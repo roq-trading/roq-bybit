@@ -1,0 +1,5 @@
+!!! THIS FILE HAS BEEN AUTO-GENERATED !!!
+roq-bybit
+drop_copy_state.hpp
+order_entry_state.hpp
+rest_state.hpp

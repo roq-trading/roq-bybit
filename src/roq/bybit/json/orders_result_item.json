@@ -1,0 +1,82 @@
+{
+  "name": "OrdersResultItem",
+  "type": "item",
+  "values": [
+    {
+      "name": "accountId",
+      "type": "std::string_view"
+    },
+    {
+      "name": "symbol",
+      "type": "std::string_view"
+    },
+    {
+      "name": "orderLinkId",
+      "type": "std::string_view"
+    },
+    {
+      "name": "orderId",
+      "type": "std::string_view"
+    },
+    {
+      "name": "orderPrice",
+      "type": "double"
+    },
+    {
+      "name": "orderQty",
+      "type": "double"
+    },
+    {
+      "name": "execQty",
+      "type": "double"
+    },
+    {
+      "name": "cummulativeQuoteQty",
+      "type": "double"
+    },
+    {
+      "name": "avgPrice",
+      "type": "double"
+    },
+    {
+      "name": "status",
+      "type": "OrderStatus"
+    },
+    {
+      "name": "timeInForce",
+      "type": "TimeInForce"
+    },
+    {
+      "name": "orderType",
+      "type": "OrderType"
+    },
+    {
+      "name": "side",
+      "type": "Side"
+    },
+    {
+      "name": "stopPrice",
+      "type": "double"
+    },
+    {
+      "name": "icebergQty",
+      "type": "double"
+    },
+    {
+      "name": "createTime",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "updateTime",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "isWorking",
+      "type": "int32_t"
+    },
+    {
+      "name": "orderCategory",
+      "type": "int32_t"
+    }
+  ]
+}

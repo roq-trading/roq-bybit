@@ -1,0 +1,16 @@
+issues
+
+
+order updates don't tell us if last traded is maker or taker
+
+response from rest always tells us the order is new, even if it's already filled
+---
+drop_copy.cpp:238] DEBUG: message="{"type":"snapshot","topic":"order","ts":"1671090927089","data":[{"e":"order","E":"1671090927089","s":"BTCUSDT","c":"WgAC6QMAAQAABzcwwQ04","S":"BUY","o":"LIMIT","f":"GTC","q":"0.0001","p":"17715.7","X":"FILLED","i":"1311600191800917504","M":"1311600186348290560","l":"0.0001","z":"0.0001","L":"17707.79","n":"0","N":"BTC","u":true,"w":true,"m":false,"O":"1671090927039","Z":"1.770779","A":"0","C":false,"v":"0","d":"NO_LIQ","t":"2290000000032919989"}]}"
+order_entry.cpp:714] DEBUG: status=OK, category=SUCCESS, body="{"retCode":0,"retMsg":"OK","result":{"orderId":"1311600191800917504","orderLinkId":"WgAC6QMAAQAABzcwwQ04","symbol":"BTCUSDT","createTime":"1671090927039","orderPrice":"17715.7","orderQty":"0.0001","orderType":"LIMIT","side":"BUY","status":"NEW","timeInForce":"GTC","accountId":"44484788","execQty":"0","orderCategory":0},"retExtInfo":{},"time":1671090927044}"
+order_state.cpp:514] Received non-final order status WORKING after order has reached final status COMPLETED
+
+
+
+maybe we should get the quantity tick size and use for comparison?
+---
+order_state.cpp:837] *** CHANGE(TRADED QUANTITY 9.800000000000004e-05 ==> 0.00010000000000000003) (1.9999999999999944e-06) != LAST TRADED QUANTITY (2.0000000000000008e-06) ***

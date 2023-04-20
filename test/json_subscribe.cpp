@@ -1,0 +1,54 @@
+/* Copyright (c) 2017-2023, Hans Erik Thrane */
+
+#include <catch2/catch_all.hpp>
+
+#include "roq/core/json/parser.hpp"
+
+#include "roq/bybit/json/parser.hpp"
+#include "roq/bybit/json/subscribe.hpp"
+
+using namespace roq;
+using namespace roq::bybit;
+
+using namespace std::literals;
+using namespace std::chrono_literals;
+
+namespace {
+auto const MESSAGE = R"({)"
+                     R"("success":true,)"
+                     R"("ret_msg":"",)"
+                     R"("conn_id":"6a1d8afffe9d8ed5-0000000e-00008169-ed8f0217f9257e39-1dacc3f2",)"
+                     R"("req_id":"2",)"
+                     R"("op":"subscribe")"
+                     R"(})"sv;
+}  // namespace
+
+TEST_CASE("json_subscribe_simple", "[json_subscribe]") {
+  core::Buffer buffer(8192);
+  json::Subscribe obj{MESSAGE, buffer};
+}
+
+TEST_CASE("json_subscribe_parser", "[json_subscribe]") {
+  struct Handler final : public json::Parser::Handler {
+    void operator()(Trace<json::Error> const &) override { FAIL(); }
+    void operator()(Trace<json::Pong> const &) override { FAIL(); }
+    void operator()(Trace<json::Subscribe> const &) override { found = true; }
+    // public
+    void operator()(Trace<json::BookTicker> const &) override { FAIL(); }
+    void operator()(Trace<json::OrderBook> const &) override { FAIL(); }
+    void operator()(Trace<json::Trade> const &) override { FAIL(); }
+    void operator()(Trace<json::Tickers> const &) override { FAIL(); }
+    // private
+    void operator()(Trace<json::Auth> const &) override { FAIL(); }
+    void operator()(Trace<json::OutboundAccountInfo> const &) override { FAIL(); }
+    void operator()(Trace<json::Order> const &) override { FAIL(); }
+    void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
+
+    bool found = false;
+  } handler;
+  core::Buffer buffer(8192);
+  core::json::Buffer buffer_2{buffer};
+  auto res = json::Parser::dispatch(handler, MESSAGE, buffer_2, {});
+  CHECK(res == true);
+  CHECK(handler.found == true);
+}

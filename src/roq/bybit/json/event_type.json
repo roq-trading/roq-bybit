@@ -1,0 +1,15 @@
+{
+  "name": "EventType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "error"
+    },
+    {
+      "name": "snapshot"
+    },
+    {
+      "name": "delta"
+    }
+  ]
+}

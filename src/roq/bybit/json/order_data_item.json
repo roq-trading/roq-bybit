@@ -1,0 +1,141 @@
+{
+  "name": "OrderDataItem",
+  "type": "item",
+  "values": [
+    {
+      "raw": "e",
+      "name": "event_type",
+      "type": "std::string_view"
+    },
+    {
+      "raw": "E",
+      "name": "event_time",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "raw": "s",
+      "name": "symbol",
+      "type": "std::string_view"
+    },
+    {
+      "raw": "c",
+      "name": "order_link_id",
+      "type": "std::string_view"
+    },
+    {
+      "raw": "S",
+      "name": "side",
+      "type": "Side"
+    },
+    {
+      "raw": "o",
+      "name": "order_type",
+      "type": "OrderType"
+    },
+    {
+      "raw": "f",
+      "name": "time_in_force",
+      "type": "TimeInForce"
+    },
+    {
+      "raw": "q",
+      "name": "quantity",
+      "type": "double"
+    },
+    {
+      "raw": "p",
+      "name": "price",
+      "type": "double"
+    },
+    {
+      "raw": "X",
+      "name": "order_status",
+      "type": "OrderStatus"
+    },
+    {
+      "raw": "i",
+      "name": "order_id",
+      "type": "std::string_view"
+    },
+    {
+      "raw": "M",
+      "name": "opponent_order_id",
+      "type": "std::string_view"
+    },
+    {
+      "raw": "l",
+      "name": "last_filled_quantity",
+      "type": "double"
+    },
+    {
+      "raw": "z",
+      "name": "total_filled_quantity",
+      "type": "double"
+    },
+    {
+      "raw": "L",
+      "name": "last_filled_price",
+      "type": "double"
+    },
+    {
+      "raw": "n",
+      "name": "trading_fee",
+      "type": "double"
+    },
+    {
+      "raw": "N",
+      "name": "fee_asset_type",
+      "type": "std::string_view"
+    },
+    {
+      "raw": "u",
+      "name": "normal_trade",
+      "type": "bool"
+    },
+    {
+      "raw": "w",
+      "name": "working",
+      "type": "bool"
+    },
+    {
+      "raw": "m",
+      "name": "limit_maker",
+      "type": "bool"
+    },
+    {
+      "raw": "O",
+      "name": "order_creation_time",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "raw": "Z",
+      "name": "total_filled_value",
+      "type": "double"
+    },
+    {
+      "raw": "A",
+      "name": "opponent_account_id",
+      "type": "std::string_view"
+    },
+    {
+      "raw": "C",
+      "name": "is_close",
+      "type": "bool"
+    },
+    {
+      "raw": "v",
+      "name": "leverage",
+      "type": "double"
+    },
+    {
+      "raw": "d",
+      "name": "liquidation",
+      "type": "Liquidation"
+    },
+    {
+      "raw": "t",
+      "name": "trade_id",
+      "type": "std::string_view"
+    }
+  ]
+}

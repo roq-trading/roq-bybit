@@ -1,0 +1,10 @@
+{
+  "name": "AccountResult",
+  "type": "comp",
+  "values": [
+    {
+      "name": "balances",
+      "type": "std::span<AccountResultItem>"
+    }
+  ]
+}

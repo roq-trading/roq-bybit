@@ -1,0 +1,36 @@
+{
+  "name": "BookTickerData",
+  "type": "comp",
+  "values": [
+    {
+      "raw": "s",
+      "name": "symbol",
+      "type": "std::string_view"
+    },
+    {
+      "raw": "bp",
+      "name": "bidPrice",
+      "type": "double"
+    },
+    {
+      "raw": "bq",
+      "name": "bidQty",
+      "type": "double"
+    },
+    {
+      "raw": "ap",
+      "name": "askPrice",
+      "type": "double"
+    },
+    {
+      "raw": "aq",
+      "name": "askQty",
+      "type": "double"
+    },
+    {
+      "raw": "t",
+      "name": "time",
+      "type": "std::chrono::milliseconds"
+    }
+  ]
+}

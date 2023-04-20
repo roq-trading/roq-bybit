@@ -1,0 +1,26 @@
+{
+  "name": "OrderBookData",
+  "type": "comp",
+  "values": [
+    {
+      "raw": "s",
+      "name": "symbol",
+      "type": "std::string_view"
+    },
+    {
+      "raw": "t",
+      "name": "timestamp",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "raw": "b",
+      "name": "bids",
+      "type": "std::span<OrderBookLevel>"
+    },
+    {
+      "raw": "a",
+      "name": "asks",
+      "type": "std::span<OrderBookLevel>"
+    }
+  ]
+}

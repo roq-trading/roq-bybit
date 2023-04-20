@@ -1,0 +1,39 @@
+{
+  "name": "MessageField",
+  "type": "enum",
+  "values": [
+    {
+      "name": "op"
+    },
+    {
+      "name": "type"
+    },
+    {
+      "name": "topic"
+    },
+    {
+      "name": "data"
+    },
+    {
+      "name": "args"
+    },
+    {
+      "name": "req_id"
+    },
+    {
+      "name": "success"
+    },
+    {
+      "name": "ret_code"
+    },
+    {
+      "name": "ret_msg"
+    },
+    {
+      "name": "conn_id"
+    },
+    {
+      "name": "ts"
+    }
+  ]
+}

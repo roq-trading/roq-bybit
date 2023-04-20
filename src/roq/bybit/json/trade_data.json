@@ -1,0 +1,35 @@
+{
+  "name": "TradeData",
+  "type": "comp",
+  "values": [
+    {
+      "raw": "v",
+      "name": "trade_id",
+      "type": "std::string_view"
+    },
+    {
+      "raw": "t",
+      "name": "timestamp",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "raw": "p",
+      "name": "price",
+      "type": "double"
+    },
+    {
+      "raw": "q",
+      "name": "quantity",
+      "type": "double"
+    },
+    {
+      "raw": "m",
+      "name": "buy",
+      "type": "bool"
+    },
+    {
+      "name": "type",
+      "type": "int32_t"
+    }
+  ]
+}

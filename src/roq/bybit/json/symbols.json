@@ -1,0 +1,34 @@
+{
+  "name": "Symbols",
+  "type": "comp",
+  "values": [
+    {
+      "name": "ret_code",
+      "type": "int32_t"
+    },
+    {
+      "name": "ret_msg",
+      "type": "std::string_view"
+    },
+    {
+      "name": "ext_code",
+      "type": "std::string_view"
+    },
+    {
+      "name": "ext_info",
+      "comment": "can be either string or dict?"
+    },
+    {
+      "name": "result",
+      "type": "std::span<SymbolsItem>"
+    },
+    {
+      "name": "ext_map",
+      "comment": "obj"
+    },
+    {
+      "name": "time_now",
+      "comment": "std::chrono::microseconds"
+    }
+  ]
+}

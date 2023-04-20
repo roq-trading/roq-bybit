@@ -1,0 +1,10 @@
+{
+  "name": "TradesResult",
+  "type": "comp",
+  "values": [
+    {
+      "name": "list",
+      "type": "std::span<TradesResultItem>"
+    }
+  ]
+}

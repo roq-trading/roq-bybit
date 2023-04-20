@@ -1,0 +1,22 @@
+{
+  "name": "TicketInfo",
+  "type": "comp",
+  "values": [
+    {
+      "name": "type",
+      "type": "EventType"
+    },
+    {
+      "name": "topic",
+      "type": "std::string_view"
+    },
+    {
+      "name": "ts",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "data",
+      "type": "std::span<TicketInfoDataItem>"
+    }
+  ]
+}

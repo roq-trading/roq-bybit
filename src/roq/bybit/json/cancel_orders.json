@@ -1,0 +1,25 @@
+{
+  "name": "CancelOrders",
+  "type": "comp",
+  "values": [
+    {
+      "name": "retCode",
+      "type": "int32_t"
+    },
+    {
+      "name": "retMsg",
+      "type": "std::string_view"
+    },
+    {
+      "name": "result",
+      "type": "CancelOrdersResult"
+    },
+    {
+      "name": "retExtInfo"
+    },
+    {
+      "name": "time",
+      "type": "std::chrono::milliseconds"
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "name": "OutboundAccountInfoDataItemItem",
+  "type": "item",
+  "values": [
+    {
+      "raw": "a",
+      "name": "asset",
+      "type": "std::string_view"
+    },
+    {
+      "raw": "f",
+      "name": "available",
+      "type": "double"
+    },
+    {
+      "raw": "l",
+      "name": "locked",
+      "type": "double"
+    }
+  ]
+}

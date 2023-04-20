@@ -1,0 +1,26 @@
+{
+  "name": "AccountResultItem",
+  "type": "item",
+  "values": [
+    {
+      "name": "coin",
+      "type": "std::string_view"
+    },
+    {
+      "name": "coinId",
+      "type": "std::string_view"
+    },
+    {
+      "name": "total",
+      "type": "double"
+    },
+    {
+      "name": "free",
+      "type": "double"
+    },
+    {
+      "name": "locked",
+      "type": "double"
+    }
+  ]
+}

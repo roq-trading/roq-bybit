@@ -1,0 +1,435 @@
+/* Copyright (c) 2017-2023, Hans Erik Thrane */
+
+#include "roq/bybit/market_data.hpp"
+
+#include <algorithm>
+#include <utility>
+
+#include "roq/mask.hpp"
+#include "roq/utils/safe_cast.hpp"
+#include "roq/utils/update.hpp"
+
+#include "roq/core/charconv.hpp"
+
+#include "roq/core/tools/exception.hpp"
+
+#include "roq/core/metrics/factory.hpp"
+
+#include "roq/web/socket/client_factory.hpp"
+
+#include "roq/bybit/flags.hpp"
+
+#include "roq/bybit/json/utils.hpp"
+
+using namespace std::literals;
+
+namespace roq {
+namespace bybit {
+
+// === CONSTANTS ===
+
+namespace {
+auto const NAME = "md"sv;
+
+auto const SUPPORTS = Mask{
+    SupportType::MARKET_STATUS,
+    SupportType::TOP_OF_BOOK,
+    SupportType::MARKET_BY_PRICE,
+    SupportType::TRADE_SUMMARY,
+    SupportType::STATISTICS,
+};
+}  // namespace
+
+// === HELPERS ===
+
+namespace {
+auto create_name(auto stream_id) {
+  return fmt::format("{}:{}"sv, stream_id, NAME);
+}
+
+auto create_connection(auto &handler, auto &context) {
+  auto uri = Flags::ws_public_uri();
+  auto config = web::socket::Client::Config{
+      // connection
+      .interface = {},
+      .uris = {&uri, 1},
+      .validate_certificate = server::Flags::net_tls_validate_certificate(),
+      // connection manager
+      .connection_timeout = server::Flags::net_connection_timeout(),
+      .disconnect_on_idle_timeout = server::Flags::net_disconnect_on_idle_timeout(),
+      .always_reconnect = true,
+      // proxy
+      .proxy = {},
+      // http
+      .query = {},
+      .user_agent = ROQ_PACKAGE_NAME,
+      .request_timeout = {},
+      .ping_frequency = Flags::ws_ping_freq(),
+      // implementation
+      .decode_buffer_size = Flags::decode_buffer_size(),
+      .encode_buffer_size = Flags::encode_buffer_size(),
+  };
+  return web::socket::ClientFactory::create(handler, context, config, []() { return std::string(); });
+}
+
+struct create_metrics final : public core::metrics::Factory {
+  explicit create_metrics(auto const &group, auto const &function)
+      : core::metrics::Factory(server::Flags::name(), group, function) {}
+};
+}  // namespace
+
+// === IMPLEMENTATION ===
+
+MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared, size_t index)
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, index_{index},
+      ping_frequency_{Flags::ws_ping_freq()}, connection_{create_connection(*this, context)},
+      decode_buffer_{Flags::decode_buffer_size()},
+      request_id_{static_cast<uint64_t>(stream_id_) * 1000000},  // scale (debugging)
+      counter_{
+          .disconnect = create_metrics(name_, "disconnect"sv),
+      },
+      profile_{
+          .parse = create_metrics(name_, "parse"sv),
+          .book_ticker = create_metrics(name_, "book_ticker"sv),
+          .order_book = create_metrics(name_, "order_book"sv),
+          .trade = create_metrics(name_, "trade"sv),
+          .tickers = create_metrics(name_, "tickers"sv),
+      },
+      latency_{
+          .ping = create_metrics(name_, "ping"sv),
+          .heartbeat = create_metrics(name_, "heartbeat"sv),
+      },
+      shared_{shared} {
+}
+
+void MarketData::operator()(Event<Start> const &) {
+  (*connection_).start();
+}
+
+void MarketData::operator()(Event<Stop> const &) {
+  (*connection_).stop();
+}
+
+void MarketData::operator()(Event<Timer> const &event) {
+  auto now = event.value.now;
+  (*connection_).refresh(now);
+  if (ready() && next_ping_ < now)
+    send_ping(now);
+}
+
+void MarketData::operator()(metrics::Writer &writer) {
+  writer
+      // counter
+      .write(counter_.disconnect, metrics::COUNTER)
+      // profile
+      .write(profile_.parse, metrics::PROFILE)
+      .write(profile_.book_ticker, metrics::PROFILE)
+      .write(profile_.order_book, metrics::PROFILE)
+      .write(profile_.trade, metrics::PROFILE)
+      .write(profile_.tickers, metrics::PROFILE)
+      // latency
+      .write(latency_.ping, metrics::LATENCY)
+      .write(latency_.heartbeat, metrics::LATENCY);
+}
+
+void MarketData::subscribe(size_t start_from) {
+  if (ready())
+    subscribe(shared_.symbols.get_slice(index_, start_from));
+}
+
+void MarketData::operator()(web::socket::Client::Connected const &) {
+}
+
+void MarketData::operator()(web::socket::Client::Disconnected const &) {
+  ++counter_.disconnect;
+  (*this)(ConnectionStatus::DISCONNECTED);
+}
+
+void MarketData::operator()(web::socket::Client::Ready const &) {
+  (*this)(ConnectionStatus::READY);
+  subscribe();
+}
+
+void MarketData::operator()(web::socket::Client::Close const &) {
+}
+
+void MarketData::operator()(web::socket::Client::Latency const &latency) {
+  TraceInfo trace_info;
+  auto external_latency = ExternalLatency{
+      .stream_id = stream_id_,
+      .account = {},
+      .latency = latency.sample,
+  };
+  create_trace_and_dispatch(handler_, trace_info, external_latency);
+  latency_.ping.update(latency.sample);
+}
+
+void MarketData::operator()(web::socket::Client::Text const &text) {
+  parse(text.payload);
+}
+
+void MarketData::operator()(web::socket::Client::Binary const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void MarketData::operator()(ConnectionStatus status) {
+  if (utils::update(status_, status)) {
+    TraceInfo trace_info;
+    auto stream_status = StreamStatus{
+        .stream_id = stream_id_,
+        .account = {},
+        .supports = SUPPORTS,
+        .transport = Transport::TCP,
+        .protocol = Protocol::WS,
+        .encoding = {Encoding::JSON},
+        .priority = Priority::PRIMARY,
+        .connection_status = status_,
+        .interface = (*connection_).get_interface(),
+        .authority = (*connection_).get_current_authority(),
+        .path = (*connection_).get_current_path(),
+        .proxy = (*connection_).get_proxy(),
+    };
+    log::info("stream_status={}"sv, stream_status);
+    create_trace_and_dispatch(handler_, trace_info, stream_status);
+  }
+}
+
+void MarketData::subscribe(std::span<Symbol const> const &symbols) {
+  if (std::empty(symbols))
+    return;
+  subscribe("bookticker"sv, symbols);
+  subscribe("orderbook.40"sv, symbols);
+  subscribe("trade"sv, symbols);
+  subscribe("tickers"sv, symbols);
+}
+
+void MarketData::subscribe(std::string_view const &topic, std::span<Symbol const> const &symbols) {
+  assert(!std::empty(symbols));
+  auto separator = fmt::format(R"(","{}.)"sv, topic);
+  auto message = fmt::format(
+      R"({{)"
+      R"("req_id":"{}",)"
+      R"("op":"subscribe",)"
+      R"("args":["{}.{}"])"
+      R"(}})"sv,
+      ++request_id_,
+      topic,
+      fmt::join(symbols, separator));
+  log::debug("message={}"sv, message);
+  (*connection_).send_text(message);
+}
+
+void MarketData::send_ping(std::chrono::nanoseconds now) {
+  assert(ping_frequency_.count() > 0);
+  next_ping_ = now + ping_frequency_ / 2;
+  auto message = fmt::format(
+      R"({{)"
+      R"("req_id":"{}",)"
+      R"("op":"ping")"
+      R"(}})"sv,
+      now.count());
+  // log::debug("message={}"sv, message);
+  (*connection_).send_text(message);
+}
+
+void MarketData::parse(std::string_view const &message) {
+  profile_.parse([&]() {
+    try {
+      TraceInfo trace_info;
+      core::json::Buffer buffer{decode_buffer_};
+      if (json::Parser::dispatch(*this, message, buffer, trace_info)) {
+      } else {
+        log::fatal(R"(Unexpected: failed to parse message="{}")"sv, message);
+      }
+    } catch (...) {
+      log::warn(R"(message="{}")"sv, message);
+      core::tools::UnhandledException::terminate();
+    }
+  });
+}
+
+void MarketData::operator()(Trace<json::Error> const &event) {
+  auto &[trace_info, error] = event;
+  log::info<4>("event={{error={}, trace_info={}}}"sv, error, trace_info);
+  log::fatal("error={}"sv, error);
+}
+
+void MarketData::operator()(Trace<json::Pong> const &event) {
+  auto &[trace_info, pong] = event;
+  log::info<4>("event={{pong={}, trace_info={}}}"sv, pong, trace_info);
+}
+
+void MarketData::operator()(Trace<json::Subscribe> const &event) {
+  auto &[trace_info, subscribe] = event;
+  log::info<4>("event={{subscribe={}, trace_info={}}}"sv, subscribe, trace_info);
+}
+
+void MarketData::operator()(Trace<json::BookTicker> const &event) {
+  profile_.book_ticker([&]() {
+    auto &[trace_info, book_ticker] = event;
+    log::info<3>("event={{book_ticker={}, trace_info={}}}"sv, book_ticker, trace_info);
+    (*connection_).touch(trace_info.source_receive_time);
+    auto &data = book_ticker.data;
+    auto top_of_book = TopOfBook{
+        .stream_id = stream_id_,
+        .exchange = Flags::exchange(),
+        .symbol = data.symbol,
+        .layer{
+            .bid_price = data.bid_price,
+            .bid_quantity = data.bid_qty,
+            .ask_price = data.ask_price,
+            .ask_quantity = data.ask_qty,
+        },
+        .update_type = UpdateType::INCREMENTAL,
+        .exchange_time_utc = data.time,  // XXX not sure
+        .exchange_sequence = {},
+        .sending_time_utc = {},
+    };
+    create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
+  });
+}
+
+void MarketData::operator()(Trace<json::OrderBook> const &event) {
+  profile_.order_book([&]() {
+    auto &[trace_info, order_book] = event;
+    log::info<3>("event={{order_book={}, trace_info={}}}"sv, order_book, trace_info);
+    (*connection_).touch(trace_info.source_receive_time);
+    auto &data = order_book.data;
+    shared_.bids.clear();
+    shared_.asks.clear();
+    auto emplace_back = [](auto &result, auto &item) {
+      auto mbp_update = MBPUpdate{
+          .price = item.price,
+          .quantity = item.quantity,
+          .implied_quantity = NaN,
+          .number_of_orders = {},
+          .update_action = {},
+          .price_level = {},
+      };
+      result.emplace_back(std::move(mbp_update));
+    };
+    for (auto &item : data.bids)
+      emplace_back(shared_.bids, item);
+    for (auto &item : data.asks)
+      emplace_back(shared_.asks, item);
+    auto market_by_price_update = MarketByPriceUpdate{
+        .stream_id = stream_id_,
+        .exchange = Flags::exchange(),
+        .symbol = data.symbol,
+        .bids = shared_.bids,
+        .asks = shared_.asks,
+        .update_type = UpdateType::SNAPSHOT,  // note!
+        .exchange_time_utc = data.timestamp,  // XXX not sure
+        .exchange_sequence = {},              // note! data.version is a string
+        .sending_time_utc = {},
+        .price_decimals = {},
+        .quantity_decimals = {},
+        .checksum = {},
+    };
+    auto is_last = true;
+    try {
+      create_trace_and_dispatch(handler_, trace_info, market_by_price_update, is_last);
+    } catch (BadState &) {
+      // resubscribe(symbol);
+    }
+  });
+}
+
+void MarketData::operator()(Trace<json::Trade> const &event) {
+  profile_.trade([&]() {
+    auto &[trace_info, trade] = event;
+    log::info<3>("event={{trade={}, trace_info={}}}"sv, trade, trace_info);
+    (*connection_).touch(trace_info.source_receive_time);
+    auto symbol = json::strip_symbol(trade.topic);
+    auto &data = trade.data;
+    auto trade_2 = Trade{
+        .side = data.buy ? Side::BUY : Side::SELL,
+        .price = data.price,
+        .quantity = data.quantity,
+        .trade_id = data.trade_id,
+        .taker_order_id = {},
+        .maker_order_id = {},
+    };
+    auto trade_summary = TradeSummary{
+        .stream_id = stream_id_,
+        .exchange = Flags::exchange(),
+        .symbol = symbol,
+        .trades = {&trade_2, 1},
+        .exchange_time_utc = data.timestamp,  // XXX not sure
+        .exchange_sequence = {},
+        .sending_time_utc = {},
+    };
+    create_trace_and_dispatch(handler_, trace_info, trade_summary, true);
+  });
+}
+
+void MarketData::operator()(Trace<json::Tickers> const &event) {
+  profile_.tickers([&]() {
+    auto &[trace_info, tickers] = event;
+    log::info<3>("event={{tickers={}, trace_info={}}}"sv, tickers, trace_info);
+    (*connection_).touch(trace_info.source_receive_time);
+    auto &data = tickers.data;
+    auto statistics = std::array<Statistics, 5>{{
+        {
+            .type = StatisticsType::OPEN_PRICE,
+            .value = data.open,
+            .begin_time_utc = {},
+            .end_time_utc = {},
+        },
+        {
+            .type = StatisticsType::HIGHEST_TRADED_PRICE,
+            .value = data.high,
+            .begin_time_utc = {},
+            .end_time_utc = {},
+        },
+        {
+            .type = StatisticsType::LOWEST_TRADED_PRICE,
+            .value = data.low,
+            .begin_time_utc = {},
+            .end_time_utc = {},
+        },
+        {
+            .type = StatisticsType::CLOSE_PRICE,
+            .value = data.close,
+            .begin_time_utc = {},
+            .end_time_utc = {},
+        },
+        {
+            .type = StatisticsType::TRADE_VOLUME,
+            .value = data.volume,
+            .begin_time_utc = {},
+            .end_time_utc = {},
+        },
+    }};
+    auto statistics_update = StatisticsUpdate{
+        .stream_id = stream_id_,
+        .exchange = Flags::exchange(),
+        .symbol = data.symbol,
+        .statistics = statistics,
+        .update_type = UpdateType::INCREMENTAL,
+        .exchange_time_utc = data.timestamp,
+        .exchange_sequence = {},
+        .sending_time_utc = {},
+    };
+    create_trace_and_dispatch(handler_, trace_info, statistics_update, true);
+  });
+}
+
+void MarketData::operator()(Trace<json::Auth> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void MarketData::operator()(Trace<json::OutboundAccountInfo> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void MarketData::operator()(Trace<json::Order> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void MarketData::operator()(Trace<json::TicketInfo> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+}  // namespace bybit
+}  // namespace roq

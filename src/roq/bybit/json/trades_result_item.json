@@ -1,0 +1,62 @@
+{
+  "name": "TradesResultItem",
+  "type": "item",
+  "values": [
+    {
+      "name": "symbol",
+      "type": "std::string_view"
+    },
+    {
+      "name": "id",
+      "type": "std::string_view"
+    },
+    {
+      "name": "orderId",
+      "type": "std::string_view"
+    },
+    {
+      "name": "tradeId",
+      "type": "std::string_view"
+    },
+    {
+      "name": "orderPrice",
+      "type": "double"
+    },
+    {
+      "name": "orderQty",
+      "type": "double"
+    },
+    {
+      "name": "execFee",
+      "type": "double"
+    },
+    {
+      "name": "feeTokenId",
+      "type": "std::string_view"
+    },
+    {
+      "name": "creatTime",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "isBuyer",
+      "type": "int32_t"
+    },
+    {
+      "name": "isMaker",
+      "type": "int32_t"
+    },
+    {
+      "name": "matchOrderId",
+      "type": "std::string_view"
+    },
+    {
+      "name": "makerRebate",
+      "type": "double"
+    },
+    {
+      "name": "executionTime",
+      "type": "std::chrono::milliseconds"
+    }
+  ]
+}

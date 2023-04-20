@@ -1,0 +1,56 @@
+{
+  "name": "TickersData",
+  "type": "comp",
+  "values": [
+    {
+      "raw": "t",
+      "name": "timestamp",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "raw": "s",
+      "name": "symbol",
+      "type": "std::string_view"
+    },
+    {
+      "raw": "o",
+      "name": "open",
+      "type": "double"
+    },
+    {
+      "raw": "h",
+      "name": "high",
+      "type": "double"
+    },
+    {
+      "raw": "l",
+      "name": "low",
+      "type": "double"
+    },
+    {
+      "raw": "c",
+      "name": "close",
+      "type": "double"
+    },
+    {
+      "raw": "v",
+      "name": "volume",
+      "type": "double"
+    },
+    {
+      "raw": "qv",
+      "name": "quote_volume",
+      "type": "double"
+    },
+    {
+      "raw": "m",
+      "name": "change",
+      "type": "double"
+    },
+    {
+      "raw": "xp",
+      "name": "xp",
+      "type": "double"
+    }
+  ]
+}

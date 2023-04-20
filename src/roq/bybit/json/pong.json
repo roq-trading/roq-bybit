@@ -1,0 +1,25 @@
+{
+  "name": "Pong",
+  "type": "comp",
+  "values": [
+    {
+      "name": "op",
+      "type": "Operation"
+    },
+    {
+      "name": "success",
+      "type": "bool"
+    },
+    {
+      "name": "args"
+    },
+    {
+      "name": "req_id",
+      "type": "std::string_view"
+    },
+    {
+      "name": "conn_id",
+      "type": "std::string_view"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "CancelOrdersResult",
+  "type": "comp",
+  "values": [
+    {
+      "name": "success",
+      "type": "int32_t"
+    }
+  ]
+}
