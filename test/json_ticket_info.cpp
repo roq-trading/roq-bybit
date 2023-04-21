@@ -51,8 +51,7 @@ TEST_CASE("json_ticket_info_parser", "[json_ticket_info]") {
     void operator()(Trace<json::Pong> const &) override { FAIL(); }
     void operator()(Trace<json::Subscribe> const &) override { FAIL(); }
     // public
-    void operator()(Trace<json::BookTicker> const &) override { FAIL(); }
-    void operator()(Trace<json::OrderBook> const &) override { FAIL(); }
+    void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
     void operator()(Trace<json::Trade> const &) override { FAIL(); }
     void operator()(Trace<json::Tickers> const &) override { FAIL(); }
     // private
@@ -97,7 +96,7 @@ TEST_CASE("json_ticket_info_maker_1", "[json_ticket_info]") {
   json::TicketInfo obj{message, buffer};
   CHECK(obj.type == json::EventType::SNAPSHOT);
   CHECK(obj.topic == "ticketInfo"sv);
-  CHECK(obj.ts == 1671084198535ms);
+  CHECK(obj.timestamp == 1671084198535ms);
   auto &data = obj.data;
   REQUIRE(std::size(data) == 1);
   auto &d0 = data[0];
@@ -144,7 +143,7 @@ TEST_CASE("json_ticket_info_maker_2", "[json_ticket_info]") {
   json::TicketInfo obj{message, buffer};
   CHECK(obj.type == json::EventType::SNAPSHOT);
   CHECK(obj.topic == "ticketInfo"sv);
-  CHECK(obj.ts == 1671084988155ms);
+  CHECK(obj.timestamp == 1671084988155ms);
   auto &data = obj.data;
   REQUIRE(std::size(data) == 1);
   auto &d0 = data[0];
@@ -191,7 +190,7 @@ TEST_CASE("json_ticket_info_taker", "[json_ticket_info]") {
   json::TicketInfo obj{message, buffer};
   CHECK(obj.type == json::EventType::SNAPSHOT);
   CHECK(obj.topic == "ticketInfo"sv);
-  CHECK(obj.ts == 1671090927053ms);
+  CHECK(obj.timestamp == 1671090927053ms);
   auto &data = obj.data;
   REQUIRE(std::size(data) == 1);
   auto &d0 = data[0];

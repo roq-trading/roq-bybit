@@ -63,8 +63,7 @@ TEST_CASE("json_order_parser", "[json_order]") {
     void operator()(Trace<json::Pong> const &) override { FAIL(); }
     void operator()(Trace<json::Subscribe> const &) override { FAIL(); }
     // public
-    void operator()(Trace<json::BookTicker> const &) override { FAIL(); }
-    void operator()(Trace<json::OrderBook> const &) override { FAIL(); }
+    void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
     void operator()(Trace<json::Trade> const &) override { FAIL(); }
     void operator()(Trace<json::Tickers> const &) override { FAIL(); }
     // private
@@ -121,7 +120,7 @@ TEST_CASE("json_order_new", "[json_order]") {
   json::Order order{message, buffer};
   CHECK(order.type == json::EventType::SNAPSHOT);
   CHECK(order.topic == "order"sv);
-  CHECK(order.ts == 1671026168138ms);
+  CHECK(order.timestamp == 1671026168138ms);
   auto &data = order.data;
   REQUIRE(std::size(data) == 1);
   auto &d0 = data[0];
@@ -193,7 +192,7 @@ TEST_CASE("json_order_filled", "[json_order]") {
   json::Order order{message, buffer};
   CHECK(order.type == json::EventType::SNAPSHOT);
   CHECK(order.topic == "order"sv);
-  CHECK(order.ts == 1671084988205ms);
+  CHECK(order.timestamp == 1671084988205ms);
   auto &data = order.data;
   REQUIRE(std::size(data) == 1);
   auto &d0 = data[0];
@@ -268,7 +267,7 @@ TEST_CASE("json_order_partially_filled_1", "[json_order]") {
   json::Order order{message, buffer};
   CHECK(order.type == json::EventType::SNAPSHOT);
   CHECK(order.topic == "order"sv);
-  CHECK(order.ts == 1671088952783ms);
+  CHECK(order.timestamp == 1671088952783ms);
   auto &data = order.data;
   REQUIRE(std::size(data) == 1);
   auto &d0 = data[0];
@@ -341,7 +340,7 @@ TEST_CASE("json_order_partially_filled_2", "[json_order]") {
   json::Order order{message, buffer};
   CHECK(order.type == json::EventType::SNAPSHOT);
   CHECK(order.topic == "order"sv);
-  CHECK(order.ts == 1671088953011ms);
+  CHECK(order.timestamp == 1671088953011ms);
   auto &data = order.data;
   REQUIRE(std::size(data) == 1);
   auto &d0 = data[0];
@@ -414,7 +413,7 @@ TEST_CASE("json_order_filled_3", "[json_order]") {
   json::Order order{message, buffer};
   CHECK(order.type == json::EventType::SNAPSHOT);
   CHECK(order.topic == "order"sv);
-  CHECK(order.ts == 1671088955209ms);
+  CHECK(order.timestamp == 1671088955209ms);
   auto &data = order.data;
   REQUIRE(std::size(data) == 1);
   auto &d0 = data[0];
@@ -486,7 +485,7 @@ TEST_CASE("json_order_taker", "[json_order]") {
   json::Order order{message, buffer};
   CHECK(order.type == json::EventType::SNAPSHOT);
   CHECK(order.topic == "order"sv);
-  CHECK(order.ts == 1671090927089ms);
+  CHECK(order.timestamp == 1671090927089ms);
   auto &data = order.data;
   REQUIRE(std::size(data) == 1);
   auto &d0 = data[0];

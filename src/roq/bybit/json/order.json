@@ -11,7 +11,8 @@
       "type": "std::string_view"
     },
     {
-      "name": "ts",
+      "raw": "ts",
+      "name": "timestamp",
       "type": "std::chrono::milliseconds"
     },
     {

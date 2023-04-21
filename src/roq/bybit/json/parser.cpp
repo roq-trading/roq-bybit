@@ -176,23 +176,19 @@ bool Parser::dispatch(
         case DATA: {
           auto ready = type != EventType::UNDEFINED && timestamp.count();
           if (ready) {
-            /*
             switch (topic) {
               using enum Topic::type_t;
               case UNDEFINED:
               case UNKNOWN:
                 break;
-              case BOOKTICKER:
-                dispatch_helper<BookTicker>(handler, buffer, trace_info, value, type, raw_topic, timestamp);
-                return true;
               case ORDERBOOK:
-                dispatch_helper<OrderBook>(handler, buffer, trace_info, value, type, raw_topic, timestamp);
+                log::fatal("Unexpected"sv);
                 return true;
               case TRADE:
-                dispatch_helper<Trade>(handler, buffer, trace_info, value, type, raw_topic, timestamp);
+                log::fatal("Unexpected"sv);
                 return true;
               case TICKERS:
-                dispatch_helper<Tickers>(handler, buffer, trace_info, value, type, raw_topic, timestamp);
+                log::fatal("Unexpected"sv);
                 return true;
               case OUTBOUND_ACCOUNT_INFO:
                 dispatch_helper_flatten<OutboundAccountInfo>(
@@ -205,7 +201,6 @@ bool Parser::dispatch(
                 dispatch_helper<TicketInfo>(handler, buffer, trace_info, value, type, raw_topic, timestamp);
                 return true;
             }
-            */
           }
           break;
         }
