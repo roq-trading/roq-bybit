@@ -39,8 +39,6 @@ set(AUTOGEN_SCHEMAS
     pong.json
     side.json
     subscribe.json
-    symbols_item.json
-    symbols.json
     tickers_data.json
     tickers.json
     ticket_info_data_item.json
@@ -51,7 +49,16 @@ set(AUTOGEN_SCHEMAS
     trade.json
     trades.json
     trades_result_item.json
-    trades_result.json)
+    trades_result.json
+    market_info.json
+    market_info_result.json
+    market_info_result_item.json
+    price_filter.json
+    leverage_filter.json
+    lot_size_filter.json
+    contract_type.json
+    options_type.json
+    status.json)
 
 roq_autogen(
   OUTPUT

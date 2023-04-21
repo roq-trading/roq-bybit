@@ -1,0 +1,25 @@
+{
+  "name": "MarketInfo",
+  "type": "comp",
+  "values": [
+    {
+      "name": "retCode",
+      "type": "int32_t"
+    },
+    {
+      "name": "retMsg",
+      "type": "std::string_view"
+    },
+    {
+      "name": "result",
+      "type": "MarketInfoResult"
+    },
+    {
+      "name": "retExtInfo"
+    },
+    {
+      "name": "time",
+      "comment": "std::chrono::milliseconds"
+    }
+  ]
+}

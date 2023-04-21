@@ -3,7 +3,16 @@
   "type": "enum",
   "values": [
     {
-      "name": "symbols"
+      "name": "get_market_info_spot"
+    },
+    {
+      "name": "get_market_info_linear"
+    },
+    {
+      "name": "get_market_info_inverse"
+    },
+    {
+      "name": "get_market_info_option"
     },
     {
       "name": "done"

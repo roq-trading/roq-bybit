@@ -24,7 +24,7 @@
 #include "roq/bybit/rest_state.hpp"
 #include "roq/bybit/shared.hpp"
 
-#include "roq/bybit/json/symbols.hpp"
+#include "roq/bybit/json/market_info.hpp"
 
 namespace roq {
 namespace bybit {
@@ -66,9 +66,19 @@ struct Rest final : public web::rest::Client::Handler {
 
   uint32_t download(RestState);
 
-  void get_symbols();
-  void get_symbols_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::Symbols> const &);
+  void get_market_info_spot();
+  void get_market_info_spot_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+
+  void get_market_info_linear();
+  void get_market_info_linear_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+
+  void get_market_info_inverse();
+  void get_market_info_inverse_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+
+  void get_market_info_option();
+  void get_market_info_option_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+
+  void operator()(Trace<json::MarketInfo> const &);
 
   template <typename SuccessHandler, typename ErrorHandler>
   void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);

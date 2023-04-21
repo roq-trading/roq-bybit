@@ -1,5 +1,5 @@
 !!! THIS FILE HAS BEEN AUTO-GENERATED !!!
-roq-bybit-json
+roq-bybit-v5-json
 account.hpp
 account_result_item.hpp
 account_result.hpp
@@ -34,8 +34,6 @@ outbound_account_info.hpp
 pong.hpp
 side.hpp
 subscribe.hpp
-symbols_item.hpp
-symbols.hpp
 tickers_data.hpp
 tickers.hpp
 ticket_info_data_item.hpp
@@ -47,6 +45,15 @@ trade.hpp
 trades.hpp
 trades_result_item.hpp
 trades_result.hpp
+market_info.hpp
+market_info_result.hpp
+market_info_result_item.hpp
+price_filter.hpp
+leverage_filter.hpp
+lot_size_filter.hpp
+contract_type.hpp
+options_type.hpp
+status.hpp
 account.cpp
 account_result_item.cpp
 account_result.cpp
@@ -81,8 +88,6 @@ outbound_account_info.cpp
 pong.cpp
 side.cpp
 subscribe.cpp
-symbols_item.cpp
-symbols.cpp
 tickers_data.cpp
 tickers.cpp
 ticket_info_data_item.cpp
@@ -94,3 +99,12 @@ trade.cpp
 trades.cpp
 trades_result_item.cpp
 trades_result.cpp
+market_info.cpp
+market_info_result.cpp
+market_info_result_item.cpp
+price_filter.cpp
+leverage_filter.cpp
+lot_size_filter.cpp
+contract_type.cpp
+options_type.cpp
+status.cpp

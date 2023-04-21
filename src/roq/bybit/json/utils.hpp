@@ -34,9 +34,11 @@ inline void update(std::chrono::milliseconds &result, core::json::Value const &v
           [&](core::json::Null const &) { result = std::chrono::milliseconds{}; },
           [](bool) { throw std::bad_cast{}; },
           [&](int64_t value) { result = std::chrono::milliseconds{value}; },
-          [&](double value) { result = std::chrono::milliseconds{static_cast<int64_t>(value * 1000000.0)}; },
+          [&](double value) { result = std::chrono::milliseconds{static_cast<int64_t>(value * 1e3)}; },
           [&](std::string_view const &value) {
-            result = core::charconv::datetime_from_string<std::remove_reference<decltype(result)>::type>(value);
+            auto tmp = core::from_chars<int64_t>(value);
+            // note! have seen 1000
+            result = std::chrono::milliseconds{tmp > 1000 ? tmp : 0};
           },
           [](core::json::Object const &) { throw std::bad_cast{}; },
           [](core::json::Array const &) { throw std::bad_cast{}; },
@@ -51,10 +53,10 @@ inline void update(std::chrono::microseconds &result, core::json::Value const &v
           [&](core::json::Null const &) { result = std::chrono::microseconds{}; },
           [](bool) { throw std::bad_cast{}; },
           [&](int64_t value) { result = std::chrono::microseconds{value}; },
-          [&](double value) { result = std::chrono::microseconds{static_cast<int64_t>(value * 1000000.0)}; },
+          [&](double value) { result = std::chrono::microseconds{static_cast<int64_t>(value * 1e6)}; },
           [&](std::string_view const &value) {
             auto tmp = core::from_chars<double>(value);
-            result = std::chrono::microseconds{static_cast<int64_t>(tmp * 1000000.0)};
+            result = std::chrono::microseconds{static_cast<int64_t>(tmp * 1e6)};
           },
           [](core::json::Object const &) { throw std::bad_cast{}; },
           [](core::json::Array const &) { throw std::bad_cast{}; },
@@ -69,10 +71,10 @@ inline void update(std::chrono::nanoseconds &result, core::json::Value const &va
           [&](core::json::Null const &) { result = std::chrono::nanoseconds{}; },
           [](bool) { throw std::bad_cast{}; },
           [&](int64_t value) { result = std::chrono::nanoseconds{value}; },
-          [&](double value) { result = std::chrono::nanoseconds{static_cast<int64_t>(value * 1.0e9)}; },
+          [&](double value) { result = std::chrono::nanoseconds{static_cast<int64_t>(value * 1e9)}; },
           [&](std::string_view const &value) {
             auto tmp = core::from_chars<double>(value);
-            result = std::chrono::nanoseconds{static_cast<int64_t>(tmp * 1.0e9)};
+            result = std::chrono::nanoseconds{static_cast<int64_t>(tmp * 1e9)};
           },
           [](core::json::Object const &) { throw std::bad_cast{}; },
           [](core::json::Array const &) { throw std::bad_cast{}; },

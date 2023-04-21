@@ -15,12 +15,12 @@ CONFIG_FILE="$CWD/config/$NAME-testnet.toml"
 URI="bybit.com"
 
 REST_URI="https://api-testnet.$URI"
-WS_PUBLIC_URI="wss://stream-testnet.$URI/spot/public/v3"
-WS_PRIVATE_URI="wss://stream-testnet.$URI/spot/private/v3"
+WS_PUBLIC_URI="wss://stream-testnet.$URI/spot/public/v5"
+WS_PRIVATE_URI="wss://stream-testnet.$URI/spot/private/v5"
 
 
-$PREFIX ./roq-bybit \
-  --name "bybit" \
+$PREFIX ./roq-bybit-v5 \
+  --name "$NAME" \
   --config_file "$CONFIG_FILE" \
   --cache_dir "$HOME/var/lib/roq/cache" \
   --event_log_dir "$HOME/var/lib/roq/data" \

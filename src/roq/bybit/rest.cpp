@@ -173,8 +173,17 @@ uint32_t Rest::download(RestState state) {
     case UNDEFINED:
       assert(false);
       break;
-    case SYMBOLS:
-      get_symbols();
+    case GET_MARKET_INFO_SPOT:
+      get_market_info_spot();
+      return 1;
+    case GET_MARKET_INFO_LINEAR:
+      get_market_info_linear();
+      return 1;
+    case GET_MARKET_INFO_INVERSE:
+      get_market_info_inverse();
+      return 1;
+    case GET_MARKET_INFO_OPTION:
+      get_market_info_option();
       return 1;
     case DONE:
       (*this)(ConnectionStatus::READY);
@@ -184,14 +193,14 @@ uint32_t Rest::download(RestState state) {
   return {};
 }
 
-// symbols
+// spot
 
-void Rest::get_symbols() {
+void Rest::get_market_info_spot() {
   profile_.symbols([&]() {
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
-        .path = "/spot/v1/symbols"sv,
-        .query = {},
+        .path = "/v5/market/instruments-info"sv,
+        .query = "?category=spot"sv,
         .accept = web::http::Accept::APPLICATION_JSON,
         .content_type = {},
         .headers = {},
@@ -201,21 +210,21 @@ void Rest::get_symbols() {
     auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
       TraceInfo trace_info;
       Trace event{trace_info, response};
-      get_symbols_ack(event, sequence);
+      get_market_info_spot_ack(event, sequence);
     };
-    (*connection_)("symbols"sv, request, callback);
+    (*connection_)("market_info_spot"sv, request, callback);
   });
 }
 
-void Rest::get_symbols_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
-  constexpr auto const STATE = RestState::SYMBOLS;
+void Rest::get_market_info_spot_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
+  constexpr auto const STATE = RestState::GET_MARKET_INFO_SPOT;
   profile_.symbols_ack([&]() {
     auto handle_success = [&](auto &body) {
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        json::Symbols symbols{body, decode_buffer_};
-        Trace event_2{event, symbols};
+        json::MarketInfo market_info{body, decode_buffer_};
+        Trace event_2{event, market_info};
         (*this)(event_2);
         download_.check(STATE);
       }
@@ -228,32 +237,166 @@ void Rest::get_symbols_ack(Trace<web::rest::Response> const &event, uint32_t seq
   });
 }
 
-void Rest::operator()(Trace<json::Symbols> const &event) {
-  auto &[trace_info, symbols] = event;
-  log::info<4>("symbols={}"sv, symbols);
+// linear
+
+void Rest::get_market_info_linear() {
+  profile_.symbols([&]() {
+    auto request = web::rest::Request{
+        .method = web::http::Method::GET,
+        .path = "/v5/market/instruments-info"sv,
+        .query = "?category=linear"sv,
+        .accept = web::http::Accept::APPLICATION_JSON,
+        .content_type = {},
+        .headers = {},
+        .body = {},
+        .quality_of_service = {},
+    };
+    auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
+      TraceInfo trace_info;
+      Trace event{trace_info, response};
+      get_market_info_linear_ack(event, sequence);
+    };
+    (*connection_)("market_info_linear"sv, request, callback);
+  });
+}
+
+void Rest::get_market_info_linear_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
+  constexpr auto const STATE = RestState::GET_MARKET_INFO_LINEAR;
+  profile_.symbols_ack([&]() {
+    auto handle_success = [&](auto &body) {
+      if (download_.skip(sequence, STATE)) {
+        log::info("Download state={} has already been processed"sv, STATE);
+      } else {
+        json::MarketInfo market_info{body, decode_buffer_};
+        Trace event_2{event, market_info};
+        (*this)(event_2);
+        download_.check(STATE);
+      }
+    };
+    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
+      log::warn(R"(error={}, text="{}")"sv, error, text);
+      download_.retry(STATE);
+    };
+    process_response(event, handle_success, handle_error);
+  });
+}
+
+// inverse
+
+void Rest::get_market_info_inverse() {
+  profile_.symbols([&]() {
+    auto request = web::rest::Request{
+        .method = web::http::Method::GET,
+        .path = "/v5/market/instruments-info"sv,
+        .query = "?category=inverse"sv,
+        .accept = web::http::Accept::APPLICATION_JSON,
+        .content_type = {},
+        .headers = {},
+        .body = {},
+        .quality_of_service = {},
+    };
+    auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
+      TraceInfo trace_info;
+      Trace event{trace_info, response};
+      get_market_info_inverse_ack(event, sequence);
+    };
+    (*connection_)("market_info_inverse"sv, request, callback);
+  });
+}
+
+void Rest::get_market_info_inverse_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
+  constexpr auto const STATE = RestState::GET_MARKET_INFO_INVERSE;
+  profile_.symbols_ack([&]() {
+    auto handle_success = [&](auto &body) {
+      if (download_.skip(sequence, STATE)) {
+        log::info("Download state={} has already been processed"sv, STATE);
+      } else {
+        json::MarketInfo market_info{body, decode_buffer_};
+        Trace event_2{event, market_info};
+        (*this)(event_2);
+        download_.check(STATE);
+      }
+    };
+    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
+      log::warn(R"(error={}, text="{}")"sv, error, text);
+      download_.retry(STATE);
+    };
+    process_response(event, handle_success, handle_error);
+  });
+}
+
+// option
+
+void Rest::get_market_info_option() {
+  profile_.symbols([&]() {
+    auto request = web::rest::Request{
+        .method = web::http::Method::GET,
+        .path = "/v5/market/instruments-info"sv,
+        .query = "?category=option"sv,
+        .accept = web::http::Accept::APPLICATION_JSON,
+        .content_type = {},
+        .headers = {},
+        .body = {},
+        .quality_of_service = {},
+    };
+    auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
+      TraceInfo trace_info;
+      Trace event{trace_info, response};
+      get_market_info_option_ack(event, sequence);
+    };
+    (*connection_)("market_info_option"sv, request, callback);
+  });
+}
+
+void Rest::get_market_info_option_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
+  constexpr auto const STATE = RestState::GET_MARKET_INFO_OPTION;
+  profile_.symbols_ack([&]() {
+    auto handle_success = [&](auto &body) {
+      if (download_.skip(sequence, STATE)) {
+        log::info("Download state={} has already been processed"sv, STATE);
+      } else {
+        json::MarketInfo market_info{body, decode_buffer_};
+        Trace event_2{event, market_info};
+        (*this)(event_2);
+        download_.check(STATE);
+      }
+    };
+    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
+      log::warn(R"(error={}, text="{}")"sv, error, text);
+      download_.retry(STATE);
+    };
+    process_response(event, handle_success, handle_error);
+  });
+}
+
+// market-info
+
+void Rest::operator()(Trace<json::MarketInfo> const &event) {
+  auto &[trace_info, market_info] = event;
+  log::info<4>("market_info={}"sv, market_info);
   std::vector<Symbol> symbols_2;
-  symbols_2.reserve(std::size(symbols.result));
+  symbols_2.reserve(std::size(market_info.result.list));
   size_t counter = 0;
-  for (size_t i = 0; i < std::size(symbols.result); ++i) {
-    auto &item = symbols.result[i];
+  for (size_t i = 0; i < std::size(market_info.result.list); ++i) {
+    auto &item = market_info.result.list[i];
     log::info<2>("item={}"sv, item);
-    auto symbol = item.name;
-    auto discard = shared_.discard_symbol(symbol);
+    log::debug("item={}"sv, item);
+    auto discard = shared_.discard_symbol(item.symbol);
     auto reference_data = ReferenceData{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
-        .symbol = symbol,
-        .description = symbol,
-        .security_type = SecurityType::SPOT,
-        .base_currency = item.base_currency,
-        .quote_currency = item.quote_currency,
+        .symbol = item.symbol,
+        .description = item.symbol,
+        .security_type = SecurityType::SPOT,  // XXX
+        .base_currency = item.base_coin,
+        .quote_currency = item.quote_coin,
         .margin_currency = {},
         .commission_currency = {},
-        .tick_size = item.min_price_precision,
+        .tick_size = item.price_filter.tick_size,
         .multiplier = 1.0,
         .min_notional = NaN,
-        .min_trade_vol = item.min_trade_quantity,
-        .max_trade_vol = item.max_trade_quantity,
+        .min_trade_vol = item.lot_size_filter.min_order_qty,
+        .max_trade_vol = item.lot_size_filter.max_order_qty,
         .trade_vol_step_size = NaN,
         .option_type = {},
         .strike_currency = {},
@@ -269,13 +412,13 @@ void Rest::operator()(Trace<json::Symbols> const &event) {
     create_trace_and_dispatch(handler_, trace_info, reference_data, true);
     if (discard)
       continue;
-    if (all_symbols_.emplace(symbol).second)  // only include new
-      symbols_2.emplace_back(symbol);
+    if (all_symbols_.emplace(item.symbol).second)  // only include new
+      symbols_2.emplace_back(item.symbol);
     ++counter;
     auto market_status = MarketStatus{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
-        .symbol = symbol,
+        .symbol = item.symbol,
         .trading_status = TradingStatus::OPEN,
     };
     create_trace_and_dispatch(handler_, trace_info, market_status, true);
@@ -287,7 +430,7 @@ void Rest::operator()(Trace<json::Symbols> const &event) {
     handler_(symbols_update);
   }
   if (counter > 0) [[unlikely]]
-    log::info("Symbols {} / {}"sv, counter, std::size(symbols.result));
+    log::info("Symbols {} / {}"sv, counter, std::size(market_info.result.list));
 }
 
 template <typename SuccessHandler, typename ErrorHandler>
