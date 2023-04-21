@@ -208,7 +208,7 @@ void MarketData::subscribe(std::span<Symbol const> const &symbols) {
     return;
   subscribe("orderbook.1"sv, symbols);
   subscribe(mbp_topic_, symbols);
-  subscribe("trade"sv, symbols);
+  subscribe("publicTrade"sv, symbols);
   subscribe("tickers"sv, symbols);
 }
 
@@ -353,33 +353,33 @@ void MarketData::operator()(Trace<json::OrderBook> const &event, size_t depth) {
   });
 }
 
-void MarketData::operator()(Trace<json::Trade> const &event) {
+void MarketData::operator()(Trace<json::PublicTrade> const &event) {
   profile_.trade([&]() {
-    auto &[trace_info, trade] = event;
-    log::info<3>("event={{trade={}, trace_info={}}}"sv, trade, trace_info);
-    log::debug("trade={}"sv, trade);
+    auto &[trace_info, public_trade] = event;
+    log::info<3>("event={{public_trade={}, trace_info={}}}"sv, public_trade, trace_info);
+    // log::debug("public_trade={}"sv, public_trade);
     (*connection_).touch(trace_info.source_receive_time);
-    auto symbol = json::strip_symbol(trade.topic);
-    auto &data = trade.data;
-    auto side = json::map(data.side);
-    auto trade_2 = Trade{
-        .side = side,
-        .price = data.price,
-        .quantity = data.quantity,
-        .trade_id = data.trade_id,
-        .taker_order_id = {},
-        .maker_order_id = {},
-    };
-    auto trade_summary = TradeSummary{
-        .stream_id = stream_id_,
-        .exchange = Flags::exchange(),
-        .symbol = symbol,
-        .trades = {&trade_2, 1},
-        .exchange_time_utc = data.timestamp,  // XXX not sure
-        .exchange_sequence = {},
-        .sending_time_utc = {},
-    };
-    create_trace_and_dispatch(handler_, trace_info, trade_summary, true);
+    for (auto &item : public_trade.data) {
+      auto side = json::map(item.side);
+      auto trade_2 = Trade{
+          .side = side,
+          .price = item.price,
+          .quantity = item.quantity,
+          .trade_id = item.trade_id,
+          .taker_order_id = {},
+          .maker_order_id = {},
+      };
+      auto trade_summary = TradeSummary{
+          .stream_id = stream_id_,
+          .exchange = Flags::exchange(),
+          .symbol = item.symbol,
+          .trades = {&trade_2, 1},
+          .exchange_time_utc = item.timestamp,
+          .exchange_sequence = {},
+          .sending_time_utc = public_trade.timestamp,
+      };
+      create_trace_and_dispatch(handler_, trace_info, trade_summary, true);
+    }
   });
 }
 
@@ -387,6 +387,7 @@ void MarketData::operator()(Trace<json::Tickers> const &event) {
   profile_.tickers([&]() {
     auto &[trace_info, tickers] = event;
     log::info<3>("event={{tickers={}, trace_info={}}}"sv, tickers, trace_info);
+    // log::debug("tickers={}"sv, tickers);
     (*connection_).touch(trace_info.source_receive_time);
     auto &data = tickers.data;
     auto statistics = std::array<Statistics, 4>{{

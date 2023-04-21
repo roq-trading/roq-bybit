@@ -15,20 +15,21 @@ using namespace std::chrono_literals;
 
 namespace {
 auto const MESSAGE = R"({)"
+                     R"("topic":"tickers.BTCUSDT",)"
+                     R"("ts":1682083233096,)"
+                     R"("type":"snapshot",)"
+                     R"("cs":792472763,)"
                      R"("data":{)"
-                     R"("t":1669300793081,)"
-                     R"("s":"ETHUSDT",)"
-                     R"("o":"1161.66",)"
-                     R"("h":"1217.54",)"
-                     R"("l":"1150.51",)"
-                     R"("c":"1194.43",)"
-                     R"("v":"112924.12393",)"
-                     R"("qv":"133609050.5631047",)"
-                     R"("m":"0.0282")"
-                     R"(},)"
-                     R"("type":"delta",)"
-                     R"("topic":"tickers.ETHUSDT",)"
-                     R"("ts":1669300793085)"
+                     R"("symbol":"BTCUSDT",)"
+                     R"("lastPrice":"27579.99",)"
+                     R"("highPrice24h":"35000",)"
+                     R"("lowPrice24h":"26900",)"
+                     R"("prevPrice24h":"29005.97",)"
+                     R"("volume24h":"240.62801",)"
+                     R"("turnover24h":"6905439.32558533",)"
+                     R"("price24hPcnt":"-0.0492",)"
+                     R"("usdIndexPrice":"28190.58008011")"
+                     R"(})"
                      R"(})"sv;
 }  // namespace
 
@@ -44,7 +45,7 @@ TEST_CASE("json_tickers_parser", "[json_tickers]") {
     void operator()(Trace<json::Subscribe> const &) override { FAIL(); }
     // public
     void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
-    void operator()(Trace<json::Trade> const &) override { FAIL(); }
+    void operator()(Trace<json::PublicTrade> const &) override { FAIL(); }
     void operator()(Trace<json::Tickers> const &) override { found = true; }
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }

@@ -1,6 +1,6 @@
 {
-  "name": "TradeData",
-  "type": "comp",
+  "name": "PublicTradeData",
+  "type": "item",
   "values": [
     {
       "raw": "T",

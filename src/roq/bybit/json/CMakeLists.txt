@@ -43,8 +43,8 @@ set(AUTOGEN_SCHEMAS
     ticket_info.json
     time_in_force.json
     topic.json
-    trade_data.json
-    trade.json
+    public_trade_data.json
+    public_trade.json
     trades.json
     trades_result_item.json
     trades_result.json

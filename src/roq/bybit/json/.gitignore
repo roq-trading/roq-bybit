@@ -38,8 +38,8 @@ ticket_info_data_item.hpp
 ticket_info.hpp
 time_in_force.hpp
 topic.hpp
-trade_data.hpp
-trade.hpp
+public_trade_data.hpp
+public_trade.hpp
 trades.hpp
 trades_result_item.hpp
 trades_result.hpp
@@ -91,8 +91,8 @@ ticket_info_data_item.cpp
 ticket_info.cpp
 time_in_force.cpp
 topic.cpp
-trade_data.cpp
-trade.cpp
+public_trade_data.cpp
+public_trade.cpp
 trades.cpp
 trades_result_item.cpp
 trades_result.cpp

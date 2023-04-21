@@ -6,7 +6,7 @@
       "name": "orderbook"
     },
     {
-      "name": "trade"
+      "name": "publicTrade"
     },
     {
       "name": "tickers"

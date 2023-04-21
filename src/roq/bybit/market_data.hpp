@@ -90,7 +90,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   void operator()(Trace<json::Subscribe> const &) override;
   // public
   void operator()(Trace<json::OrderBook> const &, size_t depth) override;
-  void operator()(Trace<json::Trade> const &) override;
+  void operator()(Trace<json::PublicTrade> const &) override;
   void operator()(Trace<json::Tickers> const &) override;
   // private
   void operator()(Trace<json::Auth> const &) override;

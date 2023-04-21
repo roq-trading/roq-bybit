@@ -283,7 +283,7 @@ void DropCopy::operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_
   log::fatal("Unexpected"sv);
 }
 
-void DropCopy::operator()(Trace<json::Trade> const &) {
+void DropCopy::operator()(Trace<json::PublicTrade> const &) {
   log::fatal("Unexpected"sv);
 }
 

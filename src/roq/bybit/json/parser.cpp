@@ -151,9 +151,9 @@ bool Parser::dispatch(
               return true;
               break;
             }
-            case TRADE: {
-              Trade trade{message, buffer};
-              create_trace_and_dispatch(handler, trace_info, trade);
+            case PUBLIC_TRADE: {
+              PublicTrade public_trade{message, buffer};
+              create_trace_and_dispatch(handler, trace_info, public_trade);
               return true;
             }
             case TICKERS: {
@@ -184,7 +184,7 @@ bool Parser::dispatch(
               case ORDERBOOK:
                 log::fatal("Unexpected"sv);
                 return true;
-              case TRADE:
+              case PUBLIC_TRADE:
                 log::fatal("Unexpected"sv);
                 return true;
               case TICKERS:

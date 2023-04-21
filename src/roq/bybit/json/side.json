@@ -3,10 +3,10 @@
   "type": "enum",
   "values": [
     {
-      "name": "BUY"
+      "name": "Buy"
     },
     {
-      "name": "SELL"
+      "name": "Sell"
     }
   ]
 }

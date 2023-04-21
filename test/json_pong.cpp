@@ -34,7 +34,7 @@ TEST_CASE("json_pong_parser", "[json_pong]") {
     void operator()(Trace<json::Subscribe> const &) override { FAIL(); }
     // public
     void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
-    void operator()(Trace<json::Trade> const &) override { FAIL(); }
+    void operator()(Trace<json::PublicTrade> const &) override { FAIL(); }
     void operator()(Trace<json::Tickers> const &) override { FAIL(); }
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
