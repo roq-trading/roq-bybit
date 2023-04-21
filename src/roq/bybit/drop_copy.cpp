@@ -279,11 +279,7 @@ void DropCopy::operator()(Trace<json::Subscribe> const &event) {
   log::info<4>("event={{subscribe={}, trace_info={}}}"sv, subscribe, trace_info);
 }
 
-void DropCopy::operator()(Trace<json::BookTicker> const &) {
-  log::fatal("Unexpected"sv);
-}
-
-void DropCopy::operator()(Trace<json::OrderBook> const &) {
+void DropCopy::operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) {
   log::fatal("Unexpected"sv);
 }
 

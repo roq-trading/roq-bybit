@@ -11,7 +11,12 @@ namespace bybit {
 
 Shared::Shared(server::Dispatcher &dispatcher)
     : dispatcher_{dispatcher}, rate_limiter{Flags::request_limit(), Flags::request_limit_interval()},
-      symbols{Flags::ws_max_subscriptions_per_stream()} {
+      symbols{
+          .spot = core::Symbols{Flags::ws_max_subscriptions_per_stream()},
+          .linear = core::Symbols{Flags::ws_max_subscriptions_per_stream()},
+          .inverse = core::Symbols{Flags::ws_max_subscriptions_per_stream()},
+          .option = core::Symbols{Flags::ws_max_subscriptions_per_stream()},
+      } {
 }
 
 }  // namespace bybit

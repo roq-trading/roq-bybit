@@ -20,6 +20,10 @@
     {
       "name": "conn_id",
       "type": "std::string_view"
+    },
+    {
+      "name": "ret_msg",
+      "type": "std::string_view"
     }
   ]
 }

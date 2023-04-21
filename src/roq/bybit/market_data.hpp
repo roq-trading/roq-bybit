@@ -8,11 +8,15 @@
 #include <utility>
 #include <vector>
 
+#include "roq/core/symbols.hpp"
+
 #include "roq/core/metrics/counter.hpp"
 #include "roq/core/metrics/latency.hpp"
 #include "roq/core/metrics/profile.hpp"
 
 #include "roq/io/context.hpp"
+
+#include "roq/io/web/uri.hpp"
 
 #include "roq/web/socket/client.hpp"
 
@@ -20,6 +24,7 @@
 
 #include "roq/bybit/shared.hpp"
 
+#include "roq/bybit/json/category.hpp"
 #include "roq/bybit/json/parser.hpp"
 
 namespace roq {
@@ -36,7 +41,15 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
     virtual void operator()(Trace<StatisticsUpdate> const &, bool is_last) = 0;
   };
 
-  MarketData(Handler &, io::Context &, uint16_t stream_id, Shared &, size_t index);
+  MarketData(
+      Handler &,
+      io::Context &,
+      uint16_t stream_id,
+      Shared &,
+      core::Symbols &,
+      size_t index,
+      roq::io::web::URI const &,
+      size_t mbp_depth);
 
   MarketData(MarketData &&) = delete;
   MarketData(MarketData const &) = delete;
@@ -76,8 +89,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   void operator()(Trace<json::Pong> const &) override;
   void operator()(Trace<json::Subscribe> const &) override;
   // public
-  void operator()(Trace<json::BookTicker> const &) override;
-  void operator()(Trace<json::OrderBook> const &) override;
+  void operator()(Trace<json::OrderBook> const &, size_t depth) override;
   void operator()(Trace<json::Trade> const &) override;
   void operator()(Trace<json::Tickers> const &) override;
   // private
@@ -89,10 +101,12 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
  private:
   Handler &handler_;
   // config
-  const uint16_t stream_id_;
-  const std::string name_;
-  const size_t index_;
-  const std::chrono::nanoseconds ping_frequency_;
+  uint16_t const stream_id_;
+  std::string const name_;
+  core::Symbols &symbols_;
+  size_t const index_;
+  std::chrono::nanoseconds const ping_frequency_;
+  std::string const mbp_topic_;
   // web socket
   std::unique_ptr<web::socket::Client> connection_;
   // buffers
@@ -104,7 +118,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile parse, book_ticker, order_book, trade, tickers;
+    core::metrics::Profile parse, order_book, trade, tickers;
   } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;

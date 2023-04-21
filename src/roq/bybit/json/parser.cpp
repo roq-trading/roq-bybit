@@ -4,6 +4,8 @@
 
 #include "roq/logging.hpp"
 
+#include "roq/core/charconv/number.hpp"
+
 #include "roq/core/json/array_parser.hpp"
 
 #include "roq/bybit/json/message_field.hpp"
@@ -23,6 +25,17 @@ auto parse_topic(auto const &value) {
   return Topic{value.substr(0, value.find_first_of('.'))};
 }
 
+constexpr auto parse_mbp_depth(auto const &value) {
+  auto pos1 = value.find_first_of('.');
+  ++pos1;
+  auto pos2 = value.find_first_of('.', pos1);
+  auto sub = value.substr(pos1, pos2 - pos1);
+  return core::charconv::from_string<size_t>(sub);
+}
+
+static_assert(parse_mbp_depth("orderbook.1.xxx"sv) == 1);
+static_assert(parse_mbp_depth("orderbook.50.xxx"sv) == 50);
+
 template <typename T>
 void dispatch_helper(
     auto &handler, auto &buffer, auto &trace_info, auto &value, auto type, auto &topic, auto timestamp) {
@@ -30,7 +43,7 @@ void dispatch_helper(
   T result;
   result.type = type;
   result.topic = topic;
-  result.ts = timestamp;
+  result.timestamp = timestamp;
   if constexpr (utils::is_iterable<data_type>::value) {
     if (!core::json::is_null(value)) {
       result.data =
@@ -93,6 +106,7 @@ bool Parser::dispatch(
               create_trace_and_dispatch(handler, trace_info, auth);
               return true;
             }
+            case PING:
             case PONG: {
               Pong pong{message, buffer};
               create_trace_and_dispatch(handler, trace_info, pong);
@@ -125,6 +139,36 @@ bool Parser::dispatch(
         case TOPIC:
           raw_topic = std::get<std::string_view>(value);
           topic = parse_topic(raw_topic);
+          switch (topic) {
+            using enum Topic::type_t;
+            case UNDEFINED:
+            case UNKNOWN:
+              break;
+            case ORDERBOOK: {
+              OrderBook order_book{message, buffer};
+              auto mbp_depth = parse_mbp_depth(raw_topic);
+              create_trace_and_dispatch(handler, trace_info, order_book, mbp_depth);
+              return true;
+              break;
+            }
+            case TRADE: {
+              Trade trade{message, buffer};
+              create_trace_and_dispatch(handler, trace_info, trade);
+              return true;
+            }
+            case TICKERS: {
+              Tickers tickers{message, buffer};
+              create_trace_and_dispatch(handler, trace_info, tickers);
+              return true;
+            }
+            case OUTBOUND_ACCOUNT_INFO:
+              break;
+              return true;
+            case ORDER:
+              break;
+            case TICKET_INFO:
+              break;
+          }
           break;
         case TS:
           update(timestamp, value);
@@ -132,6 +176,7 @@ bool Parser::dispatch(
         case DATA: {
           auto ready = type != EventType::UNDEFINED && timestamp.count();
           if (ready) {
+            /*
             switch (topic) {
               using enum Topic::type_t;
               case UNDEFINED:
@@ -160,6 +205,7 @@ bool Parser::dispatch(
                 dispatch_helper<TicketInfo>(handler, buffer, trace_info, value, type, raw_topic, timestamp);
                 return true;
             }
+            */
           }
           break;
         }

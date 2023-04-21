@@ -51,7 +51,9 @@ struct Shared final {
 
  public:
   core::limit::RateLimiter rate_limiter;
-  core::Symbols symbols;
+  struct {
+    core::Symbols spot, linear, inverse, option;
+  } symbols;
 };
 
 }  // namespace bybit

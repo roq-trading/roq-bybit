@@ -8,11 +8,6 @@
       "type": "std::string_view"
     },
     {
-      "raw": "t",
-      "name": "timestamp",
-      "type": "std::chrono::milliseconds"
-    },
-    {
       "raw": "b",
       "name": "bids",
       "type": "std::span<OrderBookLevel>"
@@ -21,6 +16,16 @@
       "raw": "a",
       "name": "asks",
       "type": "std::span<OrderBookLevel>"
+    },
+    {
+      "raw": "u",
+      "name": "update_id",
+      "type": "int64_t"
+    },
+    {
+      "raw": "seq",
+      "name": "cross_sequence",
+      "type": "int64_t"
     }
   ]
 }

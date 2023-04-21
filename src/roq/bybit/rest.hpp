@@ -24,6 +24,7 @@
 #include "roq/bybit/rest_state.hpp"
 #include "roq/bybit/shared.hpp"
 
+#include "roq/bybit/json/category.hpp"
 #include "roq/bybit/json/market_info.hpp"
 
 namespace roq {
@@ -32,6 +33,7 @@ namespace bybit {
 struct Rest final : public web::rest::Client::Handler {
   struct SymbolsUpdate final {
     std::vector<Symbol> &symbols;
+    json::Category category;
   };
 
   struct Handler {

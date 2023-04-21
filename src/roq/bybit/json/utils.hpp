@@ -13,6 +13,11 @@
 #include "roq/core/charconv.hpp"
 #include "roq/core/charconv/datetime.hpp"
 
+#include "roq/bybit/json/event_type.hpp"
+
+#include "roq/bybit/json/contract_type.hpp"
+#include "roq/bybit/json/options_type.hpp"
+
 #include "roq/bybit/json/order_status.hpp"
 #include "roq/bybit/json/order_type.hpp"
 #include "roq/bybit/json/side.hpp"
@@ -80,6 +85,51 @@ inline void update(std::chrono::nanoseconds &result, core::json::Value const &va
           [](core::json::Array const &) { throw std::bad_cast{}; },
       },
       value);
+}
+
+// update type
+
+inline UpdateType map(json::EventType event_type) {
+  switch (event_type) {
+    using enum json::EventType::type_t;
+    case UNKNOWN:
+    case UNDEFINED:
+      break;
+    case ERROR:
+      break;
+    case SNAPSHOT:
+      return UpdateType::SNAPSHOT;
+    case DELTA:
+      return UpdateType::INCREMENTAL;
+  }
+  return {};
+}
+
+// security type
+
+inline SecurityType map(json::ContractType contract_type, json::OptionsType options_type) {
+  switch (options_type) {
+    using enum json::OptionsType::type_t;
+    case UNKNOWN:
+    case UNDEFINED:
+      break;
+    case CALL:
+    case PUT:
+      return SecurityType::OPTION;
+  }
+  switch (contract_type) {
+    using enum json::ContractType::type_t;
+    case UNDEFINED:
+    case UNKNOWN:
+      break;
+    case INVERSE_PERPETUAL:
+    case LINEAR_PERPETUAL:
+      return SecurityType::SWAP;
+    case LINEAR_FUTURES:
+    case INVERSE_FUTURES:
+      return SecurityType::FUTURES;
+  }
+  return SecurityType::SPOT;
 }
 
 // side

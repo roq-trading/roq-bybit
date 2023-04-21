@@ -3,53 +3,39 @@
   "type": "comp",
   "values": [
     {
-      "raw": "t",
-      "name": "timestamp",
-      "type": "std::chrono::milliseconds"
-    },
-    {
-      "raw": "s",
       "name": "symbol",
       "type": "std::string_view"
     },
     {
-      "raw": "o",
-      "name": "open",
+      "name": "lastPrice",
       "type": "double"
     },
     {
-      "raw": "h",
-      "name": "high",
+      "name": "highPrice24h",
       "type": "double"
     },
     {
-      "raw": "l",
-      "name": "low",
+      "name": "lowPrice24h",
       "type": "double"
     },
     {
-      "raw": "c",
-      "name": "close",
+      "name": "prevPrice24h",
       "type": "double"
     },
     {
-      "raw": "v",
-      "name": "volume",
+      "name": "volume24h",
       "type": "double"
     },
     {
-      "raw": "qv",
-      "name": "quote_volume",
+      "name": "turnover24h",
       "type": "double"
     },
     {
-      "raw": "m",
-      "name": "change",
+      "name": "price24hPcnt",
       "type": "double"
     },
     {
-      "raw": "xp",
-      "name": "xp",
+      "name": "usdIndexPrice",
       "type": "double"
     }
   ]

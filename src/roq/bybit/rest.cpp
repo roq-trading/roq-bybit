@@ -16,6 +16,8 @@
 
 #include "roq/bybit/flags.hpp"
 
+#include "roq/bybit/json/utils.hpp"
+
 using namespace std::literals;
 
 namespace roq {
@@ -380,14 +382,14 @@ void Rest::operator()(Trace<json::MarketInfo> const &event) {
   for (size_t i = 0; i < std::size(market_info.result.list); ++i) {
     auto &item = market_info.result.list[i];
     log::info<2>("item={}"sv, item);
-    log::debug("item={}"sv, item);
     auto discard = shared_.discard_symbol(item.symbol);
+    auto security_type = json::map(item.contract_type, item.options_type);
     auto reference_data = ReferenceData{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = item.symbol,
         .description = item.symbol,
-        .security_type = SecurityType::SPOT,  // XXX
+        .security_type = security_type,
         .base_currency = item.base_coin,
         .quote_currency = item.quote_coin,
         .margin_currency = {},
@@ -426,6 +428,7 @@ void Rest::operator()(Trace<json::MarketInfo> const &event) {
   if (!std::empty(symbols_2)) {
     auto symbols_update = SymbolsUpdate{
         .symbols = symbols_2,
+        .category = market_info.result.category,
     };
     handler_(symbols_update);
   }

@@ -4,7 +4,7 @@
   "values": [
     {
       "name": "category",
-      "type": "std::string_view"
+      "type": "Category"
     },
     {
       "name": "list",

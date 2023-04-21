@@ -15,8 +15,8 @@ CONFIG_FILE="$CWD/config/$NAME-testnet.toml"
 URI="bybit.com"
 
 REST_URI="https://api-testnet.$URI"
-WS_PUBLIC_URI="wss://stream-testnet.$URI/spot/public/v5"
-WS_PRIVATE_URI="wss://stream-testnet.$URI/spot/private/v5"
+WS_PUBLIC_URI="wss://stream-testnet.$URI/v5/public"
+WS_PRIVATE_URI="wss://stream-testnet.$URI/v5/private"
 
 
 $PREFIX ./roq-bybit-v5 \
@@ -28,6 +28,9 @@ $PREFIX ./roq-bybit-v5 \
   --client_listen_address "$HOME/run/$NAME.sock" \
   --service_listen_address "$HOME/run/metrics/${NAME}.sock" \
   --rest_uri "$REST_URI" \
-  --ws_public_uri "$WS_PUBLIC_URI" \
+  --ws_public_uri_spot "$WS_PUBLIC_URI/spot" \
+  --ws_public_uri_linear "$WS_PUBLIC_URI/linear" \
+  --ws_public_uri_inverse "$WS_PUBLIC_URI/inverse" \
+  --ws_public_uri_option "$WS_PUBLIC_URI/option" \
   --ws_private_uri "$WS_PRIVATE_URI" \
   $@

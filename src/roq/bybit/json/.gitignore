@@ -4,8 +4,6 @@ account.hpp
 account_result_item.hpp
 account_result.hpp
 auth.hpp
-book_ticker_data.hpp
-book_ticker.hpp
 cancel_order.hpp
 cancel_order_result.hpp
 cancel_orders.hpp
@@ -53,13 +51,12 @@ leverage_filter.hpp
 lot_size_filter.hpp
 contract_type.hpp
 options_type.hpp
+category.hpp
 status.hpp
 account.cpp
 account_result_item.cpp
 account_result.cpp
 auth.cpp
-book_ticker_data.cpp
-book_ticker.cpp
 cancel_order.cpp
 cancel_order_result.cpp
 cancel_orders.cpp
@@ -107,4 +104,5 @@ leverage_filter.cpp
 lot_size_filter.cpp
 contract_type.cpp
 options_type.cpp
+category.cpp
 status.cpp

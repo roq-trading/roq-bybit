@@ -3,20 +3,26 @@
   "type": "comp",
   "values": [
     {
-      "name": "data",
-      "type": "TickersData"
+      "name": "topic",
+      "type": "std::string_view"
     },
     {
       "name": "type",
       "type": "EventType"
     },
     {
-      "name": "topic",
-      "type": "std::string_view"
+      "raw": "cs",
+      "name": "cross_sequence",
+      "type": "int64_t"
     },
     {
-      "name": "ts",
+      "raw": "ts",
+      "name": "timestamp",
       "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "data",
+      "type": "TickersData"
     }
   ]
 }

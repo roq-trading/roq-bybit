@@ -14,7 +14,6 @@ set(SOURCES
     json_outbound_account_info.cpp
     json_pong.cpp
     json_subscribe.cpp
-    json_symbols.cpp
     json_tickers.cpp
     json_ticket_info.cpp
     json_trade.cpp

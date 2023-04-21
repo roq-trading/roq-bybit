@@ -3,14 +3,24 @@
   "type": "comp",
   "values": [
     {
-      "raw": "v",
-      "name": "trade_id",
+      "raw": "T",
+      "name": "timestamp",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "raw": "s",
+      "name": "symbol",
       "type": "std::string_view"
     },
     {
-      "raw": "t",
-      "name": "timestamp",
-      "type": "std::chrono::milliseconds"
+      "raw": "S",
+      "name": "side",
+      "type": "Side"
+    },
+    {
+      "raw": "v",
+      "name": "quantity",
+      "type": "double"
     },
     {
       "raw": "p",
@@ -18,18 +28,19 @@
       "type": "double"
     },
     {
-      "raw": "q",
-      "name": "quantity",
-      "type": "double"
+      "raw": "L",
+      "name": "direction",
+      "type": "std::string_view"
     },
     {
-      "raw": "m",
-      "name": "buy",
+      "raw": "i",
+      "name": "trade_id",
+      "type": "std::string_view"
+    },
+    {
+      "raw": "BT",
+      "name": "block_trade",
       "type": "bool"
-    },
-    {
-      "name": "type",
-      "type": "int32_t"
     }
   ]
 }

@@ -3,20 +3,21 @@
   "type": "comp",
   "values": [
     {
-      "name": "data",
-      "type": "TradeData"
+      "name": "topic",
+      "type": "std::string_view"
     },
     {
       "name": "type",
       "type": "EventType"
     },
     {
-      "name": "topic",
-      "type": "std::string_view"
+      "raw": "ts",
+      "name": "timestamp",
+      "type": "std::chrono::milliseconds"
     },
     {
-      "name": "ts",
-      "type": "std::chrono::milliseconds"
+      "name": "data",
+      "type": "TradeData"
     }
   ]
 }

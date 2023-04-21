@@ -9,8 +9,6 @@ set(AUTOGEN_SCHEMAS
     account_result_item.json
     account_result.json
     auth.json
-    book_ticker_data.json
-    book_ticker.json
     cancel_order.json
     cancel_order_result.json
     cancel_orders.json
@@ -58,6 +56,7 @@ set(AUTOGEN_SCHEMAS
     lot_size_filter.json
     contract_type.json
     options_type.json
+    category.json
     status.json)
 
 roq_autogen(
