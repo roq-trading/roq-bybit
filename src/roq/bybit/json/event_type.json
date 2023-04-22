@@ -10,6 +10,10 @@
     },
     {
       "name": "delta"
+    },
+    {
+      "name": "COMMAND_RESP",
+      "comment": "...O"
     }
   ]
 }

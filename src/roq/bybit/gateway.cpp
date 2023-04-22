@@ -66,21 +66,12 @@ void Gateway::operator()(Event<Start> const &event) {
     (*order_entry)(event);
   for (auto &[_, drop_copy] : drop_copy_)
     (*drop_copy)(event);
-  assert(std::empty(market_data_spot_));
-  assert(std::empty(market_data_linear_));
-  assert(std::empty(market_data_inverse_));
-  assert(std::empty(market_data_option_));
+  assert(std::empty(market_data_));
 }
 
 void Gateway::operator()(Event<Stop> const &event) {
   log::info("Stopping..."sv);
-  for (auto &iter : market_data_spot_)
-    (*iter)(event);
-  for (auto &iter : market_data_linear_)
-    (*iter)(event);
-  for (auto &iter : market_data_inverse_)
-    (*iter)(event);
-  for (auto &iter : market_data_option_)
+  for (auto &iter : market_data_)
     (*iter)(event);
   for (auto &[_, drop_copy] : drop_copy_)
     (*drop_copy)(event);
@@ -95,13 +86,7 @@ void Gateway::operator()(Event<Timer> const &event) {
     (*order_entry)(event);
   for (auto &[_, drop_copy] : drop_copy_)
     (*drop_copy)(event);
-  for (auto &iter : market_data_spot_)
-    (*iter)(event);
-  for (auto &iter : market_data_linear_)
-    (*iter)(event);
-  for (auto &iter : market_data_inverse_)
-    (*iter)(event);
-  for (auto &iter : market_data_option_)
+  for (auto &iter : market_data_)
     (*iter)(event);
 }
 
@@ -178,43 +163,20 @@ void Gateway::operator()(Trace<FundsUpdate> const &event, bool is_last) {
 }
 
 void Gateway::operator()(Rest::SymbolsUpdate &symbols_update) {
-  auto process = [&](auto &market_data, auto &symbols, auto &uri, auto mbp_depth) {
-    auto [size, start_from] = symbols(symbols_update.symbols);
-    ensure_symbol_slices(market_data, size, symbols, uri, mbp_depth);
-    for (auto &iter : market_data)
-      (*iter).subscribe(start_from);
-  };
-  switch (symbols_update.category) {
-    using enum json::Category::type_t;
-    case UNDEFINED:
-    case UNKNOWN:
-      log::fatal("Unexpected"sv);
-      break;
-    case SPOT:
-      process(market_data_spot_, shared_.symbols.spot, Flags::ws_public_uri_spot(), Flags::ws_mbp_depth_spot());
-      break;
-    case LINEAR:
-      process(market_data_linear_, shared_.symbols.linear, Flags::ws_public_uri_linear(), Flags::ws_mbp_depth_linear());
-      break;
-    case INVERSE:
-      process(
-          market_data_inverse_, shared_.symbols.inverse, Flags::ws_public_uri_inverse(), Flags::ws_mbp_depth_inverse());
-      break;
-    case OPTION:
-      process(market_data_option_, shared_.symbols.option, Flags::ws_public_uri_option(), Flags::ws_mbp_depth_option());
-      break;
-  }
+  auto [size, start_from] = shared_.symbols(symbols_update.symbols);
+  ensure_symbol_slices(size);
+  for (auto &iter : market_data_)
+    (*iter).subscribe(start_from);
 }
 
-void Gateway::ensure_symbol_slices(auto &market_data, size_t size, auto &symbols, auto &uri, size_t mbp_depth) {
-  while (std::size(market_data) < size) {
+void Gateway::ensure_symbol_slices(size_t size) {
+  while (std::size(market_data_) < size) {
     log::debug("Create market-data (user-stream)"sv);
-    auto item = std::make_unique<MarketData>(
-        *this, context_, ++stream_id_, shared_, symbols, std::size(market_data), uri, mbp_depth);
+    auto market_data = std::make_unique<MarketData>(*this, context_, ++stream_id_, shared_, std::size(market_data_));
     MessageInfo message_info;
     Start start;
-    create_event_and_dispatch(*item, message_info, start);
-    market_data.emplace_back(std::move(item));
+    create_event_and_dispatch(*market_data, message_info, start);
+    market_data_.emplace_back(std::move(market_data));
   }
 }
 
@@ -255,13 +217,7 @@ void Gateway::operator()(metrics::Writer &writer) {
   for (auto &[_, drop_copy] : drop_copy_)
     if (static_cast<bool>(drop_copy))
       (*drop_copy)(writer);
-  for (auto &iter : market_data_spot_)
-    (*iter)(writer);
-  for (auto &iter : market_data_linear_)
-    (*iter)(writer);
-  for (auto &iter : market_data_inverse_)
-    (*iter)(writer);
-  for (auto &iter : market_data_option_)
+  for (auto &iter : market_data_)
     (*iter)(writer);
 }
 

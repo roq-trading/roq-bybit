@@ -27,19 +27,30 @@ auto create_api() {
     log::fatal(R"(Unexpected: api="{}")"sv, value);
   return *result;
 }
+
+auto create_category(auto api) -> std::string_view {
+  switch (api) {
+    using enum API;
+    case UNDEFINED:
+      break;
+    case SPOT:
+      return "spot"sv;
+    case LINEAR:
+      return "linear"sv;
+    case INVERSE:
+      return "inverse"sv;
+    case OPTION:
+      return "option"sv;
+  }
+  log::fatal("Unexpected"sv);
+}
 }  // namespace
 
 // === IMPLEMENTATION ===
 
 Shared::Shared(server::Dispatcher &dispatcher)
     : dispatcher_{dispatcher}, rate_limiter{flags::Flags::request_limit(), flags::Flags::request_limit_interval()},
-      api{create_api()}, symbols{
-                             .spot = core::Symbols{flags::Flags::ws_max_subscriptions_per_stream()},
-                             .linear = core::Symbols{flags::Flags::ws_max_subscriptions_per_stream()},
-                             .inverse = core::Symbols{flags::Flags::ws_max_subscriptions_per_stream()},
-                             .option = core::Symbols{flags::Flags::ws_max_subscriptions_per_stream()},
-                         } {
-  log::debug("api={}"sv, api);
+      api{create_api()}, category{create_category(api)}, symbols{flags::Flags::ws_max_subscriptions_per_stream()} {
 }
 
 }  // namespace bybit

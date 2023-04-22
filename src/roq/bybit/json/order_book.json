@@ -3,6 +3,11 @@
   "type": "comp",
   "values": [
     {
+      "name": "id",
+      "type": "std::string_view",
+      "comment": "...O"
+    },
+    {
       "name": "topic",
       "type": "std::string_view"
     },

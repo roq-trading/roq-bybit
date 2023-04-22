@@ -69,7 +69,7 @@ struct Gateway final : public server::Handler,
 
   void operator()(Rest::SymbolsUpdate &) override;
 
-  void ensure_symbol_slices(auto &market_data, size_t size, auto &symbols, auto &uri, size_t mbp_depth);
+  void ensure_symbol_slices(size_t size);
 
   // utilities
 
@@ -91,10 +91,7 @@ struct Gateway final : public server::Handler,
   Rest rest_;
   absl::flat_hash_map<Account, std::unique_ptr<OrderEntry>> order_entry_;
   absl::flat_hash_map<Account, std::unique_ptr<DropCopy>> drop_copy_;
-  std::vector<std::unique_ptr<MarketData>> market_data_spot_;
-  std::vector<std::unique_ptr<MarketData>> market_data_linear_;
-  std::vector<std::unique_ptr<MarketData>> market_data_inverse_;
-  std::vector<std::unique_ptr<MarketData>> market_data_option_;
+  std::vector<std::unique_ptr<MarketData>> market_data_;
   // cache
   std::vector<MBPUpdate> bids_, asks_;
 };

@@ -112,31 +112,10 @@
       "description": "back-off period"
     },
     {
-      "name": "ws_public_uri_spot",
+      "name": "ws_public_uri",
       "type": "roq::io::web::URI",
       "validator": "roq::core::flags::URI",
-      "default": "wss://stream-testnet.bybit.com/v5/public/spot",
-      "description": "WS public end-point (URI)"
-    },
-    {
-      "name": "ws_public_uri_linear",
-      "type": "roq::io::web::URI",
-      "validator": "roq::core::flags::URI",
-      "default": "wss://stream-testnet.bybit.com/v5/public/linear",
-      "description": "WS public end-point (URI)"
-    },
-    {
-      "name": "ws_public_uri_inverse",
-      "type": "roq::io::web::URI",
-      "validator": "roq::core::flags::URI",
-      "default": "wss://stream-testnet.bybit.com/v5/public/inverse",
-      "description": "WS public end-point (URI)"
-    },
-    {
-      "name": "ws_public_uri_option",
-      "type": "roq::io::web::URI",
-      "validator": "roq::core::flags::URI",
-      "default": "wss://stream-testnet.bybit.com/v5/public/option",
+      "default": "wss://stream-testnet.bybit.com/v5/public",
       "description": "WS public end-point (URI)"
     },
     {
@@ -168,27 +147,9 @@
       "description": "max symbols per connection (count)"
     },
     {
-      "name": "ws_mbp_depth_spot",
+      "name": "ws_mbp_depth",
       "type": "uint32_t",
-      "default": 50,
-      "description": "MbP depth"
-    },
-    {
-      "name": "ws_mbp_depth_linear",
-      "type": "uint32_t",
-      "default": 50,
-      "description": "MbP depth"
-    },
-    {
-      "name": "ws_mbp_depth_inverse",
-      "type": "uint32_t",
-      "default": 50,
-      "description": "MbP depth"
-    },
-    {
-      "name": "ws_mbp_depth_option",
-      "type": "uint32_t",
-      "default": 25,
+      "default": 0,
       "description": "MbP depth"
     },
     {

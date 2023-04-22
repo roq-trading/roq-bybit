@@ -24,7 +24,6 @@
 #include "roq/bybit/rest_state.hpp"
 #include "roq/bybit/shared.hpp"
 
-#include "roq/bybit/json/category.hpp"
 #include "roq/bybit/json/market_info.hpp"
 
 namespace roq {
@@ -33,7 +32,6 @@ namespace bybit {
 struct Rest final : public web::rest::Client::Handler {
   struct SymbolsUpdate final {
     std::vector<Symbol> &symbols;
-    json::Category category;
   };
 
   struct Handler {
@@ -68,18 +66,8 @@ struct Rest final : public web::rest::Client::Handler {
 
   uint32_t download(RestState);
 
-  void get_market_info_spot();
-  void get_market_info_spot_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-
-  void get_market_info_linear();
-  void get_market_info_linear_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-
-  void get_market_info_inverse();
-  void get_market_info_inverse_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-
-  void get_market_info_option();
-  void get_market_info_option_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-
+  void get_market_info();
+  void get_market_info_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<json::MarketInfo> const &);
 
   template <typename SuccessHandler, typename ErrorHandler>
@@ -99,7 +87,7 @@ struct Rest final : public web::rest::Client::Handler {
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile symbols, symbols_ack;
+    core::metrics::Profile market_info, market_info_ack;
   } profile_;
   struct {
     core::metrics::Latency ping;

@@ -1,4 +1,8 @@
-symbols = "BTCUSDT"
+symbols = [
+  "^BTCUSD$",
+  "^BTCUSDT$",
+  "^BTC-.*-[PC]$"
+]
 
 [accounts]
 

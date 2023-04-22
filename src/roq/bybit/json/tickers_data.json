@@ -4,39 +4,133 @@
   "values": [
     {
       "name": "symbol",
-      "type": "std::string_view"
+      "type": "std::string_view",
+      "comment": "SLIO"
+    },
+    {
+      "name": "tickDirection",
+      "type": "std::string_view",
+      "comment": ".LI."
     },
     {
       "name": "lastPrice",
-      "type": "double"
+      "type": "double",
+      "comment": "SLI."
     },
     {
       "name": "highPrice24h",
-      "type": "double"
+      "type": "double",
+      "comment": "SLI."
     },
     {
       "name": "lowPrice24h",
-      "type": "double"
+      "type": "double",
+      "comment": "SLI."
     },
     {
       "name": "prevPrice24h",
-      "type": "double"
+      "type": "double",
+      "comment": "SLI."
     },
     {
       "name": "volume24h",
-      "type": "double"
+      "type": "double",
+      "comment": "SLI."
     },
     {
       "name": "turnover24h",
-      "type": "double"
+      "type": "double",
+      "comment": "SLI."
     },
     {
       "name": "price24hPcnt",
-      "type": "double"
+      "type": "double",
+      "comment": "SLI."
     },
     {
       "name": "usdIndexPrice",
-      "type": "double"
+      "type": "double",
+      "comment": "S..."
+    },
+    {
+      "name": "prevPrice1h",
+      "type": "double",
+      "comment": ".LI."
+    },
+    {
+      "name": "markPrice",
+      "type": "double",
+      "comment": ".LI."
+    },
+    {
+      "name": "indexPrice",
+      "type": "double",
+      "comment": ".LI."
+    },
+    {
+      "name": "openInterest",
+      "type": "double",
+      "comment": ".LI."
+    },
+    {
+      "name": "openInterestValue",
+      "type": "double",
+      "comment": ".LI."
+    },
+    {
+      "name": "nextFundingTime",
+      "type": "std::chrono::milliseconds",
+      "comment": ".LI."
+    },
+    {
+      "name": "fundingRate",
+      "type": "double",
+      "comment": ".LI."
+    },
+    {
+      "name": "bid1Price",
+      "type": "double",
+      "comment": ".LI."
+    },
+    {
+      "name": "bid1Size",
+      "type": "double",
+      "comment": ".LI."
+    },
+    {
+      "name": "ask1Price",
+      "type": "double",
+      "comment": ".LI."
+    },
+    {
+      "name": "ask1Size",
+      "type": "double",
+      "comment": ".LI."
+    },
+    {
+      "name": "deliveryTime",
+      "type": "std::string_view",
+      "comment": "..I."
+    },
+    {
+      "name": "basisRate",
+      "type": "double",
+      "comment": "..I."
+    },
+    {
+      "name": "deliveryFeeRate",
+      "type": "double",
+      "comment": "..I."
+    },
+    {
+      "name": "predictedDeliveryPrice",
+      "type": "double",
+      "comment": "..I."
+    },
+    {
+      "name": "basis",
+      "type": "double",
+      "comment": "..I."
     }
   ]
 }

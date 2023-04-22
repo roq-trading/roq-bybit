@@ -28,9 +28,6 @@ $PREFIX ./roq-bybit-v5 \
   --client_listen_address "$HOME/run/$NAME.sock" \
   --service_listen_address "$HOME/run/metrics/${NAME}.sock" \
   --rest_uri "$REST_URI" \
-  --ws_public_uri_spot "$WS_PUBLIC_URI/spot" \
-  --ws_public_uri_linear "$WS_PUBLIC_URI/linear" \
-  --ws_public_uri_inverse "$WS_PUBLIC_URI/inverse" \
-  --ws_public_uri_option "$WS_PUBLIC_URI/option" \
+  --ws_public_uri "$WS_PUBLIC_URI" \
   --ws_private_uri "$WS_PRIVATE_URI" \
   $@

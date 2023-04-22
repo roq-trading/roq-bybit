@@ -101,6 +101,8 @@ inline UpdateType map(json::EventType event_type) {
       return UpdateType::SNAPSHOT;
     case DELTA:
       return UpdateType::INCREMENTAL;
+    case COMMAND_RESP:
+      break;
   }
   return {};
 }

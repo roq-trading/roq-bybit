@@ -54,11 +54,10 @@ struct Shared final {
  public:
   core::limit::RateLimiter rate_limiter;
 
-  API api;
+  API const api;
+  std::string const category;
 
-  struct {
-    core::Symbols spot, linear, inverse, option;
-  } symbols;
+  core::Symbols symbols;
 };
 
 }  // namespace bybit

@@ -133,6 +133,7 @@ bool Parser::dispatch(
             }
             case SNAPSHOT:
             case DELTA:
+            case COMMAND_RESP:
               break;
           }
           break;
@@ -210,6 +211,7 @@ bool Parser::dispatch(
         case RET_CODE:
         case RET_MSG:
         case CONN_ID:
+        case ID:
           break;
       };
     }

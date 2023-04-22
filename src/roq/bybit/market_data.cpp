@@ -47,7 +47,24 @@ auto create_name(auto stream_id) {
   return fmt::format("{}:{}"sv, stream_id, NAME);
 }
 
-auto create_connection(auto &handler, auto &context, auto &uri) {
+auto create_connection(auto &handler, auto &context, auto api) {
+  auto uri = [&]() {
+    auto base = flags::Flags::ws_public_uri();
+    switch (api) {
+      using enum API;
+      case UNDEFINED:
+        break;
+      case SPOT:
+        return base.append("/spot"sv);
+      case LINEAR:
+        return base.append("/linear"sv);
+      case INVERSE:
+        return base.append("/inverse"sv);
+      case OPTION:
+        return base.append("/option"sv);
+    }
+    log::fatal("Unexpected"sv);
+  }();
   auto config = web::socket::Client::Config{
       // connection
       .interface = {},
@@ -71,6 +88,31 @@ auto create_connection(auto &handler, auto &context, auto &uri) {
   return web::socket::ClientFactory::create(handler, context, config, []() { return std::string(); });
 }
 
+auto is_spot(auto api) {
+  return api == API::SPOT;
+}
+
+auto get_mbp_depth(auto api) -> size_t {
+  auto result = flags::Flags::ws_mbp_depth();
+  if (!result) {
+    switch (api) {
+      using enum API;
+      case UNDEFINED:
+        break;
+      case SPOT:
+        return 50;
+      case LINEAR:
+        return 50;
+      case INVERSE:
+        return 50;
+      case OPTION:
+        return 25;
+    }
+    log::fatal("Unexpected"sv);
+  }
+  return result;
+}
+
 auto create_mbp_topic(size_t depth) {
   return fmt::format("orderbook.{}"sv, depth);
 }
@@ -83,18 +125,11 @@ struct create_metrics final : public core::metrics::Factory {
 
 // === IMPLEMENTATION ===
 
-MarketData::MarketData(
-    Handler &handler,
-    io::Context &context,
-    uint16_t stream_id,
-    Shared &shared,
-    core::Symbols &symbols,
-    size_t index,
-    roq::io::web::URI const &uri,
-    size_t mbp_depth)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, symbols_{symbols}, index_{index},
-      ping_frequency_{Flags::ws_ping_freq()}, mbp_topic_{create_mbp_topic(mbp_depth)},
-      connection_{create_connection(*this, context, uri)}, decode_buffer_{Flags::decode_buffer_size()},
+MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared, size_t index)
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, index_{index},
+      ping_frequency_{Flags::ws_ping_freq()}, spot_{is_spot(shared.api)}, mbp_depth_{get_mbp_depth(shared.api)},
+      mbp_topic_{create_mbp_topic(mbp_depth_)}, connection_{create_connection(*this, context, shared.api)},
+      decode_buffer_{Flags::decode_buffer_size()},
       request_id_{static_cast<uint64_t>(stream_id_) * 1000000},  // scale (debugging)
       counter_{
           .disconnect = create_metrics(name_, "disconnect"sv),
@@ -143,7 +178,7 @@ void MarketData::operator()(metrics::Writer &writer) {
 
 void MarketData::subscribe(size_t start_from) {
   if (ready())
-    subscribe(symbols_.get_slice(index_, start_from));
+    subscribe(shared_.symbols.get_slice(index_, start_from));
 }
 
 void MarketData::operator()(web::socket::Client::Connected const &) {
@@ -206,7 +241,8 @@ void MarketData::operator()(ConnectionStatus status) {
 void MarketData::subscribe(std::span<Symbol const> const &symbols) {
   if (std::empty(symbols))
     return;
-  subscribe("orderbook.1"sv, symbols);
+  if (spot_)
+    subscribe("orderbook.1"sv, symbols);
   subscribe(mbp_topic_, symbols);
   subscribe("publicTrade"sv, symbols);
   subscribe("tickers"sv, symbols);
@@ -390,6 +426,24 @@ void MarketData::operator()(Trace<json::Tickers> const &event) {
     // log::debug("tickers={}"sv, tickers);
     (*connection_).touch(trace_info.source_receive_time);
     auto &data = tickers.data;
+    if (!spot_) {
+      auto top_of_book = TopOfBook{
+          .stream_id = stream_id_,
+          .exchange = Flags::exchange(),
+          .symbol = data.symbol,
+          .layer{
+              .bid_price = data.bid1_price,
+              .bid_quantity = data.bid1_size,
+              .ask_price = data.ask1_price,
+              .ask_quantity = data.ask1_size,
+          },
+          .update_type = UpdateType::INCREMENTAL,
+          .exchange_time_utc = {},
+          .exchange_sequence = tickers.cross_sequence,
+          .sending_time_utc = tickers.timestamp,
+      };
+      create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
+    }
     auto statistics = std::array<Statistics, 4>{{
         {
             .type = StatisticsType::HIGHEST_TRADED_PRICE,
@@ -422,9 +476,9 @@ void MarketData::operator()(Trace<json::Tickers> const &event) {
         .symbol = data.symbol,
         .statistics = statistics,
         .update_type = UpdateType::INCREMENTAL,
-        .exchange_time_utc = tickers.timestamp,
-        .exchange_sequence = {},
-        .sending_time_utc = {},
+        .exchange_time_utc = {},
+        .exchange_sequence = tickers.cross_sequence,
+        .sending_time_utc = tickers.timestamp,
     };
     create_trace_and_dispatch(handler_, trace_info, statistics_update, true);
   });

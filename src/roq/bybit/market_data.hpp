@@ -8,8 +8,6 @@
 #include <utility>
 #include <vector>
 
-#include "roq/core/symbols.hpp"
-
 #include "roq/core/metrics/counter.hpp"
 #include "roq/core/metrics/latency.hpp"
 #include "roq/core/metrics/profile.hpp"
@@ -41,15 +39,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
     virtual void operator()(Trace<StatisticsUpdate> const &, bool is_last) = 0;
   };
 
-  MarketData(
-      Handler &,
-      io::Context &,
-      uint16_t stream_id,
-      Shared &,
-      core::Symbols &,
-      size_t index,
-      roq::io::web::URI const &,
-      size_t mbp_depth);
+  MarketData(Handler &, io::Context &, uint16_t stream_id, Shared &, size_t index);
 
   MarketData(MarketData &&) = delete;
   MarketData(MarketData const &) = delete;
@@ -103,9 +93,10 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   // config
   uint16_t const stream_id_;
   std::string const name_;
-  core::Symbols &symbols_;
   size_t const index_;
   std::chrono::nanoseconds const ping_frequency_;
+  bool const spot_;
+  size_t const mbp_depth_;
   std::string const mbp_topic_;
   // web socket
   std::unique_ptr<web::socket::Client> connection_;
