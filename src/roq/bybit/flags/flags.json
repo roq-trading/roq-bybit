@@ -10,6 +10,13 @@
       "description": "exchange identifier (string)"
     },
     {
+      "name": "api",
+      "type": "std::string",
+      "validator": "roq::core::flags::NonEmpty",
+      "default": "spot",
+      "description": "what api to use (spot, linear, inverse, option)"
+    },
+    {
       "name": "rest_uri",
       "type": "roq::io::web::URI",
       "validator": "roq::core::flags::URI",

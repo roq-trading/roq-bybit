@@ -5,6 +5,8 @@
 #include "roq/bybit/config.hpp"
 #include "roq/bybit/gateway.hpp"
 
+#include "roq/bybit/flags/flags.hpp"
+
 using namespace std::literals;
 
 namespace roq {
@@ -16,7 +18,7 @@ namespace {
 auto const SETTINGS = server::Settings{
     .package_name = ROQ_PACKAGE_NAME,
     .build_number = ROQ_BUILD_NUMBER,
-    .api = {},
+    .api = flags::Flags::api(),
     .type = server::Type::ORDER_MANAGEMENT,
 };
 }  // namespace

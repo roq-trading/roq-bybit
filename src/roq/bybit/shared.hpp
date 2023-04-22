@@ -17,6 +17,8 @@
 
 #include "roq/core/limit/rate_limiter.hpp"
 
+#include "roq/bybit/api.hpp"
+
 namespace roq {
 namespace bybit {
 
@@ -51,6 +53,9 @@ struct Shared final {
 
  public:
   core::limit::RateLimiter rate_limiter;
+
+  API api;
+
   struct {
     core::Symbols spot, linear, inverse, option;
   } symbols;
