@@ -37,6 +37,7 @@ set(AUTOGEN_SCHEMAS
     pong.json
     side.json
     subscribe.json
+    subscribe_data.json
     tickers_data.json
     tickers.json
     ticket_info_data_item.json

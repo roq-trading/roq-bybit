@@ -15,17 +15,17 @@
     {
       "name": "lastPrice",
       "type": "double",
-      "comment": "SLI."
+      "comment": "SLIO"
     },
     {
       "name": "highPrice24h",
       "type": "double",
-      "comment": "SLI."
+      "comment": "SLIO"
     },
     {
       "name": "lowPrice24h",
       "type": "double",
-      "comment": "SLI."
+      "comment": "SLIO"
     },
     {
       "name": "prevPrice24h",
@@ -40,7 +40,7 @@
     {
       "name": "turnover24h",
       "type": "double",
-      "comment": "SLI."
+      "comment": "SLIO"
     },
     {
       "name": "price24hPcnt",
@@ -60,17 +60,27 @@
     {
       "name": "markPrice",
       "type": "double",
-      "comment": ".LI."
+      "comment": ".LIO"
+    },
+    {
+      "name": "markPriceIv",
+      "type": "double",
+      "comment": "...O"
     },
     {
       "name": "indexPrice",
       "type": "double",
-      "comment": ".LI."
+      "comment": ".LIO"
+    },
+    {
+      "name": "underlyingPrice",
+      "type": "double",
+      "comment": "...O"
     },
     {
       "name": "openInterest",
       "type": "double",
-      "comment": ".LI."
+      "comment": ".LIO"
     },
     {
       "name": "openInterestValue",
@@ -125,12 +135,77 @@
     {
       "name": "predictedDeliveryPrice",
       "type": "double",
-      "comment": "..I."
+      "comment": "..IO"
     },
     {
       "name": "basis",
       "type": "double",
       "comment": "..I."
+    },
+    {
+      "name": "bidPrice",
+      "type": "double",
+      "comment": "...O"
+    },
+    {
+      "name": "bidSize",
+      "type": "double",
+      "comment": "...O"
+    },
+    {
+      "name": "bidIv",
+      "type": "double",
+      "comment": "...O"
+    },
+    {
+      "name": "askPrice",
+      "type": "double",
+      "comment": "...O"
+    },
+    {
+      "name": "askSize",
+      "type": "double",
+      "comment": "...O"
+    },
+    {
+      "name": "askIv",
+      "type": "double",
+      "comment": "...O"
+    },
+    {
+      "name": "totalVolume",
+      "type": "double",
+      "comment": "...O"
+    },
+    {
+      "name": "totalTurnover",
+      "type": "double",
+      "comment": "...O"
+    },
+    {
+      "name": "delta",
+      "type": "double",
+      "comment": "...O"
+    },
+    {
+      "name": "gamma",
+      "type": "double",
+      "comment": "...O"
+    },
+    {
+      "name": "vega",
+      "type": "double",
+      "comment": "...O"
+    },
+    {
+      "name": "theta",
+      "type": "double",
+      "comment": "...O"
+    },
+    {
+      "name": "change24h",
+      "type": "double",
+      "comment": "...O"
     }
   ]
 }

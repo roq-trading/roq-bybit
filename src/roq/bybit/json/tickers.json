@@ -23,6 +23,11 @@
     {
       "name": "data",
       "type": "TickersData"
+    },
+    {
+      "name": "id",
+      "type": "std::string_view",
+      "comment": "...O"
     }
   ]
 }

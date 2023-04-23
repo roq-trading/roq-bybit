@@ -21,6 +21,14 @@
     {
       "name": "req_id",
       "type": "std::string_view"
+    },
+    {
+      "name": "data",
+      "type": "SubscribeData"
+    },
+    {
+      "name": "type",
+      "type": "EventType"
     }
   ]
 }

@@ -94,6 +94,39 @@ auto const INVERSE = R"({)"
                      R"("cs":12582755307,)"
                      R"("ts":1682169888078)"
                      R"(})"sv;
+
+auto const OPTION = R"({)"
+                    R"("id":"tickers.BTC-28APR23-30000-C-1267284327-1682247012340",)"
+                    R"("topic":"tickers.BTC-28APR23-30000-C",)"
+                    R"("ts":1682247012340,)"
+                    R"("data":{)"
+                    R"("symbol":"BTC-28APR23-30000-C",)"
+                    R"("bidPrice":"0",)"
+                    R"("bidSize":"0",)"
+                    R"("bidIv":"0",)"
+                    R"("askPrice":"0",)"
+                    R"("askSize":"0",)"
+                    R"("askIv":"0",)"
+                    R"("lastPrice":"40",)"
+                    R"("highPrice24h":"40",)"
+                    R"("lowPrice24h":"40",)"
+                    R"("markPrice":"35.85848319",)"
+                    R"("indexPrice":"27543.41",)"
+                    R"("markPriceIv":"0.4617",)"
+                    R"("underlyingPrice":"27546.96",)"
+                    R"("openInterest":"22.01",)"
+                    R"("turnover24h":"276.3255",)"
+                    R"("volume24h":"0.01",)"
+                    R"("totalVolume":"23",)"
+                    R"("totalTurnover":"644804",)"
+                    R"("delta":"0.058091",)"
+                    R"("gamma":"0.00007897",)"
+                    R"("vega":"3.69996245",)"
+                    R"("theta":"-17.49538621",)"
+                    R"("predictedDeliveryPrice":"0",)"
+                    R"("change24h":"-0.92307693"},)"
+                    R"("type":"snapshot")"
+                    R"(})"sv;
 }  // namespace
 
 // spot
@@ -188,3 +221,35 @@ TEST_CASE("json_tickers_parser_inverse", "[json_tickers]") {
   CHECK(res == true);
   CHECK(handler.found == true);
 }
+
+// option
+
+TEST_CASE("json_tickers_simple_option", "[json_tickers]") {
+  core::Buffer buffer(8192);
+  json::Tickers ticks{OPTION, buffer};
+}
+
+TEST_CASE("json_tickers_parser_option", "[json_tickers]") {
+  struct Handler final : public json::Parser::Handler {
+    void operator()(Trace<json::Error> const &) override { FAIL(); }
+    void operator()(Trace<json::Pong> const &) override { FAIL(); }
+    void operator()(Trace<json::Subscribe> const &) override { FAIL(); }
+    // public
+    void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
+    void operator()(Trace<json::PublicTrade> const &) override { FAIL(); }
+    void operator()(Trace<json::Tickers> const &) override { found = true; }
+    // private
+    void operator()(Trace<json::Auth> const &) override { FAIL(); }
+    void operator()(Trace<json::OutboundAccountInfo> const &) override { FAIL(); }
+    void operator()(Trace<json::Order> const &) override { FAIL(); }
+    void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
+
+    bool found = false;
+  } handler;
+  core::Buffer buffer(8192);
+  core::json::Buffer buffer_2{buffer};
+  auto res = json::Parser::dispatch(handler, OPTION, buffer_2, {});
+  CHECK(res == true);
+  CHECK(handler.found == true);
+}
+

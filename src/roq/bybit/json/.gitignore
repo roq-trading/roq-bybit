@@ -32,6 +32,7 @@ outbound_account_info.hpp
 pong.hpp
 side.hpp
 subscribe.hpp
+subscribe_data.hpp
 tickers_data.hpp
 tickers.hpp
 ticket_info_data_item.hpp
@@ -85,6 +86,7 @@ outbound_account_info.cpp
 pong.cpp
 side.cpp
 subscribe.cpp
+subscribe_data.cpp
 tickers_data.cpp
 tickers.cpp
 ticket_info_data_item.cpp

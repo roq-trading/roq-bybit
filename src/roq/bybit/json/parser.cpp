@@ -133,8 +133,12 @@ bool Parser::dispatch(
             }
             case SNAPSHOT:
             case DELTA:
-            case COMMAND_RESP:
               break;
+            case COMMAND_RESP: {
+              Subscribe subscribe{message, buffer};
+              create_trace_and_dispatch(handler, trace_info, subscribe);
+              return true;
+            }
           }
           break;
         case TOPIC:
