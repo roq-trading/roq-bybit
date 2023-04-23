@@ -426,23 +426,52 @@ void MarketData::operator()(Trace<json::Tickers> const &event) {
     // log::debug("tickers={}"sv, tickers);
     (*connection_).touch(trace_info.source_receive_time);
     auto &data = tickers.data;
-    if (!spot_) {
-      auto top_of_book = TopOfBook{
-          .stream_id = stream_id_,
-          .exchange = Flags::exchange(),
-          .symbol = data.symbol,
-          .layer{
-              .bid_price = data.bid1_price,
-              .bid_quantity = data.bid1_size,
-              .ask_price = data.ask1_price,
-              .ask_quantity = data.ask1_size,
-          },
-          .update_type = UpdateType::INCREMENTAL,
-          .exchange_time_utc = {},
-          .exchange_sequence = tickers.cross_sequence,
-          .sending_time_utc = tickers.timestamp,
-      };
-      create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
+    switch (shared_.api) {
+      using enum API;
+      case UNDEFINED:
+        break;
+      case SPOT:
+        // note! using orderbook.1
+        break;
+      case LINEAR:
+      case INVERSE: {
+        auto top_of_book = TopOfBook{
+            .stream_id = stream_id_,
+            .exchange = Flags::exchange(),
+            .symbol = data.symbol,
+            .layer{
+                .bid_price = data.bid1_price,
+                .bid_quantity = data.bid1_size,
+                .ask_price = data.ask1_price,
+                .ask_quantity = data.ask1_size,
+            },
+            .update_type = UpdateType::INCREMENTAL,
+            .exchange_time_utc = {},
+            .exchange_sequence = tickers.cross_sequence,
+            .sending_time_utc = tickers.timestamp,
+        };
+        create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
+        break;
+      }
+      case OPTION: {
+        auto top_of_book = TopOfBook{
+            .stream_id = stream_id_,
+            .exchange = Flags::exchange(),
+            .symbol = data.symbol,
+            .layer{
+                .bid_price = data.bid_price,
+                .bid_quantity = data.bid_size,
+                .ask_price = data.ask_price,
+                .ask_quantity = data.ask_size,
+            },
+            .update_type = UpdateType::INCREMENTAL,
+            .exchange_time_utc = {},
+            .exchange_sequence = tickers.cross_sequence,
+            .sending_time_utc = tickers.timestamp,
+        };
+        create_trace_and_dispatch(handler_, trace_info, top_of_book, true);
+        break;
+      }
     }
     auto statistics = std::array<Statistics, 4>{{
         {

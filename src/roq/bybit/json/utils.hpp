@@ -17,6 +17,7 @@
 
 #include "roq/bybit/json/contract_type.hpp"
 #include "roq/bybit/json/options_type.hpp"
+#include "roq/bybit/json/status.hpp"
 
 #include "roq/bybit/json/order_status.hpp"
 #include "roq/bybit/json/order_type.hpp"
@@ -132,6 +133,46 @@ inline SecurityType map(json::ContractType contract_type, json::OptionsType opti
       return SecurityType::FUTURES;
   }
   return SecurityType::SPOT;
+}
+
+// options type
+
+inline roq::OptionType map(json::OptionsType value) {
+  switch (value) {
+    using enum json::OptionsType::type_t;
+    case UNDEFINED:
+      break;
+    case UNKNOWN:
+      break;
+    case CALL:
+      return roq::OptionType::CALL;
+    case PUT:
+      return roq::OptionType::PUT;
+  }
+  return {};
+}
+
+// (trading) status
+
+inline roq::TradingStatus map(json::Status value) {
+  switch (value) {
+    using enum json::Status::type_t;
+    case UNDEFINED:
+      break;
+    case UNKNOWN:
+      break;
+    case PRE_LAUNCH:
+      break;
+    case TRADING:
+      return roq::TradingStatus::OPEN;
+    case SETTLING:
+      break;
+    case DELIVERING:
+      break;
+    case CLOSED:
+      return roq::TradingStatus::CLOSE;
+  }
+  return {};
 }
 
 // side

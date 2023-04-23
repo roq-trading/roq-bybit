@@ -190,7 +190,11 @@ uint32_t Rest::download(RestState state) {
 
 void Rest::get_market_info() {
   profile_.market_info([&]() {
-    auto query = fmt::format("?category={}"sv, shared_.category);
+    auto query = fmt::format(
+        "?category={}"
+        "&status=Trading"
+        "&limit=1000"sv,
+        shared_.category);
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
         .path = "/v5/market/instruments-info"sv,
@@ -242,6 +246,7 @@ void Rest::operator()(Trace<json::MarketInfo> const &event) {
     log::info<2>("item={}"sv, item);
     auto discard = shared_.discard_symbol(item.symbol);
     auto security_type = json::map(item.contract_type, item.options_type);
+    auto option_type = json::map(item.options_type);
     auto reference_data = ReferenceData{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
@@ -258,7 +263,7 @@ void Rest::operator()(Trace<json::MarketInfo> const &event) {
         .min_trade_vol = item.lot_size_filter.min_order_qty,
         .max_trade_vol = item.lot_size_filter.max_order_qty,
         .trade_vol_step_size = NaN,
-        .option_type = {},
+        .option_type = option_type,
         .strike_currency = {},
         .strike_price = NaN,
         .underlying = {},
@@ -275,11 +280,12 @@ void Rest::operator()(Trace<json::MarketInfo> const &event) {
     if (all_symbols_.emplace(item.symbol).second)  // only include new
       symbols_2.emplace_back(item.symbol);
     ++counter;
+    auto trading_status = json::map(item.status);
     auto market_status = MarketStatus{
         .stream_id = stream_id_,
         .exchange = Flags::exchange(),
         .symbol = item.symbol,
-        .trading_status = TradingStatus::OPEN,
+        .trading_status = trading_status,
     };
     create_trace_and_dispatch(handler_, trace_info, market_status, true);
   }
