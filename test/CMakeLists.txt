@@ -6,6 +6,7 @@ set(SOURCES
     json_pong.cpp
     json_subscribe.cpp
     json_account_info.cpp
+    json_execution.cpp
     json_instrument_info.cpp
     json_open_orders.cpp
     json_order_book.cpp

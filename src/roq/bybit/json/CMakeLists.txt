@@ -15,6 +15,9 @@ set(AUTOGEN_SCHEMAS
     open_orders.json
     open_orders_result_item.json
     open_orders_result.json
+    execution.json
+    execution_result_item.json
+    execution_result.json
     auth.json
     cancel_order.json
     cancel_order_result.json
@@ -50,9 +53,6 @@ set(AUTOGEN_SCHEMAS
     topic.json
     public_trade_data.json
     public_trade.json
-    trades.json
-    trades_result_item.json
-    trades_result.json
     instrument_info.json
     instrument_info_result.json
     instrument_info_result_item.json

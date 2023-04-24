@@ -1,5 +1,5 @@
 {
-  "name": "Trades",
+  "name": "Execution",
   "type": "comp",
   "values": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "name": "result",
-      "type": "TradesResult"
+      "type": "ExecutionResult"
     },
     {
       "name": "retExtInfo"

@@ -26,9 +26,9 @@
 #include "roq/bybit/shared.hpp"
 
 #include "roq/bybit/json/account_info.hpp"
+#include "roq/bybit/json/execution.hpp"
 #include "roq/bybit/json/open_orders.hpp"
 #include "roq/bybit/json/position_info.hpp"
-#include "roq/bybit/json/trades.hpp"
 #include "roq/bybit/json/wallet_balance.hpp"
 
 #include "roq/bybit/json/cancel_order.hpp"
@@ -99,9 +99,9 @@ struct OrderEntry final : public web::rest::Client::Handler {
   void get_open_orders_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<json::OpenOrders> const &);
 
-  void get_trades();
-  void get_trades_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::Trades> const &);
+  void get_execution();
+  void get_execution_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+  void operator()(Trace<json::Execution> const &);
 
   void create_order(Event<CreateOrder> const &, oms::Order const &, std::string_view const &request_id);
   void create_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
@@ -148,7 +148,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
         wallet_balance, wallet_balance_ack,                 //
         position_info, position_info_ack,                   //
         open_orders, open_orders_ack,                       //
-        trades, trades_ack,                                 //
+        execution, execution_ack,                           //
         create_order, create_order_ack,                     //
         cancel_order, cancel_order_ack,                     //
         cancel_all_orders, cancel_all_orders_ack;

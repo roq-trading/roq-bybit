@@ -1,0 +1,10 @@
+{
+  "name": "ExecutionResult",
+  "type": "comp",
+  "values": [
+    {
+      "name": "list",
+      "type": "std::span<ExecutionResultItem>"
+    }
+  ]
+}

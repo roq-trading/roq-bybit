@@ -3,16 +3,22 @@
   "type": "comp",
   "values": [
     {
-      "name": "ret_msg",
+      "name": "retCode",
+      "type": "int32_t"
+    },
+    {
+      "name": "retMsg",
       "type": "std::string_view"
     },
     {
-      "name": "type",
-      "type": "EventType"
+      "name": "result"
     },
     {
-      "name": "ret_code",
-      "type": "int32_t"
+      "name": "retExtInfo"
+    },
+    {
+      "name": "time",
+      "type": "std::chrono::milliseconds"
     }
   ]
 }

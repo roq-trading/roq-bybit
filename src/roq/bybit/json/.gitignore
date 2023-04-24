@@ -10,6 +10,9 @@ wallet_balance_result.hpp
 open_orders.hpp
 open_orders_result_item.hpp
 open_orders_result.hpp
+execution.hpp
+execution_result_item.hpp
+execution_result.hpp
 auth.hpp
 cancel_order.hpp
 cancel_order_result.hpp
@@ -45,9 +48,6 @@ time_in_force.hpp
 topic.hpp
 public_trade_data.hpp
 public_trade.hpp
-trades.hpp
-trades_result_item.hpp
-trades_result.hpp
 instrument_info.hpp
 instrument_info_result.hpp
 instrument_info_result_item.hpp
@@ -68,6 +68,9 @@ wallet_balance_result.cpp
 open_orders.cpp
 open_orders_result_item.cpp
 open_orders_result.cpp
+execution.cpp
+execution_result_item.cpp
+execution_result.cpp
 auth.cpp
 cancel_order.cpp
 cancel_order_result.cpp
@@ -103,9 +106,6 @@ time_in_force.cpp
 topic.cpp
 public_trade_data.cpp
 public_trade.cpp
-trades.cpp
-trades_result_item.cpp
-trades_result.cpp
 instrument_info.cpp
 instrument_info_result.cpp
 instrument_info_result_item.cpp

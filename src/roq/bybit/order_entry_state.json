@@ -15,7 +15,7 @@
       "name": "open_orders"
     },
     {
-      "name": "trades"
+      "name": "execution"
     },
     {
       "name": "done"

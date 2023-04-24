@@ -93,8 +93,8 @@ OrderEntry::OrderEntry(
           .position_info_ack = create_metrics(name_, "position_info_ack"sv),
           .open_orders = create_metrics(name_, "open_orders"sv),
           .open_orders_ack = create_metrics(name_, "open_orders_ack"sv),
-          .trades = create_metrics(name_, "trades"sv),
-          .trades_ack = create_metrics(name_, "trades_ack"sv),
+          .execution = create_metrics(name_, "execution"sv),
+          .execution_ack = create_metrics(name_, "execution_ack"sv),
           .create_order = create_metrics(name_, "create_order"sv),
           .create_order_ack = create_metrics(name_, "create_order_ack"sv),
           .cancel_order = create_metrics(name_, "cancel_order"sv),
@@ -135,8 +135,8 @@ void OrderEntry::operator()(metrics::Writer &writer) {
       .write(profile_.position_info_ack, metrics::PROFILE)
       .write(profile_.open_orders, metrics::PROFILE)
       .write(profile_.open_orders_ack, metrics::PROFILE)
-      .write(profile_.trades, metrics::PROFILE)
-      .write(profile_.trades_ack, metrics::PROFILE)
+      .write(profile_.execution, metrics::PROFILE)
+      .write(profile_.execution_ack, metrics::PROFILE)
       .write(profile_.create_order, metrics::PROFILE)
       .write(profile_.create_order_ack, metrics::PROFILE)
       .write(profile_.cancel_order, metrics::PROFILE)
@@ -241,16 +241,25 @@ uint32_t OrderEntry::download(OrderEntryState state) {
       get_wallet_balance();
       return 1;
     case POSITION_INFO:
-      get_position_info();
-      return 1;
+      if (shared_.api != API::SPOT) {
+        /* XXX need symbol
+        get_position_info();
+        return 1;
+        */
+      }
+      return {};
     case OPEN_ORDERS:
-      get_open_orders();
-      return 1;
-    case TRADES:
+      if (false) {
+        // XXX need symbol
+        // get_open_orders();
+        // return 1;
+      }
+      return {};
+    case EXECUTION:
       if (flags::Flags::debug_disable_trades_download()) {
         return {};
       } else {
-        get_trades();
+        get_execution();
         return 1;
       }
     case DONE:
@@ -351,6 +360,10 @@ void OrderEntry::get_wallet_balance() {
 void OrderEntry::get_wallet_balance_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
   auto const constexpr STATE = OrderEntryState::WALLET_BALANCE;
   profile_.wallet_balance_ack([&]() {
+    if (event.value.status() == web::http::Status::NOT_FOUND) {
+      download_.check_relaxed(STATE);
+      return;
+    }
     auto handle_success = [&](auto &body) {
       json::WalletBalance wallet_balance{body, decode_buffer_};
       log::debug("wallet_balance={}"sv, wallet_balance);
@@ -389,12 +402,29 @@ void OrderEntry::operator()(Trace<json::WalletBalance> const &event) {
 
 void OrderEntry::get_position_info() {
   profile_.position_info([&]() {
+    assert(shared_.api != API::SPOT);
     auto const path = "/v5/position/list"sv;
-    auto headers = authenticator_.create_headers(path, {}, {});
+    auto query = [&]() -> std::string_view {
+      switch (shared_.api) {
+        using enum API;
+        case UNDEFINED:
+          break;
+        case SPOT:
+          break;
+        case LINEAR:
+          return "?category=linear"sv;
+        case INVERSE:
+          return "?category=inverse"sv;
+        case OPTION:
+          return "?category=option"sv;
+      }
+      log::fatal("Unexpected"sv);
+    }();
+    auto headers = authenticator_.create_headers(path, query, {});
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
         .path = path,
-        .query = {},
+        .query = query,
         .accept = web::http::Accept::APPLICATION_JSON,
         .content_type = {},
         .headers = headers,
@@ -519,9 +549,9 @@ void OrderEntry::operator()(Trace<json::OpenOrders> const &event) {
   }
 }
 
-void OrderEntry::get_trades() {
-  profile_.trades([&]() {
-    auto const path = "/spot/v3/private/my-trades"sv;
+void OrderEntry::get_execution() {
+  profile_.execution([&]() {
+    auto const path = "/v5/execution/list"sv;
     auto headers = authenticator_.create_headers(path, {}, {});
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
@@ -536,19 +566,19 @@ void OrderEntry::get_trades() {
     auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
       TraceInfo trace_info;
       Trace event{trace_info, response};
-      get_trades_ack(event, sequence);
+      get_execution_ack(event, sequence);
     };
-    (*connection_)("trades"sv, request, callback);
+    (*connection_)("execution"sv, request, callback);
   });
 }
 
-void OrderEntry::get_trades_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
-  auto const constexpr STATE = OrderEntryState::TRADES;
-  profile_.trades_ack([&]() {
+void OrderEntry::get_execution_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
+  auto const constexpr STATE = OrderEntryState::EXECUTION;
+  profile_.execution_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::Trades trades{body, decode_buffer_};
-      log::debug("trades={}"sv, trades);
-      Trace event_2{event, trades};
+      json::Execution execution{body, decode_buffer_};
+      log::debug("execution={}"sv, execution);
+      Trace event_2{event, execution};
       (*this)(event_2);
       download_.check_relaxed(STATE);
     };
@@ -561,42 +591,10 @@ void OrderEntry::get_trades_ack(Trace<web::rest::Response> const &event, [[maybe
   });
 }
 
-void OrderEntry::operator()(Trace<json::Trades> const &event) {
+void OrderEntry::operator()(Trace<json::Execution> const &event) {
   auto &trace_info = event.trace_info;
-  auto &trades = event.value;
-  log::info<2>("trades={}"sv, trades);
-  for (auto &item : trades.result.list) {
-    // note! there's no order_link_id
-    if (shared_.find_order(item.order_id, [&](auto &order) {
-          auto liquidity = item.is_maker ? Liquidity::MAKER : Liquidity::TAKER;
-          auto fill = Fill{
-              .external_trade_id = item.trade_id,
-              .quantity = item.order_qty,
-              .price = item.order_price,
-              .liquidity = liquidity,
-          };
-          auto trade_update = oms::TradeUpdate{
-              .account = order.account,
-              .order_id = order.order_id,
-              .exchange = order.exchange,
-              .symbol = order.symbol,
-              .side = order.side,
-              .position_effect = order.position_effect,
-              .create_time_utc = utils::safe_cast(item.execution_time),
-              .update_time_utc = utils::safe_cast(item.execution_time),
-              .external_account = {},
-              .external_order_id = item.order_id,
-              .fills = {&fill, 1},
-              .update_type = {},
-              .sending_time_utc = {},
-          };
-          create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
-        })) {
-    } else {
-      log::warn<1>("*** EXTERNAL ORDER ***"sv);
-      log::warn<2>("trade={}"sv, item);
-    }
-  }
+  auto &execution = event.value;
+  log::info<2>("execution={}"sv, execution);
 }
 
 void OrderEntry::create_order(

@@ -7,6 +7,8 @@
 #include <cassert>
 #include <iterator>
 
+#include "roq/logging.hpp"
+
 #include "roq/core/codec/hex.hpp"
 
 #include <roq/core/mac/hmac.hpp>
@@ -43,11 +45,18 @@ std::string Crypto::create_signature_v2(std::chrono::milliseconds expires) {
 
 std::string Crypto::create_headers_v2(
     std::string_view const &path,
-    [[maybe_unused]] std::string_view const &query,
+    std::string_view const &query,
     std::string_view const &body,
     std::chrono::milliseconds timestamp) {
   assert(!std::empty(path));
-  auto tmp = fmt::format("{}{}{}{}"sv, timestamp.count(), key_, recv_window_.count(), body);
+  auto query_or_body = [&]() {
+    if (std::empty(query))
+      return body;
+    assert(std::empty(body));
+    assert(query[0] == '?');
+    return query.substr(1);
+  }();
+  auto tmp = fmt::format("{}{}{}{}"sv, timestamp.count(), key_, recv_window_.count(), query_or_body);
   mac_.clear();
   mac_.update(tmp);
   auto digest = mac_.final(digest_);
