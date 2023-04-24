@@ -605,7 +605,7 @@ void OrderEntry::create_order(
     auto &[message_info, create_order] = event;
     // EXPERIMENTAL
     all_symbols_.emplace(create_order.symbol);
-    auto const path = "/spot/v3/private/order"sv;
+    auto const path = "/v5/order/create"sv;
     std::string buffer;  // XXX
     auto body = json::create_order(buffer, create_order, order, request_id);
     log::debug(R"(body="{}")"sv, body);
@@ -723,7 +723,7 @@ void OrderEntry::cancel_order(
     if (!ready())
       throw oms::NotReady{"not ready"sv};
     auto &[message_info, cancel_order] = event;
-    auto const path = "/spot/v3/private/cancel-order"sv;
+    auto const path = "/v5/order/cancel"sv;
     std::string buffer;  // XXX
     auto body = json::cancel_order(buffer, cancel_order, order, request_id, previous_request_id);
     log::debug(R"(body="{}")"sv, body);
@@ -845,7 +845,7 @@ void OrderEntry::cancel_all_orders(
       log::warn("*** NOT POSSIBLE TO CANCEL ALL OPEN ORDERS (NO SYMBOLS) ***"sv);
     }
     auto &[message_info, cancel_all_orders] = event;
-    auto const path = "/spot/v3/private/cancel-orders"sv;
+    auto const path = "/v5/order/cancel-all"sv;
     for (auto &symbol : all_symbols_) {
       std::string buffer;  // XXX
       auto body = json::cancel_all_orders(buffer, cancel_all_orders, request_id, symbol);

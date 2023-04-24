@@ -228,9 +228,10 @@ uint32_t DropCopy::download(DropCopyState state) {
 }
 
 void DropCopy::subscribe() {
-  subscribe("outboundAccountInfo"sv);
+  subscribe("wallet"sv);
+  subscribe("position"sv);
   subscribe("order"sv);
-  subscribe("ticketInfo"sv);
+  subscribe("execution"sv);
 }
 
 void DropCopy::subscribe(std::string_view const &topic) {
