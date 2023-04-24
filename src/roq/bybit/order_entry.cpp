@@ -85,10 +85,14 @@ OrderEntry::OrderEntry(
           .disconnect = create_metrics(name_, "disconnect"sv),
       },
       profile_{
-          .account = create_metrics(name_, "account"sv),
-          .account_ack = create_metrics(name_, "account_ack"sv),
-          .orders = create_metrics(name_, "orders"sv),
-          .orders_ack = create_metrics(name_, "orders_ack"sv),
+          .account_info = create_metrics(name_, "account_info"sv),
+          .account_info_ack = create_metrics(name_, "account_info_ack"sv),
+          .wallet_balance = create_metrics(name_, "wallet_balance"sv),
+          .wallet_balance_ack = create_metrics(name_, "wallet_balance_ack"sv),
+          .position_info = create_metrics(name_, "position_info"sv),
+          .position_info_ack = create_metrics(name_, "position_info_ack"sv),
+          .open_orders = create_metrics(name_, "open_orders"sv),
+          .open_orders_ack = create_metrics(name_, "open_orders_ack"sv),
           .trades = create_metrics(name_, "trades"sv),
           .trades_ack = create_metrics(name_, "trades_ack"sv),
           .create_order = create_metrics(name_, "create_order"sv),
@@ -123,10 +127,14 @@ void OrderEntry::operator()(metrics::Writer &writer) {
       // counter
       .write(counter_.disconnect, metrics::COUNTER)
       // profile
-      .write(profile_.account, metrics::PROFILE)
-      .write(profile_.account_ack, metrics::PROFILE)
-      .write(profile_.orders, metrics::PROFILE)
-      .write(profile_.orders_ack, metrics::PROFILE)
+      .write(profile_.account_info, metrics::PROFILE)
+      .write(profile_.account_info_ack, metrics::PROFILE)
+      .write(profile_.wallet_balance, metrics::PROFILE)
+      .write(profile_.wallet_balance_ack, metrics::PROFILE)
+      .write(profile_.position_info, metrics::PROFILE)
+      .write(profile_.position_info_ack, metrics::PROFILE)
+      .write(profile_.open_orders, metrics::PROFILE)
+      .write(profile_.open_orders_ack, metrics::PROFILE)
       .write(profile_.trades, metrics::PROFILE)
       .write(profile_.trades_ack, metrics::PROFILE)
       .write(profile_.create_order, metrics::PROFILE)
@@ -226,11 +234,17 @@ uint32_t OrderEntry::download(OrderEntryState state) {
     case UNDEFINED:
       assert(false);
       break;
-    case ACCOUNT:
-      get_account();
+    case ACCOUNT_INFO:
+      get_account_info();
       return 1;
-    case ORDERS:
-      get_orders();
+    case WALLET_BALANCE:
+      get_wallet_balance();
+      return 1;
+    case POSITION_INFO:
+      get_position_info();
+      return 1;
+    case OPEN_ORDERS:
+      get_open_orders();
       return 1;
     case TRADES:
       if (flags::Flags::debug_disable_trades_download()) {
@@ -247,9 +261,9 @@ uint32_t OrderEntry::download(OrderEntryState state) {
   return {};
 }
 
-void OrderEntry::get_account() {
-  profile_.account([&]() {
-    auto const path = "/spot/v3/private/account"sv;
+void OrderEntry::get_account_info() {
+  profile_.account_info([&]() {
+    auto const path = "/v5/account/info"sv;
     auto headers = authenticator_.create_headers(path, {}, {});
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
@@ -264,19 +278,19 @@ void OrderEntry::get_account() {
     auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
       TraceInfo trace_info;
       Trace event{trace_info, response};
-      get_account_ack(event, sequence);
+      get_account_info_ack(event, sequence);
     };
-    (*connection_)("account"sv, request, callback);
+    (*connection_)("account_info"sv, request, callback);
   });
 }
 
-void OrderEntry::get_account_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
-  auto const constexpr STATE = OrderEntryState::ACCOUNT;
-  profile_.account_ack([&]() {
+void OrderEntry::get_account_info_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
+  auto const constexpr STATE = OrderEntryState::ACCOUNT_INFO;
+  profile_.account_info_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::Account account{body, decode_buffer_};
-      log::debug("account={}"sv, account);
-      Trace event_2{event, account};
+      json::AccountInfo account_info{body, decode_buffer_};
+      log::debug("account_info={}"sv, account_info);
+      Trace event_2{event, account_info};
       (*this)(event_2);
       download_.check_relaxed(STATE);
     };
@@ -289,10 +303,11 @@ void OrderEntry::get_account_ack(Trace<web::rest::Response> const &event, [[mayb
   });
 }
 
-void OrderEntry::operator()(Trace<json::Account> const &event) {
-  auto &[trace_info, account] = event;
-  log::info<2>("account={}"sv, account);
-  for (auto &item : account.result.balances) {
+void OrderEntry::operator()(Trace<json::AccountInfo> const &event) {
+  auto &[trace_info, account_info] = event;
+  log::info<2>("account_info={}"sv, account_info);
+  /*
+  for (auto &item : account_info.result.balances) {
     log::debug("item={}"sv, item);
     auto funds_update = FundsUpdate{
         .stream_id = stream_id_,
@@ -302,16 +317,17 @@ void OrderEntry::operator()(Trace<json::Account> const &event) {
         .hold = item.locked,
         .external_account = {},
         .update_type = UpdateType::SNAPSHOT,
-        .exchange_time_utc = account.time,
+        .exchange_time_utc = account_info.time,
         .sending_time_utc = {},
     };
     create_trace_and_dispatch(handler_, trace_info, funds_update, true);
   }
+  */
 }
 
-void OrderEntry::get_orders() {
-  profile_.orders([&]() {
-    auto const path = "/spot/v3/private/open-orders"sv;
+void OrderEntry::get_wallet_balance() {
+  profile_.wallet_balance([&]() {
+    auto const path = "/v5/account/wallet-balance"sv;
     auto headers = authenticator_.create_headers(path, {}, {});
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
@@ -326,19 +342,19 @@ void OrderEntry::get_orders() {
     auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
       TraceInfo trace_info;
       Trace event{trace_info, response};
-      get_orders_ack(event, sequence);
+      get_wallet_balance_ack(event, sequence);
     };
-    (*connection_)("orders"sv, request, callback);
+    (*connection_)("wallet_balance"sv, request, callback);
   });
 }
 
-void OrderEntry::get_orders_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
-  auto const constexpr STATE = OrderEntryState::ORDERS;
-  profile_.orders_ack([&]() {
+void OrderEntry::get_wallet_balance_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
+  auto const constexpr STATE = OrderEntryState::WALLET_BALANCE;
+  profile_.wallet_balance_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::Orders orders{body, decode_buffer_};
-      log::debug("orders={}"sv, orders);
-      Trace event_2{event, orders};
+      json::WalletBalance wallet_balance{body, decode_buffer_};
+      log::debug("wallet_balance={}"sv, wallet_balance);
+      Trace event_2{event, wallet_balance};
       (*this)(event_2);
       download_.check_relaxed(STATE);
     };
@@ -351,10 +367,119 @@ void OrderEntry::get_orders_ack(Trace<web::rest::Response> const &event, [[maybe
   });
 }
 
-void OrderEntry::operator()(Trace<json::Orders> const &event) {
-  auto &[trace_info, orders] = event;
-  log::info<2>("orders={}"sv, orders);
-  for (auto &item : orders.result.list) {
+void OrderEntry::operator()(Trace<json::WalletBalance> const &event) {
+  auto &[trace_info, wallet_balance] = event;
+  log::info<2>("wallet_balance={}"sv, wallet_balance);
+  for (auto &item : wallet_balance.result.balances) {
+    log::debug("item={}"sv, item);
+    auto funds_update = FundsUpdate{
+        .stream_id = stream_id_,
+        .account = authenticator_.get_account(),
+        .currency = item.coin,  // XXX or .coin_id?
+        .balance = item.free,
+        .hold = item.locked,
+        .external_account = {},
+        .update_type = UpdateType::SNAPSHOT,
+        .exchange_time_utc = wallet_balance.time,
+        .sending_time_utc = {},
+    };
+    create_trace_and_dispatch(handler_, trace_info, funds_update, true);
+  }
+}
+
+void OrderEntry::get_position_info() {
+  profile_.position_info([&]() {
+    auto const path = "/v5/position/list"sv;
+    auto headers = authenticator_.create_headers(path, {}, {});
+    auto request = web::rest::Request{
+        .method = web::http::Method::GET,
+        .path = path,
+        .query = {},
+        .accept = web::http::Accept::APPLICATION_JSON,
+        .content_type = {},
+        .headers = headers,
+        .body = {},
+        .quality_of_service = {},
+    };
+    auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
+      TraceInfo trace_info;
+      Trace event{trace_info, response};
+      get_position_info_ack(event, sequence);
+    };
+    (*connection_)("position_info"sv, request, callback);
+  });
+}
+
+void OrderEntry::get_position_info_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
+  auto const constexpr STATE = OrderEntryState::POSITION_INFO;
+  profile_.position_info_ack([&]() {
+    auto handle_success = [&](auto &body) {
+      json::PositionInfo position_info{body, decode_buffer_};
+      log::debug("position_info={}"sv, position_info);
+      Trace event_2{event, position_info};
+      (*this)(event_2);
+      download_.check_relaxed(STATE);
+    };
+    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
+      log::warn(R"(error={}, text="{}")"sv, error, text);
+      if (download_.downloading())
+        download_.retry(STATE);
+    };
+    process_response(event, handle_success, handle_error);
+  });
+}
+
+void OrderEntry::operator()(Trace<json::PositionInfo> const &event) {
+  auto &[trace_info, position_info] = event;
+  log::info<2>("position_info={}"sv, position_info);
+}
+
+void OrderEntry::get_open_orders() {
+  profile_.open_orders([&]() {
+    auto const path = "/v5/order/realtime"sv;
+    auto headers = authenticator_.create_headers(path, {}, {});
+    auto request = web::rest::Request{
+        .method = web::http::Method::GET,
+        .path = path,
+        .query = {},
+        .accept = web::http::Accept::APPLICATION_JSON,
+        .content_type = {},
+        .headers = headers,
+        .body = {},
+        .quality_of_service = {},
+    };
+    auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
+      TraceInfo trace_info;
+      Trace event{trace_info, response};
+      get_open_orders_ack(event, sequence);
+    };
+    (*connection_)("open_orders"sv, request, callback);
+  });
+}
+
+void OrderEntry::get_open_orders_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
+  auto const constexpr STATE = OrderEntryState::OPEN_ORDERS;
+  profile_.open_orders_ack([&]() {
+    auto handle_success = [&](auto &body) {
+      json::OpenOrders open_orders{body, decode_buffer_};
+      log::debug("open_orders={}"sv, open_orders);
+      Trace event_2{event, open_orders};
+      (*this)(event_2);
+      download_.check_relaxed(STATE);
+    };
+    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
+      log::warn(R"(error={}, text="{}")"sv, error, text);
+      if (download_.downloading())
+        download_.retry(STATE);
+    };
+    process_response(event, handle_success, handle_error);
+  });
+}
+
+void OrderEntry::operator()(Trace<json::OpenOrders> const &event) {
+  auto &[trace_info, open_orders] = event;
+  log::info<2>("open_orders={}"sv, open_orders);
+  for (auto &item : open_orders.result.list) {
     log::debug("item={}"sv, item);
     // EXPERIMENTAL
     all_symbols_.emplace(item.symbol);

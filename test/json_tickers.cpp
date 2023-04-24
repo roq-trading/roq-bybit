@@ -252,4 +252,3 @@ TEST_CASE("json_tickers_parser_option", "[json_tickers]") {
   CHECK(res == true);
   CHECK(handler.found == true);
 }
-

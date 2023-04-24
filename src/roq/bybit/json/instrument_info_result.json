@@ -1,5 +1,5 @@
 {
-  "name": "MarketInfoResult",
+  "name": "InstrumentInfoResult",
   "type": "comp",
   "values": [
     {
@@ -8,7 +8,7 @@
     },
     {
       "name": "list",
-      "type": "std::span<MarketInfoResultItem>"
+      "type": "std::span<InstrumentInfoResultItem>"
     },
     {
       "name": "nextPageCursor",

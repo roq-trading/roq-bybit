@@ -83,8 +83,8 @@ Rest::Rest(Handler &handler, io::Context &context, uint16_t stream_id, Shared &s
           .disconnect = create_metrics(name_, "disconnect"sv),
       },
       profile_{
-          .market_info = create_metrics(name_, "market_info"sv),
-          .market_info_ack = create_metrics(name_, "market_info_ack"sv),
+          .instrument_info = create_metrics(name_, "instrument_info"sv),
+          .instrument_info_ack = create_metrics(name_, "instrument_info_ack"sv),
       },
       latency_{
           .ping = create_metrics(name_, "ping"sv),
@@ -110,8 +110,8 @@ void Rest::operator()(metrics::Writer &writer) {
       // counter
       .write(counter_.disconnect, metrics::COUNTER)
       // profile
-      .write(profile_.market_info, metrics::PROFILE)
-      .write(profile_.market_info_ack, metrics::PROFILE)
+      .write(profile_.instrument_info, metrics::PROFILE)
+      .write(profile_.instrument_info_ack, metrics::PROFILE)
       // latency
       .write(latency_.ping, metrics::LATENCY);
 }
@@ -175,8 +175,8 @@ uint32_t Rest::download(RestState state) {
     case UNDEFINED:
       assert(false);
       break;
-    case GET_MARKET_INFO:
-      get_market_info();
+    case GET_INSTRUMENT_INFO:
+      get_instrument_info();
       return 1;
     case DONE:
       (*this)(ConnectionStatus::READY);
@@ -188,8 +188,8 @@ uint32_t Rest::download(RestState state) {
 
 // market info
 
-void Rest::get_market_info() {
-  profile_.market_info([&]() {
+void Rest::get_instrument_info() {
+  profile_.instrument_info([&]() {
     auto query = fmt::format(
         "?category={}"
         "&status=Trading"
@@ -208,21 +208,21 @@ void Rest::get_market_info() {
     auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
       TraceInfo trace_info;
       Trace event{trace_info, response};
-      get_market_info_ack(event, sequence);
+      get_instrument_info_ack(event, sequence);
     };
     (*connection_)("market_info_spot"sv, request, callback);
   });
 }
 
-void Rest::get_market_info_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
-  constexpr auto const STATE = RestState::GET_MARKET_INFO;
-  profile_.market_info_ack([&]() {
+void Rest::get_instrument_info_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
+  constexpr auto const STATE = RestState::GET_INSTRUMENT_INFO;
+  profile_.instrument_info_ack([&]() {
     auto handle_success = [&](auto &body) {
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        json::MarketInfo market_info{body, decode_buffer_};
-        Trace event_2{event, market_info};
+        json::InstrumentInfo instrument_info{body, decode_buffer_};
+        Trace event_2{event, instrument_info};
         (*this)(event_2);
         download_.check(STATE);
       }
@@ -235,14 +235,14 @@ void Rest::get_market_info_ack(Trace<web::rest::Response> const &event, uint32_t
   });
 }
 
-void Rest::operator()(Trace<json::MarketInfo> const &event) {
-  auto &[trace_info, market_info] = event;
-  log::info<4>("market_info={}"sv, market_info);
+void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
+  auto &[trace_info, instrument_info] = event;
+  log::info<4>("instrument_info={}"sv, instrument_info);
   std::vector<Symbol> symbols_2;
-  symbols_2.reserve(std::size(market_info.result.list));
+  symbols_2.reserve(std::size(instrument_info.result.list));
   size_t counter = 0;
-  for (size_t i = 0; i < std::size(market_info.result.list); ++i) {
-    auto &item = market_info.result.list[i];
+  for (size_t i = 0; i < std::size(instrument_info.result.list); ++i) {
+    auto &item = instrument_info.result.list[i];
     log::info<2>("item={}"sv, item);
     auto discard = shared_.discard_symbol(item.symbol);
     auto security_type = json::map(item.contract_type, item.options_type);
@@ -296,7 +296,7 @@ void Rest::operator()(Trace<json::MarketInfo> const &event) {
     handler_(symbols_update);
   }
   if (counter > 0) [[unlikely]]
-    log::info("Symbols {} / {}"sv, counter, std::size(market_info.result.list));
+    log::info("Symbols {} / {}"sv, counter, std::size(instrument_info.result.list));
 }
 
 template <typename SuccessHandler, typename ErrorHandler>

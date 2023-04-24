@@ -56,7 +56,6 @@ std::string Crypto::create_headers_v2(
   auto result = fmt::format(
       "X-BAPI-API-KEY: {}\r\n"
       "X-BAPI-SIGN: {}\r\n"
-      "X-BAPI-SIGN-TYPE: 2\r\n"
       "X-BAPI-TIMESTAMP: {}\r\n"
       "X-BAPI-RECV-WINDOW: {}\r\n",
       key_,

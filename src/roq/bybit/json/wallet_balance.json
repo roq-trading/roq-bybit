@@ -1,5 +1,5 @@
 {
-  "name": "Orders",
+  "name": "WalletBalance",
   "type": "comp",
   "values": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "name": "result",
-      "type": "OrdersResult"
+      "type": "WalletBalanceResult"
     },
     {
       "name": "retExtInfo"

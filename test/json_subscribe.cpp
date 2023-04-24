@@ -165,4 +165,3 @@ TEST_CASE("json_subscribe_parser_option", "[json_subscribe]") {
   CHECK(res == true);
   CHECK(handler.found == true);
 }
-

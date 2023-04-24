@@ -4,7 +4,7 @@
 
 #include "roq/core/json/parser.hpp"
 
-#include "roq/bybit/json/market_info.hpp"
+#include "roq/bybit/json/instrument_info.hpp"
 
 using namespace roq;
 using namespace roq::bybit;
@@ -258,22 +258,22 @@ auto const OPTION = R"({)"
                     R"(})"sv;
 }  // namespace
 
-TEST_CASE("json_market_info_spot", "[json_market_info]") {
+TEST_CASE("json_instrument_info_spot", "[json_instrument_info]") {
   core::Buffer buffer(8192);
-  json::MarketInfo ticks{SPOT, buffer};
+  json::InstrumentInfo ticks{SPOT, buffer};
 }
 
-TEST_CASE("json_market_info_linear", "[json_market_info]") {
+TEST_CASE("json_instrument_info_linear", "[json_instrument_info]") {
   core::Buffer buffer(8192);
-  json::MarketInfo ticks{LINEAR, buffer};
+  json::InstrumentInfo ticks{LINEAR, buffer};
 }
 
-TEST_CASE("json_market_info_inverse", "[json_market_info]") {
+TEST_CASE("json_instrument_info_inverse", "[json_instrument_info]") {
   core::Buffer buffer(8192);
-  json::MarketInfo ticks{INVERSE, buffer};
+  json::InstrumentInfo ticks{INVERSE, buffer};
 }
 
-TEST_CASE("json_market_info_option", "[json_market_info]") {
+TEST_CASE("json_instrument_info_option", "[json_instrument_info]") {
   core::Buffer buffer(8192);
-  json::MarketInfo ticks{OPTION, buffer};
+  json::InstrumentInfo ticks{OPTION, buffer};
 }

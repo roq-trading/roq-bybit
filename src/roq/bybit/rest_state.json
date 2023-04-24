@@ -3,7 +3,7 @@
   "type": "enum",
   "values": [
     {
-      "name": "get_market_info"
+      "name": "get_instrument_info"
     },
     {
       "name": "done"

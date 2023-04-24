@@ -92,13 +92,6 @@
       "description": "download fills since (now - begin)"
     },
     {
-      "name": "rest_token_refresh_freq",
-      "type": "std::chrono::nanoseconds",
-      "validator": "roq::core::flags::TimePeriod",
-      "default": "8h",
-      "description": "token refresh frequency"
-    },
-    {
       "name": "rest_terminate_on_403",
       "type": "bool",
       "default": false,
@@ -151,19 +144,6 @@
       "type": "uint32_t",
       "default": 0,
       "description": "MbP depth"
-    },
-    {
-      "name": "ws_mbp_request_delay",
-      "type": "std::chrono::nanoseconds",
-      "validator": "roq::core::flags::TimePeriod",
-      "default": "500ms",
-      "description": "request delay"
-    },
-    {
-      "name": "ws_mbp_request_max_retries",
-      "type": "uint32_t",
-      "default": 3,
-      "description": "request max retries"
     },
     {
       "name": "request_limit",

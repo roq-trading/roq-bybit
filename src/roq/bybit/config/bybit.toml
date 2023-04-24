@@ -1,16 +1,17 @@
 symbols = [
-  "^BTCUSD[A-Z]?$",
-  "^ETHUSD[A-Z]?$"
+  "^BTCUSD$",
+  "^BTCUSDT$",
+  "^BTC-.*-[PC]$"
 ]
 
-#[accounts]
-#
-#  [accounts.A1]
-#  master = true
-#  login = "xxx"
-#  password = "XXX"
-#  secret = "xxx"
-#  symbols = ".*"
+[accounts]
+
+  [accounts.A1]
+  master = true
+  login = "ou9ybUBuqtxL9qhdxx"
+  password = "xxx"
+  secret = "n7rklD03Qihwr2mlldckDM3TieSI8zBg4x37"
+  symbols = ".*"
 
 [users]
 

@@ -1,5 +1,5 @@
 {
-  "name": "MarketInfo",
+  "name": "OpenOrders",
   "type": "comp",
   "values": [
     {
@@ -12,14 +12,14 @@
     },
     {
       "name": "result",
-      "type": "MarketInfoResult"
+      "type": "OpenOrdersResult"
     },
     {
       "name": "retExtInfo"
     },
     {
       "name": "time",
-      "comment": "std::chrono::milliseconds"
+      "type": "std::chrono::milliseconds"
     }
   ]
 }

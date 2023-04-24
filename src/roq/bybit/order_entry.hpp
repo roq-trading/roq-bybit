@@ -25,9 +25,11 @@
 #include "roq/bybit/order_entry_state.hpp"
 #include "roq/bybit/shared.hpp"
 
-#include "roq/bybit/json/account.hpp"
-#include "roq/bybit/json/orders.hpp"
+#include "roq/bybit/json/account_info.hpp"
+#include "roq/bybit/json/open_orders.hpp"
+#include "roq/bybit/json/position_info.hpp"
 #include "roq/bybit/json/trades.hpp"
+#include "roq/bybit/json/wallet_balance.hpp"
 
 #include "roq/bybit/json/cancel_order.hpp"
 #include "roq/bybit/json/cancel_orders.hpp"
@@ -81,13 +83,21 @@ struct OrderEntry final : public web::rest::Client::Handler {
 
   uint32_t download(OrderEntryState state);
 
-  void get_account();
-  void get_account_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::Account> const &);
+  void get_account_info();
+  void get_account_info_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+  void operator()(Trace<json::AccountInfo> const &);
 
-  void get_orders();
-  void get_orders_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::Orders> const &);
+  void get_wallet_balance();
+  void get_wallet_balance_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+  void operator()(Trace<json::WalletBalance> const &);
+
+  void get_position_info();
+  void get_position_info_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+  void operator()(Trace<json::PositionInfo> const &);
+
+  void get_open_orders();
+  void get_open_orders_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+  void operator()(Trace<json::OpenOrders> const &);
 
   void get_trades();
   void get_trades_ack(Trace<web::rest::Response> const &, uint32_t sequence);
@@ -134,11 +144,13 @@ struct OrderEntry final : public web::rest::Client::Handler {
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile account, account_ack,  //
-        orders, orders_ack,                       //
-        trades, trades_ack,                       //
-        create_order, create_order_ack,           //
-        cancel_order, cancel_order_ack,           //
+    core::metrics::Profile account_info, account_info_ack,  //
+        wallet_balance, wallet_balance_ack,                 //
+        position_info, position_info_ack,                   //
+        open_orders, open_orders_ack,                       //
+        trades, trades_ack,                                 //
+        create_order, create_order_ack,                     //
+        cancel_order, cancel_order_ack,                     //
         cancel_all_orders, cancel_all_orders_ack;
   } profile_;
   struct {

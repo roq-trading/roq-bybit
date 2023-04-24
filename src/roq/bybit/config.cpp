@@ -6,6 +6,8 @@
 
 #include "roq/logging.hpp"
 
+#include "roq/utils/safe_cast.hpp"
+
 #include "roq/bybit/flags.hpp"
 
 using namespace std::literals;
@@ -71,7 +73,7 @@ void Config::dispatch(server::Config::Handler &handler) const {
     handler(user);
   auto gateway_settings = GatewaySettings{
       .supports = SUPPORTS,
-      .mbp_max_depth = {},
+      .mbp_max_depth = utils::safe_cast{flags::Flags::ws_mbp_depth()},
       .mbp_tick_size_multiplier = NaN,
       .mbp_min_trade_vol_multiplier = NaN,
       .mbp_allow_remove_non_existing = MBP_ALLOW_REMOVE_NON_EXISTING,

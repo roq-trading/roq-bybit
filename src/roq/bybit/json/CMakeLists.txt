@@ -5,9 +5,16 @@ set(SOURCES parser.cpp utils.cpp)
 include(RoqAutogen)
 
 set(AUTOGEN_SCHEMAS
-    account.json
-    account_result_item.json
-    account_result.json
+    account_info.json
+    account_info_result.json
+    position_info.json
+    position_info_result.json
+    wallet_balance.json
+    wallet_balance_result_item.json
+    wallet_balance_result.json
+    open_orders.json
+    open_orders_result_item.json
+    open_orders_result.json
     auth.json
     cancel_order.json
     cancel_order_result.json
@@ -26,9 +33,6 @@ set(AUTOGEN_SCHEMAS
     order_book_level.json
     order_data_item.json
     order.json
-    orders.json
-    orders_result_item.json
-    orders_result.json
     order_status.json
     order_type.json
     outbound_account_info_data_item.json
@@ -49,9 +53,9 @@ set(AUTOGEN_SCHEMAS
     trades.json
     trades_result_item.json
     trades_result.json
-    market_info.json
-    market_info_result.json
-    market_info_result_item.json
+    instrument_info.json
+    instrument_info_result.json
+    instrument_info_result_item.json
     price_filter.json
     leverage_filter.json
     lot_size_filter.json

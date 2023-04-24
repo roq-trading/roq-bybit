@@ -1,5 +1,5 @@
 {
-  "name": "Account",
+  "name": "PositionInfo",
   "type": "comp",
   "values": [
     {
@@ -12,14 +12,7 @@
     },
     {
       "name": "result",
-      "type": "AccountResult"
-    },
-    {
-      "name": "retExtInfo"
-    },
-    {
-      "name": "time",
-      "type": "std::chrono::milliseconds"
+      "type": "PositionInfoResult"
     }
   ]
 }

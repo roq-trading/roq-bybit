@@ -1,14 +1,16 @@
 set(TARGET_NAME "${PROJECT_NAME}-test")
 
 set(SOURCES
+    json_account_info.cpp
     json_auth.cpp
     json_error.cpp
-    json_market_info.cpp
+    json_instrument_info.cpp
     json_order_book.cpp
     json_pong.cpp
     json_public_trade.cpp
     json_subscribe.cpp
     json_tickers.cpp
+    json_wallet_balance.cpp
     main.cpp)
 
 roq_gitignore(OUTPUT ".gitignore" SOURCES "${TARGET_NAME}")

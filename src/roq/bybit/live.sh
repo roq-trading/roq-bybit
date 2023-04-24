@@ -15,10 +15,10 @@ CONFIG_FILE="$CWD/config/$NAME.toml"
 URI="bybit.com"
 
 REST_URI="https://api.$URI"
-WS_PUBLIC_URI="wss://stream.$URI/spot/public/v3"
-WS_PRIVATE_URI="wss://stream.$URI/spot/private/v3"
+WS_PUBLIC_URI="wss://stream.$URI/v5/public"
+WS_PRIVATE_URI="wss://stream.$URI/v5/private"
 
-$PREFIX ./roq-bybit \
+$PREFIX ./roq-bybit-v5 \
   --name "bybit" \
   --config_file "$CONFIG_FILE" \
   --cache_dir "$HOME/var/lib/roq/cache" \

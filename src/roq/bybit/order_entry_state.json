@@ -3,10 +3,16 @@
   "type": "enum",
   "values": [
     {
-      "name": "account"
+      "name": "account_info"
     },
     {
-      "name": "orders"
+      "name": "wallet_balance"
+    },
+    {
+      "name": "position_info"
+    },
+    {
+      "name": "open_orders"
     },
     {
       "name": "trades"

@@ -24,7 +24,7 @@
 #include "roq/bybit/rest_state.hpp"
 #include "roq/bybit/shared.hpp"
 
-#include "roq/bybit/json/market_info.hpp"
+#include "roq/bybit/json/instrument_info.hpp"
 
 namespace roq {
 namespace bybit {
@@ -66,9 +66,9 @@ struct Rest final : public web::rest::Client::Handler {
 
   uint32_t download(RestState);
 
-  void get_market_info();
-  void get_market_info_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::MarketInfo> const &);
+  void get_instrument_info();
+  void get_instrument_info_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+  void operator()(Trace<json::InstrumentInfo> const &);
 
   template <typename SuccessHandler, typename ErrorHandler>
   void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);
@@ -87,7 +87,7 @@ struct Rest final : public web::rest::Client::Handler {
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile market_info, market_info_ack;
+    core::metrics::Profile instrument_info, instrument_info_ack;
   } profile_;
   struct {
     core::metrics::Latency ping;
