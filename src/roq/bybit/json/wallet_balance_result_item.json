@@ -3,24 +3,51 @@
   "type": "item",
   "values": [
     {
-      "name": "coin",
+      "name": "accountType",
       "type": "std::string_view"
     },
     {
-      "name": "coinId",
+      "name": "accountLTV",
       "type": "std::string_view"
     },
     {
-      "name": "total",
-      "type": "double"
+      "name": "accountIMRate",
+      "type": "std::string_view"
     },
     {
-      "name": "free",
-      "type": "double"
+      "name": "accountMMRate",
+      "type": "std::string_view"
     },
     {
-      "name": "locked",
-      "type": "double"
+      "name": "totalEquity",
+      "type": "std::string_view"
+    },
+    {
+      "name": "totalWalletBalance",
+      "type": "std::string_view"
+    },
+    {
+      "name": "totalMarginBalance",
+      "type": "std::string_view"
+    },
+    {
+      "name": "totalAvailableBalance",
+      "type": "std::string_view"
+    },
+    {
+      "name": "totalPerpUPL",
+      "type": "std::string_view"
+    },
+    {
+      "name": "totalInitialMargin",
+      "type": "std::string_view"
+    },
+    {
+      "name": "totalMaintenanceMargin",
+      "type": "std::string_view"
+    },
+    {
+      "name": "coin"
     }
   ]
 }

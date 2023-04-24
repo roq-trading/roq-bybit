@@ -305,11 +305,12 @@ void DropCopy::operator()(Trace<json::Auth> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::OutboundAccountInfo> const &event) {
+void DropCopy::operator()(Trace<json::Wallet> const &event) {
   profile_.order([&]() {
-    auto &[trace_info, outbound_account_info] = event;
-    log::info<4>("event={{outbound_account_info={}, trace_info={}}}"sv, outbound_account_info, trace_info);
-    for (auto &item : outbound_account_info.data.list) {
+    auto &[trace_info, wallet] = event;
+    log::info<4>("event={{wallet={}, trace_info={}}}"sv, wallet, trace_info);
+    /*
+    for (auto &item : wallet.data.list) {
       auto funds_update = FundsUpdate{
           .stream_id = stream_id_,
           .account = authenticator_.get_account(),
@@ -318,11 +319,12 @@ void DropCopy::operator()(Trace<json::OutboundAccountInfo> const &event) {
           .hold = item.locked,
           .external_account = {},
           .update_type = UpdateType::INCREMENTAL,
-          .exchange_time_utc = outbound_account_info.ts,
+          .exchange_time_utc = wallet.ts,
           .sending_time_utc = {},
       };
       create_trace_and_dispatch(handler_, trace_info, funds_update, true);
     }
+    */
   });
 }
 
@@ -335,6 +337,7 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
       auto order_type = json::map(item.order_type);
       auto time_in_force = json::map(item.time_in_force);
       auto order_status = json::map(item.order_status);
+      /*
       auto remaining_quantity = item.quantity - item.total_filled_quantity;
       auto average_traded_price =
           utils::is_zero(item.total_filled_quantity) ? NaN : item.total_filled_value / item.total_filled_quantity;
@@ -374,6 +377,7 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
         log::warn("*** EXTERNAL ORDER ***"sv);
         log::warn("order={}"sv, item);
       }
+      */
     }
   });
 }

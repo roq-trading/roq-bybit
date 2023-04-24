@@ -3,16 +3,15 @@
   "type": "comp",
   "values": [
     {
-      "name": "type",
-      "type": "EventType"
+      "name": "id",
+      "type": "std::string_view"
     },
     {
       "name": "topic",
       "type": "std::string_view"
     },
     {
-      "raw": "ts",
-      "name": "timestamp",
+      "name": "creationTime",
       "type": "std::chrono::milliseconds"
     },
     {

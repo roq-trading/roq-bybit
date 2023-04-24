@@ -517,7 +517,7 @@ void MarketData::operator()(Trace<json::Auth> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void MarketData::operator()(Trace<json::OutboundAccountInfo> const &) {
+void MarketData::operator()(Trace<json::Wallet> const &) {
   log::fatal("Unexpected"sv);
 }
 

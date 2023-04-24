@@ -3,7 +3,7 @@
   "type": "comp",
   "values": [
     {
-      "name": "balances",
+      "name": "list",
       "type": "std::span<WalletBalanceResultItem>"
     }
   ]

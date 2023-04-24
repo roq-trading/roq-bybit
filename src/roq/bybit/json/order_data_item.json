@@ -3,139 +3,162 @@
   "type": "item",
   "values": [
     {
-      "raw": "e",
-      "name": "event_type",
+      "name": "category",
       "type": "std::string_view"
     },
     {
-      "raw": "E",
-      "name": "event_time",
-      "type": "std::chrono::milliseconds"
+      "name": "orderId",
+      "type": "std::string_view"
     },
     {
-      "raw": "s",
+      "name": "orderLinkId",
+      "type": "std::string_view"
+    },
+    {
+      "name": "isLeverage",
+      "type": "int32_t"
+    },
+    {
+      "name": "blockTradeId",
+      "type": "std::string_view"
+    },
+    {
       "name": "symbol",
       "type": "std::string_view"
     },
     {
-      "raw": "c",
-      "name": "order_link_id",
-      "type": "std::string_view"
-    },
-    {
-      "raw": "S",
-      "name": "side",
-      "type": "Side"
-    },
-    {
-      "raw": "o",
-      "name": "order_type",
-      "type": "OrderType"
-    },
-    {
-      "raw": "f",
-      "name": "time_in_force",
-      "type": "TimeInForce"
-    },
-    {
-      "raw": "q",
-      "name": "quantity",
-      "type": "double"
-    },
-    {
-      "raw": "p",
       "name": "price",
       "type": "double"
     },
     {
-      "raw": "X",
-      "name": "order_status",
+      "name": "qty",
+      "type": "double"
+    },
+    {
+      "name": "side",
+      "type": "Side"
+    },
+    {
+      "name": "positionIdx",
+      "type": "int32_t"
+    },
+    {
+      "name": "orderStatus",
       "type": "OrderStatus"
     },
     {
-      "raw": "i",
-      "name": "order_id",
+      "name": "cancelType",
+      "type": "std::string_view",
+      "comment": "XXX enum"
+    },
+    {
+      "name": "rejectReason",
       "type": "std::string_view"
     },
     {
-      "raw": "M",
-      "name": "opponent_order_id",
+      "name": "avgPrice",
+      "type": "double"
+    },
+    {
+      "name": "leavesQty",
+      "type": "double"
+    },
+    {
+      "name": "leavesValue",
+      "type": "double"
+    },
+    {
+      "name": "cumExecQty",
+      "type": "double"
+    },
+    {
+      "name": "cumExecValue",
+      "type": "double"
+    },
+    {
+      "name": "cumExecFee",
+      "type": "double"
+    },
+    {
+      "name": "timeInForce",
+      "type": "TimeInForce"
+    },
+    {
+      "name": "orderType",
+      "type": "OrderType"
+    },
+    {
+      "name": "stopOrderType",
+      "type": "std::string_view",
+      "comment": "XXX enum"
+    },
+    {
+      "name": "orderIv",
+      "type": "double"
+    },
+    {
+      "name": "triggerPrice",
+      "type": "double"
+    },
+    {
+      "name": "takeProfit",
+      "type": "double"
+    },
+    {
+      "name": "stopLoss",
+      "type": "double"
+    },
+    {
+      "name": "tpTriggerBy",
       "type": "std::string_view"
     },
     {
-      "raw": "l",
-      "name": "last_filled_quantity",
-      "type": "double"
-    },
-    {
-      "raw": "z",
-      "name": "total_filled_quantity",
-      "type": "double"
-    },
-    {
-      "raw": "L",
-      "name": "last_filled_price",
-      "type": "double"
-    },
-    {
-      "raw": "n",
-      "name": "trading_fee",
-      "type": "double"
-    },
-    {
-      "raw": "N",
-      "name": "fee_asset_type",
+      "name": "slTriggerBy",
       "type": "std::string_view"
     },
     {
-      "raw": "u",
-      "name": "normal_trade",
+      "name": "triggerDirection",
+      "type": "int32_t"
+    },
+    {
+      "name": "triggerBy",
+      "type": "std::string_view"
+    },
+    {
+      "name": "lastPriceOnCreated",
+      "type": "double"
+    },
+    {
+      "name": "reduceOnly",
       "type": "bool"
     },
     {
-      "raw": "w",
-      "name": "working",
+      "name": "closeOnTrigger",
       "type": "bool"
     },
     {
-      "raw": "m",
-      "name": "limit_maker",
-      "type": "bool"
+      "name": "placeType",
+      "type": "std::string_view"
     },
     {
-      "raw": "O",
-      "name": "order_creation_time",
+      "name": "smpType",
+      "type": "std::string_view"
+    },
+    {
+      "name": "smpGroup",
+      "type": "int32_t"
+    },
+    {
+      "name": "smpOrderId",
+      "type": "std::string_view"
+    },
+    {
+      "name": "createdTime",
       "type": "std::chrono::milliseconds"
     },
     {
-      "raw": "Z",
-      "name": "total_filled_value",
-      "type": "double"
-    },
-    {
-      "raw": "A",
-      "name": "opponent_account_id",
-      "type": "std::string_view"
-    },
-    {
-      "raw": "C",
-      "name": "is_close",
-      "type": "bool"
-    },
-    {
-      "raw": "v",
-      "name": "leverage",
-      "type": "double"
-    },
-    {
-      "raw": "d",
-      "name": "liquidation",
-      "type": "Liquidation"
-    },
-    {
-      "raw": "t",
-      "name": "trade_id",
-      "type": "std::string_view"
+      "name": "updatedTime",
+      "type": "std::chrono::milliseconds"
     }
   ]
 }

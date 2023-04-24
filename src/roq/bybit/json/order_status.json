@@ -3,25 +3,37 @@
   "type": "enum",
   "values": [
     {
-      "name": "NEW"
+      "name": "Created"
     },
     {
-      "name": "PARTIALLY_FILLED"
+      "name": "New"
     },
     {
-      "name": "FILLED"
+      "name": "Rejected"
     },
     {
-      "name": "CANCELED"
+      "name": "PartiallyFilled"
     },
     {
-      "name": "PENDING_CANCEL"
+      "name": "PartiallyFilledCanceled"
     },
     {
-      "name": "PENDING_NEW"
+      "name": "Filled"
     },
     {
-      "name": "REJECTED"
+      "name": "Cancelled"
+    },
+    {
+      "name": "Untriggered"
+    },
+    {
+      "name": "Triggered"
+    },
+    {
+      "name": "Deactivated"
+    },
+    {
+      "name": "Active"
     }
   ]
 }

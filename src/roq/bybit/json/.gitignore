@@ -7,6 +7,7 @@ position_info_result.hpp
 wallet_balance.hpp
 wallet_balance_result_item.hpp
 wallet_balance_result.hpp
+wallet.hpp
 open_orders.hpp
 open_orders_result_item.hpp
 open_orders_result.hpp
@@ -33,9 +34,6 @@ order_data_item.hpp
 order.hpp
 order_status.hpp
 order_type.hpp
-outbound_account_info_data_item.hpp
-outbound_account_info_data_item_item.hpp
-outbound_account_info.hpp
 pong.hpp
 side.hpp
 subscribe.hpp
@@ -65,6 +63,7 @@ position_info_result.cpp
 wallet_balance.cpp
 wallet_balance_result_item.cpp
 wallet_balance_result.cpp
+wallet.cpp
 open_orders.cpp
 open_orders_result_item.cpp
 open_orders_result.cpp
@@ -91,9 +90,6 @@ order_data_item.cpp
 order.cpp
 order_status.cpp
 order_type.cpp
-outbound_account_info_data_item.cpp
-outbound_account_info_data_item_item.cpp
-outbound_account_info.cpp
 pong.cpp
 side.cpp
 subscribe.cpp

@@ -12,6 +12,7 @@ set(AUTOGEN_SCHEMAS
     wallet_balance.json
     wallet_balance_result_item.json
     wallet_balance_result.json
+    wallet.json
     open_orders.json
     open_orders_result_item.json
     open_orders_result.json
@@ -38,9 +39,6 @@ set(AUTOGEN_SCHEMAS
     order.json
     order_status.json
     order_type.json
-    outbound_account_info_data_item.json
-    outbound_account_info_data_item_item.json
-    outbound_account_info.json
     pong.json
     side.json
     subscribe.json

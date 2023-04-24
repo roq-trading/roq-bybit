@@ -24,10 +24,7 @@ auto map_order_type(auto order_type, auto execution_instructions) -> json::Order
     case MARKET:
       return json::OrderType::MARKET;
     case LIMIT:
-      if (execution_instructions.has(ExecutionInstruction::PARTICIPATE_DO_NOT_INITIATE))
-        return json::OrderType::LIMIT_MAKER;
-      else
-        return json::OrderType::LIMIT;
+      return json::OrderType::LIMIT;
   }
   return {};
 }

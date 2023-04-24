@@ -336,12 +336,29 @@ void OrderEntry::operator()(Trace<json::AccountInfo> const &event) {
 
 void OrderEntry::get_wallet_balance() {
   profile_.wallet_balance([&]() {
-    auto const path = "/v5/account/wallet-balance"sv;
-    auto headers = authenticator_.create_headers(path, {}, {});
+    auto path = "/v5/account/wallet-balance"sv;
+    auto account_type = [&]() -> std::string_view {
+      switch (shared_.api) {
+        using enum API;
+        case UNDEFINED:
+          break;
+        case SPOT:
+          return "SPOT"sv;
+        case LINEAR:
+          return "UNIFIED"sv;
+        case INVERSE:
+          return "CONTRACT"sv;
+        case OPTION:
+          return "UNIFIED"sv;
+      }
+      log::fatal("Unexpected"sv);
+    }();
+    auto query = fmt::format("?accountType={}"sv, account_type);
+    auto headers = authenticator_.create_headers(path, query, {});
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
         .path = path,
-        .query = {},
+        .query = query,
         .accept = web::http::Accept::APPLICATION_JSON,
         .content_type = {},
         .headers = headers,
@@ -383,6 +400,7 @@ void OrderEntry::get_wallet_balance_ack(Trace<web::rest::Response> const &event,
 void OrderEntry::operator()(Trace<json::WalletBalance> const &event) {
   auto &[trace_info, wallet_balance] = event;
   log::info<2>("wallet_balance={}"sv, wallet_balance);
+  /*
   for (auto &item : wallet_balance.result.balances) {
     log::debug("item={}"sv, item);
     auto funds_update = FundsUpdate{
@@ -398,6 +416,7 @@ void OrderEntry::operator()(Trace<json::WalletBalance> const &event) {
     };
     create_trace_and_dispatch(handler_, trace_info, funds_update, true);
   }
+  */
 }
 
 void OrderEntry::get_position_info() {

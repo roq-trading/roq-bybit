@@ -219,8 +219,6 @@ inline roq::OrderType map(json::OrderType value) {
       return roq::OrderType::MARKET;
     case LIMIT:
       return roq::OrderType::LIMIT;
-    case LIMIT_MAKER:
-      return roq::OrderType::LIMIT;
   }
   return {};
 }
@@ -301,20 +299,28 @@ inline roq::OrderStatus map(json::OrderStatus value) {
       break;
     case UNKNOWN:
       break;
+    case CREATED:
+      return roq::OrderStatus::WORKING;
     case NEW:
       return roq::OrderStatus::WORKING;
-    case PARTIALLY_FILLED:
-      return roq::OrderStatus::WORKING;
-    case FILLED:
-      return roq::OrderStatus::COMPLETED;
-    case CANCELED:
-      return roq::OrderStatus::CANCELED;
-    case PENDING_CANCEL:
-      return roq::OrderStatus::WORKING;
-    case PENDING_NEW:
-      return roq::OrderStatus::SENT;
     case REJECTED:
       return roq::OrderStatus::REJECTED;
+    case PARTIALLY_FILLED:
+      return roq::OrderStatus::WORKING;
+    case PARTIALLY_FILLED_CANCELED:
+      return roq::OrderStatus::CANCELED;
+    case FILLED:
+      return roq::OrderStatus::COMPLETED;
+    case CANCELLED:
+      return roq::OrderStatus::CANCELED;
+    case UNTRIGGERED:
+      break;
+    case TRIGGERED:
+      break;
+    case DEACTIVATED:
+      break;
+    case ACTIVE:
+      break;
   }
   return {};
 }

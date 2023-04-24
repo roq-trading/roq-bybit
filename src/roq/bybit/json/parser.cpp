@@ -37,13 +37,33 @@ static_assert(parse_mbp_depth("orderbook.1.xxx"sv) == 1);
 static_assert(parse_mbp_depth("orderbook.50.xxx"sv) == 50);
 
 template <typename T>
-void dispatch_helper(
+void dispatch_helper_old(
     auto &handler, auto &buffer, auto &trace_info, auto &value, auto type, auto &topic, auto timestamp) {
   using data_type = decltype(T::data);
   T result;
   result.type = type;
   result.topic = topic;
   result.timestamp = timestamp;
+  if constexpr (utils::is_iterable<data_type>::value) {
+    if (!core::json::is_null(value)) {
+      result.data =
+          core::json::ArrayParser<data_type, core::json::Array>::parse(buffer, std::get<core::json::Array>(value));
+    }
+    create_trace_and_dispatch(handler, trace_info, result);
+  } else {
+    new (&result.data) data_type{value, buffer};
+    create_trace_and_dispatch(handler, trace_info, result);
+  }
+}
+
+template <typename T>
+void dispatch_helper(
+    auto &handler, auto &buffer, auto &trace_info, auto &value, auto type, auto &topic, auto timestamp) {
+  using data_type = decltype(T::data);
+  T result;
+  // result.type = type;
+  result.topic = topic;
+  result.creation_time = timestamp;
   if constexpr (utils::is_iterable<data_type>::value) {
     if (!core::json::is_null(value)) {
       result.data =
@@ -166,7 +186,7 @@ bool Parser::dispatch(
               create_trace_and_dispatch(handler, trace_info, tickers);
               return true;
             }
-            case OUTBOUND_ACCOUNT_INFO:
+            case WALLET:
               break;
               return true;
             case ORDER:
@@ -179,7 +199,7 @@ bool Parser::dispatch(
           update(timestamp, value);
           break;
         case DATA: {
-          auto ready = type != EventType::UNDEFINED && timestamp.count();
+          auto ready = topic != Topic::UNDEFINED && timestamp.count();
           if (ready) {
             switch (topic) {
               using enum Topic::type_t;
@@ -195,15 +215,18 @@ bool Parser::dispatch(
               case TICKERS:
                 log::fatal("Unexpected"sv);
                 return true;
-              case OUTBOUND_ACCOUNT_INFO:
-                dispatch_helper_flatten<OutboundAccountInfo>(
+              case WALLET:
+                dispatch_helper<Wallet>(handler, buffer, trace_info, value, type, raw_topic, timestamp);
+                /*
+                dispatch_helper_flatten<Wallet>(
                     handler, buffer, trace_info, value, type, raw_topic, timestamp);
+                */
                 return true;
               case ORDER:
                 dispatch_helper<Order>(handler, buffer, trace_info, value, type, raw_topic, timestamp);
                 return true;
               case TICKET_INFO:
-                dispatch_helper<TicketInfo>(handler, buffer, trace_info, value, type, raw_topic, timestamp);
+                dispatch_helper_old<TicketInfo>(handler, buffer, trace_info, value, type, raw_topic, timestamp);
                 return true;
             }
           }
@@ -216,6 +239,9 @@ bool Parser::dispatch(
         case RET_MSG:
         case CONN_ID:
         case ID:
+          break;
+        case CREATION_TIME:
+          update(timestamp, value);
           break;
       };
     }

@@ -1,23 +1,22 @@
 {
-  "name": "OutboundAccountInfo",
+  "name": "Wallet",
   "type": "comp",
   "values": [
     {
-      "name": "type",
-      "type": "EventType"
+      "name": "id",
+      "type": "std::string_view"
     },
     {
       "name": "topic",
       "type": "std::string_view"
     },
     {
-      "name": "ts",
+      "name": "creationTime",
       "type": "std::chrono::milliseconds"
     },
     {
       "name": "data",
-      "type": "OutboundAccountInfoDataItem",
-      "comment": "array, but we flatten it"
+      "type": "std::span<WalletBalanceResultItem>"
     }
   ]
 }
