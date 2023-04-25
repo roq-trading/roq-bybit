@@ -1,0 +1,27 @@
+{
+  "name": "StopOrderType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "TakeProfit"
+    },
+    {
+      "name": "StopLoss"
+    },
+    {
+      "name": "TrailingStop"
+    },
+    {
+      "name": "Stop"
+    },
+    {
+      "name": "PartialTakeProfit"
+    },
+    {
+      "name": "PartialStopLoss"
+    },
+    {
+      "name": "tpslOrder"
+    }
+  ]
+}

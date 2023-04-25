@@ -4,7 +4,7 @@
   "values": [
     {
       "name": "accountType",
-      "type": "std::string_view"
+      "type": "AccountType"
     },
     {
       "name": "accountLTV",

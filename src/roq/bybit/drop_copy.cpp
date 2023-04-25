@@ -337,11 +337,16 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
       auto order_type = json::map(item.order_type);
       auto time_in_force = json::map(item.time_in_force);
       auto order_status = json::map(item.order_status);
-      /*
-      auto remaining_quantity = item.quantity - item.total_filled_quantity;
-      auto average_traded_price =
-          utils::is_zero(item.total_filled_quantity) ? NaN : item.total_filled_value / item.total_filled_quantity;
-      // XXX can limit_maker map to last_liquidity? or just an order creation flag?
+      auto remaining_quantity = [&item]() {
+        if (!std::isnan(item.leaves_qty))
+          return item.leaves_qty;
+        return item.qty - item.cum_exec_qty;
+      }();
+      auto average_traded_price = [&item]() {
+        if (!std::isnan(item.avg_price))
+          return item.avg_price;
+        return item.cum_exec_value / item.cum_exec_qty;  // spot
+      }();
       auto order_update = oms::OrderUpdate{
           .account = authenticator_.get_account(),
           .exchange = Flags::exchange(),
@@ -352,22 +357,22 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
           .order_type = order_type,
           .time_in_force = time_in_force,
           .execution_instructions = {},
-          .create_time_utc = item.order_creation_time,
-          .update_time_utc = {},
+          .create_time_utc = item.created_time,
+          .update_time_utc = item.updated_time,
           .external_account = {},
           .external_order_id = item.order_id,
           .status = order_status,
-          .quantity = item.quantity,
+          .quantity = item.qty,
           .price = item.price,
           .stop_price = NaN,
           .remaining_quantity = remaining_quantity,
-          .traded_quantity = item.total_filled_quantity,
+          .traded_quantity = item.cum_exec_qty,
           .average_traded_price = average_traded_price,
-          .last_traded_quantity = item.last_filled_quantity,
-          .last_traded_price = item.last_filled_price,
+          .last_traded_quantity = NaN,
+          .last_traded_price = NaN,
           .last_liquidity = {},
           .update_type = UpdateType::INCREMENTAL,
-          .sending_time_utc = {},
+          .sending_time_utc = order.creation_time,
       };
       if (shared_.update_order(
               item.order_link_id, stream_id_, trace_info, order_update, [&]([[maybe_unused]] auto &order) {
@@ -377,7 +382,6 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
         log::warn("*** EXTERNAL ORDER ***"sv);
         log::warn("order={}"sv, item);
       }
-      */
     }
   });
 }

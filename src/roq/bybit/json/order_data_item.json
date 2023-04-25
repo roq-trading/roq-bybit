@@ -48,12 +48,11 @@
     },
     {
       "name": "cancelType",
-      "type": "std::string_view",
-      "comment": "XXX enum"
+      "type": "CancelType"
     },
     {
       "name": "rejectReason",
-      "type": "std::string_view"
+      "type": "RejectReason"
     },
     {
       "name": "avgPrice",
@@ -89,8 +88,7 @@
     },
     {
       "name": "stopOrderType",
-      "type": "std::string_view",
-      "comment": "XXX enum"
+      "type": "StopOrderType"
     },
     {
       "name": "orderIv",
@@ -122,7 +120,7 @@
     },
     {
       "name": "triggerBy",
-      "type": "std::string_view"
+      "type": "TriggerBy"
     },
     {
       "name": "lastPriceOnCreated",

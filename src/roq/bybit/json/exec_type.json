@@ -1,0 +1,24 @@
+{
+  "name": "ExecType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "Trade"
+    },
+    {
+      "name": "AdlTrade"
+    },
+    {
+      "name": "Funding"
+    },
+    {
+      "name": "BustTrade"
+    },
+    {
+      "name": "Delivery"
+    },
+    {
+      "name": "BlockTrade"
+    }
+  ]
+}

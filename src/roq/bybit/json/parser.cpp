@@ -111,15 +111,15 @@ bool Parser::dispatch(
       MessageField field{key};
       switch (field) {
         using enum MessageField::type_t;
-        case UNDEFINED:
-        case UNKNOWN:
+        case UNDEFINED__:
+        case UNKNOWN__:
           break;
         case OP:
           operation = value;
           switch (operation) {
             using enum Operation::type_t;
-            case UNDEFINED:
-            case UNKNOWN:
+            case UNDEFINED__:
+            case UNKNOWN__:
               break;
             case AUTH: {
               Auth auth{message, buffer};
@@ -143,8 +143,8 @@ bool Parser::dispatch(
           type = value;
           switch (type) {
             using enum EventType::type_t;
-            case UNDEFINED:
-            case UNKNOWN:
+            case UNDEFINED__:
+            case UNKNOWN__:
               break;
             case ERROR: {
               Error error{message, buffer};
@@ -166,8 +166,8 @@ bool Parser::dispatch(
           topic = parse_topic(raw_topic);
           switch (topic) {
             using enum Topic::type_t;
-            case UNDEFINED:
-            case UNKNOWN:
+            case UNDEFINED__:
+            case UNKNOWN__:
               break;
             case ORDERBOOK: {
               OrderBook order_book{message, buffer};
@@ -199,12 +199,12 @@ bool Parser::dispatch(
           update(timestamp, value);
           break;
         case DATA: {
-          auto ready = topic != Topic::UNDEFINED && timestamp.count();
+          auto ready = topic != Topic{} && timestamp.count();
           if (ready) {
             switch (topic) {
               using enum Topic::type_t;
-              case UNDEFINED:
-              case UNKNOWN:
+              case UNDEFINED__:
+              case UNKNOWN__:
                 break;
               case ORDERBOOK:
                 log::fatal("Unexpected"sv);

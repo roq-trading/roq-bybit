@@ -6,10 +6,10 @@
       "name": "GTC"
     },
     {
-      "name": "FOK"
+      "name": "IOC"
     },
     {
-      "name": "IOC"
+      "name": "FOK"
     }
   ]
 }

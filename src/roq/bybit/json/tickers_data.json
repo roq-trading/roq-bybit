@@ -9,7 +9,7 @@
     },
     {
       "name": "tickDirection",
-      "type": "std::string_view",
+      "type": "TickDirection",
       "comment": ".LI."
     },
     {

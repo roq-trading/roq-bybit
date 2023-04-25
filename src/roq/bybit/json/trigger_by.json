@@ -1,0 +1,15 @@
+{
+  "name": "TriggerBy",
+  "type": "enum",
+  "values": [
+    {
+      "name": "LastPrice"
+    },
+    {
+      "name": "IndexPrice"
+    },
+    {
+      "name": "MarkPrice"
+    }
+  ]
+}

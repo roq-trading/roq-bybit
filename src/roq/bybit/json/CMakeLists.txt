@@ -19,19 +19,6 @@ set(AUTOGEN_SCHEMAS
     execution.json
     execution_result_item.json
     execution_result.json
-    auth.json
-    cancel_order.json
-    cancel_order_result.json
-    cancel_orders.json
-    cancel_orders_result.json
-    create_order.json
-    create_order_result.json
-    error.json
-    event_type.json
-    liquidation.json
-    message_field.json
-    operation.json
-    operation.json
     order_book_data.json
     order_book.json
     order_book_level.json
@@ -39,16 +26,10 @@ set(AUTOGEN_SCHEMAS
     order.json
     order_status.json
     order_type.json
-    pong.json
     side.json
-    subscribe.json
-    subscribe_data.json
     tickers_data.json
     tickers.json
-    ticket_info_data_item.json
-    ticket_info.json
     time_in_force.json
-    topic.json
     public_trade_data.json
     public_trade.json
     instrument_info.json
@@ -57,10 +38,39 @@ set(AUTOGEN_SCHEMAS
     price_filter.json
     leverage_filter.json
     lot_size_filter.json
+    category.json
+    exec_type.json
+    stop_order_type.json
+    cancel_type.json
+    tick_direction.json
+    position_status.json
+    reject_reason.json
+    account_type.json
+    trigger_by.json
+    status.json
     contract_type.json
     options_type.json
-    category.json
-    status.json)
+
+    auth.json
+    error.json
+    pong.json
+    subscribe.json
+    subscribe_data.json
+
+    cancel_order.json
+    cancel_order_result.json
+    cancel_orders.json
+    cancel_orders_result.json
+    create_order.json
+    create_order_result.json
+
+    event_type.json
+    message_field.json
+    operation.json
+    topic.json
+
+    ticket_info_data_item.json
+    ticket_info.json)
 
 roq_autogen(
   OUTPUT

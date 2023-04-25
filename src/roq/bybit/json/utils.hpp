@@ -93,8 +93,8 @@ inline void update(std::chrono::nanoseconds &result, core::json::Value const &va
 inline UpdateType map(json::EventType event_type) {
   switch (event_type) {
     using enum json::EventType::type_t;
-    case UNKNOWN:
-    case UNDEFINED:
+    case UNDEFINED__:
+    case UNKNOWN__:
       break;
     case ERROR:
       break;
@@ -113,8 +113,8 @@ inline UpdateType map(json::EventType event_type) {
 inline SecurityType map(json::ContractType contract_type, json::OptionsType options_type) {
   switch (options_type) {
     using enum json::OptionsType::type_t;
-    case UNKNOWN:
-    case UNDEFINED:
+    case UNDEFINED__:
+    case UNKNOWN__:
       break;
     case CALL:
     case PUT:
@@ -122,8 +122,8 @@ inline SecurityType map(json::ContractType contract_type, json::OptionsType opti
   }
   switch (contract_type) {
     using enum json::ContractType::type_t;
-    case UNDEFINED:
-    case UNKNOWN:
+    case UNDEFINED__:
+    case UNKNOWN__:
       break;
     case INVERSE_PERPETUAL:
     case LINEAR_PERPETUAL:
@@ -140,9 +140,8 @@ inline SecurityType map(json::ContractType contract_type, json::OptionsType opti
 inline roq::OptionType map(json::OptionsType value) {
   switch (value) {
     using enum json::OptionsType::type_t;
-    case UNDEFINED:
-      break;
-    case UNKNOWN:
+    case UNDEFINED__:
+    case UNKNOWN__:
       break;
     case CALL:
       return roq::OptionType::CALL;
@@ -157,9 +156,8 @@ inline roq::OptionType map(json::OptionsType value) {
 inline roq::TradingStatus map(json::Status value) {
   switch (value) {
     using enum json::Status::type_t;
-    case UNDEFINED:
-      break;
-    case UNKNOWN:
+    case UNDEFINED__:
+    case UNKNOWN__:
       break;
     case PRE_LAUNCH:
       break;
@@ -180,9 +178,8 @@ inline roq::TradingStatus map(json::Status value) {
 inline roq::Side map(json::Side value) {
   switch (value) {
     using enum json::Side::type_t;
-    case UNDEFINED:
-      break;
-    case UNKNOWN:
+    case UNDEFINED__:
+    case UNKNOWN__:
       break;
     case BUY:
       return roq::Side::BUY;
@@ -211,9 +208,8 @@ inline json::Side map(roq::Side value) {
 inline roq::OrderType map(json::OrderType value) {
   switch (value) {
     using enum json::OrderType::type_t;
-    case UNDEFINED:
-      break;
-    case UNKNOWN:
+    case UNDEFINED__:
+    case UNKNOWN__:
       break;
     case MARKET:
       return roq::OrderType::MARKET;
@@ -241,9 +237,8 @@ inline json::OrderType map(roq::OrderType value) {
 inline roq::TimeInForce map(json::TimeInForce value) {
   switch (value) {
     using enum json::TimeInForce::type_t;
-    case UNDEFINED:
-      break;
-    case UNKNOWN:
+    case UNDEFINED__:
+    case UNKNOWN__:
       break;
     case GTC:
       return roq::TimeInForce::GTC;
@@ -295,9 +290,8 @@ inline json::TimeInForce map(roq::TimeInForce value) {
 inline roq::OrderStatus map(json::OrderStatus value) {
   switch (value) {
     using enum json::OrderStatus::type_t;
-    case UNDEFINED:
-      break;
-    case UNKNOWN:
+    case UNDEFINED__:
+    case UNKNOWN__:
       break;
     case CREATED:
       return roq::OrderStatus::WORKING;
