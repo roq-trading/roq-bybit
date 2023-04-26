@@ -1,5 +1,5 @@
 {
-  "name": "Pong",
+  "name": "Ping",
   "type": "comp",
   "values": [
     {
@@ -9,9 +9,6 @@
     {
       "name": "success",
       "type": "bool"
-    },
-    {
-      "name": "args"
     },
     {
       "name": "req_id",

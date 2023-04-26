@@ -139,7 +139,7 @@ TEST_CASE("json_tickers_simple_spot", "[json_tickers]") {
 TEST_CASE("json_tickers_parser_spot", "[json_tickers]") {
   struct Handler final : public json::Parser::Handler {
     void operator()(Trace<json::Error> const &) override { FAIL(); }
-    void operator()(Trace<json::Pong> const &) override { FAIL(); }
+    void operator()(Trace<json::Ping> const &) override { FAIL(); }
     void operator()(Trace<json::Subscribe> const &) override { FAIL(); }
     // public
     void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
@@ -147,7 +147,7 @@ TEST_CASE("json_tickers_parser_spot", "[json_tickers]") {
     void operator()(Trace<json::Tickers> const &) override { found = true; }
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
-    void operator()(Trace<json::Wallet> const &) override { FAIL(); }
+    void operator()(Trace<json::WalletBalance2> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
     void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
 
@@ -170,7 +170,7 @@ TEST_CASE("json_tickers_simple_linear", "[json_tickers]") {
 TEST_CASE("json_tickers_parser_linear", "[json_tickers]") {
   struct Handler final : public json::Parser::Handler {
     void operator()(Trace<json::Error> const &) override { FAIL(); }
-    void operator()(Trace<json::Pong> const &) override { FAIL(); }
+    void operator()(Trace<json::Ping> const &) override { FAIL(); }
     void operator()(Trace<json::Subscribe> const &) override { FAIL(); }
     // public
     void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
@@ -178,7 +178,7 @@ TEST_CASE("json_tickers_parser_linear", "[json_tickers]") {
     void operator()(Trace<json::Tickers> const &) override { found = true; }
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
-    void operator()(Trace<json::Wallet> const &) override { FAIL(); }
+    void operator()(Trace<json::WalletBalance2> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
     void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
 
@@ -201,7 +201,7 @@ TEST_CASE("json_tickers_simple_inverse", "[json_tickers]") {
 TEST_CASE("json_tickers_parser_inverse", "[json_tickers]") {
   struct Handler final : public json::Parser::Handler {
     void operator()(Trace<json::Error> const &) override { FAIL(); }
-    void operator()(Trace<json::Pong> const &) override { FAIL(); }
+    void operator()(Trace<json::Ping> const &) override { FAIL(); }
     void operator()(Trace<json::Subscribe> const &) override { FAIL(); }
     // public
     void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
@@ -209,7 +209,7 @@ TEST_CASE("json_tickers_parser_inverse", "[json_tickers]") {
     void operator()(Trace<json::Tickers> const &) override { found = true; }
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
-    void operator()(Trace<json::Wallet> const &) override { FAIL(); }
+    void operator()(Trace<json::WalletBalance2> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
     void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
 
@@ -232,7 +232,7 @@ TEST_CASE("json_tickers_simple_option", "[json_tickers]") {
 TEST_CASE("json_tickers_parser_option", "[json_tickers]") {
   struct Handler final : public json::Parser::Handler {
     void operator()(Trace<json::Error> const &) override { FAIL(); }
-    void operator()(Trace<json::Pong> const &) override { FAIL(); }
+    void operator()(Trace<json::Ping> const &) override { FAIL(); }
     void operator()(Trace<json::Subscribe> const &) override { FAIL(); }
     // public
     void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
@@ -240,7 +240,7 @@ TEST_CASE("json_tickers_parser_option", "[json_tickers]") {
     void operator()(Trace<json::Tickers> const &) override { found = true; }
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
-    void operator()(Trace<json::Wallet> const &) override { FAIL(); }
+    void operator()(Trace<json::WalletBalance2> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
     void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
 

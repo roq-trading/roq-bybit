@@ -299,9 +299,9 @@ void MarketData::operator()(Trace<json::Error> const &event) {
   log::fatal("error={}"sv, error);
 }
 
-void MarketData::operator()(Trace<json::Pong> const &event) {
-  auto &[trace_info, pong] = event;
-  log::info<4>("event={{pong={}, trace_info={}}}"sv, pong, trace_info);
+void MarketData::operator()(Trace<json::Ping> const &event) {
+  auto &[trace_info, ping] = event;
+  log::info<4>("event={{ping={}, trace_info={}}}"sv, ping, trace_info);
 }
 
 void MarketData::operator()(Trace<json::Subscribe> const &event) {
@@ -517,7 +517,7 @@ void MarketData::operator()(Trace<json::Auth> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void MarketData::operator()(Trace<json::Wallet> const &) {
+void MarketData::operator()(Trace<json::WalletBalance2> const &) {
   log::fatal("Unexpected"sv);
 }
 

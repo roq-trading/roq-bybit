@@ -32,7 +32,7 @@ TEST_CASE("json_error_simple", "[json_error]") {
 TEST_CASE("json_error_parser", "[json_error]") {
   struct Handler final : public json::Parser::Handler {
     void operator()(Trace<json::Error> const &) override { found = true; }
-    void operator()(Trace<json::Pong> const &) override { FAIL(); }
+    void operator()(Trace<json::Ping> const &) override { FAIL(); }
     void operator()(Trace<json::Subscribe> const &) override { FAIL(); }
     // public
     void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }

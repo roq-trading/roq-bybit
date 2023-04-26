@@ -2,7 +2,7 @@ set(TARGET_NAME "${PROJECT_NAME}-test")
 
 set(SOURCES
     json_auth.cpp
-    json_pong.cpp
+    json_ping.cpp
     json_account_info.cpp
     json_error.cpp
     json_execution.cpp

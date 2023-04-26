@@ -1,14 +1,17 @@
 set(TARGET_NAME "${PROJECT_NAME}-json")
 
-set(SOURCES parser.cpp utils.cpp)
+set(SOURCES parser.cpp utils.cpp wallet_parser.cpp)
 
 include(RoqAutogen)
 
 set(AUTOGEN_SCHEMAS
+  message.json
     account_info.json
     account_info_result.json
     position_info.json
     position_info_result.json
+    wallet_balance_2.json
+    wallet_balance_item.json
     wallet_balance.json
     wallet_balance_result_item.json
     wallet_balance_result.json
@@ -52,7 +55,7 @@ set(AUTOGEN_SCHEMAS
     options_type.json
     auth.json
     error.json
-    pong.json
+    ping.json
     subscribe.json
     subscribe_data.json
     cancel_order.json
@@ -62,7 +65,6 @@ set(AUTOGEN_SCHEMAS
     create_order.json
     create_order_result.json
     event_type.json
-    message_field.json
     operation.json
     topic.json
     ticket_info_data_item.json

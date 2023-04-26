@@ -39,7 +39,7 @@ TEST_CASE("json_public_trade_simple", "[json_public_trade]") {
 TEST_CASE("json_public_trade_parser", "[json_public_trade]") {
   struct Handler final : public json::Parser::Handler {
     void operator()(Trace<json::Error> const &) override { FAIL(); }
-    void operator()(Trace<json::Pong> const &) override { FAIL(); }
+    void operator()(Trace<json::Ping> const &) override { FAIL(); }
     void operator()(Trace<json::Subscribe> const &) override { FAIL(); }
     // public
     void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
@@ -47,7 +47,7 @@ TEST_CASE("json_public_trade_parser", "[json_public_trade]") {
     void operator()(Trace<json::Tickers> const &) override { FAIL(); }
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
-    void operator()(Trace<json::Wallet> const &) override { FAIL(); }
+    void operator()(Trace<json::WalletBalance2> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
     void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
 

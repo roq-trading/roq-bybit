@@ -1,9 +1,12 @@
 !!! THIS FILE HAS BEEN AUTO-GENERATED !!!
 roq-bybit-v5-json
+message.hpp
 account_info.hpp
 account_info_result.hpp
 position_info.hpp
 position_info_result.hpp
+wallet_balance_2.hpp
+wallet_balance_item.hpp
 wallet_balance.hpp
 wallet_balance_result_item.hpp
 wallet_balance_result.hpp
@@ -47,7 +50,7 @@ contract_type.hpp
 options_type.hpp
 auth.hpp
 error.hpp
-pong.hpp
+ping.hpp
 subscribe.hpp
 subscribe_data.hpp
 cancel_order.hpp
@@ -57,15 +60,17 @@ cancel_orders_result.hpp
 create_order.hpp
 create_order_result.hpp
 event_type.hpp
-message_field.hpp
 operation.hpp
 topic.hpp
 ticket_info_data_item.hpp
 ticket_info.hpp
+message.cpp
 account_info.cpp
 account_info_result.cpp
 position_info.cpp
 position_info_result.cpp
+wallet_balance_2.cpp
+wallet_balance_item.cpp
 wallet_balance.cpp
 wallet_balance_result_item.cpp
 wallet_balance_result.cpp
@@ -109,7 +114,7 @@ contract_type.cpp
 options_type.cpp
 auth.cpp
 error.cpp
-pong.cpp
+ping.cpp
 subscribe.cpp
 subscribe_data.cpp
 cancel_order.cpp
@@ -119,7 +124,6 @@ cancel_orders_result.cpp
 create_order.cpp
 create_order_result.cpp
 event_type.cpp
-message_field.cpp
 operation.cpp
 topic.cpp
 ticket_info_data_item.cpp

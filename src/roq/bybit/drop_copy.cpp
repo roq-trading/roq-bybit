@@ -270,9 +270,9 @@ void DropCopy::operator()(Trace<json::Error> const &event) {
   log::fatal("error={}"sv, error);
 }
 
-void DropCopy::operator()(Trace<json::Pong> const &event) {
-  auto &[trace_info, pong] = event;
-  log::info<4>("event={{pong={}, trace_info={}}}"sv, pong, trace_info);
+void DropCopy::operator()(Trace<json::Ping> const &event) {
+  auto &[trace_info, ping] = event;
+  log::info<4>("event={{ping={}, trace_info={}}}"sv, ping, trace_info);
 }
 
 void DropCopy::operator()(Trace<json::Subscribe> const &event) {
@@ -305,26 +305,25 @@ void DropCopy::operator()(Trace<json::Auth> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::Wallet> const &event) {
+void DropCopy::operator()(Trace<json::WalletBalance2> const &event) {
   profile_.order([&]() {
-    auto &[trace_info, wallet] = event;
-    log::info<4>("event={{wallet={}, trace_info={}}}"sv, wallet, trace_info);
-    /*
-    for (auto &item : wallet.data.list) {
+    auto &[trace_info, wallet_balance] = event;
+    log::info<4>("event={{wallet={}, trace_info={}}}"sv, wallet_balance, trace_info);
+    // XXX probably we need to match --api
+    for (auto &item : wallet_balance.coin) {
       auto funds_update = FundsUpdate{
           .stream_id = stream_id_,
           .account = authenticator_.get_account(),
-          .currency = item.asset,
-          .balance = item.available,
+          .currency = item.coin,
+          .balance = item.wallet_balance,
           .hold = item.locked,
           .external_account = {},
           .update_type = UpdateType::INCREMENTAL,
-          .exchange_time_utc = wallet.ts,
+          .exchange_time_utc = {},  // XXX lost when flattened
           .sending_time_utc = {},
       };
       create_trace_and_dispatch(handler_, trace_info, funds_update, true);
     }
-    */
   });
 }
 

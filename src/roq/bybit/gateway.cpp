@@ -95,7 +95,7 @@ void Gateway::operator()(Event<Disconnected> const &event) {
       for (auto &[account, order_entry] : order_entry_) {
         if (dispatcher_.can_user_trade_account(account, message_info.source)) {
           log::warn(R"(- account="{}")"sv, account);
-          CancelAllOrders cancel_all_orders{
+          auto cancel_all_orders = CancelAllOrders{
               .account = account,
           };
           Event event{message_info, cancel_all_orders};

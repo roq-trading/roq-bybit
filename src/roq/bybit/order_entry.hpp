@@ -29,7 +29,8 @@
 #include "roq/bybit/json/execution.hpp"
 #include "roq/bybit/json/open_orders.hpp"
 #include "roq/bybit/json/position_info.hpp"
-#include "roq/bybit/json/wallet_balance.hpp"
+
+#include "roq/bybit/json/wallet_parser.hpp"
 
 #include "roq/bybit/json/cancel_order.hpp"
 #include "roq/bybit/json/cancel_orders.hpp"
@@ -38,7 +39,7 @@
 namespace roq {
 namespace bybit {
 
-struct OrderEntry final : public web::rest::Client::Handler {
+struct OrderEntry final : public web::rest::Client::Handler, public json::WalletParser::Handler {
   struct Handler {
     virtual void operator()(Trace<StreamStatus> const &) = 0;
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
@@ -89,7 +90,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
 
   void get_wallet_balance();
   void get_wallet_balance_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::WalletBalance> const &);
+  void operator()(Trace<json::WalletBalance2> const &) override;
 
   void get_position_info();
   void get_position_info_ack(Trace<web::rest::Response> const &, uint32_t sequence);

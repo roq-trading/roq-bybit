@@ -11,7 +11,7 @@
 #include "roq/server.hpp"
 
 #include "roq/bybit/json/error.hpp"
-#include "roq/bybit/json/pong.hpp"
+#include "roq/bybit/json/ping.hpp"
 #include "roq/bybit/json/subscribe.hpp"
 
 // public
@@ -23,7 +23,7 @@
 #include "roq/bybit/json/auth.hpp"
 #include "roq/bybit/json/order.hpp"
 #include "roq/bybit/json/ticket_info.hpp"
-#include "roq/bybit/json/wallet.hpp"
+#include "roq/bybit/json/wallet_balance_2.hpp"
 
 namespace roq {
 namespace bybit {
@@ -32,7 +32,7 @@ namespace json {
 struct Parser final {
   struct Handler {
     virtual void operator()(Trace<json::Error> const &) = 0;
-    virtual void operator()(Trace<json::Pong> const &) = 0;
+    virtual void operator()(Trace<json::Ping> const &) = 0;
     virtual void operator()(Trace<json::Subscribe> const &) = 0;
     // public
     virtual void operator()(Trace<json::OrderBook> const &, size_t depth) = 0;
@@ -40,7 +40,7 @@ struct Parser final {
     virtual void operator()(Trace<json::Tickers> const &) = 0;
     // private
     virtual void operator()(Trace<json::Auth> const &) = 0;
-    virtual void operator()(Trace<json::Wallet> const &) = 0;
+    virtual void operator()(Trace<json::WalletBalance2> const &) = 0;
     virtual void operator()(Trace<json::Order> const &) = 0;
     virtual void operator()(Trace<json::TicketInfo> const &) = 0;
   };

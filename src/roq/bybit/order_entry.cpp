@@ -382,10 +382,8 @@ void OrderEntry::get_wallet_balance_ack(Trace<web::rest::Response> const &event,
       return;
     }
     auto handle_success = [&](auto &body) {
-      json::WalletBalance wallet_balance{body, decode_buffer_};
-      log::debug("wallet_balance={}"sv, wallet_balance);
-      Trace event_2{event, wallet_balance};
-      (*this)(event_2);
+      if (json::WalletParser::dispatch(*this, body, decode_buffer_, event)) {
+      }
       download_.check_relaxed(STATE);
     };
     auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
@@ -397,26 +395,24 @@ void OrderEntry::get_wallet_balance_ack(Trace<web::rest::Response> const &event,
   });
 }
 
-void OrderEntry::operator()(Trace<json::WalletBalance> const &event) {
+void OrderEntry::operator()(Trace<json::WalletBalance2> const &event) {
   auto &[trace_info, wallet_balance] = event;
   log::info<2>("wallet_balance={}"sv, wallet_balance);
-  /*
-  for (auto &item : wallet_balance.result.balances) {
+  for (auto &item : wallet_balance.coin) {
     log::debug("item={}"sv, item);
     auto funds_update = FundsUpdate{
         .stream_id = stream_id_,
         .account = authenticator_.get_account(),
-        .currency = item.coin,  // XXX or .coin_id?
-        .balance = item.free,
+        .currency = item.coin,
+        .balance = item.wallet_balance,
         .hold = item.locked,
         .external_account = {},
         .update_type = UpdateType::SNAPSHOT,
-        .exchange_time_utc = wallet_balance.time,
+        .exchange_time_utc = {},  // XXX lost when flattened
         .sending_time_utc = {},
     };
     create_trace_and_dispatch(handler_, trace_info, funds_update, true);
   }
-  */
 }
 
 void OrderEntry::get_position_info() {
