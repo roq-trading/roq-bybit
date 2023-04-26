@@ -50,25 +50,21 @@ set(AUTOGEN_SCHEMAS
     status.json
     contract_type.json
     options_type.json
-
     auth.json
     error.json
     pong.json
     subscribe.json
     subscribe_data.json
-
     cancel_order.json
     cancel_order_result.json
     cancel_orders.json
     cancel_orders_result.json
     create_order.json
     create_order_result.json
-
     event_type.json
     message_field.json
     operation.json
     topic.json
-
     ticket_info_data_item.json
     ticket_info.json)
 
