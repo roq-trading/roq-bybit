@@ -395,7 +395,29 @@ void MarketData::operator()(Trace<json::PublicTrade> const &event) {
     log::info<3>("event={{public_trade={}, trace_info={}}}"sv, public_trade, trace_info);
     // log::debug("public_trade={}"sv, public_trade);
     (*connection_).touch(trace_info.source_receive_time);
+    auto &trades = shared_.trades;
+    trades.clear();
+    std::chrono::milliseconds timestamp = {};
+    auto dispatch = [&](auto &symbol) {
+      auto trade_summary = TradeSummary{
+          .stream_id = stream_id_,
+          .exchange = Flags::exchange(),
+          .symbol = symbol,
+          .trades = trades,
+          .exchange_time_utc = timestamp,
+          .exchange_sequence = {},
+          .sending_time_utc = public_trade.timestamp,
+      };
+      create_trace_and_dispatch(handler_, trace_info, trade_summary, true);
+      trades.clear();
+      timestamp = {};
+    };
+    std::string_view previous;
     for (auto &item : public_trade.data) {
+      if (item.symbol != previous) {
+        dispatch(previous);
+        previous = item.symbol;
+      }
       auto side = json::map(item.side);
       auto trade_2 = Trade{
           .side = side,
@@ -405,17 +427,10 @@ void MarketData::operator()(Trace<json::PublicTrade> const &event) {
           .taker_order_id = {},
           .maker_order_id = {},
       };
-      auto trade_summary = TradeSummary{
-          .stream_id = stream_id_,
-          .exchange = Flags::exchange(),
-          .symbol = item.symbol,
-          .trades = {&trade_2, 1},
-          .exchange_time_utc = item.timestamp,
-          .exchange_sequence = {},
-          .sending_time_utc = public_trade.timestamp,
-      };
-      create_trace_and_dispatch(handler_, trace_info, trade_summary, true);
+      trades.emplace_back(std::move(trade_2));
+      utils::update_max(timestamp, item.timestamp);
     }
+    dispatch(previous);
   });
 }
 

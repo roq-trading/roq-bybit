@@ -47,6 +47,7 @@ struct Shared final {
 
  public:
   std::vector<MBPUpdate> bids, asks;
+  std::vector<Trade> trades;
 
  private:
   server::Dispatcher &dispatcher_;

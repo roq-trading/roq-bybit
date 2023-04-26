@@ -31,6 +31,7 @@ auto const NAME = "ex"sv;
 auto const SUPPORTS = Mask{
     SupportType::ORDER,
     SupportType::TRADE,
+    SupportType::POSITION,
     SupportType::FUNDS,
 };
 
@@ -87,15 +88,16 @@ DropCopy::DropCopy(
       profile_{
           .parse = create_metrics(name_, "parse"sv),
           .auth = create_metrics(name_, "auth"sv),
-          .outbound_account_info = create_metrics(name_, "outbound_account_info"sv),
+          .wallet = create_metrics(name_, "wallet"sv),
           .order = create_metrics(name_, "order"sv),
-          .ticket_info = create_metrics(name_, "ticket_info"sv),
+          .execution = create_metrics(name_, "execution"sv),
+          .position = create_metrics(name_, "position"sv),
       },
       latency_{
           .ping = create_metrics(name_, "ping"sv),
           .heartbeat = create_metrics(name_, "heartbeat"sv),
       },
-      authenticator_{authenticator}, shared_{shared}, download_{{}, [this](auto state) { return download(state); }} {
+      authenticator_{authenticator}, shared_{shared} {
 }
 
 bool DropCopy::ready() const {
@@ -121,9 +123,10 @@ void DropCopy::operator()(metrics::Writer &writer) {
       // profile
       .write(profile_.parse, metrics::PROFILE)
       .write(profile_.auth, metrics::PROFILE)
-      .write(profile_.outbound_account_info, metrics::PROFILE)
+      .write(profile_.wallet, metrics::PROFILE)
       .write(profile_.order, metrics::PROFILE)
-      .write(profile_.ticket_info, metrics::PROFILE)
+      .write(profile_.execution, metrics::PROFILE)
+      .write(profile_.position, metrics::PROFILE)
       // latency
       .write(latency_.ping, metrics::LATENCY)
       .write(latency_.heartbeat, metrics::LATENCY);
@@ -137,10 +140,7 @@ void DropCopy::operator()(web::socket::Client::Connected const &) {
 
 void DropCopy::operator()(web::socket::Client::Disconnected const &) {
   ++counter_.disconnect;
-  ready_ = false;
   (*this)(ConnectionStatus::DISCONNECTED);
-  download_.reset();
-  welcome_ = false;
   logon_timeout_ = {};
   next_ping_ = {};
 }
@@ -206,25 +206,6 @@ void DropCopy::operator()(ConnectionStatus status) {
     log::info("stream_status={}"sv, stream_status);
     create_trace_and_dispatch(handler_, trace_info, stream_status);
   }
-}
-
-uint32_t DropCopy::download(DropCopyState state) {
-  switch (state) {
-    using enum DropCopyState;
-    case UNDEFINED:
-      assert(false);
-      break;
-    case SUBSCRIBE:
-      subscribe();
-      return {};
-    case DONE:
-      (*this)(ConnectionStatus::READY);
-      assert(!ready_);
-      ready_ = true;
-      return {};
-  }
-  assert(false);
-  return {};
 }
 
 void DropCopy::subscribe() {
@@ -309,7 +290,7 @@ void DropCopy::operator()(Trace<json::WalletBalance2> const &event) {
   profile_.order([&]() {
     auto &[trace_info, wallet_balance] = event;
     log::info<4>("event={{wallet={}, trace_info={}}}"sv, wallet_balance, trace_info);
-    // XXX probably we need to match --api
+    // XXX probably we need to filter and match --api
     for (auto &item : wallet_balance.coin) {
       auto funds_update = FundsUpdate{
           .stream_id = stream_id_,
@@ -319,8 +300,8 @@ void DropCopy::operator()(Trace<json::WalletBalance2> const &event) {
           .hold = item.locked,
           .external_account = {},
           .update_type = UpdateType::INCREMENTAL,
-          .exchange_time_utc = {},  // XXX lost when flattened
-          .sending_time_utc = {},
+          .exchange_time_utc = {},
+          .sending_time_utc = {},  // XXX lost when flattened
       };
       create_trace_and_dispatch(handler_, trace_info, funds_update, true);
     }
@@ -386,7 +367,7 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
 }
 
 void DropCopy::operator()(Trace<json::TicketInfo> const &event) {
-  profile_.ticket_info([&]() {
+  profile_.execution([&]() {
     auto &trace_info = event.trace_info;
     auto &ticket_info = event.value;
     log::info<4>("event={{ticket_info={}, trace_info={}}}"sv, ticket_info, trace_info);

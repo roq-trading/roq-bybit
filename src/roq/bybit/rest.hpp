@@ -76,8 +76,8 @@ struct Rest final : public web::rest::Client::Handler {
  private:
   Handler &handler_;
   // config
-  const uint16_t stream_id_;
-  const std::string name_;
+  uint16_t const stream_id_;
+  std::string const name_;
   // connection
   std::unique_ptr<web::rest::Client> connection_;
   // buffers

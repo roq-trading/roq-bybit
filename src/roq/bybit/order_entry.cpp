@@ -29,6 +29,7 @@ auto const NAME = "om"sv;
 
 auto const SUPPORTS = Mask{
     SupportType::CREATE_ORDER,
+    SupportType::MODIFY_ORDER,
     SupportType::CANCEL_ORDER,
     SupportType::ORDER_ACK,
     SupportType::FUNDS,
@@ -158,6 +159,7 @@ uint16_t OrderEntry::operator()(
     oms::Order const &,
     [[maybe_unused]] std::string_view const &request_id,
     [[maybe_unused]] std::string_view const &previous_request_id) {
+  // XXX TODO
   throw oms::NotSupported{"not supported"sv};
 }
 
@@ -383,6 +385,8 @@ void OrderEntry::get_wallet_balance_ack(Trace<web::rest::Response> const &event,
     }
     auto handle_success = [&](auto &body) {
       if (json::WalletParser::dispatch(*this, body, decode_buffer_, event)) {
+      } else {
+        log::warn(R"(Unexpected: message="{}")"sv, body);
       }
       download_.check_relaxed(STATE);
     };
@@ -408,8 +412,8 @@ void OrderEntry::operator()(Trace<json::WalletBalance2> const &event) {
         .hold = item.locked,
         .external_account = {},
         .update_type = UpdateType::SNAPSHOT,
-        .exchange_time_utc = {},  // XXX lost when flattened
-        .sending_time_utc = {},
+        .exchange_time_utc = {},
+        .sending_time_utc = {},  // XXX lost when flattened
     };
     create_trace_and_dispatch(handler_, trace_info, funds_update, true);
   }

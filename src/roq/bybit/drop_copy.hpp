@@ -18,7 +18,6 @@
 #include "roq/server.hpp"
 
 #include "roq/bybit/authenticator.hpp"
-#include "roq/bybit/drop_copy_state.hpp"
 #include "roq/bybit/shared.hpp"
 
 #include "roq/bybit/json/parser.hpp"
@@ -72,8 +71,6 @@ struct DropCopy final : public web::socket::Client::Handler, json::Parser::Handl
  private:
   void operator()(ConnectionStatus);
 
-  uint32_t download(DropCopyState);
-
   void subscribe();
 
   void subscribe(std::string_view const &topic);
@@ -83,8 +80,8 @@ struct DropCopy final : public web::socket::Client::Handler, json::Parser::Handl
  private:
   Handler &handler_;
   // config
-  const uint16_t stream_id_;
-  const std::string name_;
+  uint16_t const stream_id_;
+  std::string const name_;
   // web socket
   std::unique_ptr<web::socket::Client> connection_;
   // buffers
@@ -96,7 +93,7 @@ struct DropCopy final : public web::socket::Client::Handler, json::Parser::Handl
     core::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile parse, auth, outbound_account_info, order, ticket_info;
+    core::metrics::Profile parse, auth, wallet, order, execution, position;
   } profile_;
   struct {
     core::metrics::Latency ping, heartbeat;
@@ -106,10 +103,7 @@ struct DropCopy final : public web::socket::Client::Handler, json::Parser::Handl
   // cache
   Shared &shared_;
   // state
-  bool welcome_ = false;
-  bool ready_ = false;
   ConnectionStatus status_ = {};
-  core::Download<DropCopyState> download_;
   std::chrono::nanoseconds logon_timeout_ = {};
   std::chrono::nanoseconds next_ping_ = {};
 };

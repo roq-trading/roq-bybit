@@ -1,6 +1,5 @@
 !!! THIS FILE HAS BEEN AUTO-GENERATED !!!
 roq-bybit-v5
 api.hpp
-drop_copy_state.hpp
 order_entry_state.hpp
 rest_state.hpp
