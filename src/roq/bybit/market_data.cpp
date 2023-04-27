@@ -399,6 +399,11 @@ void MarketData::operator()(Trace<json::PublicTrade> const &event) {
     trades.clear();
     std::chrono::milliseconds timestamp = {};
     auto dispatch = [&](auto &symbol) {
+      if (std::empty(symbol)) {
+        assert(std::empty(trades));
+      }
+      if (std::empty(trades))
+        return;
       auto trade_summary = TradeSummary{
           .stream_id = stream_id_,
           .exchange = Flags::exchange(),
