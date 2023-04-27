@@ -143,6 +143,7 @@ void DropCopy::operator()(web::socket::Client::Disconnected const &) {
   (*this)(ConnectionStatus::DISCONNECTED);
   logon_timeout_ = {};
   next_ping_ = {};
+  authenticator_.request_queue.clear();
 }
 
 void DropCopy::operator()(web::socket::Client::Ready const &) {
@@ -151,11 +152,10 @@ void DropCopy::operator()(web::socket::Client::Ready const &) {
   auto signature = authenticator_.create_signature(expires);
   auto message = fmt::format(
       R"({{)"
-      R"("req_id":"{}",)"
+      R"("req_id":"auth",)"
       R"("op": "auth",)"
       R"("args":["{}",{},"{}"])"
       R"(}})"sv,
-      ++request_id_,
       authenticator_.get_key(),
       expires.count(),
       signature);
@@ -222,7 +222,7 @@ void DropCopy::subscribe(std::string_view const &topic) {
       R"("op":"subscribe",)"
       R"("args":["{}"])"
       R"(}})"sv,
-      ++request_id_,
+      topic,
       topic);
   log::debug("message={}"sv, message);
   (*connection_).send_text(message);
@@ -245,20 +245,33 @@ void DropCopy::parse(std::string_view const &message) {
   });
 }
 
-void DropCopy::operator()(Trace<json::Error> const &event) {
-  auto &[trace_info, error] = event;
-  log::info<4>("event={{error={}, trace_info={}}}"sv, error, trace_info);
-  log::fatal("error={}"sv, error);
-}
-
 void DropCopy::operator()(Trace<json::Ping> const &event) {
   auto &[trace_info, ping] = event;
   log::info<4>("event={{ping={}, trace_info={}}}"sv, ping, trace_info);
 }
 
+void DropCopy::operator()(Trace<json::Auth> const &event) {
+  profile_.auth([&]() {
+    auto &[trace_info, auth] = event;
+    log::info<4>("event={{auth={}, trace_info={}}}"sv, auth, trace_info);
+    if (auth.success) {
+      (*this)(ConnectionStatus::READY);
+      subscribe();
+    } else {
+      log::fatal("Unexpected: auth={}"sv, auth);
+    }
+  });
+}
+
 void DropCopy::operator()(Trace<json::Subscribe> const &event) {
   auto &[trace_info, subscribe] = event;
   log::info<4>("event={{subscribe={}, trace_info={}}}"sv, subscribe, trace_info);
+}
+
+void DropCopy::operator()(Trace<json::Error> const &event) {
+  auto &[trace_info, error] = event;
+  log::info<4>("event={{error={}, trace_info={}}}"sv, error, trace_info);
+  log::fatal("error={}"sv, error);
 }
 
 void DropCopy::operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) {
@@ -271,19 +284,6 @@ void DropCopy::operator()(Trace<json::PublicTrade> const &) {
 
 void DropCopy::operator()(Trace<json::Tickers> const &) {
   log::fatal("Unexpected"sv);
-}
-
-void DropCopy::operator()(Trace<json::Auth> const &event) {
-  profile_.auth([&]() {
-    auto &[trace_info, auth] = event;
-    log::info<4>("event={{auth={}, trace_info={}}}"sv, auth, trace_info);
-    if (auth.success) {
-      (*this)(ConnectionStatus::READY);
-      subscribe();
-    } else {
-      // XXX ???
-    }
-  });
 }
 
 void DropCopy::operator()(Trace<json::WalletBalance2> const &event) {

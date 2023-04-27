@@ -5,7 +5,7 @@ set(SOURCES parser.cpp utils.cpp wallet_parser.cpp)
 include(RoqAutogen)
 
 set(AUTOGEN_SCHEMAS
-  message.json
+    message.json
     account_info.json
     account_info_result.json
     position_info.json

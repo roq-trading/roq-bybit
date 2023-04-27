@@ -293,20 +293,24 @@ void MarketData::parse(std::string_view const &message) {
   });
 }
 
-void MarketData::operator()(Trace<json::Error> const &event) {
-  auto &[trace_info, error] = event;
-  log::info<4>("event={{error={}, trace_info={}}}"sv, error, trace_info);
-  log::fatal("error={}"sv, error);
-}
-
 void MarketData::operator()(Trace<json::Ping> const &event) {
   auto &[trace_info, ping] = event;
   log::info<4>("event={{ping={}, trace_info={}}}"sv, ping, trace_info);
 }
 
+void MarketData::operator()(Trace<json::Auth> const &) {
+  log::fatal("Unexpected"sv);
+}
+
 void MarketData::operator()(Trace<json::Subscribe> const &event) {
   auto &[trace_info, subscribe] = event;
   log::info<4>("event={{subscribe={}, trace_info={}}}"sv, subscribe, trace_info);
+}
+
+void MarketData::operator()(Trace<json::Error> const &event) {
+  auto &[trace_info, error] = event;
+  log::info<4>("event={{error={}, trace_info={}}}"sv, error, trace_info);
+  log::fatal("error={}"sv, error);
 }
 
 void MarketData::operator()(Trace<json::OrderBook> const &event, size_t depth) {
@@ -531,10 +535,6 @@ void MarketData::operator()(Trace<json::Tickers> const &event) {
     };
     create_trace_and_dispatch(handler_, trace_info, statistics_update, true);
   });
-}
-
-void MarketData::operator()(Trace<json::Auth> const &) {
-  log::fatal("Unexpected"sv);
 }
 
 void MarketData::operator()(Trace<json::WalletBalance2> const &) {

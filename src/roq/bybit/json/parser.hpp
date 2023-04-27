@@ -31,15 +31,16 @@ namespace json {
 
 struct Parser final {
   struct Handler {
-    virtual void operator()(Trace<json::Error> const &) = 0;
     virtual void operator()(Trace<json::Ping> const &) = 0;
+    // response
+    virtual void operator()(Trace<json::Auth> const &) = 0;
     virtual void operator()(Trace<json::Subscribe> const &) = 0;
-    // public
+    virtual void operator()(Trace<json::Error> const &) = 0;
+    // public stream
     virtual void operator()(Trace<json::OrderBook> const &, size_t depth) = 0;
     virtual void operator()(Trace<json::PublicTrade> const &) = 0;
     virtual void operator()(Trace<json::Tickers> const &) = 0;
-    // private
-    virtual void operator()(Trace<json::Auth> const &) = 0;
+    // private stream
     virtual void operator()(Trace<json::WalletBalance2> const &) = 0;
     virtual void operator()(Trace<json::Order> const &) = 0;
     virtual void operator()(Trace<json::TicketInfo> const &) = 0;

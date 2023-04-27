@@ -5,6 +5,10 @@
 #include <string>
 #include <string_view>
 
+#include "roq/core/timer_queue.hpp"
+
+#include "roq/core/limit/rate_limiter.hpp"
+
 #include "roq/bybit/config.hpp"
 
 #include "roq/bybit/tools/crypto.hpp"
@@ -27,6 +31,10 @@ struct Authenticator final {
  private:
   std::string const account_;
   tools::Crypto crypto_;
+
+ public:
+  core::limit::RateLimiter rate_limiter;
+  core::TimerQueue<std::string> request_queue;
 };
 
 }  // namespace bybit

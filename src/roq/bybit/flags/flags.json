@@ -52,7 +52,7 @@
     },
     {
       "name": "rest_recv_window",
-      "type": "std::chrono::nanoseconds",
+      "type": "std::chrono::milliseconds",
       "validator": "roq::core::flags::TimePeriod",
       "default": "5s",
       "description": "recv window"
@@ -148,14 +148,14 @@
     {
       "name": "request_limit",
       "type": "uint32_t",
-      "default": "80",
+      "default": "10",
       "description": "request limit per interval"
     },
     {
       "name": "request_limit_interval",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::core::flags::TimePeriod",
-      "default": "10s",
+      "default": "1s",
       "description": "request limit monitor interval"
     },
     {
