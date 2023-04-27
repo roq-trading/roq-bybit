@@ -21,7 +21,7 @@
 
 #include "roq/server.hpp"
 
-#include "roq/bybit/authenticator.hpp"
+#include "roq/bybit/account.hpp"
 #include "roq/bybit/order_entry_state.hpp"
 #include "roq/bybit/shared.hpp"
 
@@ -47,7 +47,7 @@ struct OrderEntry final : public web::rest::Client::Handler, public json::Wallet
     virtual void operator()(Trace<FundsUpdate> const &, bool is_last) = 0;
   };
 
-  OrderEntry(Handler &, io::Context &, uint16_t stream_id, Authenticator &, Shared &);
+  OrderEntry(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
 
   OrderEntry(OrderEntry &&) = delete;
   OrderEntry(OrderEntry const &) = delete;
@@ -157,8 +157,8 @@ struct OrderEntry final : public web::rest::Client::Handler, public json::Wallet
   struct {
     core::metrics::Latency ping;
   } latency_;
-  // authenticator
-  Authenticator &authenticator_;
+  // account
+  Account &account_;
   // cache
   Shared &shared_;
   // state

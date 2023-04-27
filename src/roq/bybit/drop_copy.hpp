@@ -17,7 +17,7 @@
 
 #include "roq/server.hpp"
 
-#include "roq/bybit/authenticator.hpp"
+#include "roq/bybit/account.hpp"
 #include "roq/bybit/shared.hpp"
 
 #include "roq/bybit/json/parser.hpp"
@@ -33,7 +33,7 @@ struct DropCopy final : public web::socket::Client::Handler, json::Parser::Handl
     virtual void operator()(Trace<FundsUpdate> const &, bool is_last) = 0;
   };
 
-  DropCopy(Handler &, io::Context &, uint16_t stream_id, Authenticator &, Shared &);
+  DropCopy(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
 
   DropCopy(DropCopy &&) = delete;
   DropCopy(DropCopy const &) = delete;
@@ -101,8 +101,8 @@ struct DropCopy final : public web::socket::Client::Handler, json::Parser::Handl
   struct {
     core::metrics::Latency ping, heartbeat;
   } latency_;
-  // authenticator
-  Authenticator &authenticator_;
+  // account
+  Account &account_;
   // cache
   Shared &shared_;
   // state

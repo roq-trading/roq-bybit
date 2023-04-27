@@ -78,8 +78,7 @@ struct create_metrics final : public core::metrics::Factory {
 
 // === IMPLEMENTATION ===
 
-DropCopy::DropCopy(
-    Handler &handler, io::Context &context, uint16_t stream_id, Authenticator &authenticator, Shared &shared)
+DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)},
       connection_{create_connection(*this, context)}, decode_buffer_{Flags::decode_buffer_size()},
       counter_{
@@ -97,7 +96,7 @@ DropCopy::DropCopy(
           .ping = create_metrics(name_, "ping"sv),
           .heartbeat = create_metrics(name_, "heartbeat"sv),
       },
-      authenticator_{authenticator}, shared_{shared} {
+      account_{account}, shared_{shared} {
 }
 
 bool DropCopy::ready() const {
@@ -143,20 +142,20 @@ void DropCopy::operator()(web::socket::Client::Disconnected const &) {
   (*this)(ConnectionStatus::DISCONNECTED);
   logon_timeout_ = {};
   next_ping_ = {};
-  authenticator_.request_queue.clear();
+  account_.request_queue.clear();
 }
 
 void DropCopy::operator()(web::socket::Client::Ready const &) {
   auto now = clock::get_realtime();
   auto expires = std::chrono::duration_cast<std::chrono::milliseconds>(now + AUTH_EXPIRES);
-  auto signature = authenticator_.create_signature(expires);
+  auto signature = account_.create_signature(expires);
   auto message = fmt::format(
       R"({{)"
       R"("req_id":"auth",)"
       R"("op": "auth",)"
       R"("args":["{}",{},"{}"])"
       R"(}})"sv,
-      authenticator_.get_key(),
+      account_.get_key(),
       expires.count(),
       signature);
   log::debug(R"(message="{}")"sv, message);
@@ -171,7 +170,7 @@ void DropCopy::operator()(web::socket::Client::Latency const &latency) {
   TraceInfo trace_info;
   auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
-      .account = authenticator_.get_account(),
+      .account = account_.get_name(),
       .latency = latency.sample,
   };
   create_trace_and_dispatch(handler_, trace_info, external_latency);
@@ -191,7 +190,7 @@ void DropCopy::operator()(ConnectionStatus status) {
     TraceInfo trace_info;
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,
-        .account = authenticator_.get_account(),
+        .account = account_.get_name(),
         .supports = SUPPORTS,
         .transport = Transport::TCP,
         .protocol = Protocol::WS,
@@ -294,7 +293,7 @@ void DropCopy::operator()(Trace<json::WalletBalance2> const &event) {
     for (auto &item : wallet_balance.coin) {
       auto funds_update = FundsUpdate{
           .stream_id = stream_id_,
-          .account = authenticator_.get_account(),
+          .account = account_.get_name(),
           .currency = item.coin,
           .balance = item.wallet_balance,
           .hold = item.locked,
@@ -328,7 +327,7 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
         return item.cum_exec_value / item.cum_exec_qty;  // spot
       }();
       auto order_update = oms::OrderUpdate{
-          .account = authenticator_.get_account(),
+          .account = account_.get_name(),
           .exchange = Flags::exchange(),
           .symbol = item.symbol,
           .side = side,

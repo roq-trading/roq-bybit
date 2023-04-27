@@ -25,26 +25,26 @@ namespace bybit {
 
 namespace {
 template <typename R>
-auto create_authenticator(auto const &config) {
+auto create_accounts(auto const &config) {
   R result;
   for (auto &[_, account] : config.accounts)
-    result.try_emplace(account.name, std::make_unique<Authenticator>(config, account.name));
+    result.try_emplace(account.name, std::make_unique<Account>(config, account.name));
   return result;
 }
 
 template <typename R>
-auto create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &authenticator_by_account, auto &shared) {
+auto create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
   R result;
-  for (auto &[account, authenticator] : authenticator_by_account)
-    result.try_emplace(account, std::make_unique<OrderEntry>(gateway, context, ++stream_id, *authenticator, shared));
+  for (auto &[name, account] : accounts)
+    result.try_emplace(name, std::make_unique<OrderEntry>(gateway, context, ++stream_id, *account, shared));
   return result;
 }
 
 template <typename R>
-auto create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &authenticator_by_account, auto &shared) {
+auto create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
   R result;
-  for (auto &[account, authenticator] : authenticator_by_account)
-    result.try_emplace(account, std::make_unique<DropCopy>(gateway, context, ++stream_id, *authenticator, shared));
+  for (auto &[name, account] : accounts)
+    result.try_emplace(name, std::make_unique<DropCopy>(gateway, context, ++stream_id, *account, shared));
   return result;
 }
 }  // namespace
@@ -52,11 +52,10 @@ auto create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &authe
 // === IMPLEMENTATION ===
 
 Gateway::Gateway(server::Dispatcher &dispatcher, Config const &config, io::Context &context)
-    : dispatcher_{dispatcher}, master_account_{config.get_master_account()},
-      authenticator_{create_authenticator<decltype(authenticator_)>(config)}, context_{context}, shared_{dispatcher},
-      rest_{*this, context_, ++stream_id_, shared_},
-      order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, authenticator_, shared_)},
-      drop_copy_{create_drop_copy<decltype(drop_copy_)>(*this, context_, stream_id_, authenticator_, shared_)} {
+    : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(config)}, context_{context},
+      shared_{dispatcher}, rest_{*this, context_, ++stream_id_, shared_},
+      order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, accounts_, shared_)},
+      drop_copy_{create_drop_copy<decltype(drop_copy_)>(*this, context_, stream_id_, accounts_, shared_)} {
 }
 
 void Gateway::operator()(Event<Start> const &event) {

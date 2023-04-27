@@ -13,7 +13,7 @@
 
 #include "roq/io/context.hpp"
 
-#include "roq/bybit/authenticator.hpp"
+#include "roq/bybit/account.hpp"
 #include "roq/bybit/config.hpp"
 #include "roq/bybit/drop_copy.hpp"
 #include "roq/bybit/market_data.hpp"
@@ -80,10 +80,8 @@ struct Gateway final : public server::Handler,
 
  private:
   server::Dispatcher &dispatcher_;
-  // config
-  const std::string master_account_;
-  // authentication
-  absl::flat_hash_map<Account, std::unique_ptr<Authenticator>> authenticator_;
+  // accounts
+  absl::flat_hash_map<std::string, std::unique_ptr<Account>> accounts_;
   // io
   io::Context &context_;
   // shared
@@ -92,8 +90,8 @@ struct Gateway final : public server::Handler,
   uint16_t stream_id_ = {};
   // streams
   Rest rest_;
-  absl::flat_hash_map<Account, std::unique_ptr<OrderEntry>> order_entry_;
-  absl::flat_hash_map<Account, std::unique_ptr<DropCopy>> drop_copy_;
+  absl::flat_hash_map<std::string, std::unique_ptr<OrderEntry>> order_entry_;
+  absl::flat_hash_map<std::string, std::unique_ptr<DropCopy>> drop_copy_;
   std::vector<std::unique_ptr<MarketData>> market_data_;
   // cache
   std::vector<MBPUpdate> bids_, asks_;

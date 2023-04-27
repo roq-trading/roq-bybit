@@ -78,9 +78,8 @@ struct create_metrics final : public core::metrics::Factory {
 
 // === IMPLEMENTATION ===
 
-OrderEntry::OrderEntry(
-    Handler &handler, io::Context &context, uint16_t stream_id, Authenticator &authenticator, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, authenticator.get_account())},
+OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())},
       connection_{create_connection(*this, context)}, decode_buffer_{Flags::decode_buffer_size()},
       counter_{
           .disconnect = create_metrics(name_, "disconnect"sv),
@@ -106,7 +105,7 @@ OrderEntry::OrderEntry(
       latency_{
           .ping = create_metrics(name_, "ping"sv),
       },
-      authenticator_{authenticator}, shared_{shared},
+      account_{account}, shared_{shared},
       download_{Flags::rest_request_timeout(), [this](auto state) { return download(state); }} {
 }
 
@@ -197,7 +196,7 @@ void OrderEntry::operator()(Trace<web::rest::Client::Latency> const &event) {
   auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
-      .account = authenticator_.get_account(),
+      .account = account_.get_name(),
       .latency = latency.sample,
   };
   create_trace_and_dispatch(handler_, trace_info, external_latency);
@@ -213,7 +212,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
     TraceInfo trace_info;
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,
-        .account = authenticator_.get_account(),
+        .account = account_.get_name(),
         .supports = SUPPORTS,
         .transport = Transport::TCP,
         .protocol = Protocol::HTTP,
@@ -275,7 +274,7 @@ uint32_t OrderEntry::download(OrderEntryState state) {
 void OrderEntry::get_account_info() {
   profile_.account_info([&]() {
     auto const path = "/v5/account/info"sv;
-    auto headers = authenticator_.create_headers(path, {}, {});
+    auto headers = account_.create_headers(path, {}, {});
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
         .path = path,
@@ -322,7 +321,7 @@ void OrderEntry::operator()(Trace<json::AccountInfo> const &event) {
     log::debug("item={}"sv, item);
     auto funds_update = FundsUpdate{
         .stream_id = stream_id_,
-        .account = authenticator_.get_account(),
+        .account = account_.get_name(),
         .currency = item.coin,  // XXX or .coin_id?
         .balance = item.free,
         .hold = item.locked,
@@ -356,7 +355,7 @@ void OrderEntry::get_wallet_balance() {
       log::fatal("Unexpected"sv);
     }();
     auto query = fmt::format("?accountType={}"sv, account_type);
-    auto headers = authenticator_.create_headers(path, query, {});
+    auto headers = account_.create_headers(path, query, {});
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
         .path = path,
@@ -406,7 +405,7 @@ void OrderEntry::operator()(Trace<json::WalletBalance2> const &event) {
     log::debug("item={}"sv, item);
     auto funds_update = FundsUpdate{
         .stream_id = stream_id_,
-        .account = authenticator_.get_account(),
+        .account = account_.get_name(),
         .currency = item.coin,
         .balance = item.wallet_balance,
         .hold = item.locked,
@@ -439,7 +438,7 @@ void OrderEntry::get_position_info() {
       }
       log::fatal("Unexpected"sv);
     }();
-    auto headers = authenticator_.create_headers(path, query, {});
+    auto headers = account_.create_headers(path, query, {});
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
         .path = path,
@@ -486,7 +485,7 @@ void OrderEntry::operator()(Trace<json::PositionInfo> const &event) {
 void OrderEntry::get_open_orders() {
   profile_.open_orders([&]() {
     auto const path = "/v5/order/realtime"sv;
-    auto headers = authenticator_.create_headers(path, {}, {});
+    auto headers = account_.create_headers(path, {}, {});
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
         .path = path,
@@ -537,7 +536,7 @@ void OrderEntry::operator()(Trace<json::OpenOrders> const &event) {
     auto time_in_force = json::map(item.time_in_force);
     auto order_status = json::map(item.status);
     auto order_update = oms::OrderUpdate{
-        .account = authenticator_.get_account(),
+        .account = account_.get_name(),
         .exchange = Flags::exchange(),
         .symbol = item.symbol,
         .side = side,
@@ -571,7 +570,7 @@ void OrderEntry::operator()(Trace<json::OpenOrders> const &event) {
 void OrderEntry::get_execution() {
   profile_.execution([&]() {
     auto const path = "/v5/execution/list"sv;
-    auto headers = authenticator_.create_headers(path, {}, {});
+    auto headers = account_.create_headers(path, {}, {});
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
         .path = path,
@@ -628,7 +627,7 @@ void OrderEntry::create_order(
     std::string buffer;  // XXX
     auto body = json::create_order(buffer, create_order, order, request_id);
     log::debug(R"(body="{}")"sv, body);
-    auto headers = authenticator_.create_headers(path, {}, body);
+    auto headers = account_.create_headers(path, {}, body);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
         .path = path,
@@ -703,7 +702,7 @@ void OrderEntry::operator()(
   auto order_status = json::map(result.status);
   auto remaining_quantity = result.order_qty - result.exec_qty;
   auto order_update = oms::OrderUpdate{
-      .account = authenticator_.get_account(),
+      .account = account_.get_name(),
       .exchange = Flags::exchange(),
       .symbol = result.symbol,
       .side = side,
@@ -746,7 +745,7 @@ void OrderEntry::cancel_order(
     std::string buffer;  // XXX
     auto body = json::cancel_order(buffer, cancel_order, order, request_id, previous_request_id);
     log::debug(R"(body="{}")"sv, body);
-    auto headers = authenticator_.create_headers(path, {}, body);
+    auto headers = account_.create_headers(path, {}, body);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
         .path = path,
@@ -823,7 +822,7 @@ void OrderEntry::operator()(
   auto order_status = json::map(result.status);
   auto remaining_quantity = result.order_qty - result.exec_qty;
   auto order_update = oms::OrderUpdate{
-      .account = authenticator_.get_account(),
+      .account = account_.get_name(),
       .exchange = Flags::exchange(),
       .symbol = result.symbol,
       .side = side,
@@ -869,7 +868,7 @@ void OrderEntry::cancel_all_orders(
       std::string buffer;  // XXX
       auto body = json::cancel_all_orders(buffer, cancel_all_orders, request_id, symbol);
       log::debug(R"(body="{}")"sv, body);
-      auto headers = authenticator_.create_headers(path, {}, body);
+      auto headers = account_.create_headers(path, {}, body);
       auto request = web::rest::Request{
           .method = web::http::Method::POST,
           .path = path,
