@@ -590,12 +590,7 @@ void OrderEntry::get_execution(std::string_view const &symbol) {
     }();
     auto end_time = clock::get_realtime<std::chrono::milliseconds>();
     auto start_time = end_time - 24h;
-    auto query = fmt::format(
-        "?category={}&symbol={}&startTime={}&endTime={}&limit=100"sv,
-        category,
-        symbol,
-        start_time.count(),
-        end_time.count());
+    auto query = fmt::format("?category={}&symbol={}&startTime={}&limit=100"sv, category, symbol, start_time.count());
     auto headers = account_.create_headers(path, query, {});
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
