@@ -81,7 +81,7 @@ struct Gateway final : public server::Handler,
  private:
   server::Dispatcher &dispatcher_;
   // accounts
-  absl::flat_hash_map<std::string, std::unique_ptr<Account>> accounts_;
+  absl::flat_hash_map<std::string, std::unique_ptr<Account>> const accounts_;
   // io
   io::Context &context_;
   // shared

@@ -25,24 +25,27 @@ namespace bybit {
 
 namespace {
 template <typename R>
-auto create_accounts(auto const &config) {
-  R result;
+R create_accounts(auto &config) {
+  using result_type = std::remove_cvref<R>::type;
+  result_type result;
   for (auto &[_, account] : config.accounts)
     result.try_emplace(account.name, std::make_unique<Account>(config, account.name));
   return result;
 }
 
 template <typename R>
-auto create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
-  R result;
+R create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
+  using result_type = std::remove_cvref<R>::type;
+  result_type result;
   for (auto &[name, account] : accounts)
     result.try_emplace(name, std::make_unique<OrderEntry>(gateway, context, ++stream_id, *account, shared));
   return result;
 }
 
 template <typename R>
-auto create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
-  R result;
+R create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
+  using result_type = std::remove_cvref<R>::type;
+  result_type result;
   for (auto &[name, account] : accounts)
     result.try_emplace(name, std::make_unique<DropCopy>(gateway, context, ++stream_id, *account, shared));
   return result;
@@ -200,13 +203,14 @@ void Gateway::operator()(metrics::Writer &writer) {
 
 template <typename... Args>
 void Gateway::dispatch(Args &&...args) {
-  rest_(std::forward<Args>(args)...);
+  auto helper = [&](auto &target) { target(std::forward<Args>(args)...); };
+  helper(rest_);
   for (auto &[_, item] : order_entry_)
-    (*item)(std::forward<Args>(args)...);
+    helper(*item);
   for (auto &[_, item] : drop_copy_)
-    (*item)(std::forward<Args>(args)...);
+    helper(*item);
   for (auto &item : market_data_)
-    (*item)(std::forward<Args>(args)...);
+    helper(*item);
 }
 
 OrderEntry &Gateway::get_order_entry(std::string_view const &account) {

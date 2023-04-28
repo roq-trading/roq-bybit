@@ -79,7 +79,7 @@ struct Rest final : public web::rest::Client::Handler {
   uint16_t const stream_id_;
   std::string const name_;
   // connection
-  std::unique_ptr<web::rest::Client> connection_;
+  std::unique_ptr<web::rest::Client> const connection_;
   // buffers
   core::Buffer decode_buffer_;
   // metrics

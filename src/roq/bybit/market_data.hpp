@@ -102,7 +102,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   size_t const mbp_depth_;
   std::string const mbp_topic_;
   // web socket
-  std::unique_ptr<web::socket::Client> connection_;
+  std::unique_ptr<web::socket::Client> const connection_;
   // buffers
   core::Buffer decode_buffer_;
   // session
