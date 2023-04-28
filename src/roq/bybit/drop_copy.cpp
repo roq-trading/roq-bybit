@@ -209,7 +209,8 @@ void DropCopy::operator()(ConnectionStatus status) {
 
 void DropCopy::subscribe() {
   subscribe("wallet"sv);
-  subscribe("position"sv);
+  if (shared_.api != API::SPOT)
+    subscribe("position"sv);
   subscribe("order"sv);
   subscribe("execution"sv);
 }
@@ -265,6 +266,15 @@ void DropCopy::operator()(Trace<json::Auth> const &event) {
 void DropCopy::operator()(Trace<json::Subscribe> const &event) {
   auto &[trace_info, subscribe] = event;
   log::info<4>("event={{subscribe={}, trace_info={}}}"sv, subscribe, trace_info);
+  auto &req_id = subscribe.req_id;
+  if (req_id.compare("wallet"sv) == 0) {
+    account_.request_queue.emplace_back(req_id, std::string{});
+  } else if (
+      req_id.compare("position"sv) == 0 || req_id.compare("order"sv) == 0 || req_id.compare("execution"sv) == 0) {
+    account_.request_queue.emplace_back(req_id, "BTCUSDT"sv);
+  } else {
+    log::warn(R"(Unexpected: req_id="{}")"sv, req_id);
+  }
 }
 
 void DropCopy::operator()(Trace<json::Error> const &event) {

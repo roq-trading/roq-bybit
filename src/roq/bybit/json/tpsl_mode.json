@@ -1,0 +1,12 @@
+{
+  "name": "TpslMode",
+  "type": "enum",
+  "values": [
+    {
+      "name": "Buy"
+    },
+    {
+      "name": "Sell"
+    }
+  ]
+}

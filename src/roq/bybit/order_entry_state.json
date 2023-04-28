@@ -6,18 +6,6 @@
       "name": "account_info"
     },
     {
-      "name": "wallet_balance"
-    },
-    {
-      "name": "position_info"
-    },
-    {
-      "name": "open_orders"
-    },
-    {
-      "name": "execution"
-    },
-    {
       "name": "done"
     }
   ]

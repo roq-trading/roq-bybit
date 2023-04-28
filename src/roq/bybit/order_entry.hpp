@@ -84,6 +84,8 @@ struct OrderEntry final : public web::rest::Client::Handler, public json::Wallet
 
   uint32_t download(OrderEntryState state);
 
+  void check_request_queue(std::chrono::nanoseconds now);
+
   void get_account_info();
   void get_account_info_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<json::AccountInfo> const &);
@@ -92,15 +94,15 @@ struct OrderEntry final : public web::rest::Client::Handler, public json::Wallet
   void get_wallet_balance_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<json::WalletBalance2> const &) override;
 
-  void get_position_info();
+  void get_position_info(std::string_view const &symbol);
   void get_position_info_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<json::PositionInfo> const &);
 
-  void get_open_orders();
+  void get_open_orders(std::string_view const &symbol);
   void get_open_orders_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<json::OpenOrders> const &);
 
-  void get_execution();
+  void get_execution(std::string_view const &symbol);
   void get_execution_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<json::Execution> const &);
 

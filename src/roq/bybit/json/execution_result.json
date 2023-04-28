@@ -5,6 +5,14 @@
     {
       "name": "list",
       "type": "std::span<ExecutionResultItem>"
+    },
+    {
+      "name": "nextPageCursor",
+      "type": "std::string_view"
+    },
+    {
+      "name": "category",
+      "type": "Category"
     }
   ]
 }

@@ -5,6 +5,7 @@ account_info.hpp
 account_info_result.hpp
 position_info.hpp
 position_info_result.hpp
+position_info_result_item.hpp
 wallet_balance_2.hpp
 wallet_balance_item.hpp
 wallet_balance.hpp
@@ -69,6 +70,7 @@ account_info.cpp
 account_info_result.cpp
 position_info.cpp
 position_info_result.cpp
+position_info_result_item.cpp
 wallet_balance_2.cpp
 wallet_balance_item.cpp
 wallet_balance.cpp

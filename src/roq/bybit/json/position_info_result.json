@@ -3,28 +3,16 @@
   "type": "comp",
   "values": [
     {
-      "name": "marginMode",
+      "name": "list",
+      "type": "std::span<PositionInfoResultItem>"
+    },
+    {
+      "name": "nextPageCursor",
       "type": "std::string_view"
     },
     {
-      "name": "updatedTime",
-      "type": "std::chrono::milliseconds"
-    },
-    {
-      "name": "unifiedMarginStatus",
-      "type": "int32_t"
-    },
-    {
-      "name": "dcpStatus",
-      "type": "std::string_view"
-    },
-    {
-      "name": "timeWindow",
-      "type": "int32_t"
-    },
-    {
-      "name": "smpGroup",
-      "type": "int32_t"
+      "name": "category",
+      "type": "Category"
     }
   ]
 }

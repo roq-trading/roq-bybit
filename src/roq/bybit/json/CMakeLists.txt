@@ -10,6 +10,7 @@ set(AUTOGEN_SCHEMAS
     account_info_result.json
     position_info.json
     position_info_result.json
+    position_info_result_item.json
     wallet_balance_2.json
     wallet_balance_item.json
     wallet_balance.json

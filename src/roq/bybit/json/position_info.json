@@ -13,6 +13,13 @@
     {
       "name": "result",
       "type": "PositionInfoResult"
+    },
+    {
+      "name": "retExtInfo"
+    },
+    {
+      "name": "time",
+      "type": "std::chrono::milliseconds"
     }
   ]
 }

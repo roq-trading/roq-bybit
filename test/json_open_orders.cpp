@@ -11,11 +11,20 @@ using namespace std::literals;
 using namespace std::chrono_literals;
 
 namespace {
-auto const MESSAGE = R"({)"
-                     R"(})"sv;
+auto const EMPTY = R"({)"
+                   R"("retCode":0,)"
+                   R"("retMsg":"OK",)"
+                   R"("result":{)"
+                   R"("list":[],)"
+                   R"("nextPageCursor":"",)"
+                   R"("category":"linear")"
+                   R"(},)"
+                   R"("retExtInfo":{},)"
+                   R"("time":1682689733889)"
+                   R"(})"sv;
 }  // namespace
 
-TEST_CASE("json_open_orders_spot", "[json_open_orders]") {
+TEST_CASE("empty", "[json_open_orders]") {
   core::Buffer buffer(8192);
-  json::OpenOrders obj{MESSAGE, buffer};
+  json::OpenOrders obj{EMPTY, buffer};
 }

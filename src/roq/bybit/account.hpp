@@ -7,6 +7,7 @@
 
 #include "roq/core/timer_queue.hpp"
 
+#include "roq/core/limit/queue.hpp"
 #include "roq/core/limit/rate_limiter.hpp"
 
 #include "roq/bybit/config.hpp"
@@ -34,7 +35,7 @@ struct Account final {
 
  public:
   core::limit::RateLimiter rate_limiter;
-  core::TimerQueue<std::string> request_queue;
+  core::limit::Queue<std::pair<std::string, std::string>> request_queue;
 };
 
 }  // namespace bybit

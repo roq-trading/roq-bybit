@@ -7,16 +7,16 @@
       "type": "std::string_view"
     },
     {
-      "name": "id",
-      "type": "std::string_view"
-    },
-    {
       "name": "orderId",
       "type": "std::string_view"
     },
     {
-      "name": "tradeId",
+      "name": "orderLinkId",
       "type": "std::string_view"
+    },
+    {
+      "name": "side",
+      "type": "Side"
     },
     {
       "name": "orderPrice",
@@ -27,36 +27,80 @@
       "type": "double"
     },
     {
+      "name": "leavesQty",
+      "type": "double"
+    },
+    {
+      "name": "orderType",
+      "type": "OrderType"
+    },
+    {
+      "name": "stopOrderType",
+      "type": "StopOrderType"
+    },
+    {
       "name": "execFee",
       "type": "double"
     },
     {
-      "name": "feeTokenId",
+      "name": "execId",
       "type": "std::string_view"
     },
     {
-      "name": "creatTime",
-      "type": "std::chrono::milliseconds"
-    },
-    {
-      "name": "isBuyer",
-      "type": "int32_t"
-    },
-    {
-      "name": "isMaker",
-      "type": "int32_t"
-    },
-    {
-      "name": "matchOrderId",
-      "type": "std::string_view"
-    },
-    {
-      "name": "makerRebate",
+      "name": "execPrice",
       "type": "double"
     },
     {
-      "name": "executionTime",
+      "name": "execQty",
+      "type": "double"
+    },
+    {
+      "name": "execType",
+      "type": "ExecType"
+    },
+    {
+      "name": "execValue",
+      "type": "double"
+    },
+    {
+      "name": "execTime",
       "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "isMaker",
+      "type": "bool"
+    },
+    {
+      "name": "feeRate",
+      "type": "double"
+    },
+    {
+      "name": "tradeIv",
+      "type": "double"
+    },
+    {
+      "name": "markIv",
+      "type": "double"
+    },
+    {
+      "name": "markPrice",
+      "type": "double"
+    },
+    {
+      "name": "indexPrice",
+      "type": "double"
+    },
+    {
+      "name": "underlyingPrice",
+      "type": "double"
+    },
+    {
+      "name": "blockTradeId",
+      "type": "std::string_view"
+    },
+    {
+      "name": "closedSize",
+      "type": "double"
     }
   ]
 }

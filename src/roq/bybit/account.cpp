@@ -18,7 +18,7 @@ namespace bybit {
 
 Account::Account(Config const &config, std::string_view const &name)
     : name_{name}, crypto_{config.get_api_key(name_), config.get_secret(name_), flags::Flags::rest_recv_window()},
-      rate_limiter{flags::Flags::request_limit(), flags::Flags::request_limit_interval()} {
+      rate_limiter{flags::Flags::request_limit(), flags::Flags::request_limit_interval()}, request_queue{rate_limiter} {
 }
 
 std::string Account::create_signature(std::chrono::milliseconds expires) {

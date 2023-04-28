@@ -211,6 +211,8 @@ inline roq::OrderType map(json::OrderType value) {
     case UNDEFINED__:
     case UNKNOWN__:
       break;
+    case UNKNOWN:
+      break;
     case MARKET:
       return roq::OrderType::MARKET;
     case LIMIT:
