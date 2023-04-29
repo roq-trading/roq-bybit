@@ -155,6 +155,11 @@ void Gateway::operator()(Rest::SymbolsUpdate &symbols_update) {
     (*iter).subscribe(start_from);
 }
 
+void Gateway::operator()(Trace<OrderEntry::Response> const &event) {
+  auto &[trace_info, response] = event;
+  get_drop_copy(response.account)(event);
+}
+
 void Gateway::ensure_symbol_slices(size_t size) {
   while (std::size(market_data_) < size) {
     log::debug("Create market-data (user-stream)"sv);
@@ -218,6 +223,13 @@ OrderEntry &Gateway::get_order_entry(std::string_view const &account) {
   if (iter != std::end(order_entry_))
     return *(*iter).second;
   throw RuntimeError{R"(Unknown account="{}")"sv, account};
+}
+
+DropCopy &Gateway::get_drop_copy(std::string_view const &account) {
+  auto iter = drop_copy_.find(account);
+  if (iter != std::end(drop_copy_))
+    return *(*iter).second;
+  log::fatal(R"(Unknown account="{}")"sv, account);
 }
 
 }  // namespace bybit

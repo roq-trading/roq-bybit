@@ -131,6 +131,11 @@ void DropCopy::operator()(metrics::Writer &writer) {
       .write(latency_.heartbeat, metrics::LATENCY);
 }
 
+void DropCopy::operator()(Trace<OrderEntry::Response> const &event) {
+  auto &[trace_info, response] = event;
+  log::debug(R"(RESPONSE topic="{}", symbol="{}")"sv, response.topic, response.symbol);
+}
+
 void DropCopy::operator()(web::socket::Client::Connected const &) {
   assert(logon_timeout_.count() == 0);
   auto now = clock::get_system();

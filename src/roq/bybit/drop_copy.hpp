@@ -20,6 +20,8 @@
 #include "roq/bybit/account.hpp"
 #include "roq/bybit/shared.hpp"
 
+#include "roq/bybit/order_entry.hpp"  // response
+
 #include "roq/bybit/json/parser.hpp"
 
 namespace roq {
@@ -45,6 +47,8 @@ struct DropCopy final : public web::socket::Client::Handler, json::Parser::Handl
   void operator()(Event<Timer> const &);
 
   void operator()(metrics::Writer &);
+
+  void operator()(Trace<OrderEntry::Response> const &);
 
  protected:
   // web::socket::Client::Handler

@@ -252,16 +252,12 @@ void OrderEntry::check_request_queue(std::chrono::nanoseconds now) {
   auto request = [&](auto &message) {
     auto &[topic, symbol] = message;
     if (topic.compare("wallet"sv) == 0) {
-      log::debug("REQUEST WALLET"sv);
       get_wallet_balance();
     } else if (topic.compare("position"sv) == 0) {
-      log::debug("REQUEST POSITION {}"sv, symbol);
       get_position_info(symbol);
     } else if (topic.compare("order"sv) == 0) {
-      log::debug("REQUEST ORDER {}"sv, symbol);
       get_open_orders(symbol);
     } else if (topic.compare("execution"sv) == 0) {
-      log::debug("REQUEST EXECUTION {}"sv, symbol);
       get_execution(symbol);
     }
   };
@@ -363,16 +359,16 @@ void OrderEntry::get_wallet_balance() {
         .body = {},
         .quality_of_service = {},
     };
-    auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
+    auto callback = [this]([[maybe_unused]] auto &request_id, auto &response) {
       TraceInfo trace_info;
       Trace event{trace_info, response};
-      get_wallet_balance_ack(event, sequence);
+      get_wallet_balance_ack(event);
     };
     (*connection_)("wallet_balance"sv, request, callback);
   });
 }
 
-void OrderEntry::get_wallet_balance_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
+void OrderEntry::get_wallet_balance_ack(Trace<web::rest::Response> const &event) {
   profile_.wallet_balance_ack([&]() {
     if (event.value.status() == web::http::Status::NOT_FOUND) {
       return;
@@ -442,16 +438,16 @@ void OrderEntry::get_position_info(std::string_view const &symbol) {
         .body = {},
         .quality_of_service = {},
     };
-    auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
+    auto callback = [this, symbol = std::string{symbol}]([[maybe_unused]] auto &request_id, auto &response) {
       TraceInfo trace_info;
       Trace event{trace_info, response};
-      get_position_info_ack(event, sequence);
+      get_position_info_ack(event, symbol);
     };
     (*connection_)("position_info"sv, request, callback);
   });
 }
 
-void OrderEntry::get_position_info_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
+void OrderEntry::get_position_info_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.position_info_ack([&]() {
     auto handle_success = [&](auto &body) {
       json::PositionInfo position_info{body, decode_buffer_};
@@ -502,16 +498,16 @@ void OrderEntry::get_open_orders(std::string_view const &symbol) {
         .body = {},
         .quality_of_service = {},
     };
-    auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
+    auto callback = [this, symbol = std::string{symbol}]([[maybe_unused]] auto &request_id, auto &response) {
       TraceInfo trace_info;
       Trace event{trace_info, response};
-      get_open_orders_ack(event, sequence);
+      get_open_orders_ack(event, symbol);
     };
     (*connection_)("open_orders"sv, request, callback);
   });
 }
 
-void OrderEntry::get_open_orders_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
+void OrderEntry::get_open_orders_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.open_orders_ack([&]() {
     auto handle_success = [&](auto &body) {
       json::OpenOrders open_orders{body, decode_buffer_};
@@ -602,16 +598,16 @@ void OrderEntry::get_execution(std::string_view const &symbol) {
         .body = {},
         .quality_of_service = {},
     };
-    auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
+    auto callback = [this, symbol = std::string{symbol}]([[maybe_unused]] auto &request_id, auto &response) {
       TraceInfo trace_info;
       Trace event{trace_info, response};
-      get_execution_ack(event, sequence);
+      get_execution_ack(event, symbol);
     };
     (*connection_)("execution"sv, request, callback);
   });
 }
 
-void OrderEntry::get_execution_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
+void OrderEntry::get_execution_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.execution_ack([&]() {
     auto handle_success = [&](auto &body) {
       json::Execution execution{body, decode_buffer_};
@@ -623,6 +619,12 @@ void OrderEntry::get_execution_ack(Trace<web::rest::Response> const &event, [[ma
       log::warn(R"(error={}, text="{}")"sv, error, text);
     };
     process_response(event, handle_success, handle_error);
+    auto response = Response{
+        .account = account_.get_name(),
+        .topic = "execution"sv,
+        .symbol = symbol,
+    };
+    create_trace_and_dispatch(handler_, event, response);
   });
 }
 

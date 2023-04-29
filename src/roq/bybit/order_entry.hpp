@@ -40,11 +40,18 @@ namespace roq {
 namespace bybit {
 
 struct OrderEntry final : public web::rest::Client::Handler, public json::WalletParser::Handler {
+  struct Response final {
+    std::string_view account;
+    std::string_view topic;
+    std::string_view symbol;
+  };
   struct Handler {
     virtual void operator()(Trace<StreamStatus> const &) = 0;
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
     virtual void operator()(Trace<oms::TradeUpdate> const &, uint16_t stream_id, bool is_last, uint8_t user_id) = 0;
     virtual void operator()(Trace<FundsUpdate> const &, bool is_last) = 0;
+    //
+    virtual void operator()(Trace<Response> const &) = 0;
   };
 
   OrderEntry(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
@@ -91,19 +98,19 @@ struct OrderEntry final : public web::rest::Client::Handler, public json::Wallet
   void operator()(Trace<json::AccountInfo> const &);
 
   void get_wallet_balance();
-  void get_wallet_balance_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+  void get_wallet_balance_ack(Trace<web::rest::Response> const &);
   void operator()(Trace<json::WalletBalance2> const &) override;
 
   void get_position_info(std::string_view const &symbol);
-  void get_position_info_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+  void get_position_info_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
   void operator()(Trace<json::PositionInfo> const &);
 
   void get_open_orders(std::string_view const &symbol);
-  void get_open_orders_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+  void get_open_orders_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
   void operator()(Trace<json::OpenOrders> const &);
 
   void get_execution(std::string_view const &symbol);
-  void get_execution_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+  void get_execution_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
   void operator()(Trace<json::Execution> const &);
 
   void create_order(Event<CreateOrder> const &, oms::Order const &, std::string_view const &request_id);
