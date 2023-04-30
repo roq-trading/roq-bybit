@@ -2,6 +2,7 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/bybit/json/place_order.hpp"
 #include "roq/bybit/json/utils.hpp"
 
 using namespace roq;
@@ -11,7 +12,7 @@ using namespace std::literals;
 using namespace std::chrono_literals;
 
 namespace {
-auto SYMBOL = "BTCUSDT"sv;
+auto const SYMBOL = "BTCUSDT"sv;
 }
 
 namespace {
@@ -52,10 +53,27 @@ TEST_CASE("json_place_order_simple", "[json_place_order]") {
                   R"("side":"Buy",)"
                   R"("orderType":"Limit",)"
                   R"("qty":"1.2345",)"
-                  R"("timeInForce":"GTC,)"
+                  R"("timeInForce":"GTC",)"
                   R"("reduceOnly":false,)"
                   R"("price":"23456.78",)"
                   R"("orderLinkId":"1234")"
                   R"(})";
   CHECK(buffer == expected);
+}
+
+namespace {
+auto const MESSAGE = R"({)"
+                     R"("retCode":0,)"
+                     R"("retMsg":"OK",)"
+                     R"("result":{"orderId":"1410305521329702656",)"
+                     R"("orderLinkId":"SQAC6QMAAQAASPS4YMFC")"
+                     R"(},)"
+                     R"("retExtInfo":{},)"
+                     R"("time":1682857519260)"
+                     R"(})";
+}
+
+TEST_CASE("json_place_order_response", "[json_place_order]") {
+  core::Buffer buffer(8192);
+  json::PlaceOrder obj{MESSAGE, buffer};
 }

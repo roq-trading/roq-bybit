@@ -22,7 +22,7 @@ symbols = [
   [users.trader]
   password = "secret"
   accounts = [ "A1" ]
-  symbols = [ "KCS-USDT" ]
+  symbols = [ "BTCUSDT" ]
 
 [rate_limits]
 

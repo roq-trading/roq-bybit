@@ -3,11 +3,7 @@
   "type": "item",
   "values": [
     {
-      "name": "accountId",
-      "type": "std::string_view"
-    },
-    {
-      "name": "symbol",
+      "name": "orderId",
       "type": "std::string_view"
     },
     {
@@ -15,32 +11,68 @@
       "type": "std::string_view"
     },
     {
-      "name": "orderId",
+      "name": "blockTradeId",
       "type": "std::string_view"
     },
     {
-      "name": "orderPrice",
+      "name": "symbol",
+      "type": "std::string_view"
+    },
+    {
+      "name": "price",
       "type": "double"
     },
     {
-      "name": "orderQty",
+      "name": "qty",
       "type": "double"
     },
     {
-      "name": "execQty",
-      "type": "double"
+      "name": "side",
+      "type": "Side"
     },
     {
-      "name": "cummulativeQuoteQty",
-      "type": "double"
+      "name": "isLeverage",
+      "type": "int32_t"
+    },
+    {
+      "name": "positionIdx",
+      "type": "int32_t"
+    },
+    {
+      "name": "orderStatus",
+      "type": "OrderStatus"
+    },
+    {
+      "name": "cancelType",
+      "type": "CancelType"
+    },
+    {
+      "name": "rejectReason",
+      "type": "std::string_view"
     },
     {
       "name": "avgPrice",
       "type": "double"
     },
     {
-      "name": "status",
-      "type": "OrderStatus"
+      "name": "leavesQty",
+      "type": "double"
+    },
+    {
+      "name": "leavesValue",
+      "type": "double"
+    },
+    {
+      "name": "cumExecQty",
+      "type": "double"
+    },
+    {
+      "name": "cumExecValue",
+      "type": "double"
+    },
+    {
+      "name": "cumExecFee",
+      "type": "double"
     },
     {
       "name": "timeInForce",
@@ -51,32 +83,76 @@
       "type": "OrderType"
     },
     {
-      "name": "side",
-      "type": "Side"
+      "name": "stopOrderType",
+      "type": "StopOrderType"
     },
     {
-      "name": "stopPrice",
+      "name": "orderIv",
       "type": "double"
     },
     {
-      "name": "icebergQty",
+      "name": "triggerPrice",
       "type": "double"
     },
     {
-      "name": "createTime",
-      "type": "std::chrono::milliseconds"
+      "name": "takeProfit",
+      "type": "double"
     },
     {
-      "name": "updateTime",
-      "type": "std::chrono::milliseconds"
+      "name": "stopLoss",
+      "type": "double"
     },
     {
-      "name": "isWorking",
+      "name": "tpTriggerBy",
+      "type": "double"
+    },
+    {
+      "name": "slTriggerBy",
+      "type": "double"
+    },
+    {
+      "name": "triggerDirection",
       "type": "int32_t"
     },
     {
-      "name": "orderCategory",
+      "name": "triggerBy",
+      "type": "double"
+    },
+    {
+      "name": "lastPriceOnCreated",
+      "type": "double"
+    },
+    {
+      "name": "reduceOnly",
+      "type": "bool"
+    },
+    {
+      "name": "closeOnTrigger",
+      "type": "bool"
+    },
+    {
+      "name": "placeType",
+      "type": "std::string_view"
+    },
+    {
+      "name": "smpType",
+      "type": "std::string_view"
+    },
+    {
+      "name": "smpGroup",
       "type": "int32_t"
+    },
+    {
+      "name": "smpOrderId",
+      "type": "std::string_view"
+    },
+    {
+      "name": "createdTime",
+      "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "updatedTime",
+      "type": "std::chrono::milliseconds"
     }
   ]
 }

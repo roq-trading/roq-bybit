@@ -341,7 +341,10 @@ extern std::string_view cancel_order(
     std::string_view const &previous_request_id);
 
 extern std::string_view cancel_all_orders(
-    std::string &buffer, CancelAllOrders const &, std::string_view const &request_id, std::string_view const &symbol);
+    std::string &buffer,
+    roq::CancelAllOrders const &,
+    std::string_view const &request_id,
+    std::string_view const &symbol);
 
 extern Error map_error(int32_t ret_code);
 

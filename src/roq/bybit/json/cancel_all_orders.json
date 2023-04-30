@@ -1,5 +1,5 @@
 {
-  "name": "CancelOrders",
+  "name": "CancelAllOrders",
   "type": "comp",
   "values": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "name": "result",
-      "type": "CancelOrdersResult"
+      "type": "CancelAllOrdersResult"
     },
     {
       "name": "retExtInfo"

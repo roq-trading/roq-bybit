@@ -33,8 +33,8 @@
 #include "roq/bybit/json/wallet_parser.hpp"
 
 #include "roq/bybit/json/amend_order.hpp"
+#include "roq/bybit/json/cancel_all_orders.hpp"
 #include "roq/bybit/json/cancel_order.hpp"
-#include "roq/bybit/json/cancel_orders.hpp"
 #include "roq/bybit/json/place_order.hpp"
 
 namespace roq {
@@ -136,7 +136,7 @@ struct OrderEntry final : public web::rest::Client::Handler, public json::Wallet
 
   void cancel_all_orders(Event<CancelAllOrders> const &, std::string_view const &request_id);
   void cancel_all_orders_ack(Trace<web::rest::Response> const &);
-  void operator()(Trace<json::CancelOrders> const &);
+  void operator()(Trace<json::CancelAllOrders> const &);
 
   template <typename SuccessHandler, typename ErrorHandler>
   void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);

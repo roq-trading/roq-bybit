@@ -1,6 +1,6 @@
 {
-  "name": "PlaceOrderResult",
-  "type": "comp",
+  "name": "CancelAllOrdersResultItem",
+  "type": "item",
   "values": [
     {
       "name": "orderId",

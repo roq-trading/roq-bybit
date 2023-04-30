@@ -48,7 +48,7 @@ std::string_view place_order(
       R"("side":"{}",)"
       R"("orderType":"{}",)"
       R"("qty":"{}",)"
-      R"("timeInForce":"{},)"
+      R"("timeInForce":"{}",)"
       R"("reduceOnly":{})"sv,
       "spot"sv,  // XXX
       create_order.symbol,
@@ -118,15 +118,17 @@ std::string_view cancel_order(
 
 std::string_view cancel_all_orders(
     std::string &buffer,
-    CancelAllOrders const &,
+    roq::CancelAllOrders const &,
     [[maybe_unused]] std::string_view const &request_id,
     std::string_view const &symbol) {
   buffer.clear();
   fmt::format_to(
       std::back_inserter(buffer),
       R"({{)"
+      R"("category":"{}",)"
       R"("symbol":"{}")"
       R"(}})"sv,
+      "spot"sv,  // XXX
       symbol);
   return buffer;
 }

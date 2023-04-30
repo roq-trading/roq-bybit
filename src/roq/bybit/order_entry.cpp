@@ -554,7 +554,7 @@ void OrderEntry::operator()(Trace<json::OpenOrders> const &event) {
     auto side = json::map(item.side);
     auto order_type = json::map(item.order_type);
     auto time_in_force = json::map(item.time_in_force);
-    auto order_status = json::map(item.status);
+    auto order_status = json::map(item.order_status);
     auto order_update = oms::OrderUpdate{
         .account = account_.get_name(),
         .exchange = Flags::exchange(),
@@ -565,16 +565,16 @@ void OrderEntry::operator()(Trace<json::OpenOrders> const &event) {
         .order_type = order_type,
         .time_in_force = time_in_force,
         .execution_instructions = {},
-        .create_time_utc = item.create_time,
-        .update_time_utc = item.update_time,
+        .create_time_utc = item.created_time,
+        .update_time_utc = item.updated_time,
         .external_account = {},
         .external_order_id = item.order_id,
         .status = order_status,
-        .quantity = item.order_qty,
-        .price = item.order_price,
-        .stop_price = item.stop_price,
+        .quantity = item.qty,
+        .price = item.price,
+        .stop_price = NaN,
         .remaining_quantity = NaN,
-        .traded_quantity = item.exec_qty,
+        .traded_quantity = item.cum_exec_qty,
         .average_traded_price = item.avg_price,
         .last_traded_quantity = {},
         .last_traded_price = {},
@@ -722,46 +722,42 @@ void OrderEntry::operator()(
     Trace<json::PlaceOrder> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   auto &[trace_info, place_order] = event;
   log::info<2>("place_order={}"sv, place_order);
-  auto status = place_order.ret_code == 0 ? RequestStatus::ACCEPTED : RequestStatus::REJECTED;
+  auto request_status = place_order.ret_code == 0 ? RequestStatus::ACCEPTED : RequestStatus::REJECTED;
   auto error = json::map_error(place_order.ret_code);
   auto text = place_order.ret_msg;
+  auto &result = place_order.result;
+  auto order_status = place_order.ret_code == 0 ? OrderStatus::ACCEPTED : OrderStatus::REJECTED;
   auto response = oms::Response{
       .type = RequestType::CREATE_ORDER,
       .origin = Origin::EXCHANGE,
-      .status = status,
+      .status = request_status,
       .error = error,
       .text = text,
       .version = version,
-      .request_id = {},
+      .request_id = result.order_link_id,
       .quantity = NaN,
       .price = NaN,
   };
-  auto &result = place_order.result;
-  auto side = json::map(result.side);
-  auto order_type = json::map(result.order_type);
-  auto time_in_force = json::map(result.time_in_force);
-  auto order_status = json::map(result.status);
-  auto remaining_quantity = result.order_qty - result.exec_qty;
   auto order_update = oms::OrderUpdate{
       .account = account_.get_name(),
       .exchange = Flags::exchange(),
-      .symbol = result.symbol,
-      .side = side,
+      .symbol = {},
+      .side = {},
       .position_effect = {},
       .max_show_quantity = NaN,
-      .order_type = order_type,
-      .time_in_force = time_in_force,
+      .order_type = {},
+      .time_in_force = {},
       .execution_instructions = {},
       .create_time_utc = {},
-      .update_time_utc = utils::safe_cast(result.create_time),
+      .update_time_utc = place_order.time,
       .external_account = {},
       .external_order_id = result.order_id,
       .status = order_status,
-      .quantity = result.order_qty,
-      .price = result.order_price,
+      .quantity = NaN,
+      .price = NaN,
       .stop_price = NaN,
-      .remaining_quantity = remaining_quantity,
-      .traded_quantity = result.exec_qty,
+      .remaining_quantity = NaN,
+      .traded_quantity = NaN,
       .average_traded_price = NaN,
       .last_traded_quantity = NaN,
       .last_traded_price = NaN,
@@ -1053,9 +1049,9 @@ void OrderEntry::cancel_all_orders(
 void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event) {
   profile_.cancel_all_orders_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::CancelOrders cancel_orders{body, decode_buffer_};
-      log::debug("cancel_orders={}"sv, cancel_orders);
-      Trace event_2{event, cancel_orders};
+      json::CancelAllOrders cancel_all_orders{body, decode_buffer_};
+      log::debug("cancel_all_orders={}"sv, cancel_all_orders);
+      Trace event_2{event, cancel_all_orders};
       (*this)(event_2);
     };
     auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
@@ -1065,9 +1061,9 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event) 
   });
 }
 
-void OrderEntry::operator()(Trace<json::CancelOrders> const &event) {
-  auto &[trace_info, cancel_orders] = event;
-  log::info<2>("cancel_orders={}"sv, cancel_orders);
+void OrderEntry::operator()(Trace<json::CancelAllOrders> const &event) {
+  auto &[trace_info, cancel_all_orders] = event;
+  log::info<2>("cancel_all_orders={}"sv, cancel_all_orders);
 }
 
 template <typename SuccessHandler, typename ErrorHandler>

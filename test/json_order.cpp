@@ -90,3 +90,5 @@ TEST_CASE("json_order_parser", "[json_order]") {
   CHECK(res == true);
   CHECK(handler.found == true);
 }
+
+// "{"id":"460579-1410305521329702656-82d5fda2-5331-4c34-84f1-f88443a31d7a","topic":"order","creationTime":1682857519269,"data":[{"symbol":"BTCUSDT","orderId":"1410305521329702656","side":"Buy","orderType":"Limit","cancelType":"UNKNOWN","price":"27867.99","qty":"0.000040","orderIv":"","timeInForce":"GTC","orderStatus":"New","orderLinkId":"SQAC6QMAAQAASPS4YMFC","lastPriceOnCreated":"","reduceOnly":false,"leavesQty":"","leavesValue":"","cumExecQty":"0.000000","cumExecValue":"0.00000000","avgPrice":"","blockTradeId":"","positionIdx":0,"cumExecFee":"0","createdTime":"1682857519247","updatedTime":"","rejectReason":"","stopOrderType":"","triggerPrice":"","takeProfit":"","stopLoss":"","tpTriggerBy":"","slTriggerBy":"","triggerDirection":0,"triggerBy":"","closeOnTrigger":false,"category":"spot","isLeverage":"0","smpType":"None","smpGroup":0,"smpOrderId":""}]}
