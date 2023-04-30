@@ -19,7 +19,8 @@
 #include "roq/web/rest/client.hpp"
 
 #include "roq/core/download.hpp"
-#include "roq/server.hpp"
+
+#include "roq/core/limit/rate_limiter.hpp"
 
 #include "roq/bybit/rest_state.hpp"
 #include "roq/bybit/shared.hpp"
@@ -94,10 +95,12 @@ struct Rest final : public web::rest::Client::Handler {
   } latency_;
   // cache
   Shared &shared_;
-  absl::flat_hash_set<Symbol> all_symbols_;
+  absl::flat_hash_set<Symbol> symbols_;
   // state
   ConnectionStatus status_ = {};
   core::Download<RestState> download_;
+  // ...
+  core::limit::RateLimiter rate_limiter;
 };
 
 }  // namespace bybit

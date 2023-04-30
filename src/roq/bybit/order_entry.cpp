@@ -95,8 +95,10 @@ OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_i
           .open_orders_ack = create_metrics(name_, "open_orders_ack"sv),
           .execution = create_metrics(name_, "execution"sv),
           .execution_ack = create_metrics(name_, "execution_ack"sv),
-          .create_order = create_metrics(name_, "create_order"sv),
-          .create_order_ack = create_metrics(name_, "create_order_ack"sv),
+          .place_order = create_metrics(name_, "place_order"sv),
+          .place_order_ack = create_metrics(name_, "place_order_ack"sv),
+          .amend_order = create_metrics(name_, "amend_order"sv),
+          .amend_order_ack = create_metrics(name_, "amend_order_ack"sv),
           .cancel_order = create_metrics(name_, "cancel_order"sv),
           .cancel_order_ack = create_metrics(name_, "cancel_order_ack"sv),
           .cancel_all_orders = create_metrics(name_, "cancel_all_orders"sv),
@@ -139,8 +141,10 @@ void OrderEntry::operator()(metrics::Writer &writer) {
       .write(profile_.open_orders_ack, metrics::PROFILE)
       .write(profile_.execution, metrics::PROFILE)
       .write(profile_.execution_ack, metrics::PROFILE)
-      .write(profile_.create_order, metrics::PROFILE)
-      .write(profile_.create_order_ack, metrics::PROFILE)
+      .write(profile_.place_order, metrics::PROFILE)
+      .write(profile_.place_order_ack, metrics::PROFILE)
+      .write(profile_.amend_order, metrics::PROFILE)
+      .write(profile_.amend_order_ack, metrics::PROFILE)
       .write(profile_.cancel_order, metrics::PROFILE)
       .write(profile_.cancel_order_ack, metrics::PROFILE)
       .write(profile_.cancel_all_orders, metrics::PROFILE)
@@ -151,17 +155,17 @@ void OrderEntry::operator()(metrics::Writer &writer) {
 
 uint16_t OrderEntry::operator()(
     Event<CreateOrder> const &event, oms::Order const &order, std::string_view const &request_id) {
-  create_order(event, order, request_id);
+  place_order(event, order, request_id);
   return stream_id_;
 }
 
 uint16_t OrderEntry::operator()(
-    Event<ModifyOrder> const &,
-    oms::Order const &,
-    [[maybe_unused]] std::string_view const &request_id,
-    [[maybe_unused]] std::string_view const &previous_request_id) {
-  // XXX TODO
-  throw oms::NotSupported{"not supported"sv};
+    Event<ModifyOrder> const &event,
+    oms::Order const &order,
+    std::string_view const &request_id,
+    std::string_view const &previous_request_id) {
+  amend_order(event, order, request_id, previous_request_id);
+  return stream_id_;
 }
 
 uint16_t OrderEntry::operator()(
@@ -383,6 +387,12 @@ void OrderEntry::get_wallet_balance_ack(Trace<web::rest::Response> const &event)
       log::warn(R"(error={}, text="{}")"sv, error, text);
     };
     process_response(event, handle_success, handle_error);
+    auto response = Response{
+        .account = account_.get_name(),
+        .topic = "wallet"sv,
+        .symbol = {},
+    };
+    create_trace_and_dispatch(handler_, event, response);
   });
 }
 
@@ -459,6 +469,12 @@ void OrderEntry::get_position_info_ack(Trace<web::rest::Response> const &event, 
       log::warn(R"(error={}, text="{}")"sv, error, text);
     };
     process_response(event, handle_success, handle_error);
+    auto response = Response{
+        .account = account_.get_name(),
+        .topic = "position"sv,
+        .symbol = symbol,
+    };
+    create_trace_and_dispatch(handler_, event, response);
   });
 }
 
@@ -519,6 +535,12 @@ void OrderEntry::get_open_orders_ack(Trace<web::rest::Response> const &event, st
       log::warn(R"(error={}, text="{}")"sv, error, text);
     };
     process_response(event, handle_success, handle_error);
+    auto response = Response{
+        .account = account_.get_name(),
+        .topic = "order"sv,
+        .symbol = symbol,
+    };
+    create_trace_and_dispatch(handler_, event, response);
   });
 }
 
@@ -634,9 +656,9 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
   log::info<2>("execution={}"sv, execution);
 }
 
-void OrderEntry::create_order(
+void OrderEntry::place_order(
     Event<CreateOrder> const &event, oms::Order const &order, std::string_view const &request_id) {
-  profile_.create_order([&]() {
+  profile_.place_order([&]() {
     if (!ready())
       throw oms::NotReady{"not ready"sv};
     auto &[message_info, create_order] = event;
@@ -644,7 +666,7 @@ void OrderEntry::create_order(
     all_symbols_.emplace(create_order.symbol);
     auto const path = "/v5/order/create"sv;
     std::string buffer;  // XXX
-    auto body = json::create_order(buffer, create_order, order, request_id);
+    auto body = json::place_order(buffer, create_order, order, request_id);
     log::debug(R"(body="{}")"sv, body);
     auto headers = account_.create_headers(path, {}, body);
     auto request = web::rest::Request{
@@ -662,19 +684,19 @@ void OrderEntry::create_order(
       auto version = uint32_t{1};
       TraceInfo trace_info;
       Trace event{trace_info, response};
-      create_order_ack(event, user_id, order_id, version);
+      place_order_ack(event, user_id, order_id, version);
     };
-    (*connection_)("create_order"sv, request, callback);
+    (*connection_)("place_order"sv, request, callback);
   });
 }
 
-void OrderEntry::create_order_ack(
+void OrderEntry::place_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
-  profile_.create_order_ack([&]() {
+  profile_.place_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::CreateOrder create_order{body, decode_buffer_};
-      log::debug("create_order={}"sv, create_order);
-      Trace event_2{event, create_order};
+      json::PlaceOrder place_order{body, decode_buffer_};
+      log::debug("place_order={}"sv, place_order);
+      Trace event_2{event, place_order};
       (*this)(event_2, user_id, order_id, version);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
@@ -697,12 +719,12 @@ void OrderEntry::create_order_ack(
 }
 
 void OrderEntry::operator()(
-    Trace<json::CreateOrder> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
-  auto &[trace_info, create_order] = event;
-  log::info<2>("create_order={}"sv, create_order);
-  auto status = create_order.ret_code == 0 ? RequestStatus::ACCEPTED : RequestStatus::REJECTED;
-  auto error = json::map_error(create_order.ret_code);
-  auto text = create_order.ret_msg;
+    Trace<json::PlaceOrder> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+  auto &[trace_info, place_order] = event;
+  log::info<2>("place_order={}"sv, place_order);
+  auto status = place_order.ret_code == 0 ? RequestStatus::ACCEPTED : RequestStatus::REJECTED;
+  auto error = json::map_error(place_order.ret_code);
+  auto text = place_order.ret_msg;
   auto response = oms::Response{
       .type = RequestType::CREATE_ORDER,
       .origin = Origin::EXCHANGE,
@@ -714,7 +736,7 @@ void OrderEntry::operator()(
       .quantity = NaN,
       .price = NaN,
   };
-  auto &result = create_order.result;
+  auto &result = place_order.result;
   auto side = json::map(result.side);
   auto order_type = json::map(result.order_type);
   auto time_in_force = json::map(result.time_in_force);
@@ -732,6 +754,126 @@ void OrderEntry::operator()(
       .execution_instructions = {},
       .create_time_utc = {},
       .update_time_utc = utils::safe_cast(result.create_time),
+      .external_account = {},
+      .external_order_id = result.order_id,
+      .status = order_status,
+      .quantity = result.order_qty,
+      .price = result.order_price,
+      .stop_price = NaN,
+      .remaining_quantity = remaining_quantity,
+      .traded_quantity = result.exec_qty,
+      .average_traded_price = NaN,
+      .last_traded_quantity = NaN,
+      .last_traded_price = NaN,
+      .last_liquidity = {},
+      .update_type = UpdateType::INCREMENTAL,
+      .sending_time_utc = {},
+  };
+  Trace event_2{trace_info, response};
+  (*this)(event_2, user_id, order_id, order_update);
+}
+
+void OrderEntry::amend_order(
+    Event<ModifyOrder> const &event,
+    oms::Order const &order,
+    [[maybe_unused]] std::string_view const &request_id,
+    std::string_view const &previous_request_id) {
+  profile_.amend_order([&]() {
+    if (!ready())
+      throw oms::NotReady{"not ready"sv};
+    auto &[message_info, modify_order] = event;
+    auto const path = "/v5/order/amend"sv;
+    std::string buffer;  // XXX
+    auto body = json::amend_order(buffer, modify_order, order, request_id, previous_request_id);
+    log::debug(R"(body="{}")"sv, body);
+    auto headers = account_.create_headers(path, {}, body);
+    auto request = web::rest::Request{
+        .method = web::http::Method::POST,
+        .path = path,
+        .query = {},
+        .accept = web::http::Accept::APPLICATION_JSON,
+        .content_type = web::http::ContentType::APPLICATION_JSON,
+        .headers = headers,
+        .body = body,
+        .quality_of_service = {},
+    };
+    auto callback =
+        [this, user_id = message_info.source, order_id = modify_order.order_id, version = modify_order.version](
+            [[maybe_unused]] auto &request_id, auto &response) {
+          TraceInfo trace_info;
+          Trace event{trace_info, response};
+          amend_order_ack(event, user_id, order_id, version);
+        };
+    (*connection_)("amend_order"sv, request, callback);
+  });
+}
+
+void OrderEntry::amend_order_ack(
+    Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+  profile_.amend_order_ack([&]() {
+    auto handle_success = [&](auto &body) {
+      json::AmendOrder amend_order{body, decode_buffer_};
+      log::debug("amend_order={}"sv, amend_order);
+      Trace event_2{event, amend_order};
+      (*this)(event_2, user_id, order_id, version);
+    };
+    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
+      log::warn(R"(error={}, text="{}")"sv, error, text);
+      auto response = oms::Response{
+          .type = RequestType::MODIFY_ORDER,
+          .origin = origin,
+          .status = status,
+          .error = error,
+          .text = text,
+          .version = version,
+          .request_id = {},
+          .quantity = NaN,
+          .price = NaN,
+      };
+      Trace event_2{event, response};
+      (*this)(event_2, user_id, order_id);
+    };
+    process_response(event, handle_success, handle_error);
+  });
+}
+
+// XXX this is a little weird -- the response tells us the last known (?) status of the order
+void OrderEntry::operator()(
+    Trace<json::AmendOrder> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+  auto &[trace_info, amend_order] = event;
+  log::info<2>("amend_order={}"sv, amend_order);
+  auto status = amend_order.ret_code == 0 ? RequestStatus::ACCEPTED : RequestStatus::REJECTED;
+  auto error = json::map_error(amend_order.ret_code);
+  auto text = amend_order.ret_msg;
+  auto response = oms::Response{
+      .type = RequestType::MODIFY_ORDER,
+      .origin = Origin::EXCHANGE,
+      .status = status,
+      .error = error,
+      .text = text,
+      .version = version,
+      .request_id = {},
+      .quantity = NaN,
+      .price = NaN,
+  };
+  auto &result = amend_order.result;
+  auto side = json::map(result.side);
+  auto order_type = json::map(result.order_type);
+  auto time_in_force = json::map(result.time_in_force);
+  auto order_status = json::map(result.status);
+  auto remaining_quantity = result.order_qty - result.exec_qty;
+  auto order_update = oms::OrderUpdate{
+      .account = account_.get_name(),
+      .exchange = Flags::exchange(),
+      .symbol = result.symbol,
+      .side = side,
+      .position_effect = {},
+      .max_show_quantity = NaN,
+      .order_type = order_type,
+      .time_in_force = time_in_force,
+      .execution_instructions = {},
+      .create_time_utc = {},
+      .update_time_utc = {},
       .external_account = {},
       .external_order_id = result.order_id,
       .status = order_status,

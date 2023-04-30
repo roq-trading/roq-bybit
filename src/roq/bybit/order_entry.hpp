@@ -32,9 +32,10 @@
 
 #include "roq/bybit/json/wallet_parser.hpp"
 
+#include "roq/bybit/json/amend_order.hpp"
 #include "roq/bybit/json/cancel_order.hpp"
 #include "roq/bybit/json/cancel_orders.hpp"
-#include "roq/bybit/json/create_order.hpp"
+#include "roq/bybit/json/place_order.hpp"
 
 namespace roq {
 namespace bybit {
@@ -113,9 +114,17 @@ struct OrderEntry final : public web::rest::Client::Handler, public json::Wallet
   void get_execution_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
   void operator()(Trace<json::Execution> const &);
 
-  void create_order(Event<CreateOrder> const &, oms::Order const &, std::string_view const &request_id);
-  void create_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
-  void operator()(Trace<json::CreateOrder> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
+  void place_order(Event<CreateOrder> const &, oms::Order const &, std::string_view const &request_id);
+  void place_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
+  void operator()(Trace<json::PlaceOrder> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
+
+  void amend_order(
+      Event<ModifyOrder> const &,
+      oms::Order const &,
+      std::string_view const &request_id,
+      std::string_view const &previous_request_id);
+  void amend_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
+  void operator()(Trace<json::AmendOrder> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
 
   void cancel_order(
       Event<CancelOrder> const &,
@@ -159,7 +168,8 @@ struct OrderEntry final : public web::rest::Client::Handler, public json::Wallet
         position_info, position_info_ack,                   //
         open_orders, open_orders_ack,                       //
         execution, execution_ack,                           //
-        create_order, create_order_ack,                     //
+        place_order, place_order_ack,                       //
+        amend_order, amend_order_ack,                       //
         cancel_order, cancel_order_ack,                     //
         cancel_all_orders, cancel_all_orders_ack;
   } profile_;

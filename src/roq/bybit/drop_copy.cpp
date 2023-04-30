@@ -131,9 +131,37 @@ void DropCopy::operator()(metrics::Writer &writer) {
       .write(latency_.heartbeat, metrics::LATENCY);
 }
 
+void DropCopy::operator()(Rest::SymbolsUpdate &symbols_update) {
+  for (auto &symbol : symbols_update.symbols) {
+    if (!shared_.dispatcher.can_account_trade_symbol(account_.get_name(), symbol))
+      continue;
+    auto res = symbols_.emplace(symbol);
+    assert(res.second);
+    if ((*connection_).ready()) {
+      // XXX TODO HANS need to check a latch for each subscription type
+      if (shared_.api != API::SPOT)
+        account_.request_queue.emplace_back("position"sv, symbol);
+      account_.request_queue.emplace_back("order"sv, symbol);
+      account_.request_queue.emplace_back("execution"sv, symbol);
+    }
+  }
+}
+
 void DropCopy::operator()(Trace<OrderEntry::Response> const &event) {
   auto &[trace_info, response] = event;
   log::debug(R"(RESPONSE topic="{}", symbol="{}")"sv, response.topic, response.symbol);
+  if (response.topic == "wallet"sv) {
+    log::debug("WALLET"sv);
+  } else if (response.topic == "position"sv) {
+    log::debug("POSITION"sv);
+  } else if (response.topic == "order"sv) {
+    log::debug("ORDER"sv);
+  } else if (response.topic == "execution"sv) {
+    log::debug("EXECUTION"sv);
+  } else {
+    log::fatal("Unexpected"sv);
+    // log::fatal("Unexpected: response={}"sv, response);
+  }
 }
 
 void DropCopy::operator()(web::socket::Client::Connected const &) {
@@ -276,7 +304,8 @@ void DropCopy::operator()(Trace<json::Subscribe> const &event) {
     account_.request_queue.emplace_back(req_id, std::string{});
   } else if (
       req_id.compare("position"sv) == 0 || req_id.compare("order"sv) == 0 || req_id.compare("execution"sv) == 0) {
-    account_.request_queue.emplace_back(req_id, "BTCUSDT"sv);
+    for (auto &symbol : symbols_)
+      account_.request_queue.emplace_back(req_id, symbol);
   } else {
     log::warn(R"(Unexpected: req_id="{}")"sv, req_id);
   }

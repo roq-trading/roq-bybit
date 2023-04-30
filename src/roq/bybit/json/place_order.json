@@ -1,5 +1,5 @@
 {
-  "name": "CreateOrder",
+  "name": "PlaceOrder",
   "type": "comp",
   "values": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "name": "result",
-      "type": "CreateOrderResult"
+      "type": "PlaceOrderResult"
     },
     {
       "name": "retExtInfo"

@@ -1,15 +1,18 @@
 set(TARGET_NAME "${PROJECT_NAME}-test")
 
 set(SOURCES
-    json_auth.cpp
-    json_ping.cpp
     json_account_info.cpp
+    json_amend_order.cpp
+    json_auth.cpp
+    json_cancel_order.cpp
     json_error.cpp
     json_execution.cpp
     json_instrument_info.cpp
     json_open_orders.cpp
     json_order_book.cpp
     json_order.cpp
+    json_ping.cpp
+    json_place_order.cpp
     json_position_info.cpp
     json_public_trade.cpp
     json_subscribe.cpp

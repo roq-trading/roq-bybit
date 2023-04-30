@@ -49,7 +49,7 @@ auto create_category(auto api) -> std::string_view {
 // === IMPLEMENTATION ===
 
 Shared::Shared(server::Dispatcher &dispatcher)
-    : dispatcher_{dispatcher}, rate_limiter{flags::Flags::request_limit(), flags::Flags::request_limit_interval()},
+    : dispatcher{dispatcher}, rate_limiter{flags::Flags::request_limit(), flags::Flags::request_limit_interval()},
       api{create_api()}, category{create_category(api)}, symbols{flags::Flags::ws_max_subscriptions_per_stream()} {
 }
 

@@ -151,13 +151,10 @@ void Gateway::operator()(Trace<FundsUpdate> const &event, bool is_last) {
 void Gateway::operator()(Rest::SymbolsUpdate &symbols_update) {
   auto [size, start_from] = shared_.symbols(symbols_update.symbols);
   ensure_symbol_slices(size);
-  for (auto &iter : market_data_)
-    (*iter).subscribe(start_from);
-}
-
-void Gateway::operator()(Trace<OrderEntry::Response> const &event) {
-  auto &[trace_info, response] = event;
-  get_drop_copy(response.account)(event);
+  for (auto &item : market_data_)
+    (*item).subscribe(start_from);
+  for (auto &item : drop_copy_)
+    (*item.second)(symbols_update);
 }
 
 void Gateway::ensure_symbol_slices(size_t size) {
@@ -169,6 +166,11 @@ void Gateway::ensure_symbol_slices(size_t size) {
     create_event_and_dispatch(*market_data, message_info, start);
     market_data_.emplace_back(std::move(market_data));
   }
+}
+
+void Gateway::operator()(Trace<OrderEntry::Response> const &event) {
+  auto &[trace_info, response] = event;
+  get_drop_copy(response.account)(event);
 }
 
 uint16_t Gateway::operator()(

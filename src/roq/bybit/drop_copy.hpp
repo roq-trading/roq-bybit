@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include <absl/container/flat_hash_set.h>
+
 #include <string>
 #include <string_view>
 
@@ -21,6 +23,7 @@
 #include "roq/bybit/shared.hpp"
 
 #include "roq/bybit/order_entry.hpp"  // response
+#include "roq/bybit/rest.hpp"         // symbols
 
 #include "roq/bybit/json/parser.hpp"
 
@@ -47,6 +50,8 @@ struct DropCopy final : public web::socket::Client::Handler, json::Parser::Handl
   void operator()(Event<Timer> const &);
 
   void operator()(metrics::Writer &);
+
+  void operator()(Rest::SymbolsUpdate &);
 
   void operator()(Trace<OrderEntry::Response> const &);
 
@@ -113,6 +118,8 @@ struct DropCopy final : public web::socket::Client::Handler, json::Parser::Handl
   ConnectionStatus status_ = {};
   std::chrono::nanoseconds logon_timeout_ = {};
   std::chrono::nanoseconds next_ping_ = {};
+  // ...
+  absl::flat_hash_set<std::string> symbols_;
 };
 
 }  // namespace bybit

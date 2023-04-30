@@ -69,9 +69,9 @@ struct Gateway final : public server::Handler,
 
   void operator()(Rest::SymbolsUpdate &) override;
 
-  void operator()(Trace<OrderEntry::Response> const &) override;
-
   void ensure_symbol_slices(size_t size);
+
+  void operator()(Trace<OrderEntry::Response> const &) override;
 
   // utilities
 

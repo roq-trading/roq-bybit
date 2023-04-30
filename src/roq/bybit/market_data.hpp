@@ -57,6 +57,8 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   void subscribe(size_t start_from = 0);
 
  protected:
+  // web::socket::Client::Handler
+
   void operator()(web::socket::Client::Connected const &) override;
   void operator()(web::socket::Client::Disconnected const &) override;
   void operator()(web::socket::Client::Ready const &) override;

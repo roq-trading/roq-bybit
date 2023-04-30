@@ -1,5 +1,7 @@
 !!! THIS FILE HAS BEEN AUTO-GENERATED !!!
 roq-bybit-v5-json
+amend_order.hpp
+amend_order_result.hpp
 message.hpp
 account_info.hpp
 account_info_result.hpp
@@ -58,13 +60,15 @@ cancel_order.hpp
 cancel_order_result.hpp
 cancel_orders.hpp
 cancel_orders_result.hpp
-create_order.hpp
-create_order_result.hpp
+place_order.hpp
+place_order_result.hpp
 event_type.hpp
 operation.hpp
 topic.hpp
 ticket_info_data_item.hpp
 ticket_info.hpp
+amend_order.cpp
+amend_order_result.cpp
 message.cpp
 account_info.cpp
 account_info_result.cpp
@@ -123,8 +127,8 @@ cancel_order.cpp
 cancel_order_result.cpp
 cancel_orders.cpp
 cancel_orders_result.cpp
-create_order.cpp
-create_order_result.cpp
+place_order.cpp
+place_order_result.cpp
 event_type.cpp
 operation.cpp
 topic.cpp

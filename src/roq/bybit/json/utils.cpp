@@ -30,7 +30,7 @@ auto map_order_type(auto order_type, auto execution_instructions) -> json::Order
 }
 }  // namespace
 
-std::string_view create_order(
+std::string_view place_order(
     std::string &buffer,
     roq::CreateOrder const &create_order,
     oms::Order const &order,
@@ -39,22 +39,27 @@ std::string_view create_order(
   auto side = map(create_order.side);
   auto order_type = map_order_type(create_order.order_type, create_order.execution_instructions);
   auto time_in_force = map(create_order.time_in_force);
+  auto reduce_only = create_order.execution_instructions.has(ExecutionInstruction::DO_NOT_INCREASE);
   fmt::format_to(
       std::back_inserter(buffer),
       R"({{)"
+      R"("category":"{}",)"
       R"("symbol":"{}",)"
-      R"("orderQty":"{}",)"
       R"("side":"{}",)"
       R"("orderType":"{}",)"
-      R"("timeInForce":"{}")"sv,
+      R"("qty":"{}",)"
+      R"("timeInForce":"{},)"
+      R"("reduceOnly":{})"sv,
+      "spot"sv,  // XXX
       create_order.symbol,
-      utils::Number{create_order.quantity, order.quantity_decimals},
       side.as_raw_text(),
       order_type.as_raw_text(),
-      time_in_force.as_raw_text());
+      utils::Number{create_order.quantity, order.quantity_decimals},
+      time_in_force.as_raw_text(),
+      reduce_only);
   if (!std::isnan(create_order.price))
     fmt::format_to(
-        std::back_inserter(buffer), R"(,"orderPrice":"{}")"sv, utils::Number{create_order.price, order.price_decimals});
+        std::back_inserter(buffer), R"(,"price":"{}")"sv, utils::Number{create_order.price, order.price_decimals});
   fmt::format_to(
       std::back_inserter(buffer),
       R"(,"orderLinkId":"{}")"
@@ -63,19 +68,51 @@ std::string_view create_order(
   return buffer;
 }
 
-std::string_view cancel_order(
+std::string_view amend_order(
     std::string &buffer,
-    roq::CancelOrder const &,
-    oms::Order const &,
+    roq::ModifyOrder const &modify_order,
+    oms::Order const &order,
     [[maybe_unused]] std::string_view const &request_id,
     std::string_view const &previous_request_id) {
   buffer.clear();
   fmt::format_to(
       std::back_inserter(buffer),
       R"({{)"
+      R"("category":"{}",)"
+      R"("symbol":"{}")"sv,
+      "spot"sv,  // XXX
+      order.symbol);
+  if (!std::isnan(modify_order.price))
+    fmt::format_to(
+        std::back_inserter(buffer), R"(,"price":"{}")"sv, utils::Number{modify_order.price, order.price_decimals});
+  if (!std::isnan(modify_order.quantity))
+    fmt::format_to(
+        std::back_inserter(buffer), R"(,"qty":"{}")"sv, utils::Number{modify_order.quantity, order.quantity_decimals});
+  fmt::format_to(
+      std::back_inserter(buffer),
+      R"(,"orderLinkId":"{}")"
+      R"(}})"sv,
+      previous_request_id);  // XXX not correct -- there's modify order now
+  return buffer;
+}
+
+std::string_view cancel_order(
+    std::string &buffer,
+    roq::CancelOrder const &,
+    oms::Order const &order,
+    [[maybe_unused]] std::string_view const &request_id,
+    std::string_view const &previous_request_id) {
+  buffer.clear();
+  fmt::format_to(
+      std::back_inserter(buffer),
+      R"({{)"
+      R"("category":"{}",)"
+      R"("symbol":"{}",)"
       R"("orderLinkId":"{}")"
       R"(}})"sv,
-      previous_request_id);
+      "spot"sv,  // XXX
+      order.symbol,
+      previous_request_id);  // XXX not correct -- there's modify order now
   return buffer;
 }
 

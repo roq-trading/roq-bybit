@@ -23,6 +23,10 @@ using namespace std::literals;
 namespace roq {
 namespace bybit {
 
+// === TODO ===
+// => use rate limiter / request queue
+// => query instrument-info every N seconds
+
 // === CONSTANTS ===
 
 namespace {
@@ -89,7 +93,8 @@ Rest::Rest(Handler &handler, io::Context &context, uint16_t stream_id, Shared &s
       latency_{
           .ping = create_metrics(name_, "ping"sv),
       },
-      shared_{shared}, download_{Flags::rest_request_timeout(), [this](auto state) { return download(state); }} {
+      shared_{shared}, download_{Flags::rest_request_timeout(), [this](auto state) { return download(state); }},
+      rate_limiter{flags::Flags::request_limit(), flags::Flags::request_limit_interval()} {
 }
 
 void Rest::operator()(Event<Start> const &) {
@@ -215,7 +220,7 @@ void Rest::get_instrument_info() {
 }
 
 void Rest::get_instrument_info_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
-  constexpr auto const STATE = RestState::GET_INSTRUMENT_INFO;
+  auto const STATE = RestState::GET_INSTRUMENT_INFO;
   profile_.instrument_info_ack([&]() {
     auto handle_success = [&](auto &body) {
       if (download_.skip(sequence, STATE)) {
@@ -224,6 +229,7 @@ void Rest::get_instrument_info_ack(Trace<web::rest::Response> const &event, uint
         json::InstrumentInfo instrument_info{body, decode_buffer_};
         Trace event_2{event, instrument_info};
         (*this)(event_2);
+        // XXX HANS NEW ??? create_trace_and_dispatch(*this, event, instrument_info)();
         download_.check(STATE);
       }
     };
@@ -238,11 +244,10 @@ void Rest::get_instrument_info_ack(Trace<web::rest::Response> const &event, uint
 void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
   auto &[trace_info, instrument_info] = event;
   log::info<4>("instrument_info={}"sv, instrument_info);
-  std::vector<Symbol> symbols_2;
-  symbols_2.reserve(std::size(instrument_info.result.list));
+  std::vector<Symbol> symbols;
+  symbols.reserve(std::size(instrument_info.result.list));  // alloc
   size_t counter = 0;
-  for (size_t i = 0; i < std::size(instrument_info.result.list); ++i) {
-    auto &item = instrument_info.result.list[i];
+  for (auto &item : instrument_info.result.list) {
     log::info<2>("item={}"sv, item);
     auto discard = shared_.discard_symbol(item.symbol);
     auto security_type = json::map(item.contract_type, item.options_type);
@@ -277,8 +282,8 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
     create_trace_and_dispatch(handler_, trace_info, reference_data, true);
     if (discard)
       continue;
-    if (all_symbols_.emplace(item.symbol).second)  // only include new
-      symbols_2.emplace_back(item.symbol);
+    if (symbols_.emplace(item.symbol).second)  // only include new
+      symbols.emplace_back(item.symbol);
     ++counter;
     auto trading_status = json::map(item.status);
     auto market_status = MarketStatus{
@@ -289,13 +294,13 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
     };
     create_trace_and_dispatch(handler_, trace_info, market_status, true);
   }
-  if (!std::empty(symbols_2)) {
+  if (!std::empty(symbols)) {
     auto symbols_update = SymbolsUpdate{
-        .symbols = symbols_2,
+        .symbols = symbols,
     };
     handler_(symbols_update);
   }
-  if (counter > 0) [[unlikely]]
+  if (counter > 0)
     log::info("Symbols {} / {}"sv, counter, std::size(instrument_info.result.list));
 }
 
