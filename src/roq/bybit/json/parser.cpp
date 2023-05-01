@@ -92,8 +92,11 @@ bool Parser::dispatch(
       create_trace_and_dispatch(handler, trace_info, order);
       return true;
     }
-    case EXECUTION:
-      break;
+    case EXECUTION: {
+      Execution2 execution{message, buffer};
+      create_trace_and_dispatch(handler, trace_info, execution);
+      return true;
+    }
   }
   switch (message_.op) {
     using enum Operation::type_t;

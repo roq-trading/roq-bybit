@@ -21,9 +21,9 @@
 
 // private
 #include "roq/bybit/json/auth.hpp"
+#include "roq/bybit/json/execution_2.hpp"
 #include "roq/bybit/json/order.hpp"
 #include "roq/bybit/json/position.hpp"
-#include "roq/bybit/json/ticket_info.hpp"
 #include "roq/bybit/json/wallet_balance_2.hpp"
 
 namespace roq {
@@ -45,7 +45,7 @@ struct Parser final {
     virtual void operator()(Trace<json::WalletBalance2> const &) = 0;
     virtual void operator()(Trace<json::Position> const &) = 0;
     virtual void operator()(Trace<json::Order> const &) = 0;
-    virtual void operator()(Trace<json::TicketInfo> const &) = 0;
+    virtual void operator()(Trace<json::Execution2> const &) = 0;
   };
 
   static bool dispatch(Handler &, std::string_view const &message, core::json::Buffer &, TraceInfo const &);

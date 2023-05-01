@@ -112,7 +112,7 @@ TEST_CASE("json_wallet_parser", "[json_wallet]") {
     }
     void operator()(Trace<json::Position> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
-    void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
+    void operator()(Trace<json::Execution2> const &) override { FAIL(); }
 
     bool found = false;
   } handler;
@@ -144,7 +144,7 @@ TEST_CASE("json_wallet_parser_2", "[json_wallet]") {
     }
     void operator()(Trace<json::Position> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
-    void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
+    void operator()(Trace<json::Execution2> const &) override { FAIL(); }
 
     bool found = false;
   } handler;

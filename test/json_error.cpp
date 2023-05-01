@@ -42,7 +42,7 @@ TEST_CASE("json_error_parser", "[json_error]") {
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
     void operator()(Trace<json::Wallet> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
-    void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
+    void operator()(Trace<json::Execution2> const &) override { FAIL(); }
 
     bool found = false;
   } handler;

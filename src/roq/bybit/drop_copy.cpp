@@ -416,7 +416,7 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::TicketInfo> const &event) {
+void DropCopy::operator()(Trace<json::Execution2> const &event) {
   profile_.execution([&]() {
     auto &trace_info = event.trace_info;
     auto &ticket_info = event.value;
@@ -425,9 +425,9 @@ void DropCopy::operator()(Trace<json::TicketInfo> const &event) {
       if (shared_.find_order(item.order_link_id, [&](auto &order) {
             auto liquidity = item.is_maker ? Liquidity::MAKER : Liquidity::TAKER;
             auto fill = Fill{
-                .external_trade_id = item.trade_id,
-                .quantity = item.quantity,
-                .price = item.price,
+                .external_trade_id = item.exec_id,
+                .quantity = item.exec_qty,
+                .price = item.exec_price,
                 .liquidity = liquidity,
             };
             auto trade_update = oms::TradeUpdate{
@@ -437,9 +437,9 @@ void DropCopy::operator()(Trace<json::TicketInfo> const &event) {
                 .symbol = order.symbol,
                 .side = order.side,
                 .position_effect = order.position_effect,
-                .create_time_utc = utils::safe_cast(item.event_time),
-                .update_time_utc = utils::safe_cast(item.event_time),
-                .external_account = item.account_id,
+                .create_time_utc = {},
+                .update_time_utc = utils::safe_cast(item.exec_time),
+                .external_account = {},
                 .external_order_id = item.order_id,
                 .fills = {&fill, 1},
                 .update_type = {},

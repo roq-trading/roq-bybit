@@ -1,7 +1,5 @@
 !!! THIS FILE HAS BEEN AUTO-GENERATED !!!
 roq-bybit-v5-json
-position.hpp
-position_data_item.hpp
 account_info.hpp
 account_info_result.hpp
 account_type.hpp
@@ -19,6 +17,8 @@ contract_type.hpp
 error.hpp
 event_type.hpp
 exec_type.hpp
+execution_2.hpp
+execution_data_item.hpp
 execution.hpp
 execution_result_item.hpp
 execution_result.hpp
@@ -43,9 +43,11 @@ order_type.hpp
 ping.hpp
 place_order.hpp
 place_order_result.hpp
+position_data_item.hpp
 position_info.hpp
 position_info_result_item.hpp
 position_info_result.hpp
+position.hpp
 position_status.hpp
 price_filter.hpp
 public_trade_data.hpp
@@ -59,8 +61,6 @@ subscribe.hpp
 tick_direction.hpp
 tickers_data.hpp
 tickers.hpp
-ticket_info_data_item.hpp
-ticket_info.hpp
 time_in_force.hpp
 topic.hpp
 tp_sl_mode.hpp
@@ -71,8 +71,6 @@ wallet_balance.hpp
 wallet_balance_result_item.hpp
 wallet_balance_result.hpp
 wallet.hpp
-position.cpp
-position_data_item.cpp
 account_info.cpp
 account_info_result.cpp
 account_type.cpp
@@ -90,6 +88,8 @@ contract_type.cpp
 error.cpp
 event_type.cpp
 exec_type.cpp
+execution_2.cpp
+execution_data_item.cpp
 execution.cpp
 execution_result_item.cpp
 execution_result.cpp
@@ -114,9 +114,11 @@ order_type.cpp
 ping.cpp
 place_order.cpp
 place_order_result.cpp
+position_data_item.cpp
 position_info.cpp
 position_info_result_item.cpp
 position_info_result.cpp
+position.cpp
 position_status.cpp
 price_filter.cpp
 public_trade_data.cpp
@@ -130,8 +132,6 @@ subscribe.cpp
 tick_direction.cpp
 tickers_data.cpp
 tickers.cpp
-ticket_info_data_item.cpp
-ticket_info.cpp
 time_in_force.cpp
 topic.cpp
 tp_sl_mode.cpp

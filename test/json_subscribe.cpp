@@ -69,7 +69,7 @@ TEST_CASE("json_subscribe_parser_spot", "[json_subscribe]") {
     void operator()(Trace<json::WalletBalance2> const &) override { FAIL(); }
     void operator()(Trace<json::Position> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
-    void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
+    void operator()(Trace<json::Execution2> const &) override { FAIL(); }
 
     bool found = false;
   } handler;
@@ -99,7 +99,7 @@ TEST_CASE("json_subscribe_parser_linear", "[json_subscribe]") {
     void operator()(Trace<json::WalletBalance2> const &) override { FAIL(); }
     void operator()(Trace<json::Position> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
-    void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
+    void operator()(Trace<json::Execution2> const &) override { FAIL(); }
 
     bool found = false;
   } handler;
@@ -129,7 +129,7 @@ TEST_CASE("json_subscribe_parser_inverse", "[json_subscribe]") {
     void operator()(Trace<json::WalletBalance2> const &) override { FAIL(); }
     void operator()(Trace<json::Position> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
-    void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
+    void operator()(Trace<json::Execution2> const &) override { FAIL(); }
 
     bool found = false;
   } handler;
@@ -159,7 +159,7 @@ TEST_CASE("json_subscribe_parser_option", "[json_subscribe]") {
     void operator()(Trace<json::WalletBalance2> const &) override { FAIL(); }
     void operator()(Trace<json::Position> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
-    void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
+    void operator()(Trace<json::Execution2> const &) override { FAIL(); }
 
     bool found = false;
   } handler;

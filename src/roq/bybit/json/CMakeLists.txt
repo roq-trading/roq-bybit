@@ -5,8 +5,6 @@ set(SOURCES parser.cpp utils.cpp wallet_parser.cpp)
 include(RoqAutogen)
 
 set(AUTOGEN_SCHEMAS
-    position.json
-    position_data_item.json
     account_info.json
     account_info_result.json
     account_type.json
@@ -24,6 +22,8 @@ set(AUTOGEN_SCHEMAS
     error.json
     event_type.json
     exec_type.json
+    execution_2.json
+    execution_data_item.json
     execution.json
     execution_result_item.json
     execution_result.json
@@ -48,9 +48,11 @@ set(AUTOGEN_SCHEMAS
     ping.json
     place_order.json
     place_order_result.json
+    position_data_item.json
     position_info.json
     position_info_result_item.json
     position_info_result.json
+    position.json
     position_status.json
     price_filter.json
     public_trade_data.json
@@ -64,8 +66,6 @@ set(AUTOGEN_SCHEMAS
     tick_direction.json
     tickers_data.json
     tickers.json
-    ticket_info_data_item.json
-    ticket_info.json
     time_in_force.json
     topic.json
     tp_sl_mode.json

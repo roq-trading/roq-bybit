@@ -549,7 +549,7 @@ void MarketData::operator()(Trace<json::Order> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void MarketData::operator()(Trace<json::TicketInfo> const &) {
+void MarketData::operator()(Trace<json::Execution2> const &) {
   log::fatal("Unexpected"sv);
 }
 
