@@ -15,6 +15,8 @@
 
 #include "roq/bybit/json/event_type.hpp"
 
+#include "roq/bybit/json/category.hpp"
+
 #include "roq/bybit/json/contract_type.hpp"
 #include "roq/bybit/json/options_type.hpp"
 #include "roq/bybit/json/status.hpp"
@@ -324,27 +326,30 @@ inline roq::OrderStatus map(json::OrderStatus value) {
 extern std::string_view strip_symbol(std::string_view const &topic);
 
 extern std::string_view place_order(
-    std::string &buffer, roq::CreateOrder const &, oms::Order const &, std::string_view const &request_id);
+    std::string &buffer, roq::CreateOrder const &, oms::Order const &, std::string_view const &request_id, Category);
 
 extern std::string_view amend_order(
     std::string &buffer,
     roq::ModifyOrder const &,
     oms::Order const &,
     std::string_view const &request_id,
-    std::string_view const &previous_request_id);
+    std::string_view const &previous_request_id,
+    Category);
 
 extern std::string_view cancel_order(
     std::string &buffer,
     roq::CancelOrder const &,
     oms::Order const &,
     std::string_view const &request_id,
-    std::string_view const &previous_request_id);
+    std::string_view const &previous_request_id,
+    Category);
 
 extern std::string_view cancel_all_orders(
     std::string &buffer,
     roq::CancelAllOrders const &,
     std::string_view const &request_id,
-    std::string_view const &symbol);
+    std::string_view const &symbol,
+    Category);
 
 extern Error map_error(int32_t ret_code);
 

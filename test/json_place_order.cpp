@@ -46,7 +46,7 @@ TEST_CASE("json_place_order_simple", "[json_place_order]") {
   };
   auto order = ::create_order();
   auto request_id = "1234"sv;
-  json::place_order(buffer, create_order, order, request_id);
+  json::place_order(buffer, create_order, order, request_id, json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"

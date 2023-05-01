@@ -2,6 +2,7 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/bybit/json/amend_order.hpp"
 #include "roq/bybit/json/utils.hpp"
 
 using namespace roq;
@@ -39,7 +40,7 @@ TEST_CASE("json_amend_order_price", "[json_amend_order]") {
   auto order = create_order();
   auto request_id = "2345"sv;
   auto previous_request_id = "1234"sv;
-  json::amend_order(buffer, modify_order, order, request_id, previous_request_id);
+  json::amend_order(buffer, modify_order, order, request_id, previous_request_id, json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"
@@ -64,7 +65,7 @@ TEST_CASE("json_amend_order_quantity", "[json_amend_order]") {
   auto order = create_order();
   auto request_id = "2345"sv;
   auto previous_request_id = "1234"sv;
-  json::amend_order(buffer, modify_order, order, request_id, previous_request_id);
+  json::amend_order(buffer, modify_order, order, request_id, previous_request_id, json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"
@@ -89,7 +90,7 @@ TEST_CASE("json_amend_order_both", "[json_amend_order]") {
   auto order = create_order();
   auto request_id = "2345"sv;
   auto previous_request_id = "1234"sv;
-  json::amend_order(buffer, modify_order, order, request_id, previous_request_id);
+  json::amend_order(buffer, modify_order, order, request_id, previous_request_id, json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"
@@ -98,4 +99,19 @@ TEST_CASE("json_amend_order_both", "[json_amend_order]") {
                   R"("orderLinkId":"1234")"
                   R"(})";
   CHECK(buffer == expected);
+}
+
+namespace {
+auto const ERROR = R"({)"
+                   R"("retCode":10001,)"
+                   R"("retMsg":"Illegal category",)"
+                   R"("result":{},)"
+                   R"("retExtInfo":{},)"
+                   R"("time":1682911123716)"
+                   R"(})";
+}
+
+TEST_CASE("json_amend_order_error", "[json_amend_order]") {
+  core::Buffer buffer(8192);
+  json::AmendOrder obj{ERROR, buffer};
 }

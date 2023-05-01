@@ -35,7 +35,7 @@ TEST_CASE("json_cancel_order_simple", "[json_cancel_order]") {
   auto order = create_order();
   auto request_id = "2345"sv;
   auto previous_request_id = "1234"sv;
-  json::cancel_order(buffer, cancel_order, order, request_id, previous_request_id);
+  json::cancel_order(buffer, cancel_order, order, request_id, previous_request_id, json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"

@@ -34,7 +34,8 @@ std::string_view place_order(
     std::string &buffer,
     roq::CreateOrder const &create_order,
     oms::Order const &order,
-    std::string_view const &request_id) {
+    std::string_view const &request_id,
+    Category category) {
   buffer.clear();
   auto side = map(create_order.side);
   auto order_type = map_order_type(create_order.order_type, create_order.execution_instructions);
@@ -50,7 +51,7 @@ std::string_view place_order(
       R"("qty":"{}",)"
       R"("timeInForce":"{}",)"
       R"("reduceOnly":{})"sv,
-      "spot"sv,  // XXX
+      category.as_raw_text(),
       create_order.symbol,
       side.as_raw_text(),
       order_type.as_raw_text(),
@@ -73,14 +74,15 @@ std::string_view amend_order(
     roq::ModifyOrder const &modify_order,
     oms::Order const &order,
     [[maybe_unused]] std::string_view const &request_id,
-    std::string_view const &previous_request_id) {
+    std::string_view const &previous_request_id,
+    Category category) {
   buffer.clear();
   fmt::format_to(
       std::back_inserter(buffer),
       R"({{)"
       R"("category":"{}",)"
       R"("symbol":"{}")"sv,
-      "spot"sv,  // XXX
+      category.as_raw_text(),
       order.symbol);
   if (!std::isnan(modify_order.price))
     fmt::format_to(
@@ -88,11 +90,19 @@ std::string_view amend_order(
   if (!std::isnan(modify_order.quantity))
     fmt::format_to(
         std::back_inserter(buffer), R"(,"qty":"{}")"sv, utils::Number{modify_order.quantity, order.quantity_decimals});
-  fmt::format_to(
-      std::back_inserter(buffer),
-      R"(,"orderLinkId":"{}")"
-      R"(}})"sv,
-      previous_request_id);  // XXX not correct -- there's modify order now
+  if (!std::empty(order.external_order_id)) {
+    fmt::format_to(
+        std::back_inserter(buffer),
+        R"(,"orderId":"{}")"
+        R"(}})"sv,
+        order.external_order_id);
+  } else {
+    fmt::format_to(
+        std::back_inserter(buffer),
+        R"(,"orderLinkId":"{}")"
+        R"(}})"sv,
+        previous_request_id);  // XXX not correct -- we need original request_id
+  }
   return buffer;
 }
 
@@ -101,18 +111,29 @@ std::string_view cancel_order(
     roq::CancelOrder const &,
     oms::Order const &order,
     [[maybe_unused]] std::string_view const &request_id,
-    std::string_view const &previous_request_id) {
+    std::string_view const &previous_request_id,
+    Category category) {
   buffer.clear();
   fmt::format_to(
       std::back_inserter(buffer),
       R"({{)"
       R"("category":"{}",)"
-      R"("symbol":"{}",)"
-      R"("orderLinkId":"{}")"
-      R"(}})"sv,
-      "spot"sv,  // XXX
-      order.symbol,
-      previous_request_id);  // XXX not correct -- there's modify order now
+      R"("symbol":"{}")"sv,
+      category.as_raw_text(),
+      order.symbol);
+  if (!std::empty(order.external_order_id)) {
+    fmt::format_to(
+        std::back_inserter(buffer),
+        R"(,"orderId":"{}")"
+        R"(}})"sv,
+        order.external_order_id);
+  } else {
+    fmt::format_to(
+        std::back_inserter(buffer),
+        R"(,"orderLinkId":"{}")"
+        R"(}})"sv,
+        previous_request_id);  // XXX not correct -- we need original request_id
+  }
   return buffer;
 }
 
@@ -120,7 +141,8 @@ std::string_view cancel_all_orders(
     std::string &buffer,
     roq::CancelAllOrders const &,
     [[maybe_unused]] std::string_view const &request_id,
-    std::string_view const &symbol) {
+    std::string_view const &symbol,
+    Category category) {
   buffer.clear();
   fmt::format_to(
       std::back_inserter(buffer),
@@ -128,7 +150,7 @@ std::string_view cancel_all_orders(
       R"("category":"{}",)"
       R"("symbol":"{}")"
       R"(}})"sv,
-      "spot"sv,  // XXX
+      category.as_raw_text(),
       symbol);
   return buffer;
 }

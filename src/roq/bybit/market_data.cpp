@@ -51,7 +51,7 @@ auto create_connection(auto &handler, auto &context, auto api) {
   auto uri = [&]() {
     auto base = flags::Flags::ws_public_uri();
     switch (api) {
-      using enum API;
+      using enum tools::API;
       case UNDEFINED:
         break;
       case SPOT:
@@ -89,14 +89,14 @@ auto create_connection(auto &handler, auto &context, auto api) {
 }
 
 auto is_spot(auto api) {
-  return api == API::SPOT;
+  return api == tools::API::SPOT;
 }
 
 auto get_mbp_depth(auto api) -> size_t {
   auto result = flags::Flags::ws_mbp_depth();
   if (!result) {
     switch (api) {
-      using enum API;
+      using enum tools::API;
       case UNDEFINED:
         break;
       case SPOT:
@@ -451,7 +451,7 @@ void MarketData::operator()(Trace<json::Tickers> const &event) {
     (*connection_).touch(trace_info.source_receive_time);
     auto &data = tickers.data;
     switch (shared_.api) {
-      using enum API;
+      using enum tools::API;
       case UNDEFINED:
         break;
       case SPOT:
@@ -538,6 +538,10 @@ void MarketData::operator()(Trace<json::Tickers> const &event) {
 }
 
 void MarketData::operator()(Trace<json::WalletBalance2> const &) {
+  log::fatal("Unexpected"sv);
+}
+
+void MarketData::operator()(Trace<json::Position> const &) {
   log::fatal("Unexpected"sv);
 }
 

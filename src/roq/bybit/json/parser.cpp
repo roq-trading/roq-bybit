@@ -82,12 +82,17 @@ bool Parser::dispatch(
     }
     case WALLET:
       return dispatch_helper_flatten_wallet(handler, buffer, trace_info, message);
+    case POSITION: {
+      Position position{message, buffer};
+      create_trace_and_dispatch(handler, trace_info, position);
+      return true;
+    }
     case ORDER: {
       Order order{message, buffer};
       create_trace_and_dispatch(handler, trace_info, order);
       return true;
     }
-    case TICKET_INFO:
+    case EXECUTION:
       break;
   }
   switch (message_.op) {

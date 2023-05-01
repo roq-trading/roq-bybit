@@ -1,18 +1,10 @@
 {
-  "name": "PositionInfoResultItem",
+  "name": "PositionDataItem",
   "type": "item",
   "values": [
     {
-      "name": "positionIdx",
-      "type": "int32_t"
-    },
-    {
-      "name": "riskId",
-      "type": "int32_t"
-    },
-    {
-      "name": "riskLimitValue",
-      "type": "double"
+      "name": "category",
+      "type": "std::string_view"
     },
     {
       "name": "symbol",
@@ -27,31 +19,51 @@
       "type": "double"
     },
     {
-      "name": "avgPrice",
-      "type": "double"
-    },
-    {
-      "name": "positionValue",
-      "type": "double"
+      "name": "positionIdx",
+      "type": "int32_t"
     },
     {
       "name": "tradeMode",
       "type": "int32_t"
     },
     {
-      "name": "autoAddMargin",
+      "name": "positionValue",
+      "type": "double"
+    },
+    {
+      "name": "riskId",
       "type": "int32_t"
     },
     {
-      "name": "positionStatus",
-      "type": "PositionStatus"
+      "name": "riskLimitValue",
+      "type": "double"
+    },
+    {
+      "name": "entryPrice",
+      "type": "double"
+    },
+    {
+      "name": "markPrice",
+      "type": "double"
     },
     {
       "name": "leverage",
       "type": "double"
     },
     {
-      "name": "markPrice",
+      "name": "positionBalance",
+      "type": "double"
+    },
+    {
+      "name": "autoAddMargin",
+      "type": "int32_t"
+    },
+    {
+      "name": "positionMM",
+      "type": "double"
+    },
+    {
+      "name": "positionIM",
       "type": "double"
     },
     {
@@ -63,15 +75,7 @@
       "type": "double"
     },
     {
-      "name": "positionIM",
-      "type": "double"
-    },
-    {
-      "name": "positionMM",
-      "type": "double"
-    },
-    {
-      "name": "tpslMode",
+      "name": "tpSlMode",
       "type": "TpSlMode"
     },
     {
@@ -93,6 +97,10 @@
     {
       "name": "cumRealisedPnl",
       "type": "double"
+    },
+    {
+      "name": "positionStatus",
+      "type": "PositionStatus"
     },
     {
       "name": "adlRankIndicator",

@@ -22,25 +22,25 @@ namespace {
 auto create_api() {
   std::string value{flags::Flags::api()};
   std::transform(std::begin(value), std::end(value), std::begin(value), ::toupper);
-  auto result = magic_enum::enum_cast<API>(value);
+  auto result = magic_enum::enum_cast<tools::API>(value);
   if (!result.has_value())
     log::fatal(R"(Unexpected: api="{}")"sv, value);
   return *result;
 }
 
-auto create_category(auto api) -> std::string_view {
+auto create_category(auto api) -> json::Category {
   switch (api) {
-    using enum API;
+    using enum tools::API;
     case UNDEFINED:
       break;
     case SPOT:
-      return "spot"sv;
+      return json::Category::SPOT;
     case LINEAR:
-      return "linear"sv;
+      return json::Category::LINEAR;
     case INVERSE:
-      return "inverse"sv;
+      return json::Category::INVERSE;
     case OPTION:
-      return "option"sv;
+      return json::Category::OPTION;
   }
   log::fatal("Unexpected"sv);
 }

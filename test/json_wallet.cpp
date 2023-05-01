@@ -110,6 +110,7 @@ TEST_CASE("json_wallet_parser", "[json_wallet]") {
       auto &c0 = wallet_balance.coin[0];
       CHECK(c0.coin == "USDT"sv);
     }
+    void operator()(Trace<json::Position> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
     void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
 
@@ -141,6 +142,7 @@ TEST_CASE("json_wallet_parser_2", "[json_wallet]") {
       auto &c0 = wallet_balance.coin[0];
       CHECK(c0.coin == "USDT"sv);
     }
+    void operator()(Trace<json::Position> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
     void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
 

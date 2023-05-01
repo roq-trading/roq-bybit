@@ -139,7 +139,7 @@ void DropCopy::operator()(Rest::SymbolsUpdate &symbols_update) {
     assert(res.second);
     if ((*connection_).ready()) {
       // XXX TODO HANS need to check a latch for each subscription type
-      if (shared_.api != API::SPOT)
+      if (shared_.api != tools::API::SPOT)
         account_.request_queue.emplace_back("position"sv, symbol);
       account_.request_queue.emplace_back("order"sv, symbol);
       account_.request_queue.emplace_back("execution"sv, symbol);
@@ -242,7 +242,7 @@ void DropCopy::operator()(ConnectionStatus status) {
 
 void DropCopy::subscribe() {
   subscribe("wallet"sv);
-  if (shared_.api != API::SPOT)
+  if (shared_.api != tools::API::SPOT)
     subscribe("position"sv);
   subscribe("order"sv);
   subscribe("execution"sv);
@@ -330,7 +330,7 @@ void DropCopy::operator()(Trace<json::Tickers> const &) {
 }
 
 void DropCopy::operator()(Trace<json::WalletBalance2> const &event) {
-  profile_.order([&]() {
+  profile_.wallet([&]() {
     auto &[trace_info, wallet_balance] = event;
     log::info<4>("event={{wallet={}, trace_info={}}}"sv, wallet_balance, trace_info);
     // XXX probably we need to filter and match --api
@@ -348,6 +348,13 @@ void DropCopy::operator()(Trace<json::WalletBalance2> const &event) {
       };
       create_trace_and_dispatch(handler_, trace_info, funds_update, true);
     }
+  });
+}
+
+void DropCopy::operator()(Trace<json::Position> const &event) {
+  profile_.position([&]() {
+    auto &[trace_info, position] = event;
+    log::info<4>("event={{position={}, trace_info={}}}"sv, position, trace_info);
   });
 }
 

@@ -148,6 +148,7 @@ TEST_CASE("json_tickers_parser_spot", "[json_tickers]") {
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
     void operator()(Trace<json::WalletBalance2> const &) override { FAIL(); }
+    void operator()(Trace<json::Position> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
     void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
 
@@ -179,6 +180,7 @@ TEST_CASE("json_tickers_parser_linear", "[json_tickers]") {
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
     void operator()(Trace<json::WalletBalance2> const &) override { FAIL(); }
+    void operator()(Trace<json::Position> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
     void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
 
@@ -210,6 +212,7 @@ TEST_CASE("json_tickers_parser_inverse", "[json_tickers]") {
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
     void operator()(Trace<json::WalletBalance2> const &) override { FAIL(); }
+    void operator()(Trace<json::Position> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
     void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
 
@@ -241,6 +244,7 @@ TEST_CASE("json_tickers_parser_option", "[json_tickers]") {
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
     void operator()(Trace<json::WalletBalance2> const &) override { FAIL(); }
+    void operator()(Trace<json::Position> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
     void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
 

@@ -26,14 +26,22 @@ namespace bybit {
 
 namespace {
 auto const NAME = "om"sv;
+}  // namespace
 
-auto const SUPPORTS = Mask{
-    SupportType::CREATE_ORDER,
-    SupportType::MODIFY_ORDER,
-    SupportType::CANCEL_ORDER,
-    SupportType::ORDER_ACK,
-    SupportType::FUNDS,
-};
+// === HELPERS ===
+
+namespace {
+auto get_supports(auto api) {
+  auto supports = Mask{
+      SupportType::CREATE_ORDER,
+      SupportType::CANCEL_ORDER,
+      SupportType::ORDER_ACK,
+      SupportType::FUNDS,
+  };
+  if (api != tools::API::SPOT)
+    supports |= SupportType::MODIFY_ORDER;
+  return supports;
+}
 }  // namespace
 
 // === CONSTANTS ===
@@ -219,7 +227,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,
         .account = account_.get_name(),
-        .supports = SUPPORTS,
+        .supports = get_supports(shared_.api),
         .transport = Transport::TCP,
         .protocol = Protocol::HTTP,
         .encoding = {Encoding::JSON},
@@ -337,7 +345,7 @@ void OrderEntry::get_wallet_balance() {
     auto path = "/v5/account/wallet-balance"sv;
     auto account_type = [&]() -> std::string_view {
       switch (shared_.api) {
-        using enum API;
+        using enum tools::API;
         case UNDEFINED:
           break;
         case SPOT:
@@ -418,11 +426,11 @@ void OrderEntry::operator()(Trace<json::WalletBalance2> const &event) {
 
 void OrderEntry::get_position_info(std::string_view const &symbol) {
   profile_.position_info([&]() {
-    assert(shared_.api != API::SPOT);
+    assert(shared_.api != tools::API::SPOT);
     auto const path = "/v5/position/list"sv;
     auto category = [&]() -> std::string_view {
       switch (shared_.api) {
-        using enum API;
+        using enum tools::API;
         case UNDEFINED:
           break;
         case SPOT:
@@ -488,7 +496,7 @@ void OrderEntry::get_open_orders(std::string_view const &symbol) {
     auto path = "/v5/order/realtime"sv;
     auto category = [&]() -> std::string_view {
       switch (shared_.api) {
-        using enum API;
+        using enum tools::API;
         case UNDEFINED:
           break;
         case SPOT:
@@ -592,7 +600,7 @@ void OrderEntry::get_execution(std::string_view const &symbol) {
     auto path = "/v5/execution/list"sv;
     auto category = [&]() -> std::string_view {
       switch (shared_.api) {
-        using enum API;
+        using enum tools::API;
         case UNDEFINED:
           break;
         case SPOT:
@@ -666,7 +674,7 @@ void OrderEntry::place_order(
     all_symbols_.emplace(create_order.symbol);
     auto const path = "/v5/order/create"sv;
     std::string buffer;  // XXX
-    auto body = json::place_order(buffer, create_order, order, request_id);
+    auto body = json::place_order(buffer, create_order, order, request_id, shared_.category);
     log::debug(R"(body="{}")"sv, body);
     auto headers = account_.create_headers(path, {}, body);
     auto request = web::rest::Request{
@@ -775,12 +783,14 @@ void OrderEntry::amend_order(
     [[maybe_unused]] std::string_view const &request_id,
     std::string_view const &previous_request_id) {
   profile_.amend_order([&]() {
+    if (shared_.api == tools::API::SPOT)
+      throw oms::NotSupported{"amend_order"sv};
     if (!ready())
       throw oms::NotReady{"not ready"sv};
     auto &[message_info, modify_order] = event;
     auto const path = "/v5/order/amend"sv;
     std::string buffer;  // XXX
-    auto body = json::amend_order(buffer, modify_order, order, request_id, previous_request_id);
+    auto body = json::amend_order(buffer, modify_order, order, request_id, previous_request_id, shared_.category);
     log::debug(R"(body="{}")"sv, body);
     auto headers = account_.create_headers(path, {}, body);
     auto request = web::rest::Request{
@@ -900,7 +910,7 @@ void OrderEntry::cancel_order(
     auto &[message_info, cancel_order] = event;
     auto const path = "/v5/order/cancel"sv;
     std::string buffer;  // XXX
-    auto body = json::cancel_order(buffer, cancel_order, order, request_id, previous_request_id);
+    auto body = json::cancel_order(buffer, cancel_order, order, request_id, previous_request_id, shared_.category);
     log::debug(R"(body="{}")"sv, body);
     auto headers = account_.create_headers(path, {}, body);
     auto request = web::rest::Request{
@@ -1023,7 +1033,7 @@ void OrderEntry::cancel_all_orders(
     auto const path = "/v5/order/cancel-all"sv;
     for (auto &symbol : all_symbols_) {
       std::string buffer;  // XXX
-      auto body = json::cancel_all_orders(buffer, cancel_all_orders, request_id, symbol);
+      auto body = json::cancel_all_orders(buffer, cancel_all_orders, request_id, symbol, shared_.category);
       log::debug(R"(body="{}")"sv, body);
       auto headers = account_.create_headers(path, {}, body);
       auto request = web::rest::Request{

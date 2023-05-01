@@ -3,8 +3,7 @@
   "type": "enum",
   "values": [
     {
-      "name": "UNKNOWN",
-      "comment": "undoc"
+      "name": "UNKNOWN"
     },
     {
       "name": "CancelByUser"

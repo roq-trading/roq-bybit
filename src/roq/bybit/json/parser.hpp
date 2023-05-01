@@ -22,6 +22,7 @@
 // private
 #include "roq/bybit/json/auth.hpp"
 #include "roq/bybit/json/order.hpp"
+#include "roq/bybit/json/position.hpp"
 #include "roq/bybit/json/ticket_info.hpp"
 #include "roq/bybit/json/wallet_balance_2.hpp"
 
@@ -42,6 +43,7 @@ struct Parser final {
     virtual void operator()(Trace<json::Tickers> const &) = 0;
     // private stream
     virtual void operator()(Trace<json::WalletBalance2> const &) = 0;
+    virtual void operator()(Trace<json::Position> const &) = 0;
     virtual void operator()(Trace<json::Order> const &) = 0;
     virtual void operator()(Trace<json::TicketInfo> const &) = 0;
   };

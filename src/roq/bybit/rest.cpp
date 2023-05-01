@@ -199,7 +199,7 @@ void Rest::get_instrument_info() {
         "?category={}"
         "&status=Trading"
         "&limit=1000"sv,
-        shared_.category);
+        shared_.category.as_raw_text());
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
         .path = "/v5/market/instruments-info"sv,

@@ -157,6 +157,18 @@
     {
       "name": "updatedTime",
       "type": "std::chrono::milliseconds"
+    },
+    {
+      "name": "tpSlMode",
+      "type": "TpSlMode"
+    },
+    {
+      "name": "tpLimitPrice",
+      "type": "double"
+    },
+    {
+      "name": "slLimitPrice",
+      "type": "double"
     }
   ]
 }

@@ -104,11 +104,11 @@
     },
     {
       "name": "tpTriggerBy",
-      "type": "double"
+      "type": "TriggerBy"
     },
     {
       "name": "slTriggerBy",
-      "type": "double"
+      "type": "TriggerBy"
     },
     {
       "name": "triggerDirection",
@@ -116,7 +116,7 @@
     },
     {
       "name": "triggerBy",
-      "type": "double"
+      "type": "TriggerBy"
     },
     {
       "name": "lastPriceOnCreated",

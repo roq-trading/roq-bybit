@@ -40,6 +40,7 @@ TEST_CASE("json_auth_parser", "[json_auth]") {
     // private
     void operator()(Trace<json::Auth> const &) override { found = true; }
     void operator()(Trace<json::WalletBalance2> const &) override { FAIL(); }
+    void operator()(Trace<json::Position> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
     void operator()(Trace<json::TicketInfo> const &) override { FAIL(); }
 

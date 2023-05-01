@@ -14,6 +14,7 @@ set(SOURCES
     json_order.cpp
     json_ping.cpp
     json_place_order.cpp
+    json_position.cpp
     json_position_info.cpp
     json_public_trade.cpp
     json_subscribe.cpp

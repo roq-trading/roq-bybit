@@ -20,7 +20,7 @@ add_subdirectory("tools")
 
 include(RoqAutogen)
 
-set(AUTOGEN_SCHEMAS api.json order_entry_state.json rest_state.json)
+set(AUTOGEN_SCHEMAS order_entry_state.json rest_state.json)
 
 roq_autogen(
   OUTPUT

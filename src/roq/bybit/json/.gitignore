@@ -1,5 +1,7 @@
 !!! THIS FILE HAS BEEN AUTO-GENERATED !!!
 roq-bybit-v5-json
+position.hpp
+position_data_item.hpp
 account_info.hpp
 account_info_result.hpp
 account_type.hpp
@@ -61,6 +63,7 @@ ticket_info_data_item.hpp
 ticket_info.hpp
 time_in_force.hpp
 topic.hpp
+tp_sl_mode.hpp
 trigger_by.hpp
 wallet_balance_2.hpp
 wallet_balance_item.hpp
@@ -68,6 +71,8 @@ wallet_balance.hpp
 wallet_balance_result_item.hpp
 wallet_balance_result.hpp
 wallet.hpp
+position.cpp
+position_data_item.cpp
 account_info.cpp
 account_info_result.cpp
 account_type.cpp
@@ -129,6 +134,7 @@ ticket_info_data_item.cpp
 ticket_info.cpp
 time_in_force.cpp
 topic.cpp
+tp_sl_mode.cpp
 trigger_by.cpp
 wallet_balance_2.cpp
 wallet_balance_item.cpp
