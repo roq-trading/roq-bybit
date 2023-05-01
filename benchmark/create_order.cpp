@@ -50,7 +50,7 @@ void BM_create_order(benchmark::State &state) {
   oms::Order order;
   uint64_t count = 1000000000;
   for (auto _ : state) {
-    auto body = json::place_order(buffer, CREATE_ORDER, order, REQUEST_ID);
+    auto body = json::place_order(buffer, CREATE_ORDER, order, REQUEST_ID, json::Category::SPOT);
     if (!std::empty(body))
       ++count;
   }
@@ -63,7 +63,7 @@ void BM_create_order_and_sign(benchmark::State &state) {
   tools::Crypto crypto{LOGIN, SECRET, 1s};
   uint64_t count = 1000000000;
   for (auto _ : state) {
-    auto body = json::place_order(buffer, CREATE_ORDER, ORDER, REQUEST_ID);
+    auto body = json::place_order(buffer, CREATE_ORDER, ORDER, REQUEST_ID, json::Category::SPOT);
     auto headers = crypto.create_headers_v2(PATH, {}, body, 1671026168138ms);
     if (!(std::empty(body) || std::empty(headers)))
       ++count;
