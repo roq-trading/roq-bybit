@@ -42,8 +42,8 @@ bool dispatch_helper_flatten_wallet(auto &handler, auto &buffer, auto &trace_inf
   for (auto [key, value] : std::get<core::json::Object>(root)) {
     if (key.compare("data"sv) == 0) {
       for (auto item : std::get<core::json::Array>(value)) {
-        WalletBalance2 wallet_balance{item, buffer};
-        create_trace_and_dispatch(handler, trace_info, wallet_balance);
+        Wallet wallet{item, buffer};
+        create_trace_and_dispatch(handler, trace_info, wallet);
       }
       return true;
     }

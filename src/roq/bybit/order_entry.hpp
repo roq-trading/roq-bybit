@@ -50,6 +50,7 @@ struct OrderEntry final : public web::rest::Client::Handler, public json::Wallet
     virtual void operator()(Trace<StreamStatus> const &) = 0;
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
     virtual void operator()(Trace<oms::TradeUpdate> const &, uint16_t stream_id, bool is_last, uint8_t user_id) = 0;
+    virtual void operator()(Trace<PositionUpdate> const &, bool is_last) = 0;
     virtual void operator()(Trace<FundsUpdate> const &, bool is_last) = 0;
     //
     virtual void operator()(Trace<Response> const &) = 0;
@@ -100,7 +101,7 @@ struct OrderEntry final : public web::rest::Client::Handler, public json::Wallet
 
   void get_wallet_balance();
   void get_wallet_balance_ack(Trace<web::rest::Response> const &);
-  void operator()(Trace<json::WalletBalance2> const &) override;
+  void operator()(Trace<json::Wallet> const &) override;
 
   void get_position_info(std::string_view const &symbol);
   void get_position_info_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);

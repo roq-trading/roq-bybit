@@ -28,14 +28,22 @@ namespace bybit {
 namespace {
 auto const NAME = "ex"sv;
 
-auto const SUPPORTS = Mask{
-    SupportType::ORDER,
-    SupportType::TRADE,
-    SupportType::POSITION,
-    SupportType::FUNDS,
-};
-
 auto const AUTH_EXPIRES = 1s;
+}  // namespace
+
+// === HELPERS ===
+
+namespace {
+auto get_supports(auto api) {
+  auto result = Mask{
+      SupportType::ORDER,
+      SupportType::TRADE,
+      SupportType::FUNDS,
+  };
+  if (api != tools::API::SPOT)
+    result |= SupportType::POSITION;
+  return result;
+}
 }  // namespace
 
 // === CONSTANTS ===
@@ -224,7 +232,7 @@ void DropCopy::operator()(ConnectionStatus status) {
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,
         .account = account_.get_name(),
-        .supports = SUPPORTS,
+        .supports = get_supports(shared_.api),
         .transport = Transport::TCP,
         .protocol = Protocol::WS,
         .encoding = {Encoding::JSON},
@@ -329,17 +337,17 @@ void DropCopy::operator()(Trace<json::Tickers> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void DropCopy::operator()(Trace<json::WalletBalance2> const &event) {
+void DropCopy::operator()(Trace<json::Wallet> const &event) {
   profile_.wallet([&]() {
-    auto &[trace_info, wallet_balance] = event;
-    log::info<4>("event={{wallet={}, trace_info={}}}"sv, wallet_balance, trace_info);
+    auto &[trace_info, wallet] = event;
+    log::info<4>("event={{wallet={}, trace_info={}}}"sv, wallet, trace_info);
     // XXX probably we need to filter and match --api
-    for (auto &item : wallet_balance.coin) {
+    for (auto &item : wallet.coin) {
       auto funds_update = FundsUpdate{
           .stream_id = stream_id_,
           .account = account_.get_name(),
           .currency = item.coin,
-          .balance = item.wallet_balance,
+          .balance = item.wallet_balance,  // XXX item.free ???
           .hold = item.locked,
           .external_account = {},
           .update_type = UpdateType::INCREMENTAL,
@@ -355,6 +363,28 @@ void DropCopy::operator()(Trace<json::Position> const &event) {
   profile_.position([&]() {
     auto &[trace_info, position] = event;
     log::info<4>("event={{position={}, trace_info={}}}"sv, position, trace_info);
+    for (auto &item : position.data) {
+      if (shared_.discard_symbol(item.symbol))
+        continue;
+      // log::debug("item={}"sv, item);
+      auto side = json::map(item.side);
+      auto quantity = utils::sign(side) * item.size;
+      auto long_quantity = std::max(0.0, quantity);
+      auto short_quantity = std::max(0.0, -quantity);
+      auto position_update = PositionUpdate{
+          .stream_id = stream_id_,
+          .account = account_.get_name(),
+          .exchange = Flags::exchange(),
+          .symbol = item.symbol,
+          .external_account = {},
+          .long_quantity = long_quantity,
+          .short_quantity = short_quantity,
+          .update_type = UpdateType::SNAPSHOT,
+          .exchange_time_utc = item.updated_time,  // XXX created_time ???
+          .sending_time_utc = position.creation_time,
+      };
+      create_trace_and_dispatch(handler_, trace_info, position_update, true);
+    }
   });
 }
 
@@ -367,16 +397,6 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
       auto order_type = json::map(item.order_type);
       auto time_in_force = json::map(item.time_in_force);
       auto order_status = json::map(item.order_status);
-      auto remaining_quantity = [&item]() {
-        if (!std::isnan(item.leaves_qty))
-          return item.leaves_qty;
-        return item.qty - item.cum_exec_qty;
-      }();
-      auto average_traded_price = [&item]() {
-        if (!std::isnan(item.avg_price))
-          return item.avg_price;
-        return item.cum_exec_value / item.cum_exec_qty;  // spot
-      }();
       auto order_update = oms::OrderUpdate{
           .account = account_.get_name(),
           .exchange = Flags::exchange(),
@@ -395,9 +415,9 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
           .quantity = item.qty,
           .price = item.price,
           .stop_price = NaN,
-          .remaining_quantity = remaining_quantity,
+          .remaining_quantity = item.leaves_qty,
           .traded_quantity = item.cum_exec_qty,
-          .average_traded_price = average_traded_price,
+          .average_traded_price = item.avg_price,
           .last_traded_quantity = NaN,
           .last_traded_price = NaN,
           .last_liquidity = {},
@@ -409,8 +429,8 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
                 // no fills here
               })) {
       } else {
-        log::warn("*** EXTERNAL ORDER ***"sv);
-        log::warn("order={}"sv, item);
+        log::warn<1>(
+            R"(*** EXTERNAL ORDER *** (order_id="{}", order_link_id="{}"))"sv, item.order_id, item.order_link_id);
       }
     }
   });
@@ -419,39 +439,56 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
 void DropCopy::operator()(Trace<json::Execution2> const &event) {
   profile_.execution([&]() {
     auto &trace_info = event.trace_info;
-    auto &ticket_info = event.value;
-    log::info<4>("event={{ticket_info={}, trace_info={}}}"sv, ticket_info, trace_info);
-    for (auto &item : ticket_info.data) {
-      if (shared_.find_order(item.order_link_id, [&](auto &order) {
-            auto liquidity = item.is_maker ? Liquidity::MAKER : Liquidity::TAKER;
-            auto fill = Fill{
-                .external_trade_id = item.exec_id,
-                .quantity = item.exec_qty,
-                .price = item.exec_price,
-                .liquidity = liquidity,
-            };
-            auto trade_update = oms::TradeUpdate{
-                .account = order.account,
-                .order_id = order.order_id,
-                .exchange = order.exchange,
-                .symbol = order.symbol,
-                .side = order.side,
-                .position_effect = order.position_effect,
-                .create_time_utc = {},
-                .update_time_utc = utils::safe_cast(item.exec_time),
-                .external_account = {},
-                .external_order_id = item.order_id,
-                .fills = {&fill, 1},
-                .update_type = {},
-                .sending_time_utc = {},
-            };
-            create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
-          })) {
-      } else {
-        log::warn<1>("*** EXTERNAL ORDER ***"sv);
-        log::warn<2>("ticket_info={}"sv, item);
+    auto &execution = event.value;
+    log::info<4>("event={{execution={}, trace_info={}}}"sv, execution, trace_info);
+    std::string_view order_id, order_link_id;
+    std::chrono::nanoseconds exec_time = {};
+    auto dispatch = [&]() {
+      if (!std::empty(order_link_id)) {
+        if (shared_.find_order(order_link_id, [&](auto &order) {
+              auto trade_update = oms::TradeUpdate{
+                  .account = order.account,
+                  .order_id = order.order_id,
+                  .exchange = order.exchange,
+                  .symbol = order.symbol,
+                  .side = order.side,
+                  .position_effect = order.position_effect,
+                  .create_time_utc = {},
+                  .update_time_utc = utils::safe_cast(exec_time),
+                  .external_account = {},
+                  .external_order_id = order_id,
+                  .fills = shared_.fills,
+                  .update_type = {},
+                  .sending_time_utc = execution.creation_time,
+              };
+              create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
+            })) {
+        } else {
+          log::warn<1>(R"(*** EXTERNAL ORDER *** (order_id="{}", order_link_id="{}"))"sv, order_id, order_link_id);
+        }
       }
+      shared_.fills.clear();
+      order_id = {};
+      order_link_id = {};
+      exec_time = {};
+    };
+    for (auto &item : execution.data) {
+      if (item.order_id != order_id) {
+        dispatch();
+        order_id = item.order_id;
+        order_link_id = item.order_link_id;
+        exec_time = item.exec_time;
+      }
+      auto liquidity = item.is_maker ? Liquidity::MAKER : Liquidity::TAKER;
+      auto fill = Fill{
+          .external_trade_id = item.exec_id,
+          .quantity = item.exec_qty,
+          .price = item.exec_price,
+          .liquidity = liquidity,
+      };
+      shared_.fills.emplace_back(std::move(fill));
     }
+    dispatch();
   });
 }
 

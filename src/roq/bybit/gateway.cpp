@@ -144,6 +144,10 @@ void Gateway::operator()(Trace<oms::TradeUpdate> const &event, uint16_t stream_i
   dispatcher_(event, stream_id, is_last, user_id);
 }
 
+void Gateway::operator()(Trace<PositionUpdate> const &event, bool is_last) {
+  dispatcher_(event, is_last);
+}
+
 void Gateway::operator()(Trace<FundsUpdate> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }

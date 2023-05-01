@@ -537,7 +537,7 @@ void MarketData::operator()(Trace<json::Tickers> const &event) {
   });
 }
 
-void MarketData::operator()(Trace<json::WalletBalance2> const &) {
+void MarketData::operator()(Trace<json::Wallet> const &) {
   log::fatal("Unexpected"sv);
 }
 

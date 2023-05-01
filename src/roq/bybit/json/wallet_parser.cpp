@@ -22,8 +22,8 @@ bool WalletParser::dispatch(
       for (auto [key_2, value_2] : std::get<core::json::Object>(value)) {
         if (key_2.compare("list"sv) == 0) {
           for (auto item : std::get<core::json::Array>(value_2)) {
-            WalletBalance2 wallet_balance{item, buffer};
-            create_trace_and_dispatch(handler, trace_info, wallet_balance);
+            Wallet wallet{item, buffer};
+            create_trace_and_dispatch(handler, trace_info, wallet);
           }
           return true;
         }

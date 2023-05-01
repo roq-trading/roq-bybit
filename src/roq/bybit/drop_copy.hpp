@@ -35,6 +35,7 @@ struct DropCopy final : public web::socket::Client::Handler, json::Parser::Handl
     virtual void operator()(Trace<StreamStatus> const &) = 0;
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
     virtual void operator()(Trace<oms::TradeUpdate> const &, uint16_t stream_id, bool is_last, uint8_t user_id) = 0;
+    virtual void operator()(Trace<PositionUpdate> const &, bool is_last) = 0;
     virtual void operator()(Trace<FundsUpdate> const &, bool is_last) = 0;
   };
 
@@ -78,7 +79,7 @@ struct DropCopy final : public web::socket::Client::Handler, json::Parser::Handl
   void operator()(Trace<json::PublicTrade> const &) override;
   void operator()(Trace<json::Tickers> const &) override;
   // private stream
-  void operator()(Trace<json::WalletBalance2> const &) override;
+  void operator()(Trace<json::Wallet> const &) override;
   void operator()(Trace<json::Position> const &) override;
   void operator()(Trace<json::Order> const &) override;
   void operator()(Trace<json::Execution2> const &) override;

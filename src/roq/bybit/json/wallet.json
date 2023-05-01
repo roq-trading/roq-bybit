@@ -3,20 +3,52 @@
   "type": "comp",
   "values": [
     {
-      "name": "id",
+      "name": "accountType",
+      "type": "AccountType"
+    },
+    {
+      "name": "accountLTV",
       "type": "std::string_view"
     },
     {
-      "name": "topic",
+      "name": "accountIMRate",
       "type": "std::string_view"
     },
     {
-      "name": "creationTime",
-      "type": "std::chrono::milliseconds"
+      "name": "accountMMRate",
+      "type": "std::string_view"
     },
     {
-      "name": "data",
-      "type": "std::span<WalletBalanceResultItem>"
+      "name": "totalEquity",
+      "type": "std::string_view"
+    },
+    {
+      "name": "totalWalletBalance",
+      "type": "std::string_view"
+    },
+    {
+      "name": "totalMarginBalance",
+      "type": "std::string_view"
+    },
+    {
+      "name": "totalAvailableBalance",
+      "type": "std::string_view"
+    },
+    {
+      "name": "totalPerpUPL",
+      "type": "std::string_view"
+    },
+    {
+      "name": "totalInitialMargin",
+      "type": "std::string_view"
+    },
+    {
+      "name": "totalMaintenanceMargin",
+      "type": "std::string_view"
+    },
+    {
+      "name": "coin",
+      "type": "std::span<WalletBalanceItem>"
     }
   ]
 }

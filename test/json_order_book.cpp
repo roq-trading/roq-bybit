@@ -184,7 +184,7 @@ TEST_CASE("json_order_book_parser", "[json_order_book]") {
     void operator()(Trace<json::Tickers> const &) override { FAIL(); }
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
-    void operator()(Trace<json::WalletBalance2> const &) override { FAIL(); }
+    void operator()(Trace<json::Wallet> const &) override { FAIL(); }
     void operator()(Trace<json::Position> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
     void operator()(Trace<json::Execution2> const &) override { FAIL(); }

@@ -10,7 +10,7 @@
 
 #include "roq/core/json/buffer.hpp"
 
-#include "roq/bybit/json/wallet_balance_2.hpp"
+#include "roq/bybit/json/wallet.hpp"
 
 namespace roq {
 namespace bybit {
@@ -18,7 +18,7 @@ namespace json {
 
 struct WalletParser final {
   struct Handler {
-    virtual void operator()(Trace<json::WalletBalance2> const &) = 0;
+    virtual void operator()(Trace<json::Wallet> const &) = 0;
   };
 
   static bool dispatch(Handler &, std::string_view const &message, core::Buffer &, TraceInfo const &);

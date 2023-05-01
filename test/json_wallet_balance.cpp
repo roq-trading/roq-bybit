@@ -119,7 +119,7 @@ auto const MESSAGE = R"({)"
 
 TEST_CASE("json_wallet_balance_spot", "[json_wallet_balance]") {
   struct Handler final : public json::WalletParser::Handler {
-    void operator()(Trace<json::WalletBalance2> const &event) override {
+    void operator()(Trace<json::Wallet> const &event) override {
       found = true;
       auto &[trace_info, wallet_balance] = event;
       CHECK(wallet_balance.account_type == json::AccountType::SPOT);

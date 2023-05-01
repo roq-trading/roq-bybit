@@ -3,7 +3,6 @@
 #include <catch2/catch_all.hpp>
 
 #include "roq/bybit/json/parser.hpp"
-#include "roq/bybit/json/wallet.hpp"
 
 using namespace roq;
 using namespace roq::bybit;
@@ -102,7 +101,7 @@ TEST_CASE("json_wallet_parser", "[json_wallet]") {
     void operator()(Trace<json::Tickers> const &) override { FAIL(); }
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
-    void operator()(Trace<json::WalletBalance2> const &event) override {
+    void operator()(Trace<json::Wallet> const &event) override {
       found = true;
       auto &[trace_info, wallet_balance] = event;
       CHECK(wallet_balance.account_type == json::AccountType::SPOT);
@@ -134,7 +133,7 @@ TEST_CASE("json_wallet_parser_2", "[json_wallet]") {
     void operator()(Trace<json::Tickers> const &) override { FAIL(); }
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
-    void operator()(Trace<json::WalletBalance2> const &event) override {
+    void operator()(Trace<json::Wallet> const &event) override {
       found = true;
       auto &[trace_info, wallet_balance] = event;
       CHECK(wallet_balance.account_type == json::AccountType::SPOT);

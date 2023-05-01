@@ -70,7 +70,6 @@ set(AUTOGEN_SCHEMAS
     topic.json
     tp_sl_mode.json
     trigger_by.json
-    wallet_balance_2.json
     wallet_balance_item.json
     wallet_balance.json
     wallet_balance_result_item.json

@@ -32,15 +32,15 @@ auto const NAME = "om"sv;
 
 namespace {
 auto get_supports(auto api) {
-  auto supports = Mask{
+  auto result = Mask{
       SupportType::CREATE_ORDER,
       SupportType::CANCEL_ORDER,
       SupportType::ORDER_ACK,
       SupportType::FUNDS,
   };
   if (api != tools::API::SPOT)
-    supports |= SupportType::MODIFY_ORDER;
-  return supports;
+    result |= SupportType::MODIFY_ORDER;
+  return result;
 }
 }  // namespace
 
@@ -321,23 +321,7 @@ void OrderEntry::get_account_info_ack(Trace<web::rest::Response> const &event, [
 void OrderEntry::operator()(Trace<json::AccountInfo> const &event) {
   auto &[trace_info, account_info] = event;
   log::info<2>("account_info={}"sv, account_info);
-  /*
-  for (auto &item : account_info.result.balances) {
-    log::debug("item={}"sv, item);
-    auto funds_update = FundsUpdate{
-        .stream_id = stream_id_,
-        .account = account_.get_name(),
-        .currency = item.coin,  // XXX or .coin_id?
-        .balance = item.free,
-        .hold = item.locked,
-        .external_account = {},
-        .update_type = UpdateType::SNAPSHOT,
-        .exchange_time_utc = account_info.time,
-        .sending_time_utc = {},
-    };
-    create_trace_and_dispatch(handler_, trace_info, funds_update, true);
-  }
-  */
+  // XXX HANS maybe do something with unified account ???
 }
 
 void OrderEntry::get_wallet_balance() {
@@ -404,16 +388,16 @@ void OrderEntry::get_wallet_balance_ack(Trace<web::rest::Response> const &event)
   });
 }
 
-void OrderEntry::operator()(Trace<json::WalletBalance2> const &event) {
-  auto &[trace_info, wallet_balance] = event;
-  log::info<2>("wallet_balance={}"sv, wallet_balance);
-  for (auto &item : wallet_balance.coin) {
+void OrderEntry::operator()(Trace<json::Wallet> const &event) {
+  auto &[trace_info, wallet] = event;
+  log::info<2>("wallet={}"sv, wallet);
+  for (auto &item : wallet.coin) {
     log::debug("item={}"sv, item);
     auto funds_update = FundsUpdate{
         .stream_id = stream_id_,
         .account = account_.get_name(),
         .currency = item.coin,
-        .balance = item.wallet_balance,
+        .balance = item.wallet_balance,  // XXX item.free ???
         .hold = item.locked,
         .external_account = {},
         .update_type = UpdateType::SNAPSHOT,
@@ -489,6 +473,28 @@ void OrderEntry::get_position_info_ack(Trace<web::rest::Response> const &event, 
 void OrderEntry::operator()(Trace<json::PositionInfo> const &event) {
   auto &[trace_info, position_info] = event;
   log::info<2>("position_info={}"sv, position_info);
+  for (auto &item : position_info.result.list) {
+    if (shared_.discard_symbol(item.symbol))
+      continue;
+    // log::debug("item={}"sv, item);
+    auto side = json::map(item.side);
+    auto quantity = utils::sign(side) * item.size;
+    auto long_quantity = std::max(0.0, quantity);
+    auto short_quantity = std::max(0.0, -quantity);
+    auto position_update = PositionUpdate{
+        .stream_id = stream_id_,
+        .account = account_.get_name(),
+        .exchange = Flags::exchange(),
+        .symbol = item.symbol,
+        .external_account = {},
+        .long_quantity = long_quantity,
+        .short_quantity = short_quantity,
+        .update_type = UpdateType::SNAPSHOT,
+        .exchange_time_utc = item.updated_time,  // XXX created_time ???
+        .sending_time_utc = position_info.time,
+    };
+    create_trace_and_dispatch(handler_, trace_info, position_update, true);
+  }
 }
 
 void OrderEntry::get_open_orders(std::string_view const &symbol) {
@@ -557,7 +563,6 @@ void OrderEntry::operator()(Trace<json::OpenOrders> const &event) {
   log::info<2>("open_orders={}"sv, open_orders);
   for (auto &item : open_orders.result.list) {
     log::debug("item={}"sv, item);
-    // EXPERIMENTAL
     all_symbols_.emplace(item.symbol);
     auto side = json::map(item.side);
     auto order_type = json::map(item.order_type);
@@ -580,15 +585,15 @@ void OrderEntry::operator()(Trace<json::OpenOrders> const &event) {
         .status = order_status,
         .quantity = item.qty,
         .price = item.price,
-        .stop_price = NaN,
-        .remaining_quantity = NaN,
+        .stop_price = NaN,  // XXX item.trigger_price ???
+        .remaining_quantity = item.leaves_qty,
         .traded_quantity = item.cum_exec_qty,
         .average_traded_price = item.avg_price,
-        .last_traded_quantity = {},
-        .last_traded_price = {},
+        .last_traded_quantity = NaN,
+        .last_traded_price = NaN,
         .last_liquidity = {},
         .update_type = UpdateType::SNAPSHOT,
-        .sending_time_utc = {},
+        .sending_time_utc = open_orders.time,
     };
     Trace event_2{trace_info, order_update};
     (*this)(event_2, item.order_link_id);
@@ -662,6 +667,54 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
   auto &trace_info = event.trace_info;
   auto &execution = event.value;
   log::info<2>("execution={}"sv, execution);
+  std::string_view order_id, order_link_id;
+  std::chrono::nanoseconds exec_time = {};
+  auto dispatch = [&]() {
+    if (!std::empty(order_link_id)) {
+      if (shared_.find_order(order_link_id, [&](auto &order) {
+            auto trade_update = oms::TradeUpdate{
+                .account = order.account,
+                .order_id = order.order_id,
+                .exchange = order.exchange,
+                .symbol = order.symbol,
+                .side = order.side,
+                .position_effect = order.position_effect,
+                .create_time_utc = {},
+                .update_time_utc = utils::safe_cast(exec_time),
+                .external_account = {},
+                .external_order_id = order_id,
+                .fills = shared_.fills,
+                .update_type = {},
+                .sending_time_utc = execution.time,
+            };
+            create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
+          })) {
+      } else {
+        log::warn<1>(R"(*** EXTERNAL ORDER *** (order_id="{}", order_link_id="{}"))"sv, order_id, order_link_id);
+      }
+    }
+    shared_.fills.clear();
+    order_id = {};
+    order_link_id = {};
+    exec_time = {};
+  };
+  for (auto &item : execution.result.list) {
+    if (item.order_id != order_id) {
+      dispatch();
+      order_id = item.order_id;
+      order_link_id = item.order_link_id;
+      exec_time = item.exec_time;
+    }
+    auto liquidity = item.is_maker ? Liquidity::MAKER : Liquidity::TAKER;
+    auto fill = Fill{
+        .external_trade_id = item.exec_id,
+        .quantity = item.exec_qty,
+        .price = item.exec_price,
+        .liquidity = liquidity,
+    };
+    shared_.fills.emplace_back(std::move(fill));
+  }
+  dispatch();
 }
 
 void OrderEntry::place_order(
