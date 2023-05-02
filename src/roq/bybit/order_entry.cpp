@@ -619,7 +619,7 @@ void OrderEntry::get_execution(std::string_view const &symbol) {
       log::fatal("Unexpected"sv);
     }();
     auto end_time = clock::get_realtime<std::chrono::milliseconds>();
-    auto start_time = end_time - 24h;
+    auto start_time = end_time - flags::Flags::execution_lookback();
     auto query = fmt::format("?category={}&symbol={}&startTime={}&limit=100"sv, category, symbol, start_time.count());
     auto headers = account_.create_headers(path, query, {});
     auto request = web::rest::Request{
@@ -666,7 +666,8 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
   auto &trace_info = event.trace_info;
   auto &execution = event.value;
   log::info<2>("execution={}"sv, execution);
-  std::string_view order_id, order_link_id;
+  std::string_view order_id, order_link_id, symbol;
+  Side side = {};
   std::chrono::nanoseconds exec_time = {};
   auto dispatch = [&]() {
     if (!std::empty(order_link_id)) {
@@ -689,12 +690,29 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
             create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
           })) {
       } else {
-        log::warn<1>(R"(*** EXTERNAL ORDER *** (order_id="{}", order_link_id="{}"))"sv, order_id, order_link_id);
+        auto trade_update = oms::TradeUpdate{
+            .account = account_.get_name(),
+            .order_id = ORDER_ID_NONE,
+            .exchange = flags::Flags::exchange(),
+            .symbol = symbol,
+            .side = side,
+            .position_effect = {},
+            .create_time_utc = utils::safe_cast(exec_time),
+            .update_time_utc = utils::safe_cast(exec_time),
+            .external_account = {},
+            .external_order_id = order_id,
+            .fills = shared_.fills,
+            .update_type = UpdateType::INCREMENTAL,
+            .sending_time_utc = execution.time,
+        };
+        create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, SOURCE_SELF);
       }
     }
     shared_.fills.clear();
     order_id = {};
     order_link_id = {};
+    symbol = {};
+    side = {};
     exec_time = {};
   };
   for (auto &item : execution.result.list) {
@@ -702,6 +720,8 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
       dispatch();
       order_id = item.order_id;
       order_link_id = item.order_link_id;
+      symbol = item.symbol;
+      side = json::map(item.side);
       exec_time = item.exec_time;
     }
     auto liquidity = item.is_maker ? Liquidity::MAKER : Liquidity::TAKER;

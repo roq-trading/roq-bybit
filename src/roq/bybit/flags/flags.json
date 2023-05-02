@@ -189,6 +189,13 @@
       "type": "bool",
       "default": false,
       "description": "disable downloading of trades?"
+    },
+    {
+      "name": "execution_lookback",
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "24h",
+      "description": "how far back to request executions?"
     }
   ]
 }

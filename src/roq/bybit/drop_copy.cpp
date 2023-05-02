@@ -441,7 +441,8 @@ void DropCopy::operator()(Trace<json::Execution2> const &event) {
     auto &trace_info = event.trace_info;
     auto &execution = event.value;
     log::info<4>("event={{execution={}, trace_info={}}}"sv, execution, trace_info);
-    std::string_view order_id, order_link_id;
+    std::string_view order_id, order_link_id, symbol;
+    Side side = {};
     std::chrono::nanoseconds exec_time = {};
     auto dispatch = [&]() {
       if (!std::empty(order_link_id)) {
@@ -464,12 +465,29 @@ void DropCopy::operator()(Trace<json::Execution2> const &event) {
               create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
             })) {
         } else {
-          log::warn<1>(R"(*** EXTERNAL ORDER *** (order_id="{}", order_link_id="{}"))"sv, order_id, order_link_id);
+          auto trade_update = oms::TradeUpdate{
+              .account = account_.get_name(),
+              .order_id = ORDER_ID_NONE,
+              .exchange = flags::Flags::exchange(),
+              .symbol = symbol,
+              .side = side,
+              .position_effect = {},
+              .create_time_utc = utils::safe_cast(exec_time),
+              .update_time_utc = utils::safe_cast(exec_time),
+              .external_account = {},
+              .external_order_id = order_id,
+              .fills = shared_.fills,
+              .update_type = UpdateType::INCREMENTAL,
+              .sending_time_utc = execution.creation_time,
+          };
+          create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, SOURCE_SELF);
         }
       }
       shared_.fills.clear();
       order_id = {};
       order_link_id = {};
+      symbol = {};
+      side = {};
       exec_time = {};
     };
     for (auto &item : execution.data) {
@@ -477,6 +495,8 @@ void DropCopy::operator()(Trace<json::Execution2> const &event) {
         dispatch();
         order_id = item.order_id;
         order_link_id = item.order_link_id;
+        symbol = item.symbol;
+        side = json::map(item.side);
         exec_time = item.exec_time;
       }
       auto liquidity = item.is_maker ? Liquidity::MAKER : Liquidity::TAKER;
