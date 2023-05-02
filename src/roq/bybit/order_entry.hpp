@@ -184,8 +184,6 @@ struct OrderEntry final : public web::rest::Client::Handler, public json::Wallet
   // state
   ConnectionStatus status_ = {};
   core::Download<OrderEntryState> download_;
-  // EXPERIMENTAL
-  absl::flat_hash_set<Symbol> all_symbols_;
 };
 
 }  // namespace bybit

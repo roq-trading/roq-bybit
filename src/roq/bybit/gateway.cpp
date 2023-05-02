@@ -104,6 +104,7 @@ void Gateway::operator()(Event<Disconnected> const &event) {
           (*order_entry)(event, {});
         }
       }
+      break;
   }
 }
 

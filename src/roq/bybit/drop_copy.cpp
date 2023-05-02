@@ -141,7 +141,7 @@ void DropCopy::operator()(metrics::Writer &writer) {
 
 void DropCopy::operator()(Rest::SymbolsUpdate &symbols_update) {
   for (auto &symbol : symbols_update.symbols) {
-    if (!shared_.dispatcher.can_account_trade_symbol(account_.get_name(), symbol))
+    if (!shared_.dispatcher.can_account_trade_symbol(account_.get_name(), Flags::exchange(), symbol))
       continue;
     auto res = symbols_.emplace(symbol);
     assert(res.second);

@@ -1,17 +1,16 @@
 symbols = [
   "^BTCUSD$",
   "^BTCUSDT$",
-  "^BTC-.*-[PC]$"
+  "^BTC-.*-[PC]$",
+  "^ETHUSDT$"
 ]
 
 [accounts]
 
   [accounts.A1]
-  master = true
   login = "dBW7d0xxu8cbXUl5vq"
-  password = "xxx"
   secret = "ranTfZlmFtC7XDi738wz5AnqxBkYEZpqfVKn"
-  symbols = ".*"
+  symbols = "^BTC.*$"
 
 [users]
 

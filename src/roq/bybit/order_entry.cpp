@@ -563,7 +563,6 @@ void OrderEntry::operator()(Trace<json::OpenOrders> const &event) {
   log::info<2>("open_orders={}"sv, open_orders);
   for (auto &item : open_orders.result.list) {
     log::debug("item={}"sv, item);
-    all_symbols_.emplace(item.symbol);
     auto side = json::map(item.side);
     auto order_type = json::map(item.order_type);
     auto time_in_force = json::map(item.time_in_force);
@@ -723,8 +722,6 @@ void OrderEntry::place_order(
     if (!ready())
       throw oms::NotReady{"not ready"sv};
     auto &[message_info, create_order] = event;
-    // EXPERIMENTAL
-    all_symbols_.emplace(create_order.symbol);
     auto const path = "/v5/order/create"sv;
     std::string buffer;  // XXX
     auto body = json::place_order(buffer, create_order, order, request_id, shared_.category);
@@ -1079,32 +1076,34 @@ void OrderEntry::cancel_all_orders(
       log::warn("*** NOT POSSIBLE TO CANCEL ALL OPEN ORDERS (NOT READY) ***"sv);
       return;
     }
-    if (std::empty(all_symbols_)) {
-      log::warn("*** NOT POSSIBLE TO CANCEL ALL OPEN ORDERS (NO SYMBOLS) ***"sv);
-    }
     auto &[message_info, cancel_all_orders] = event;
     auto const path = "/v5/order/cancel-all"sv;
-    for (auto &symbol : all_symbols_) {
-      std::string buffer;  // XXX
-      auto body = json::cancel_all_orders(buffer, cancel_all_orders, request_id, symbol, shared_.category);
-      log::debug(R"(body="{}")"sv, body);
-      auto headers = account_.create_headers(path, {}, body);
-      auto request = web::rest::Request{
-          .method = web::http::Method::POST,
-          .path = path,
-          .query = {},
-          .accept = web::http::Accept::APPLICATION_JSON,
-          .content_type = web::http::ContentType::APPLICATION_JSON,
-          .headers = headers,
-          .body = body,
-          .quality_of_service = {},
-      };
-      auto callback = [this]([[maybe_unused]] auto &request_id, auto &response) {
-        TraceInfo trace_info;
-        Trace event{trace_info, response};
-        cancel_all_orders_ack(event);
-      };
-      (*connection_)("cancel_all_orders"sv, request, callback);
+    std::string buffer;  // XXX
+    if (shared_.dispatcher.get_all_order_symbols(
+            [&](auto &symbol) {
+              auto body = json::cancel_all_orders(buffer, cancel_all_orders, request_id, symbol, shared_.category);
+              log::debug(R"(body="{}")"sv, body);
+              auto headers = account_.create_headers(path, {}, body);
+              auto request = web::rest::Request{
+                  .method = web::http::Method::POST,
+                  .path = path,
+                  .query = {},
+                  .accept = web::http::Accept::APPLICATION_JSON,
+                  .content_type = web::http::ContentType::APPLICATION_JSON,
+                  .headers = headers,
+                  .body = body,
+                  .quality_of_service = {},
+              };
+              auto callback = [this]([[maybe_unused]] auto &request_id, auto &response) {
+                TraceInfo trace_info;
+                Trace event{trace_info, response};
+                cancel_all_orders_ack(event);
+              };
+              (*connection_)("cancel_all_orders"sv, request, callback);
+            },
+            account_.get_name())) {
+    } else {
+      log::warn("*** NOT POSSIBLE TO CANCEL ALL OPEN ORDERS (NO SYMBOLS) ***"sv);
     }
   });
 }
