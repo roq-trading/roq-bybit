@@ -679,12 +679,12 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
                 .symbol = order.symbol,
                 .side = order.side,
                 .position_effect = order.position_effect,
-                .create_time_utc = {},
+                .create_time_utc = utils::safe_cast(exec_time),
                 .update_time_utc = utils::safe_cast(exec_time),
                 .external_account = {},
                 .external_order_id = order_id,
                 .fills = shared_.fills,
-                .update_type = {},
+                .update_type = UpdateType::SNAPSHOT,
                 .sending_time_utc = execution.time,
             };
             create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
@@ -824,7 +824,7 @@ void OrderEntry::operator()(
       .last_traded_price = NaN,
       .last_liquidity = {},
       .update_type = UpdateType::INCREMENTAL,
-      .sending_time_utc = {},
+      .sending_time_utc = place_order.time,
   };
   Trace event_2{trace_info, response};
   (*this)(event_2, user_id, order_id, order_update);
@@ -946,7 +946,7 @@ void OrderEntry::operator()(
       .last_traded_price = NaN,
       .last_liquidity = {},
       .update_type = UpdateType::INCREMENTAL,
-      .sending_time_utc = {},
+      .sending_time_utc = amend_order.time,
   };
   Trace event_2{trace_info, response};
   (*this)(event_2, user_id, order_id, order_update);
@@ -1066,7 +1066,7 @@ void OrderEntry::operator()(
       .last_traded_price = NaN,
       .last_liquidity = {},
       .update_type = UpdateType::INCREMENTAL,
-      .sending_time_utc = {},
+      .sending_time_utc = cancel_order.time,
   };
   Trace event_2{trace_info, response};
   (*this)(event_2, user_id, order_id, order_update);

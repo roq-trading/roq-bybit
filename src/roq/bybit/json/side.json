@@ -3,6 +3,9 @@
   "type": "enum",
   "values": [
     {
+      "name": "None"
+    },
+    {
       "name": "Buy"
     },
     {

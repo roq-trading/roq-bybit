@@ -183,6 +183,8 @@ inline roq::Side map(json::Side value) {
     case UNDEFINED__:
     case UNKNOWN__:
       break;
+    case NONE:
+      break;
     case BUY:
       return roq::Side::BUY;
     case SELL:

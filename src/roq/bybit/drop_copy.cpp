@@ -379,8 +379,8 @@ void DropCopy::operator()(Trace<json::Position> const &event) {
           .external_account = {},
           .long_quantity = long_quantity,
           .short_quantity = short_quantity,
-          .update_type = UpdateType::SNAPSHOT,
-          .exchange_time_utc = item.updated_time,  // XXX created_time ???
+          .update_type = UpdateType::INCREMENTAL,
+          .exchange_time_utc = item.updated_time,
           .sending_time_utc = position.creation_time,
       };
       create_trace_and_dispatch(handler_, trace_info, position_update, true);
@@ -453,12 +453,12 @@ void DropCopy::operator()(Trace<json::Execution2> const &event) {
                   .symbol = order.symbol,
                   .side = order.side,
                   .position_effect = order.position_effect,
-                  .create_time_utc = {},
+                  .create_time_utc = utils::safe_cast(exec_time),
                   .update_time_utc = utils::safe_cast(exec_time),
                   .external_account = {},
                   .external_order_id = order_id,
                   .fills = shared_.fills,
-                  .update_type = {},
+                  .update_type = UpdateType::INCREMENTAL,
                   .sending_time_utc = execution.creation_time,
               };
               create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
