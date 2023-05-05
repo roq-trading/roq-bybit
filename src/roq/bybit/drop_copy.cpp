@@ -445,52 +445,32 @@ void DropCopy::operator()(Trace<json::Execution2> const &event) {
     Side side = {};
     std::chrono::nanoseconds exec_time = {};
     auto dispatch = [&]() {
-      if (!std::empty(order_link_id)) {
-        if (shared_.find_order(order_link_id, [&](auto &order) {
-              auto trade_update = oms::TradeUpdate{
-                  .account = order.account,
-                  .order_id = order.order_id,
-                  .exchange = order.exchange,
-                  .symbol = order.symbol,
-                  .side = order.side,
-                  .position_effect = order.position_effect,
-                  .create_time_utc = utils::safe_cast(exec_time),
-                  .update_time_utc = utils::safe_cast(exec_time),
-                  .external_account = {},
-                  .external_order_id = order_id,
-                  .fills = shared_.fills,
-                  .update_type = UpdateType::INCREMENTAL,
-                  .sending_time_utc = execution.creation_time,
-              };
-              create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
-            })) {
-        } else {
-          auto trade_update = oms::TradeUpdate{
-              .account = account_.get_name(),
-              .order_id = ORDER_ID_NONE,
-              .exchange = flags::Flags::exchange(),
-              .symbol = symbol,
-              .side = side,
-              .position_effect = {},
-              .create_time_utc = utils::safe_cast(exec_time),
-              .update_time_utc = utils::safe_cast(exec_time),
-              .external_account = {},
-              .external_order_id = order_id,
-              .fills = shared_.fills,
-              .update_type = UpdateType::INCREMENTAL,
-              .sending_time_utc = execution.creation_time,
-          };
-          create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, SOURCE_SELF);
-        }
-      }
+      if (std::empty(shared_.fills))
+        return;
+      auto trade_update = TradeUpdate{
+          .stream_id = stream_id_,
+          .account = account_.get_name(),
+          .order_id = ORDER_ID_NONE,
+          .exchange = flags::Flags::exchange(),
+          .symbol = symbol,
+          .side = side,
+          .position_effect = {},
+          .create_time_utc = utils::safe_cast(exec_time),
+          .update_time_utc = utils::safe_cast(exec_time),
+          .external_account = {},
+          .external_order_id = order_id,
+          .fills = shared_.fills,
+          .routing_id = {},
+          .update_type = UpdateType::INCREMENTAL,
+          .sending_time_utc = execution.creation_time,
+          .user = {},
+      };
+      create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE, order_link_id);
       shared_.fills.clear();
-      order_id = {};
-      order_link_id = {};
-      symbol = {};
-      side = {};
-      exec_time = {};
     };
     for (auto &item : execution.data) {
+      if (item.exec_type != json::ExecType::TRADE)  // note!
+        continue;
       if (item.order_id != order_id) {
         dispatch();
         order_id = item.order_id;

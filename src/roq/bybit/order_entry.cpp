@@ -618,9 +618,12 @@ void OrderEntry::get_execution(std::string_view const &symbol) {
       }
       log::fatal("Unexpected"sv);
     }();
-    auto end_time = clock::get_realtime<std::chrono::milliseconds>();
-    auto start_time = end_time - flags::Flags::execution_lookback();
-    auto query = fmt::format("?category={}&symbol={}&startTime={}&limit=100"sv, category, symbol, start_time.count());
+    auto end_time = clock::get_realtime() + 1min;  // note! make sure we don't miss anything
+    auto start_time =
+        std::chrono::duration_cast<std::chrono::milliseconds>(end_time - flags::Flags::execution_lookback());
+    auto query = fmt::format(
+        "?category={}&symbol={}&startTime={}&execType=Trade&limit=100"sv, category, symbol, start_time.count());
+    log::debug(R"(query="{}")"sv, query);
     auto headers = account_.create_headers(path, query, {});
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
@@ -670,52 +673,32 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
   Side side = {};
   std::chrono::nanoseconds exec_time = {};
   auto dispatch = [&]() {
-    if (!std::empty(order_link_id)) {
-      if (shared_.find_order(order_link_id, [&](auto &order) {
-            auto trade_update = oms::TradeUpdate{
-                .account = order.account,
-                .order_id = order.order_id,
-                .exchange = order.exchange,
-                .symbol = order.symbol,
-                .side = order.side,
-                .position_effect = order.position_effect,
-                .create_time_utc = utils::safe_cast(exec_time),
-                .update_time_utc = utils::safe_cast(exec_time),
-                .external_account = {},
-                .external_order_id = order_id,
-                .fills = shared_.fills,
-                .update_type = UpdateType::SNAPSHOT,
-                .sending_time_utc = execution.time,
-            };
-            create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, order.user_id);
-          })) {
-      } else {
-        auto trade_update = oms::TradeUpdate{
-            .account = account_.get_name(),
-            .order_id = ORDER_ID_NONE,
-            .exchange = flags::Flags::exchange(),
-            .symbol = symbol,
-            .side = side,
-            .position_effect = {},
-            .create_time_utc = utils::safe_cast(exec_time),
-            .update_time_utc = utils::safe_cast(exec_time),
-            .external_account = {},
-            .external_order_id = order_id,
-            .fills = shared_.fills,
-            .update_type = UpdateType::INCREMENTAL,
-            .sending_time_utc = execution.time,
-        };
-        create_trace_and_dispatch(handler_, trace_info, trade_update, stream_id_, true, SOURCE_SELF);
-      }
-    }
+    if (std::empty(shared_.fills))
+      return;
+    auto trade_update = TradeUpdate{
+        .stream_id = stream_id_,
+        .account = account_.get_name(),
+        .order_id = ORDER_ID_NONE,
+        .exchange = flags::Flags::exchange(),
+        .symbol = symbol,
+        .side = side,
+        .position_effect = {},
+        .create_time_utc = utils::safe_cast(exec_time),
+        .update_time_utc = utils::safe_cast(exec_time),
+        .external_account = {},
+        .external_order_id = order_id,
+        .fills = shared_.fills,
+        .routing_id = {},
+        .update_type = UpdateType::SNAPSHOT,
+        .sending_time_utc = execution.time,
+        .user = {},
+    };
+    create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE, order_link_id);
     shared_.fills.clear();
-    order_id = {};
-    order_link_id = {};
-    symbol = {};
-    side = {};
-    exec_time = {};
   };
   for (auto &item : execution.result.list) {
+    if (item.exec_type != json::ExecType::TRADE)  // note!
+      continue;
     if (item.order_id != order_id) {
       dispatch();
       order_id = item.order_id;
