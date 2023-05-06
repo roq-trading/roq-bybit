@@ -16,7 +16,7 @@ std::string_view strip_symbol(std::string_view const &topic) {
 }
 
 namespace {
-auto map_order_type(auto order_type, auto execution_instructions) -> json::OrderType {
+auto map_order_type(auto order_type) -> json::OrderType {
   switch (order_type) {
     using enum roq::OrderType;
     case UNDEFINED:
@@ -38,7 +38,7 @@ std::string_view place_order(
     Category category) {
   buffer.clear();
   auto side = map(create_order.side);
-  auto order_type = map_order_type(create_order.order_type, create_order.execution_instructions);
+  auto order_type = map_order_type(create_order.order_type);
   auto time_in_force = map(create_order.time_in_force);
   auto reduce_only = create_order.execution_instructions.has(ExecutionInstruction::DO_NOT_INCREASE);
   fmt::format_to(
