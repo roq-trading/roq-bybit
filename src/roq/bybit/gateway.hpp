@@ -19,6 +19,7 @@
 #include "roq/bybit/market_data.hpp"
 #include "roq/bybit/order_entry.hpp"
 #include "roq/bybit/rest.hpp"
+#include "roq/bybit/settings.hpp"
 #include "roq/bybit/shared.hpp"
 
 namespace roq {
@@ -29,7 +30,7 @@ struct Gateway final : public server::Handler,
                        public OrderEntry::Handler,
                        public DropCopy::Handler,
                        public MarketData::Handler {
-  Gateway(server::Dispatcher &, Config const &, io::Context &);
+  Gateway(server::Dispatcher &, Settings const &, Config const &, io::Context &);
 
  protected:
   void operator()(Event<Start> const &) override;
