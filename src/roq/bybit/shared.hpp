@@ -17,6 +17,8 @@
 
 #include "roq/core/limit/rate_limiter.hpp"
 
+#include "roq/bybit/settings.hpp"
+
 #include "roq/bybit/tools/api.hpp"
 
 #include "roq/bybit/json/category.hpp"
@@ -25,7 +27,7 @@ namespace roq {
 namespace bybit {
 
 struct Shared final {
-  explicit Shared(server::Dispatcher &);
+  Shared(server::Dispatcher &, Settings const &);
 
   Shared(Shared &&) = default;
   Shared(Shared const &) = delete;
@@ -56,6 +58,7 @@ struct Shared final {
   server::Dispatcher &dispatcher;
 
  public:
+  Settings const &settings;
   core::limit::RateLimiter rate_limiter;
 
   tools::API const api;

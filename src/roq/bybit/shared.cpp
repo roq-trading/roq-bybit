@@ -48,9 +48,10 @@ auto create_category(auto api) -> json::Category {
 
 // === IMPLEMENTATION ===
 
-Shared::Shared(server::Dispatcher &dispatcher)
-    : dispatcher{dispatcher}, rate_limiter{flags::Flags::request_limit(), flags::Flags::request_limit_interval()},
-      api{create_api()}, category{create_category(api)}, symbols{flags::Flags::ws_max_subscriptions_per_stream()} {
+Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings)
+    : dispatcher{dispatcher}, settings{settings},
+      rate_limiter{flags::Flags::request_limit(), flags::Flags::request_limit_interval()}, api{create_api()},
+      category{create_category(api)}, symbols{flags::Flags::ws_max_subscriptions_per_stream()} {
 }
 
 }  // namespace bybit
