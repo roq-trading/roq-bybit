@@ -1,0 +1,61 @@
+{
+  "name": "REST",
+  "type": "flags",
+  "prefix": "rest_",
+  "values": [
+    {
+      "name": "uri",
+      "type": "roq::io::web::URI",
+      "validator": "roq::core::flags::URI",
+      "default": "https://api-testnet.bybit.com",
+      "description": "REST end-point (URI)"
+    },
+    {
+      "name": "proxy",
+      "type": "roq::io::web::URI",
+      "validator": "roq::core::flags::URI",
+      "description": "proxy end-point (URI)"
+    },
+    {
+      "name": "ping_freq",
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "5s",
+      "description": "ping frequency"
+    },
+    {
+      "name": "ping_path",
+      "type": "std::string",
+      "validator": "roq::core::flags::Path",
+      "default": "/api/v1/status",
+      "description": "URI path used for REST connection keep-alive messages"
+    },
+    {
+      "name": "request_timeout",
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "30s",
+      "description": "request: timeout"
+    },
+    {
+      "name": "recv_window",
+      "type": "std::chrono::milliseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "5s",
+      "description": "recv window"
+    },
+    {
+      "name": "terminate_on_403",
+      "type": "bool",
+      "default": false,
+      "description": "terminate on 403?"
+    },
+    {
+      "name": "back_off_delay",
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::core::flags::TimePeriod",
+      "default": "30s",
+      "description": "back-off period"
+    }
+  ]
+}
