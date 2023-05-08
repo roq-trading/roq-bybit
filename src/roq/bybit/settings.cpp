@@ -2,6 +2,8 @@
 
 #include "roq/bybit/settings.hpp"
 
+#include "roq/logging.hpp"
+
 #include "roq/bybit/flags/flags.hpp"
 
 using namespace std::literals;
@@ -38,6 +40,7 @@ Settings::Settings(server::Type type)
           .max_subscriptions_per_stream = flags::Flags::ws_max_subscriptions_per_stream(),
           .mbp_depth = flags::Flags::ws_mbp_depth(),
       } {
+  log::debug("settings={}"sv, *this);
 }
 
 }  // namespace bybit
