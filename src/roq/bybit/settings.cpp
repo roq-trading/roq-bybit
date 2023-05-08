@@ -5,8 +5,6 @@
 #include "roq/logging.hpp"
 
 #include "roq/bybit/flags/flags.hpp"
-#include "roq/bybit/flags/rest.hpp"
-#include "roq/bybit/flags/ws.hpp"
 
 using namespace std::literals;
 

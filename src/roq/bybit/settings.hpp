@@ -18,6 +18,7 @@ struct Settings final : public server::Settings {
   explicit Settings(server::Type);
 
   std::string_view exchange;
+
   flags::Common__flags common;
   flags::REST__flags rest;
   flags::WS__flags ws;
