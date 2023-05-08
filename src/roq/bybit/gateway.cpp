@@ -12,8 +12,6 @@
 #include "roq/core/charconv.hpp"
 #include "roq/core/utils.hpp"
 
-#include "roq/bybit/flags.hpp"
-
 #include "roq/bybit/json/utils.hpp"
 
 using namespace std::literals;
@@ -25,11 +23,11 @@ namespace bybit {
 
 namespace {
 template <typename R>
-R create_accounts(auto &config) {
+R create_accounts(auto &settings, auto &config) {
   using result_type = std::remove_cvref<R>::type;
   result_type result;
   for (auto &[_, account] : config.accounts)
-    result.try_emplace(account.name, std::make_unique<Account>(config, account.name));
+    result.try_emplace(account.name, std::make_unique<Account>(settings, config, account.name));
   return result;
 }
 
@@ -55,7 +53,7 @@ R create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts
 // === IMPLEMENTATION ===
 
 Gateway::Gateway(server::Dispatcher &dispatcher, Settings const &settings, Config const &config, io::Context &context)
-    : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(config)}, context_{context},
+    : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(settings, config)}, context_{context},
       shared_{dispatcher, settings}, rest_{*this, context_, ++stream_id_, shared_},
       order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, accounts_, shared_)},
       drop_copy_{create_drop_copy<decltype(drop_copy_)>(*this, context_, stream_id_, accounts_, shared_)} {

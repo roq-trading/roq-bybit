@@ -13,8 +13,6 @@
 
 #include "roq/web/socket/client_factory.hpp"
 
-#include "roq/bybit/flags.hpp"
-
 #include "roq/bybit/json/utils.hpp"
 
 using namespace std::literals;
@@ -54,7 +52,7 @@ auto create_name(auto stream_id) {
 }
 
 auto create_connection(auto &handler, auto &settings, auto &context) {
-  auto uri = flags::Flags::ws_private_uri();
+  auto uri = settings.ws.private_uri;
   auto config = web::socket::Client::Config{
       // connection
       .interface = {},
@@ -70,10 +68,10 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
       .query = {},
       .user_agent = ROQ_PACKAGE_NAME,
       .request_timeout = {},
-      .ping_frequency = Flags::ws_ping_freq(),
+      .ping_frequency = settings.ws.ping_freq,
       // implementation
-      .decode_buffer_size = Flags::decode_buffer_size(),
-      .encode_buffer_size = Flags::encode_buffer_size(),
+      .decode_buffer_size = settings.common.decode_buffer_size,
+      .encode_buffer_size = settings.common.encode_buffer_size,
   };
   return web::socket::ClientFactory::create(handler, context, config, []() { return std::string(); });
 }
@@ -88,7 +86,8 @@ struct create_metrics final : public core::metrics::Factory {
 
 DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)},
-      connection_{create_connection(*this, shared.settings, context)}, decode_buffer_{Flags::decode_buffer_size()},
+      connection_{create_connection(*this, shared.settings, context)},
+      decode_buffer_{shared.settings.common.decode_buffer_size},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -141,7 +140,7 @@ void DropCopy::operator()(metrics::Writer &writer) {
 
 void DropCopy::operator()(Rest::SymbolsUpdate &symbols_update) {
   for (auto &symbol : symbols_update.symbols) {
-    if (!shared_.dispatcher.can_account_trade_symbol(account_.get_name(), Flags::exchange(), symbol))
+    if (!shared_.dispatcher.can_account_trade_symbol(account_.get_name(), shared_.settings.exchange, symbol))
       continue;
     auto res = symbols_.emplace(symbol);
     assert(res.second);
@@ -175,7 +174,7 @@ void DropCopy::operator()(Trace<OrderEntry::Response> const &event) {
 void DropCopy::operator()(web::socket::Client::Connected const &) {
   assert(logon_timeout_.count() == 0);
   auto now = clock::get_system();
-  logon_timeout_ = now + Flags::ws_request_timeout();
+  logon_timeout_ = now + shared_.settings.ws.request_timeout;
 }
 
 void DropCopy::operator()(web::socket::Client::Disconnected const &) {
@@ -374,7 +373,7 @@ void DropCopy::operator()(Trace<json::Position> const &event) {
       auto position_update = PositionUpdate{
           .stream_id = stream_id_,
           .account = account_.get_name(),
-          .exchange = Flags::exchange(),
+          .exchange = shared_.settings.exchange,
           .symbol = item.symbol,
           .external_account = {},
           .long_quantity = long_quantity,
@@ -399,7 +398,7 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
       auto order_status = json::map(item.order_status);
       auto order_update = oms::OrderUpdate{
           .account = account_.get_name(),
-          .exchange = Flags::exchange(),
+          .exchange = shared_.settings.exchange,
           .symbol = item.symbol,
           .side = side,
           .position_effect = {},
@@ -451,7 +450,7 @@ void DropCopy::operator()(Trace<json::Execution2> const &event) {
           .stream_id = stream_id_,
           .account = account_.get_name(),
           .order_id = ORDER_ID_NONE,
-          .exchange = flags::Flags::exchange(),
+          .exchange = shared_.settings.exchange,
           .symbol = symbol,
           .side = side,
           .position_effect = {},

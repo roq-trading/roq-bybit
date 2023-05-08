@@ -58,40 +58,6 @@
       "description": "recv window"
     },
     {
-      "name": "rest_download_orders_page_size",
-      "type": "uint32_t",
-      "validator": "roq::core::flags::NonZero<uint32_t>",
-      "default": 500,
-      "description": "page size used when downloading orders"
-    },
-    {
-      "name": "rest_download_orders_begin",
-      "type": "std::chrono::nanoseconds",
-      "validator": "roq::core::flags::TimePeriod",
-      "default": "24h",
-      "description": "download orders since (now - begin)"
-    },
-    {
-      "name": "rest_download_only_active_orders",
-      "type": "bool",
-      "default": false,
-      "description": "download only active orders?"
-    },
-    {
-      "name": "rest_download_fills_page_size",
-      "type": "uint32_t",
-      "validator": "roq::core::flags::NonZero<uint32_t>",
-      "default": 500,
-      "description": "page size used when downloading fills"
-    },
-    {
-      "name": "rest_download_fills_begin",
-      "type": "std::chrono::nanoseconds",
-      "validator": "roq::core::flags::TimePeriod",
-      "default": "24h",
-      "description": "download fills since (now - begin)"
-    },
-    {
       "name": "rest_terminate_on_403",
       "type": "bool",
       "default": false,
@@ -159,12 +125,6 @@
       "description": "request limit monitor interval"
     },
     {
-      "name": "self_trade_prevention",
-      "type": "std::string",
-      "default": "CN",
-      "description": "self-trade prevention: CN, CO, CB, DC"
-    },
-    {
       "name": "encode_buffer_size",
       "type": "uint32_t",
       "validator": "roq::core::flags::NonZero<uint32_t>",
@@ -185,14 +145,8 @@
       "description": "allow price inversion?"
     },
     {
-      "name": "debug_disable_trades_download",
-      "type": "bool",
-      "default": false,
-      "description": "disable downloading of trades?"
-    },
-    {
       "name": "execution_lookback",
-      "type": "std::chrono::nanoseconds",
+      "type": "std::chrono::milliseconds",
       "validator": "roq::core::flags::TimePeriod",
       "default": "24h",
       "description": "how far back to request executions?"

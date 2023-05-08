@@ -9,8 +9,6 @@
 
 #include "roq/logging.hpp"
 
-#include "roq/bybit/flags/flags.hpp"
-
 using namespace std::literals;
 
 namespace roq {
@@ -19,8 +17,8 @@ namespace bybit {
 // === HELPERS ===
 
 namespace {
-auto create_api() {
-  std::string value{flags::Flags::api()};
+auto create_api(auto &settings) {
+  std::string value{settings.app.api};
   std::transform(std::begin(value), std::end(value), std::begin(value), ::toupper);
   auto result = magic_enum::enum_cast<tools::API>(value);
   if (!result.has_value())
@@ -50,8 +48,8 @@ auto create_category(auto api) -> json::Category {
 
 Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings)
     : dispatcher{dispatcher}, settings{settings},
-      rate_limiter{flags::Flags::request_limit(), flags::Flags::request_limit_interval()}, api{create_api()},
-      category{create_category(api)}, symbols{flags::Flags::ws_max_subscriptions_per_stream()} {
+      rate_limiter{settings.common.request_limit, settings.common.request_limit_interval}, api{create_api(settings)},
+      category{create_category(api)}, symbols{settings.ws.max_subscriptions_per_stream} {
 }
 
 }  // namespace bybit

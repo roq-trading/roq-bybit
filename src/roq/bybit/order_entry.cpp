@@ -13,8 +13,6 @@
 
 #include "roq/web/rest/client_factory.hpp"
 
-#include "roq/bybit/flags.hpp"
-
 #include "roq/bybit/json/utils.hpp"
 
 using namespace std::literals;
@@ -52,7 +50,7 @@ auto create_name(auto stream_id, auto const &account) {
 }
 
 auto create_connection(auto &handler, auto &settings, auto &context) {
-  auto uri = Flags::rest_uri();
+  auto uri = settings.rest.uri;
   auto config = web::rest::Client::Config{
       // connection
       .interface = {},
@@ -63,16 +61,16 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
       .disconnect_on_idle_timeout = {},
       .connection = web::http::Connection::KEEP_ALIVE,
       // proxy
-      .proxy = Flags::rest_proxy(),
+      .proxy = settings.rest.proxy,
       // http
       .query = {},
       .user_agent = ROQ_PACKAGE_NAME,
-      .request_timeout = Flags::rest_request_timeout(),
-      .ping_frequency = Flags::rest_ping_freq(),
-      .ping_path = Flags::rest_ping_path(),
+      .request_timeout = settings.rest.request_timeout,
+      .ping_frequency = settings.rest.ping_freq,
+      .ping_path = settings.rest.ping_path,
       // implementation
-      .decode_buffer_size = Flags::decode_buffer_size(),
-      .encode_buffer_size = Flags::encode_buffer_size(),
+      .decode_buffer_size = settings.common.decode_buffer_size,
+      .encode_buffer_size = settings.common.encode_buffer_size,
       .allow_pipelining = true,
   };
   return web::rest::ClientFactory::create(handler, context, config);
@@ -88,7 +86,8 @@ struct create_metrics final : public core::metrics::Factory {
 
 OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())},
-      connection_{create_connection(*this, shared.settings, context)}, decode_buffer_{Flags::decode_buffer_size()},
+      connection_{create_connection(*this, shared.settings, context)},
+      decode_buffer_{shared.settings.common.decode_buffer_size},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -116,7 +115,7 @@ OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_i
           .ping = create_metrics(shared.settings, name_, "ping"sv),
       },
       account_{account}, shared_{shared},
-      download_{Flags::rest_request_timeout(), [this](auto state) { return download(state); }} {
+      download_{shared.settings.rest.request_timeout, [this](auto state) { return download(state); }} {
 }
 
 void OrderEntry::operator()(Event<Start> const &) {
@@ -484,7 +483,7 @@ void OrderEntry::operator()(Trace<json::PositionInfo> const &event) {
     auto position_update = PositionUpdate{
         .stream_id = stream_id_,
         .account = account_.get_name(),
-        .exchange = Flags::exchange(),
+        .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
         .external_account = {},
         .long_quantity = long_quantity,
@@ -569,7 +568,7 @@ void OrderEntry::operator()(Trace<json::OpenOrders> const &event) {
     auto order_status = json::map(item.order_status);
     auto order_update = oms::OrderUpdate{
         .account = account_.get_name(),
-        .exchange = Flags::exchange(),
+        .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
         .side = side,
         .position_effect = {},
@@ -620,7 +619,7 @@ void OrderEntry::get_execution(std::string_view const &symbol) {
     }();
     auto end_time = clock::get_realtime() + 1min;  // note! make sure we don't miss anything
     auto start_time =
-        std::chrono::duration_cast<std::chrono::milliseconds>(end_time - flags::Flags::execution_lookback());
+        std::chrono::duration_cast<std::chrono::milliseconds>(end_time - shared_.settings.common.execution_lookback);
     auto query = fmt::format(
         "?category={}&symbol={}&startTime={}&execType=Trade&limit=100"sv, category, symbol, start_time.count());
     log::debug(R"(query="{}")"sv, query);
@@ -679,7 +678,7 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
         .stream_id = stream_id_,
         .account = account_.get_name(),
         .order_id = ORDER_ID_NONE,
-        .exchange = flags::Flags::exchange(),
+        .exchange = shared_.settings.exchange,
         .symbol = symbol,
         .side = side,
         .position_effect = {},
@@ -801,7 +800,7 @@ void OrderEntry::operator()(
   };
   auto order_update = oms::OrderUpdate{
       .account = account_.get_name(),
-      .exchange = Flags::exchange(),
+      .exchange = shared_.settings.exchange,
       .symbol = {},
       .side = {},
       .position_effect = {},
@@ -923,7 +922,7 @@ void OrderEntry::operator()(
   auto remaining_quantity = result.order_qty - result.exec_qty;
   auto order_update = oms::OrderUpdate{
       .account = account_.get_name(),
-      .exchange = Flags::exchange(),
+      .exchange = shared_.settings.exchange,
       .symbol = result.symbol,
       .side = side,
       .position_effect = {},
@@ -1043,7 +1042,7 @@ void OrderEntry::operator()(
   auto remaining_quantity = result.order_qty - result.exec_qty;
   auto order_update = oms::OrderUpdate{
       .account = account_.get_name(),
-      .exchange = Flags::exchange(),
+      .exchange = shared_.settings.exchange,
       .symbol = result.symbol,
       .side = side,
       .position_effect = {},
@@ -1209,11 +1208,11 @@ void OrderEntry::operator()(Trace<oms::OrderUpdate> const &event, std::string_vi
 }
 
 void OrderEntry::waf_limit_violation() {
-  if (Flags::rest_terminate_on_403()) {
+  if (shared_.settings.rest.terminate_on_403) {
     log::fatal("WAF limit violation"sv);
   } else {
     log::warn("WAF limit violation"sv);
-    (*connection_).suspend(Flags::rest_back_off_delay());
+    (*connection_).suspend(shared_.settings.rest.back_off_delay);
   }
 }
 

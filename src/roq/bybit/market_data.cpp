@@ -17,8 +17,6 @@
 
 #include "roq/web/socket/client_factory.hpp"
 
-#include "roq/bybit/flags.hpp"
-
 #include "roq/bybit/json/utils.hpp"
 
 using namespace std::literals;
@@ -49,7 +47,7 @@ auto create_name(auto stream_id) {
 
 auto create_connection(auto &handler, auto &settings, auto &context, auto api) {
   auto uri = [&]() {
-    auto base = flags::Flags::ws_public_uri();
+    auto base = settings.ws.public_uri;
     switch (api) {
       using enum tools::API;
       case UNDEFINED:
@@ -80,10 +78,10 @@ auto create_connection(auto &handler, auto &settings, auto &context, auto api) {
       .query = {},
       .user_agent = ROQ_PACKAGE_NAME,
       .request_timeout = {},
-      .ping_frequency = Flags::ws_ping_freq(),
+      .ping_frequency = settings.ws.ping_freq,
       // implementation
-      .decode_buffer_size = Flags::decode_buffer_size(),
-      .encode_buffer_size = Flags::encode_buffer_size(),
+      .decode_buffer_size = settings.common.decode_buffer_size,
+      .encode_buffer_size = settings.common.encode_buffer_size,
   };
   return web::socket::ClientFactory::create(handler, context, config, []() { return std::string(); });
 }
@@ -92,8 +90,8 @@ auto is_spot(auto api) {
   return api == tools::API::SPOT;
 }
 
-auto get_mbp_depth(auto api) -> size_t {
-  auto result = flags::Flags::ws_mbp_depth();
+auto get_mbp_depth(auto &settings, auto api) -> size_t {
+  auto result = settings.ws.mbp_depth;
   if (!result) {
     switch (api) {
       using enum tools::API;
@@ -127,10 +125,10 @@ struct create_metrics final : public core::metrics::Factory {
 
 MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared, size_t index)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, index_{index},
-      ping_frequency_{Flags::ws_ping_freq()}, spot_{is_spot(shared.api)}, mbp_depth_{get_mbp_depth(shared.api)},
-      mbp_topic_{create_mbp_topic(mbp_depth_)},
+      ping_frequency_{shared.settings.ws.ping_freq}, spot_{is_spot(shared.api)},
+      mbp_depth_{get_mbp_depth(shared.settings, shared.api)}, mbp_topic_{create_mbp_topic(mbp_depth_)},
       connection_{create_connection(*this, shared.settings, context, shared.api)},
-      decode_buffer_{Flags::decode_buffer_size()},
+      decode_buffer_{shared.settings.common.decode_buffer_size},
       request_id_{static_cast<uint64_t>(stream_id_) * 1000000},  // scale (debugging)
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
@@ -339,7 +337,7 @@ void MarketData::operator()(Trace<json::OrderBook> const &event, size_t depth) {
       auto [ask_price, ask_quantity] = helper(data.asks);
       auto top_of_book = TopOfBook{
           .stream_id = stream_id_,
-          .exchange = Flags::exchange(),
+          .exchange = shared_.settings.exchange,
           .symbol = data.symbol,
           .layer{
               .bid_price = bid_price,
@@ -373,7 +371,7 @@ void MarketData::operator()(Trace<json::OrderBook> const &event, size_t depth) {
         emplace_back(shared_.asks, item);
       auto market_by_price_update = MarketByPriceUpdate{
           .stream_id = stream_id_,
-          .exchange = Flags::exchange(),
+          .exchange = shared_.settings.exchange,
           .symbol = data.symbol,
           .bids = shared_.bids,
           .asks = shared_.asks,
@@ -411,7 +409,7 @@ void MarketData::operator()(Trace<json::PublicTrade> const &event) {
         return;
       auto trade_summary = TradeSummary{
           .stream_id = stream_id_,
-          .exchange = Flags::exchange(),
+          .exchange = shared_.settings.exchange,
           .symbol = symbol,
           .trades = trades,
           .exchange_time_utc = timestamp,
@@ -462,7 +460,7 @@ void MarketData::operator()(Trace<json::Tickers> const &event) {
       case INVERSE: {
         auto top_of_book = TopOfBook{
             .stream_id = stream_id_,
-            .exchange = Flags::exchange(),
+            .exchange = shared_.settings.exchange,
             .symbol = data.symbol,
             .layer{
                 .bid_price = data.bid1_price,
@@ -481,7 +479,7 @@ void MarketData::operator()(Trace<json::Tickers> const &event) {
       case OPTION: {
         auto top_of_book = TopOfBook{
             .stream_id = stream_id_,
-            .exchange = Flags::exchange(),
+            .exchange = shared_.settings.exchange,
             .symbol = data.symbol,
             .layer{
                 .bid_price = data.bid_price,
@@ -526,7 +524,7 @@ void MarketData::operator()(Trace<json::Tickers> const &event) {
     }};
     auto statistics_update = StatisticsUpdate{
         .stream_id = stream_id_,
-        .exchange = Flags::exchange(),
+        .exchange = shared_.settings.exchange,
         .symbol = data.symbol,
         .statistics = statistics,
         .update_type = UpdateType::INCREMENTAL,

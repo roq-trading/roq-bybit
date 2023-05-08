@@ -11,6 +11,7 @@
 #include "roq/core/limit/rate_limiter.hpp"
 
 #include "roq/bybit/config.hpp"
+#include "roq/bybit/settings.hpp"
 
 #include "roq/bybit/tools/crypto.hpp"
 
@@ -18,7 +19,7 @@ namespace roq {
 namespace bybit {
 
 struct Account final {
-  Account(Config const &, std::string_view const &name);
+  Account(Settings const &, Config const &, std::string_view const &name);
 
   Account(Account &&) = delete;
   Account(Account const &) = delete;

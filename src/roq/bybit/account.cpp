@@ -6,8 +6,6 @@
 
 #include "roq/clock.hpp"
 
-#include "roq/bybit/flags/flags.hpp"
-
 using namespace std::literals;
 using namespace std::chrono_literals;
 
@@ -16,9 +14,9 @@ namespace bybit {
 
 // === IMPLEMENTATION ===
 
-Account::Account(Config const &config, std::string_view const &name)
-    : name_{name}, crypto_{config.get_api_key(name_), config.get_secret(name_), flags::Flags::rest_recv_window()},
-      rate_limiter{flags::Flags::request_limit(), flags::Flags::request_limit_interval()}, request_queue{rate_limiter} {
+Account::Account(Settings const &settings, Config const &config, std::string_view const &name)
+    : name_{name}, crypto_{config.get_api_key(name_), config.get_secret(name_), settings.rest.recv_window},
+      rate_limiter{settings.common.request_limit, settings.common.request_limit_interval}, request_queue{rate_limiter} {
 }
 
 std::string Account::create_signature(std::chrono::milliseconds expires) {

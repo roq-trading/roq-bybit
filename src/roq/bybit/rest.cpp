@@ -14,8 +14,6 @@
 
 #include "roq/web/rest/client_factory.hpp"
 
-#include "roq/bybit/flags.hpp"
-
 #include "roq/bybit/json/utils.hpp"
 
 using namespace std::literals;
@@ -46,7 +44,7 @@ auto create_name(auto stream_id) {
 }
 
 auto create_connection(auto &handler, auto &settings, auto &context) {
-  auto uri = Flags::rest_uri();
+  auto uri = settings.rest.uri;
   auto config = web::rest::Client::Config{
       // connection
       .interface = {},
@@ -57,16 +55,16 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
       .disconnect_on_idle_timeout = {},
       .connection = web::http::Connection::KEEP_ALIVE,
       // proxy
-      .proxy = Flags::rest_proxy(),
+      .proxy = settings.rest.proxy,
       // http
       .query = {},
       .user_agent = ROQ_PACKAGE_NAME,
-      .request_timeout = Flags::rest_request_timeout(),
-      .ping_frequency = Flags::rest_ping_freq(),
-      .ping_path = Flags::rest_ping_path(),
+      .request_timeout = settings.rest.request_timeout,
+      .ping_frequency = settings.rest.ping_freq,
+      .ping_path = settings.rest.ping_path,
       // implementation
-      .decode_buffer_size = Flags::decode_buffer_size(),
-      .encode_buffer_size = Flags::encode_buffer_size(),
+      .decode_buffer_size = settings.common.decode_buffer_size,
+      .encode_buffer_size = settings.common.encode_buffer_size,
       .allow_pipelining = true,
   };
   return web::rest::ClientFactory::create(handler, context, config);
@@ -76,13 +74,18 @@ struct create_metrics final : public core::metrics::Factory {
   explicit create_metrics(auto &settings, auto const &group, auto const &function)
       : core::metrics::Factory(settings.app.name, group, function) {}
 };
+
+auto create_rate_limiter(auto &settings) {
+  return core::limit::RateLimiter{settings.common.request_limit, settings.common.request_limit_interval};
+}
 }  // namespace
 
 // === IMPLEMENTATION ===
 
 Rest::Rest(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)},
-      connection_{create_connection(*this, shared.settings, context)}, decode_buffer_{Flags::decode_buffer_size()},
+      connection_{create_connection(*this, shared.settings, context)},
+      decode_buffer_{shared.settings.common.decode_buffer_size},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -93,8 +96,8 @@ Rest::Rest(Handler &handler, io::Context &context, uint16_t stream_id, Shared &s
       latency_{
           .ping = create_metrics(shared.settings, name_, "ping"sv),
       },
-      shared_{shared}, download_{Flags::rest_request_timeout(), [this](auto state) { return download(state); }},
-      rate_limiter{flags::Flags::request_limit(), flags::Flags::request_limit_interval()} {
+      shared_{shared}, download_{shared.settings.rest.request_timeout, [this](auto state) { return download(state); }},
+      rate_limiter{create_rate_limiter(shared.settings)} {
 }
 
 void Rest::operator()(Event<Start> const &) {
@@ -254,7 +257,7 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
     auto option_type = json::map(item.options_type);
     auto reference_data = ReferenceData{
         .stream_id = stream_id_,
-        .exchange = Flags::exchange(),
+        .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
         .description = item.symbol,
         .security_type = security_type,
@@ -288,7 +291,7 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
     auto trading_status = json::map(item.status);
     auto market_status = MarketStatus{
         .stream_id = stream_id_,
-        .exchange = Flags::exchange(),
+        .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
         .trading_status = trading_status,
     };
