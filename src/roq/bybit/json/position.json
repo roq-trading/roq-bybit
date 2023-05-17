@@ -16,7 +16,7 @@
     },
     {
       "name": "data",
-      "type": "std::span<PositionDataItem>"
+      "type": "std::span<PositionDataItem const>"
     }
   ]
 }

@@ -4,7 +4,7 @@
   "values": [
     {
       "name": "list",
-      "type": "std::span<ExecutionResultItem>"
+      "type": "std::span<ExecutionResultItem const>"
     },
     {
       "name": "nextPageCursor",

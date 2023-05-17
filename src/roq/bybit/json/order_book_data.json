@@ -10,12 +10,12 @@
     {
       "raw": "b",
       "name": "bids",
-      "type": "std::span<OrderBookLevel>"
+      "type": "std::span<OrderBookLevel const>"
     },
     {
       "raw": "a",
       "name": "asks",
-      "type": "std::span<OrderBookLevel>"
+      "type": "std::span<OrderBookLevel const>"
     },
     {
       "raw": "u",

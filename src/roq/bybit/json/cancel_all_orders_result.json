@@ -9,7 +9,7 @@
     },
     {
       "name": "list",
-      "type": "std::span<CancelAllOrdersResultItem>",
+      "type": "std::span<CancelAllOrdersResultItem const>",
       "comment": ".LIO"
     }
   ]

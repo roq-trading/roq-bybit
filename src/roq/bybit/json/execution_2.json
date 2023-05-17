@@ -16,7 +16,7 @@
     },
     {
       "name": "data",
-      "type": "std::span<ExecutionDataItem>"
+      "type": "std::span<ExecutionDataItem const>"
     }
   ]
 }

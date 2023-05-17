@@ -48,7 +48,7 @@
     },
     {
       "name": "coin",
-      "type": "std::span<WalletBalanceItem>"
+      "type": "std::span<WalletBalanceItem const>"
     }
   ]
 }

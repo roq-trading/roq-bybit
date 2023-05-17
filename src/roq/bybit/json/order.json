@@ -16,7 +16,7 @@
     },
     {
       "name": "data",
-      "type": "std::span<OrderDataItem>"
+      "type": "std::span<OrderDataItem const>"
     }
   ]
 }
