@@ -53,8 +53,8 @@ auto const MESSAGE_LINEAR = R"({)"
 }  // namespace
 
 TEST_CASE("json_position_linear", "[json_position]") {
-  core::Buffer buffer(8192);
-  json::Position obj{MESSAGE_LINEAR, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto position = json::Position::create(MESSAGE_LINEAR, buffer);
 }
 
 TEST_CASE("json_position_parser", "[json_position]") {
@@ -75,9 +75,8 @@ TEST_CASE("json_position_parser", "[json_position]") {
 
     bool found = false;
   } handler;
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_2{buffer};
-  auto res = json::Parser::dispatch(handler, MESSAGE_LINEAR, buffer_2, {});
+  std::vector<std::byte> buffer(8192);
+  auto res = json::Parser::dispatch(handler, MESSAGE_LINEAR, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
 }
@@ -122,6 +121,6 @@ auto const MESSAGE_SIDE_NONE = R"({)"
 }  // namespace
 
 TEST_CASE("json_position_side_none", "[json_position]") {
-  core::Buffer buffer(8192);
-  json::Position obj{MESSAGE_SIDE_NONE, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto position = json::Position::create(MESSAGE_SIDE_NONE, buffer);
 }

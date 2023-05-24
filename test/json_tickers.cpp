@@ -132,8 +132,8 @@ auto const OPTION = R"({)"
 // spot
 
 TEST_CASE("json_tickers_simple_spot", "[json_tickers]") {
-  core::Buffer buffer(8192);
-  json::Tickers ticks{SPOT, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto tickers = json::Tickers::create(SPOT, buffer);
 }
 
 TEST_CASE("json_tickers_parser_spot", "[json_tickers]") {
@@ -154,9 +154,8 @@ TEST_CASE("json_tickers_parser_spot", "[json_tickers]") {
 
     bool found = false;
   } handler;
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_2{buffer};
-  auto res = json::Parser::dispatch(handler, SPOT, buffer_2, {});
+  std::vector<std::byte> buffer(8192);
+  auto res = json::Parser::dispatch(handler, SPOT, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
 }
@@ -164,8 +163,8 @@ TEST_CASE("json_tickers_parser_spot", "[json_tickers]") {
 // linear
 
 TEST_CASE("json_tickers_simple_linear", "[json_tickers]") {
-  core::Buffer buffer(8192);
-  json::Tickers ticks{LINEAR, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto tickers = json::Tickers::create(LINEAR, buffer);
 }
 
 TEST_CASE("json_tickers_parser_linear", "[json_tickers]") {
@@ -186,9 +185,8 @@ TEST_CASE("json_tickers_parser_linear", "[json_tickers]") {
 
     bool found = false;
   } handler;
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_2{buffer};
-  auto res = json::Parser::dispatch(handler, LINEAR, buffer_2, {});
+  std::vector<std::byte> buffer(8192);
+  auto res = json::Parser::dispatch(handler, LINEAR, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
 }
@@ -196,8 +194,8 @@ TEST_CASE("json_tickers_parser_linear", "[json_tickers]") {
 // inverse
 
 TEST_CASE("json_tickers_simple_inverse", "[json_tickers]") {
-  core::Buffer buffer(8192);
-  json::Tickers ticks{INVERSE, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto tickers = json::Tickers::create(INVERSE, buffer);
 }
 
 TEST_CASE("json_tickers_parser_inverse", "[json_tickers]") {
@@ -218,9 +216,8 @@ TEST_CASE("json_tickers_parser_inverse", "[json_tickers]") {
 
     bool found = false;
   } handler;
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_2{buffer};
-  auto res = json::Parser::dispatch(handler, INVERSE, buffer_2, {});
+  std::vector<std::byte> buffer(8192);
+  auto res = json::Parser::dispatch(handler, INVERSE, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
 }
@@ -228,8 +225,8 @@ TEST_CASE("json_tickers_parser_inverse", "[json_tickers]") {
 // option
 
 TEST_CASE("json_tickers_simple_option", "[json_tickers]") {
-  core::Buffer buffer(8192);
-  json::Tickers ticks{OPTION, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto tickers = json::Tickers::create(OPTION, buffer);
 }
 
 TEST_CASE("json_tickers_parser_option", "[json_tickers]") {
@@ -250,9 +247,8 @@ TEST_CASE("json_tickers_parser_option", "[json_tickers]") {
 
     bool found = false;
   } handler;
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_2{buffer};
-  auto res = json::Parser::dispatch(handler, OPTION, buffer_2, {});
+  std::vector<std::byte> buffer(8192);
+  auto res = json::Parser::dispatch(handler, OPTION, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
 }

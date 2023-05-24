@@ -26,6 +26,6 @@ auto const MESSAGE = R"({)"
 }  // namespace
 
 TEST_CASE("json_account_info_spot", "[json_account_info]") {
-  core::Buffer buffer(8192);
-  json::AccountInfo obj{MESSAGE, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto account_info = json::AccountInfo::create(MESSAGE, buffer);
 }

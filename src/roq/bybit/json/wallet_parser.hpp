@@ -2,13 +2,10 @@
 
 #pragma once
 
+#include <span>
 #include <string_view>
 
 #include "roq/trace_info.hpp"
-
-#include "roq/core/buffer.hpp"
-
-#include "roq/core/json/buffer.hpp"
 
 #include "roq/bybit/json/wallet.hpp"
 
@@ -21,7 +18,7 @@ struct WalletParser final {
     virtual void operator()(Trace<json::Wallet> const &) = 0;
   };
 
-  static bool dispatch(Handler &, std::string_view const &message, core::Buffer &, TraceInfo const &);
+  static bool dispatch(Handler &, std::string_view const &message, std::span<std::byte> const &, TraceInfo const &);
 };
 
 }  // namespace json

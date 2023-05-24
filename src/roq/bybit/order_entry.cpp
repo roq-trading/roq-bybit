@@ -87,7 +87,7 @@ struct create_metrics final : public core::metrics::Factory {
 OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())},
       connection_{create_connection(*this, shared.settings, context)},
-      decode_buffer_{shared.settings.common.decode_buffer_size},
+      decode_buffer_(shared.settings.common.decode_buffer_size),
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -302,7 +302,7 @@ void OrderEntry::get_account_info_ack(Trace<web::rest::Response> const &event, [
   auto const constexpr STATE = OrderEntryState::ACCOUNT_INFO;
   profile_.account_info_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::AccountInfo account_info{body, decode_buffer_};
+      auto account_info = json::AccountInfo::create(body, decode_buffer_);
       log::debug("account_info={}"sv, account_info);
       Trace event_2{event, account_info};
       (*this)(event_2);
@@ -451,7 +451,7 @@ void OrderEntry::get_position_info(std::string_view const &symbol) {
 void OrderEntry::get_position_info_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.position_info_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::PositionInfo position_info{body, decode_buffer_};
+      auto position_info = json::PositionInfo::create(body, decode_buffer_);
       log::debug("position_info={}"sv, position_info);
       Trace event_2{event, position_info};
       (*this)(event_2);
@@ -539,7 +539,7 @@ void OrderEntry::get_open_orders(std::string_view const &symbol) {
 void OrderEntry::get_open_orders_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.open_orders_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::OpenOrders open_orders{body, decode_buffer_};
+      auto open_orders = json::OpenOrders::create(body, decode_buffer_);
       log::debug("open_orders={}"sv, open_orders);
       Trace event_2{event, open_orders};
       (*this)(event_2);
@@ -646,7 +646,7 @@ void OrderEntry::get_execution(std::string_view const &symbol) {
 void OrderEntry::get_execution_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.execution_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::Execution execution{body, decode_buffer_};
+      auto execution = json::Execution::create(body, decode_buffer_);
       log::debug("execution={}"sv, execution);
       Trace event_2{event, execution};
       (*this)(event_2);
@@ -754,7 +754,7 @@ void OrderEntry::place_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.place_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::PlaceOrder place_order{body, decode_buffer_};
+      auto place_order = json::PlaceOrder::create(body, decode_buffer_);
       log::debug("place_order={}"sv, place_order);
       Trace event_2{event, place_order};
       (*this)(event_2, user_id, order_id, version);
@@ -870,7 +870,7 @@ void OrderEntry::amend_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.amend_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::AmendOrder amend_order{body, decode_buffer_};
+      auto amend_order = json::AmendOrder::create(body, decode_buffer_);
       log::debug("amend_order={}"sv, amend_order);
       Trace event_2{event, amend_order};
       (*this)(event_2, user_id, order_id, version);
@@ -990,7 +990,7 @@ void OrderEntry::cancel_order_ack(
     Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::CancelOrder cancel_order{body, decode_buffer_};
+      auto cancel_order = json::CancelOrder::create(body, decode_buffer_);
       log::debug("cancel_order={}"sv, cancel_order);
       Trace event_2{event, cancel_order};
       (*this)(event_2, user_id, order_id, version);
@@ -1113,7 +1113,7 @@ void OrderEntry::cancel_all_orders(
 void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event) {
   profile_.cancel_all_orders_ack([&]() {
     auto handle_success = [&](auto &body) {
-      json::CancelAllOrders cancel_all_orders{body, decode_buffer_};
+      auto cancel_all_orders = json::CancelAllOrders::create(body, decode_buffer_);
       log::debug("cancel_all_orders={}"sv, cancel_all_orders);
       Trace event_2{event, cancel_all_orders};
       (*this)(event_2);

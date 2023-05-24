@@ -13,6 +13,13 @@
     {
       "name": "result",
       "type": "AccountInfoResult"
+    },
+    {
+      "name": "retExtInfo"
+    },
+    {
+      "name": "time",
+      "type": "std::chrono::milliseconds"
     }
   ]
 }

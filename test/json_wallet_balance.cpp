@@ -130,7 +130,7 @@ TEST_CASE("json_wallet_balance_spot", "[json_wallet_balance]") {
 
     bool found = false;
   } handler;
-  core::Buffer buffer(8192);
+  std::vector<std::byte> buffer(8192);
   auto res = json::WalletParser::dispatch(handler, MESSAGE, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);

@@ -159,18 +159,18 @@ auto const MESSAGE_50_DELTA = R"({)"
 }  // namespace
 
 TEST_CASE("json_order_book_simple_1", "[json_order_book]") {
-  core::Buffer buffer(8192);
-  json::OrderBook order_book{MESSAGE_1, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto order_book = json::OrderBook::create(MESSAGE_1, buffer);
 }
 
 TEST_CASE("json_order_book_simple_50_snapshot", "[json_order_book]") {
-  core::Buffer buffer(8192);
-  json::OrderBook order_book{MESSAGE_50_SNAPSHOT, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto order_book = json::OrderBook::create(MESSAGE_50_SNAPSHOT, buffer);
 }
 
 TEST_CASE("json_order_book_simple_50_delta", "[json_order_book]") {
-  core::Buffer buffer(8192);
-  json::OrderBook order_book{MESSAGE_50_DELTA, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto order_book = json::OrderBook::create(MESSAGE_50_DELTA, buffer);
 }
 
 TEST_CASE("json_order_book_parser", "[json_order_book]") {
@@ -191,9 +191,8 @@ TEST_CASE("json_order_book_parser", "[json_order_book]") {
 
     bool found = false;
   } handler;
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_2{buffer};
-  auto res = json::Parser::dispatch(handler, MESSAGE_1, buffer_2, {});
+  std::vector<std::byte> buffer(8192);
+  auto res = json::Parser::dispatch(handler, MESSAGE_1, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
 }

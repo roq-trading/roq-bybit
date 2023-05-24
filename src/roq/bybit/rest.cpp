@@ -85,7 +85,7 @@ auto create_rate_limiter(auto &settings) {
 Rest::Rest(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)},
       connection_{create_connection(*this, shared.settings, context)},
-      decode_buffer_{shared.settings.common.decode_buffer_size},
+      decode_buffer_(shared.settings.common.decode_buffer_size),
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -229,7 +229,7 @@ void Rest::get_instrument_info_ack(Trace<web::rest::Response> const &event, uint
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        json::InstrumentInfo instrument_info{body, decode_buffer_};
+        auto instrument_info = json::InstrumentInfo::create(body, decode_buffer_);
         Trace event_2{event, instrument_info};
         (*this)(event_2);
         // XXX HANS NEW ??? create_trace_and_dispatch(*this, event, instrument_info)();

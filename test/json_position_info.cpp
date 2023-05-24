@@ -53,7 +53,7 @@ auto const MESSAGE = R"({)"
 }  // namespace
 
 TEST_CASE("simple", "[json_position_info]") {
-  core::Buffer buffer(8192);
-  json::PositionInfo obj{MESSAGE, buffer};
-  REQUIRE(std::size(obj.result.list) == 1);
+  std::vector<std::byte> buffer(8192);
+  auto position_info = json::PositionInfo::create(MESSAGE, buffer);
+  REQUIRE(std::size(position_info.result.list) == 1);
 }

@@ -25,8 +25,8 @@ auto const EMPTY = R"({)"
 }  // namespace
 
 TEST_CASE("json_open_orders_empty", "[json_open_orders]") {
-  core::Buffer buffer(8192);
-  json::OpenOrders obj{EMPTY, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto open_orders = json::OpenOrders::create(EMPTY, buffer);
 }
 
 namespace {
@@ -81,8 +81,8 @@ auto const MESSAGE_SPOT = R"({)"
 }  // namespace
 
 TEST_CASE("json_open_orders_spot", "[json_open_orders]") {
-  core::Buffer buffer(8192);
-  json::OpenOrders obj{MESSAGE_SPOT, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto open_orders = json::OpenOrders::create(MESSAGE_SPOT, buffer);
 }
 
 namespace {
@@ -140,6 +140,6 @@ auto const MESSAGE_LINEAR = R"({)"
 }  // namespace
 
 TEST_CASE("json_open_orders_linear", "[json_open_orders]") {
-  core::Buffer buffer(8192);
-  json::OpenOrders obj{MESSAGE_LINEAR, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto open_orders = json::OpenOrders::create(MESSAGE_LINEAR, buffer);
 }

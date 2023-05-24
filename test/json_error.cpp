@@ -24,8 +24,8 @@ auto const MESSAGE = R"({)"
 }  // namespace
 
 TEST_CASE("json_error_simple", "[json_error]") {
-  core::Buffer buffer(8192);
-  json::Error obj{MESSAGE, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto error = json::Error::create(MESSAGE, buffer);
 }
 
 /*
@@ -46,9 +46,8 @@ TEST_CASE("json_error_parser", "[json_error]") {
 
     bool found = false;
   } handler;
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_2{buffer};
-  auto res = json::Parser::dispatch(handler, MESSAGE, buffer_2, {});
+  std::vector<std::byte> buffer(8192);
+  auto res = json::Parser::dispatch(handler, MESSAGE, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
 }

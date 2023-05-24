@@ -32,8 +32,8 @@ auto const MESSAGE = R"({)"
 }  // namespace
 
 TEST_CASE("json_public_trade_simple", "[json_public_trade]") {
-  core::Buffer buffer(8192);
-  json::PublicTrade trade{MESSAGE, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto public_trade = json::PublicTrade::create(MESSAGE, buffer);
 }
 
 TEST_CASE("json_public_trade_parser", "[json_public_trade]") {
@@ -54,9 +54,8 @@ TEST_CASE("json_public_trade_parser", "[json_public_trade]") {
 
     bool found = false;
   } handler;
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_2{buffer};
-  auto res = json::Parser::dispatch(handler, MESSAGE, buffer_2, {});
+  std::vector<std::byte> buffer(8192);
+  auto res = json::Parser::dispatch(handler, MESSAGE, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
 }

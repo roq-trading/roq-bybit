@@ -105,8 +105,8 @@ auto const MESSAGE = R"({)"
 }  // namespace
 
 TEST_CASE("json_execution_simple", "[json_execution]") {
-  core::Buffer buffer(8192);
-  json::Execution obj{MESSAGE, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto execution = json::Execution::create(MESSAGE, buffer);
 }
 
 namespace {
@@ -165,9 +165,8 @@ TEST_CASE("json_execution_parser", "[json_execution]") {
 
     bool found = false;
   } handler;
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_2{buffer};
-  auto res = json::Parser::dispatch(handler, MESSAGE_LINEAR, buffer_2, {});
+  std::vector<std::byte> buffer(8192);
+  auto res = json::Parser::dispatch(handler, MESSAGE_LINEAR, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
 }

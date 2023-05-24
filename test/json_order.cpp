@@ -63,8 +63,8 @@ auto const MESSAGE_SPOT = R"({)"
 }  // namespace
 
 TEST_CASE("json_order_spot", "[json_order]") {
-  core::Buffer buffer(8192);
-  json::Order obj{MESSAGE_SPOT, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto order = json::Order::create(MESSAGE_SPOT, buffer);
 }
 
 TEST_CASE("json_order_parser", "[json_order]") {
@@ -85,9 +85,8 @@ TEST_CASE("json_order_parser", "[json_order]") {
 
     bool found = false;
   } handler;
-  core::Buffer buffer(8192);
-  core::json::Buffer buffer_2{buffer};
-  auto res = json::Parser::dispatch(handler, MESSAGE_SPOT, buffer_2, {});
+  std::vector<std::byte> buffer(8192);
+  auto res = json::Parser::dispatch(handler, MESSAGE_SPOT, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
 }
@@ -146,6 +145,6 @@ auto const MESSAGE_LINEAR = R"({)"
 }
 
 TEST_CASE("json_order_linear", "[json_order]") {
-  core::Buffer buffer(8192);
-  json::Order obj{MESSAGE_LINEAR, buffer};
+  std::vector<std::byte> buffer(8192);
+  auto order = json::Order::create(MESSAGE_LINEAR, buffer);
 }

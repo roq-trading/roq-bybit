@@ -37,12 +37,13 @@ static_assert(parse_mbp_depth("orderbook.1.xxx"sv) == 1);
 static_assert(parse_mbp_depth("orderbook.50.xxx"sv) == 50);
 
 bool dispatch_helper_flatten_wallet(auto &handler, auto &buffer, auto &trace_info, auto &message) {
+  core::json::Buffer buffer_2{buffer};
   core::json::Parser parser{message};
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::Object>(root)) {
     if (key.compare("data"sv) == 0) {
       for (auto item : std::get<core::json::Array>(value)) {
-        Wallet wallet{item, buffer};
+        Wallet wallet{item, buffer_2};
         create_trace_and_dispatch(handler, trace_info, wallet);
       }
       return true;
@@ -55,8 +56,11 @@ bool dispatch_helper_flatten_wallet(auto &handler, auto &buffer, auto &trace_inf
 // === IMPLEMENTATION ===
 
 bool Parser::dispatch(
-    Handler &handler, std::string_view const &message, core::json::Buffer &buffer, TraceInfo const &trace_info) {
-  Message message_{message, buffer};
+    Handler &handler,
+    std::string_view const &message,
+    std::span<std::byte> const &buffer,
+    TraceInfo const &trace_info) {
+  auto message_ = Message::create(message, buffer);
   auto topic = parse_topic(message_.topic);
   switch (topic) {
     using enum Topic::type_t;
@@ -64,36 +68,36 @@ bool Parser::dispatch(
     case UNKNOWN__:
       break;
     case ORDERBOOK: {
-      OrderBook order_book{message, buffer};
+      auto order_book = OrderBook::create(message, buffer);
       auto mbp_depth = parse_mbp_depth(message_.topic);
       create_trace_and_dispatch(handler, trace_info, order_book, mbp_depth);
       return true;
       break;
     }
     case PUBLIC_TRADE: {
-      PublicTrade public_trade{message, buffer};
+      auto public_trade = PublicTrade::create(message, buffer);
       create_trace_and_dispatch(handler, trace_info, public_trade);
       return true;
     }
     case TICKERS: {
-      Tickers tickers{message, buffer};
+      auto tickers = Tickers::create(message, buffer);
       create_trace_and_dispatch(handler, trace_info, tickers);
       return true;
     }
     case WALLET:
       return dispatch_helper_flatten_wallet(handler, buffer, trace_info, message);
     case POSITION: {
-      Position position{message, buffer};
+      auto position = Position::create(message, buffer);
       create_trace_and_dispatch(handler, trace_info, position);
       return true;
     }
     case ORDER: {
-      Order order{message, buffer};
+      auto order = Order::create(message, buffer);
       create_trace_and_dispatch(handler, trace_info, order);
       return true;
     }
     case EXECUTION: {
-      Execution2 execution{message, buffer};
+      auto execution = Execution2::create(message, buffer);
       create_trace_and_dispatch(handler, trace_info, execution);
       return true;
     }
@@ -104,17 +108,17 @@ bool Parser::dispatch(
     case UNKNOWN__:
       break;
     case AUTH: {
-      Auth auth{message, buffer};
+      auto auth = Auth::create(message, buffer);
       create_trace_and_dispatch(handler, trace_info, auth);
       return true;
     }
     case PING: {
-      Ping ping{message, buffer};
+      auto ping = Ping::create(message, buffer);
       create_trace_and_dispatch(handler, trace_info, ping);
       return true;
     }
     case SUBSCRIBE: {
-      Subscribe subscribe{message, buffer};
+      auto subscribe = Subscribe::create(message, buffer);
       create_trace_and_dispatch(handler, trace_info, subscribe);
       return true;
     }
@@ -126,7 +130,7 @@ bool Parser::dispatch(
       break;
     case ERROR: {
       // XXX check that this is a real message
-      Error error{message, buffer};
+      auto error = Error::create(message, buffer);
       create_trace_and_dispatch(handler, trace_info, error);
       return true;
     }
@@ -134,7 +138,7 @@ bool Parser::dispatch(
     case DELTA:
       break;
     case COMMAND_RESP: {
-      Subscribe subscribe{message, buffer};
+      auto subscribe = Subscribe::create(message, buffer);
       create_trace_and_dispatch(handler, trace_info, subscribe);
       return true;
     }

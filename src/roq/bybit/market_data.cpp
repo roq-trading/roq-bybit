@@ -128,7 +128,7 @@ MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_i
       ping_frequency_{shared.settings.ws.ping_freq}, spot_{is_spot(shared.api)},
       mbp_depth_{get_mbp_depth(shared.settings, shared.api)}, mbp_topic_{create_mbp_topic(mbp_depth_)},
       connection_{create_connection(*this, shared.settings, context, shared.api)},
-      decode_buffer_{shared.settings.common.decode_buffer_size},
+      decode_buffer_(shared.settings.common.decode_buffer_size),
       request_id_{static_cast<uint64_t>(stream_id_) * 1000000},  // scale (debugging)
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
@@ -280,8 +280,7 @@ void MarketData::parse(std::string_view const &message) {
   profile_.parse([&]() {
     try {
       TraceInfo trace_info;
-      core::json::Buffer buffer{decode_buffer_};
-      if (json::Parser::dispatch(*this, message, buffer, trace_info)) {
+      if (json::Parser::dispatch(*this, message, decode_buffer_, trace_info)) {
       } else {
         log::fatal(R"(Unexpected: failed to parse message="{}")"sv, message);
       }
