@@ -260,20 +260,24 @@ auto const OPTION = R"({)"
 
 TEST_CASE("json_instrument_info_spot", "[json_instrument_info]") {
   std::vector<std::byte> buffer(8192);
-  auto instrument_info = json::InstrumentInfo::create(SPOT, buffer);
+  auto obj = json::InstrumentInfo::create(SPOT, buffer);
+  CHECK(obj.ret_code == 0);
 }
 
 TEST_CASE("json_instrument_info_linear", "[json_instrument_info]") {
   std::vector<std::byte> buffer(8192);
-  auto instrument_info = json::InstrumentInfo::create(LINEAR, buffer);
+  auto obj = json::InstrumentInfo::create(LINEAR, buffer);
+  CHECK(obj.ret_code == 0);
 }
 
 TEST_CASE("json_instrument_info_inverse", "[json_instrument_info]") {
   std::vector<std::byte> buffer(8192);
-  auto instrument_info = json::InstrumentInfo::create(INVERSE, buffer);
+  auto obj = json::InstrumentInfo::create(INVERSE, buffer);
+  CHECK(obj.ret_code == 0);
 }
 
 TEST_CASE("json_instrument_info_option", "[json_instrument_info]") {
   std::vector<std::byte> buffer(8192);
-  auto instrument_info = json::InstrumentInfo::create(OPTION, buffer);
+  auto obj = json::InstrumentInfo::create(OPTION, buffer);
+  CHECK(obj.ret_code == 0);
 }

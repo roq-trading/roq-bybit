@@ -133,7 +133,8 @@ auto const OPTION = R"({)"
 
 TEST_CASE("json_tickers_simple_spot", "[json_tickers]") {
   std::vector<std::byte> buffer(8192);
-  auto tickers = json::Tickers::create(SPOT, buffer);
+  auto obj = json::Tickers::create(SPOT, buffer);
+  CHECK(obj.topic == "tickers.BTCUSDT"sv);
 }
 
 TEST_CASE("json_tickers_parser_spot", "[json_tickers]") {
@@ -164,7 +165,8 @@ TEST_CASE("json_tickers_parser_spot", "[json_tickers]") {
 
 TEST_CASE("json_tickers_simple_linear", "[json_tickers]") {
   std::vector<std::byte> buffer(8192);
-  auto tickers = json::Tickers::create(LINEAR, buffer);
+  auto obj = json::Tickers::create(LINEAR, buffer);
+  CHECK(obj.topic == "tickers.BTCUSDT"sv);
 }
 
 TEST_CASE("json_tickers_parser_linear", "[json_tickers]") {
@@ -195,7 +197,8 @@ TEST_CASE("json_tickers_parser_linear", "[json_tickers]") {
 
 TEST_CASE("json_tickers_simple_inverse", "[json_tickers]") {
   std::vector<std::byte> buffer(8192);
-  auto tickers = json::Tickers::create(INVERSE, buffer);
+  auto obj = json::Tickers::create(INVERSE, buffer);
+  CHECK(obj.topic == "tickers.BTCUSDM23"sv);
 }
 
 TEST_CASE("json_tickers_parser_inverse", "[json_tickers]") {
@@ -226,7 +229,8 @@ TEST_CASE("json_tickers_parser_inverse", "[json_tickers]") {
 
 TEST_CASE("json_tickers_simple_option", "[json_tickers]") {
   std::vector<std::byte> buffer(8192);
-  auto tickers = json::Tickers::create(OPTION, buffer);
+  auto obj = json::Tickers::create(OPTION, buffer);
+  CHECK(obj.topic == "tickers.BTC-28APR23-30000-C"sv);
 }
 
 TEST_CASE("json_tickers_parser_option", "[json_tickers]") {

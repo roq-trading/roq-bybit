@@ -54,7 +54,8 @@ auto const MESSAGE_LINEAR = R"({)"
 
 TEST_CASE("json_position_linear", "[json_position]") {
   std::vector<std::byte> buffer(8192);
-  auto position = json::Position::create(MESSAGE_LINEAR, buffer);
+  auto obj = json::Position::create(MESSAGE_LINEAR, buffer);
+  CHECK(obj.topic == "position"sv);
 }
 
 TEST_CASE("json_position_parser", "[json_position]") {
@@ -122,5 +123,6 @@ auto const MESSAGE_SIDE_NONE = R"({)"
 
 TEST_CASE("json_position_side_none", "[json_position]") {
   std::vector<std::byte> buffer(8192);
-  auto position = json::Position::create(MESSAGE_SIDE_NONE, buffer);
+  auto obj = json::Position::create(MESSAGE_SIDE_NONE, buffer);
+  CHECK(obj.topic == "position"sv);
 }

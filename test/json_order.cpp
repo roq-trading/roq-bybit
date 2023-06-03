@@ -64,7 +64,8 @@ auto const MESSAGE_SPOT = R"({)"
 
 TEST_CASE("json_order_spot", "[json_order]") {
   std::vector<std::byte> buffer(8192);
-  auto order = json::Order::create(MESSAGE_SPOT, buffer);
+  auto obj = json::Order::create(MESSAGE_SPOT, buffer);
+  CHECK(obj.id == "460579-1405980802291926784-ff9c1866-f679-4fde-9e43-833c96d09967"sv);
 }
 
 TEST_CASE("json_order_parser", "[json_order]") {
@@ -146,5 +147,6 @@ auto const MESSAGE_LINEAR = R"({)"
 
 TEST_CASE("json_order_linear", "[json_order]") {
   std::vector<std::byte> buffer(8192);
-  auto order = json::Order::create(MESSAGE_LINEAR, buffer);
+  auto obj = json::Order::create(MESSAGE_LINEAR, buffer);
+  CHECK(obj.topic == "order"sv);
 }

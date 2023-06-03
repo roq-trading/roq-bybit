@@ -25,7 +25,8 @@ auto const MESSAGE = R"({)"
 
 TEST_CASE("json_error_simple", "[json_error]") {
   std::vector<std::byte> buffer(8192);
-  auto error = json::Error::create(MESSAGE, buffer);
+  auto obj = json::Error::create(MESSAGE, buffer);
+  CHECK(obj.ret_code == 10004);
 }
 
 /*

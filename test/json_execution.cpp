@@ -106,7 +106,8 @@ auto const MESSAGE = R"({)"
 
 TEST_CASE("json_execution_simple", "[json_execution]") {
   std::vector<std::byte> buffer(8192);
-  auto execution = json::Execution::create(MESSAGE, buffer);
+  auto obj = json::Execution::create(MESSAGE, buffer);
+  CHECK(obj.ret_code == 0);
 }
 
 namespace {
