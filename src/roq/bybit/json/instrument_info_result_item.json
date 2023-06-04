@@ -86,6 +86,11 @@
       "name": "settleCoin",
       "type": "std::string_view",
       "comment": ".LIO"
+    },
+    {
+      "name": "marginTrading",
+      "type": "std::string_view",
+      "comment": "????"
     }
   ]
 }
