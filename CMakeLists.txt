@@ -13,7 +13,7 @@ message("Using GIT_REPO_VERSION=${GIT_REPO_VERSION}")
 
 # project
 
-project(roq-bybit-v5 VERSION ${GIT_REPO_VERSION})
+project(roq-bybit VERSION ${GIT_REPO_VERSION})
 
 # conda
 

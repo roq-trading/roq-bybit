@@ -19,7 +19,7 @@ WS_PUBLIC_URI="wss://stream-testnet.$URI/v5/public"
 WS_PRIVATE_URI="wss://stream-testnet.$URI/v5/private"
 
 
-$PREFIX ./roq-bybit-v5 \
+$PREFIX ./roq-bybit \
   --name "$NAME" \
   --config_file "$CONFIG_FILE" \
   --cache_dir "$HOME/var/lib/roq/cache" \
