@@ -5,14 +5,14 @@
     {
       "name": "exchange",
       "type": "std::string",
-      "validator": "roq::core::flags::NonEmpty",
+      "validator": "roq::flags::validators::NonEmpty",
       "default": "bybit",
       "description": "exchange identifier (string)"
     },
     {
       "name": "api",
       "type": "std::string",
-      "validator": "roq::core::flags::NonEmpty",
+      "validator": "roq::flags::validators::NonEmpty",
       "default": "spot",
       "description": "what api to use (spot, linear, inverse, option)"
     }
