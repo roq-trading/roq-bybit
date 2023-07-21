@@ -10,7 +10,9 @@ fi
 
 NAME="bybit"
 
-CONFIG_FILE="$CWD/config/$NAME-testnet.toml"
+CONFIG="${CONFIG:-$NAME-testnet}"
+
+CONFIG_FILE="$ROQ_CONFIG_PATH/roq-bybit/$CONFIG.toml"
 
 URI="bybit.com"
 
