@@ -752,7 +752,7 @@ void OrderEntry::place_order(
 }
 
 void OrderEntry::place_order_ack(
-    Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.place_order_ack([&]() {
     auto handle_success = [&](auto &body) {
       auto place_order = json::PlaceOrder::create(body, decode_buffer_);
@@ -780,7 +780,7 @@ void OrderEntry::place_order_ack(
 }
 
 void OrderEntry::operator()(
-    Trace<json::PlaceOrder> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    Trace<json::PlaceOrder> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   auto &[trace_info, place_order] = event;
   log::info<2>("place_order={}"sv, place_order);
   auto request_status = place_order.ret_code == 0 ? RequestStatus::ACCEPTED : RequestStatus::REJECTED;
@@ -869,7 +869,7 @@ void OrderEntry::amend_order(
 }
 
 void OrderEntry::amend_order_ack(
-    Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.amend_order_ack([&]() {
     auto handle_success = [&](auto &body) {
       auto amend_order = json::AmendOrder::create(body, decode_buffer_);
@@ -899,7 +899,7 @@ void OrderEntry::amend_order_ack(
 
 // XXX this is a little weird -- the response tells us the last known (?) status of the order
 void OrderEntry::operator()(
-    Trace<json::AmendOrder> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    Trace<json::AmendOrder> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   auto &[trace_info, amend_order] = event;
   log::info<2>("amend_order={}"sv, amend_order);
   auto status = amend_order.ret_code == 0 ? RequestStatus::ACCEPTED : RequestStatus::REJECTED;
@@ -990,7 +990,7 @@ void OrderEntry::cancel_order(
 }
 
 void OrderEntry::cancel_order_ack(
-    Trace<web::rest::Response> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
     auto handle_success = [&](auto &body) {
       auto cancel_order = json::CancelOrder::create(body, decode_buffer_);
@@ -1020,7 +1020,7 @@ void OrderEntry::cancel_order_ack(
 
 // XXX this is a little weird -- the response tells us the last known (?) status of the order
 void OrderEntry::operator()(
-    Trace<json::CancelOrder> const &event, uint8_t user_id, uint32_t order_id, uint32_t version) {
+    Trace<json::CancelOrder> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   auto &[trace_info, cancel_order] = event;
   log::info<2>("cancel_order={}"sv, cancel_order);
   auto status = cancel_order.ret_code == 0 ? RequestStatus::ACCEPTED : RequestStatus::REJECTED;
@@ -1187,7 +1187,7 @@ void OrderEntry::process_response(
 }
 
 template <typename... Args>
-void OrderEntry::operator()(Trace<oms::Response> const &event, uint8_t user_id, uint32_t order_id, Args &&...args) {
+void OrderEntry::operator()(Trace<oms::Response> const &event, uint8_t user_id, uint64_t order_id, Args &&...args) {
   auto &[trace_info, response] = event;
   if (shared_.update_order(
           user_id,

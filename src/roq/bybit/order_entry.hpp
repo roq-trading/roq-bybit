@@ -116,24 +116,24 @@ struct OrderEntry final : public web::rest::Client::Handler, public json::Wallet
   void operator()(Trace<json::Execution> const &);
 
   void place_order(Event<CreateOrder> const &, oms::Order const &, std::string_view const &request_id);
-  void place_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
-  void operator()(Trace<json::PlaceOrder> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
+  void place_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
+  void operator()(Trace<json::PlaceOrder> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
 
   void amend_order(
       Event<ModifyOrder> const &,
       oms::Order const &,
       std::string_view const &request_id,
       std::string_view const &previous_request_id);
-  void amend_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
-  void operator()(Trace<json::AmendOrder> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
+  void amend_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
+  void operator()(Trace<json::AmendOrder> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
 
   void cancel_order(
       Event<CancelOrder> const &,
       oms::Order const &,
       std::string_view const &request_id,
       std::string_view const &previous_request_id);
-  void cancel_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
-  void operator()(Trace<json::CancelOrder> const &, uint8_t user_id, uint32_t order_id, uint32_t version);
+  void cancel_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
+  void operator()(Trace<json::CancelOrder> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
 
   void cancel_all_orders(Event<CancelAllOrders> const &, std::string_view const &request_id);
   void cancel_all_orders_ack(Trace<web::rest::Response> const &);
@@ -143,7 +143,7 @@ struct OrderEntry final : public web::rest::Client::Handler, public json::Wallet
   void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);
 
   template <typename... Args>
-  void operator()(Trace<oms::Response> const &, uint8_t user_id, uint32_t order_id, Args &&...);
+  void operator()(Trace<oms::Response> const &, uint8_t user_id, uint64_t order_id, Args &&...);
 
   void operator()(Trace<oms::OrderUpdate> const &, std::string_view const &client_order_id);
 
