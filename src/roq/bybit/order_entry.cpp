@@ -678,7 +678,7 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
     auto trade_update = TradeUpdate{
         .stream_id = stream_id_,
         .account = account_.get_name(),
-        .order_id = ORDER_ID_NONE,
+        .order_id = {},
         .exchange = shared_.settings.exchange,
         .symbol = symbol,
         .side = side,
@@ -692,6 +692,7 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
         .update_type = UpdateType::SNAPSHOT,
         .sending_time_utc = execution.time,
         .user = {},
+        .strategy_id = {},
     };
     create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE, order_link_id);
     shared_.fills.clear();

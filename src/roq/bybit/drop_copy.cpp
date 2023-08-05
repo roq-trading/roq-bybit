@@ -447,7 +447,7 @@ void DropCopy::operator()(Trace<json::Execution2> const &event) {
       auto trade_update = TradeUpdate{
           .stream_id = stream_id_,
           .account = account_.get_name(),
-          .order_id = ORDER_ID_NONE,
+          .order_id = {},
           .exchange = shared_.settings.exchange,
           .symbol = symbol,
           .side = side,
@@ -461,6 +461,7 @@ void DropCopy::operator()(Trace<json::Execution2> const &event) {
           .update_type = UpdateType::INCREMENTAL,
           .sending_time_utc = execution.creation_time,
           .user = {},
+          .strategy_id = {},
       };
       create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE, order_link_id);
       shared_.fills.clear();
