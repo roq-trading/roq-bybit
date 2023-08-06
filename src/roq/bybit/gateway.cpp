@@ -103,6 +103,9 @@ void Gateway::operator()(Event<Disconnected> const &event) {
         }
       }
       break;
+    case BY_STRATEGY:
+      log::warn("*** CANCEL MANAGED ORDERS BY STRATEGY NOT IMPLEMENTED ***"sv);
+      break;
   }
 }
 
