@@ -31,6 +31,7 @@ auto const CREATE_ORDER = CreateOrder{
     .price = 17123.45,
     .stop_price = NaN,
     .routing_id = {},
+    .strategy_id = {},
 };
 auto const ORDER = []() {
   oms::Order result;

@@ -2,6 +2,9 @@
 
 #include "roq/bybit/drop_copy.hpp"
 
+#include <algorithm>
+#include <utility>
+
 #include "roq/mask.hpp"
 
 #include "roq/utils/safe_cast.hpp"
@@ -456,6 +459,7 @@ void DropCopy::operator()(Trace<json::Execution2> const &event) {
           .update_time_utc = utils::safe_cast(exec_time),
           .external_account = {},
           .external_order_id = order_id,
+          .client_order_id = {},
           .fills = shared_.fills,
           .routing_id = {},
           .update_type = UpdateType::INCREMENTAL,

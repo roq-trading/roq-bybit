@@ -43,6 +43,7 @@ TEST_CASE("json_place_order_simple", "[json_place_order]") {
       .price = 23456.78,
       .stop_price = NaN,
       .routing_id = {},
+      .strategy_id = {},
   };
   auto order = ::create_order();
   auto request_id = "1234"sv;
@@ -71,7 +72,7 @@ auto const MESSAGE = R"({)"
                      R"("retExtInfo":{},)"
                      R"("time":1682857519260)"
                      R"(})";
-}
+}  // namespace
 
 TEST_CASE("json_place_order_response", "[json_place_order]") {
   std::vector<std::byte> buffer(8192);

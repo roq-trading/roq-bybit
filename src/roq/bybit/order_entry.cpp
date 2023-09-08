@@ -2,6 +2,7 @@
 
 #include "roq/bybit/order_entry.hpp"
 
+#include <algorithm>
 #include <utility>
 
 #include "roq/mask.hpp"
@@ -687,6 +688,7 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
         .update_time_utc = utils::safe_cast(exec_time),
         .external_account = {},
         .external_order_id = order_id,
+        .client_order_id = {},
         .fills = shared_.fills,
         .routing_id = {},
         .update_type = UpdateType::SNAPSHOT,

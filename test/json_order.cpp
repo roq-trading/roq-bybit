@@ -143,7 +143,7 @@ auto const MESSAGE_LINEAR = R"({)"
                             R"(})"
                             R"(])"
                             R"(})";
-}
+}  // namespace
 
 TEST_CASE("json_order_linear", "[json_order]") {
   std::vector<std::byte> buffer(8192);

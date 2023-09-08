@@ -146,7 +146,7 @@ auto const MESSAGE_LINEAR = R"({)"
                             R"(})"
                             R"(])"
                             R"(})";
-}
+}  // namespace
 
 TEST_CASE("json_execution_parser", "[json_execution]") {
   struct Handler final : public json::Parser::Handler {

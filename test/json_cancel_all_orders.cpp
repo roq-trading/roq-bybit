@@ -57,7 +57,7 @@ auto const MESSAGE = R"({)"
                      R"("retExtInfo":{},)"
                      R"("time":1682861453404)"
                      R"(})";
-}
+}  // namespace
 
 TEST_CASE("json_cancel_all_orders_response", "[json_cancel_all_orders]") {
   std::vector<std::byte> buffer(8192);
