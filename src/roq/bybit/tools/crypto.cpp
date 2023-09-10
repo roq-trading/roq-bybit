@@ -9,7 +9,7 @@
 
 #include "roq/logging.hpp"
 
-#include "roq/core/codec/hex.hpp"
+#include "roq/utils/codec/hex.hpp"
 
 #include <roq/core/mac/hmac.hpp>
 
@@ -39,7 +39,7 @@ std::string Crypto::create_signature_v2(std::chrono::milliseconds expires) {
   mac_.update(tmp);
   auto digest = mac_.final(digest_);
   std::string result;
-  core::codec::Hex::encode(result, digest);
+  utils::codec::Hex::encode(result, digest);
   return result;
 }
 
@@ -61,7 +61,7 @@ std::string Crypto::create_headers_v2(
   mac_.update(tmp);
   auto digest = mac_.final(digest_);
   std::string signature;
-  core::codec::Hex::encode(signature, digest);
+  utils::codec::Hex::encode(signature, digest);
   auto result = fmt::format(
       "X-BAPI-API-KEY: {}\r\n"
       "X-BAPI-SIGN: {}\r\n"
