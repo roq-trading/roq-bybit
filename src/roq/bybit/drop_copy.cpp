@@ -421,6 +421,7 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
           .last_traded_quantity = NaN,
           .last_traded_price = NaN,
           .last_liquidity = {},
+          .routing_id = {},
           .update_type = UpdateType::INCREMENTAL,
           .sending_time_utc = order.creation_time,
       };
