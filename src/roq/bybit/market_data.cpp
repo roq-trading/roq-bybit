@@ -393,7 +393,8 @@ void MarketData::operator()(Trace<json::OrderBook> const &event, size_t depth) {
 
 void MarketData::operator()(Trace<json::PublicTrade> const &event) {
   profile_.trade([&]() {
-    auto &[trace_info, public_trade] = event;
+    auto &trace_info = event.trace_info;
+    auto &public_trade = event.value;
     log::info<3>("event={{public_trade={}, trace_info={}}}"sv, public_trade, trace_info);
     // log::debug("public_trade={}"sv, public_trade);
     (*connection_).touch(trace_info.source_receive_time);

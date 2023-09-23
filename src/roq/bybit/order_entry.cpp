@@ -1089,7 +1089,7 @@ void OrderEntry::cancel_all_orders(
       log::warn("*** NOT POSSIBLE TO CANCEL ALL OPEN ORDERS (NOT READY) ***"sv);
       return;
     }
-    auto &[message_info, cancel_all_orders] = event;
+    auto &cancel_all_orders = event.value;
     auto const path = "/v5/order/cancel-all"sv;
     std::string buffer;  // XXX
     if (shared_.dispatcher.get_all_order_symbols(
