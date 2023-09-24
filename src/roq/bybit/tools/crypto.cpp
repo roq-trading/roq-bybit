@@ -11,7 +11,7 @@
 
 #include "roq/utils/codec/hex.hpp"
 
-#include <roq/core/mac/hmac.hpp>
+#include <roq/utils/mac/hmac.hpp>
 
 using namespace std::literals;
 
@@ -23,7 +23,7 @@ namespace tools {
 
 namespace {
 auto create_hmac(auto const &secret) {
-  return core::mac::HMAC<core::hash::SHA256>{secret};
+  return utils::mac::HMAC<utils::hash::SHA256>{secret};
 }
 }  // namespace
 

@@ -8,9 +8,9 @@
 #include <string>
 #include <string_view>
 
-#include <roq/core/hash/sha256.hpp>
+#include <roq/utils/hash/sha256.hpp>
 
-#include "roq/core/mac/hmac.hpp"
+#include "roq/utils/mac/hmac.hpp"
 
 namespace roq {
 namespace bybit {
@@ -33,7 +33,7 @@ struct Crypto final {
       std::chrono::milliseconds now);
 
  private:
-  using MAC = core::mac::HMAC<core::hash::SHA256>;
+  using MAC = utils::mac::HMAC<utils::hash::SHA256>;
   using Digest = std::array<std::byte, MAC::DIGEST_LENGTH>;
 
   std::string const key_;
