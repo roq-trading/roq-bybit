@@ -32,6 +32,7 @@ add_executable(${TARGET_NAME} ${SOURCES})
 target_link_libraries(
   ${TARGET_NAME}
   ${PROJECT_NAME}-json
+  roq-core::roq-core
   roq-io::roq-io
   roq-logging::roq-logging
   aklomp::base64
