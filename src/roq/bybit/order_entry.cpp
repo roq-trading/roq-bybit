@@ -300,7 +300,7 @@ void OrderEntry::get_account_info() {
 }
 
 void OrderEntry::get_account_info_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
-  auto const constexpr STATE = OrderEntryState::ACCOUNT_INFO;
+  auto constexpr const STATE = OrderEntryState::ACCOUNT_INFO;
   profile_.account_info_ack([&]() {
     auto handle_success = [&](auto &body) {
       auto account_info = json::AccountInfo::create(body, decode_buffer_);
