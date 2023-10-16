@@ -1097,11 +1097,32 @@ void OrderEntry::operator()(
 void OrderEntry::cancel_all_orders(
     Event<CancelAllOrders> const &event, [[maybe_unused]] std::string_view const &request_id) {
   profile_.cancel_all_orders([&]() {
-    if (!ready()) {
-      log::warn("*** NOT POSSIBLE TO CANCEL ALL OPEN ORDERS (NOT READY) ***"sv);
-      return;
-    }
+    if (!ready()) [[unlikely]]
+      throw oms::NotReady{"not ready"sv};
     auto &cancel_all_orders = event.value;
+    auto send_ack = [&](auto &symbol) {
+      auto cancel_all_orders_ack = CancelAllOrdersAck{
+          .stream_id = stream_id_,
+          .account = account_.get_name(),
+          .order_id = cancel_all_orders.order_id,
+          .exchange = cancel_all_orders.exchange,
+          .symbol = symbol,
+          .side = cancel_all_orders.side,
+          .origin = Origin::GATEWAY,
+          .status = RequestStatus::FORWARDED,
+          .error = {},
+          .text = {},
+          .request_id = request_id,
+          .external_account = {},
+          .number_of_affected_orders = {},
+          .round_trip_latency = {},
+          .user = {},
+          .strategy_id = cancel_all_orders.strategy_id,
+      };
+      TraceInfo trace_info{event};
+      Trace event_2{trace_info, cancel_all_orders_ack};
+      shared_(event_2);
+    };
     auto const path = "/v5/order/cancel-all"sv;
     std::string buffer;  // XXX
     if (shared_.dispatcher.get_all_order_symbols(
@@ -1119,12 +1140,13 @@ void OrderEntry::cancel_all_orders(
                   .body = body,
                   .quality_of_service = {},
               };
-              auto callback = [this]([[maybe_unused]] auto &request_id, auto &response) {
+              auto callback = [this](auto &request_id, auto &response) {
                 TraceInfo trace_info;
                 Trace event{trace_info, response};
-                cancel_all_orders_ack(event);
+                cancel_all_orders_ack(event, request_id);
               };
               (*connection_)("cancel_all_orders"sv, request, callback);
+              send_ack(symbol);
             },
             account_.get_name())) {
     } else {
@@ -1133,16 +1155,40 @@ void OrderEntry::cancel_all_orders(
   });
 }
 
-void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event) {
+void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, std::string_view const &request_id) {
   profile_.cancel_all_orders_ack([&]() {
+    auto send_ack = [&](auto origin, auto status, Error error, std::string_view const &text) {
+      auto cancel_all_orders_ack = CancelAllOrdersAck{
+          .stream_id = stream_id_,
+          .account = account_.get_name(),
+          .order_id = {},
+          .exchange = {},
+          .symbol = {},
+          .side = {},
+          .origin = origin,
+          .status = status,
+          .error = error,
+          .text = text,
+          .request_id = request_id,
+          .external_account = {},
+          .number_of_affected_orders = {},
+          .round_trip_latency = {},
+          .user = {},
+          .strategy_id = {},
+      };
+      Trace event_2{event, cancel_all_orders_ack};
+      shared_(event_2);
+    };
     auto handle_success = [&](auto &body) {
       auto cancel_all_orders = json::CancelAllOrders::create(body, decode_buffer_);
       log::debug("cancel_all_orders={}"sv, cancel_all_orders);
       Trace event_2{event, cancel_all_orders};
       (*this)(event_2);
+      send_ack(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {});
     };
     auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
       log::warn(R"(error={}, text="{}")"sv, error, text);
+      send_ack(origin, RequestStatus::REJECTED, error, text);
     };
     process_response(event, handle_success, handle_error);
   });
