@@ -20,12 +20,12 @@
     {
       "raw": "u",
       "name": "update_id",
-      "type": "int64_t"
+      "type": "uint64_t"
     },
     {
       "raw": "seq",
       "name": "cross_sequence",
-      "type": "int64_t"
+      "type": "uint64_t"
     }
   ]
 }

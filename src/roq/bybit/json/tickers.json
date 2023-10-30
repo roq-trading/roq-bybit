@@ -13,7 +13,7 @@
     {
       "raw": "cs",
       "name": "cross_sequence",
-      "type": "int64_t"
+      "type": "uint64_t"
     },
     {
       "raw": "ts",
