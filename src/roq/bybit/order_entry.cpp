@@ -624,10 +624,14 @@ void OrderEntry::get_execution(std::string_view const &symbol) {
       log::fatal("Unexpected"sv);
     }();
     auto end_time = clock::get_realtime() + 1min;  // note! make sure we don't miss anything
-    auto start_time =
-        std::chrono::duration_cast<std::chrono::milliseconds>(end_time - shared_.settings.common.execution_lookback);
+    auto start_time = std::chrono::duration_cast<std::chrono::milliseconds>(
+        end_time - shared_.settings.common.download_trades_lookback);
     auto query = fmt::format(
-        "?category={}&symbol={}&startTime={}&execType=Trade&limit=100"sv, category, symbol, start_time.count());
+        "?category={}&symbol={}&startTime={}&execType=Trade&limit={}"sv,
+        category,
+        symbol,
+        start_time.count(),
+        shared_.settings.common.download_trades_limit);
     log::debug(R"(query="{}")"sv, query);
     auto headers = account_.create_headers(path, query, {});
     auto request = web::rest::Request{
