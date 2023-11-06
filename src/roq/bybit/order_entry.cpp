@@ -263,6 +263,7 @@ uint32_t OrderEntry::download(OrderEntryState state) {
 void OrderEntry::check_request_queue(std::chrono::nanoseconds now) {
   auto request = [&](auto &message) {
     auto &[topic, symbol] = message;
+    log::debug(R"(HERE topic="{}", symbol="{}")"sv, topic, symbol);
     if (topic.compare("wallet"sv) == 0) {
       get_wallet_balance();
     } else if (topic.compare("position"sv) == 0) {
@@ -273,7 +274,9 @@ void OrderEntry::check_request_queue(std::chrono::nanoseconds now) {
       get_execution(symbol);
     }
   };
-  account_.request_queue.dispatch(now, request);
+  if (account_.request_queue.dispatch(now, request)) {
+    log::debug("HERE size={}"sv, std::size(account_.request_queue));
+  }
 }
 
 void OrderEntry::get_account_info() {
@@ -708,8 +711,6 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
     shared_.fills.clear();
   };
   for (auto &item : execution.result.list) {
-    if (item.exec_type != json::ExecType::TRADE)  // note!
-      continue;
     if (item.order_id != order_id) {
       dispatch();
       order_id = item.order_id;
@@ -720,6 +721,7 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
     }
     auto liquidity = item.is_maker ? Liquidity::MAKER : Liquidity::TAKER;
     auto fill = Fill{
+        .exchange_time_utc = item.exec_time,
         .external_trade_id = item.exec_id,
         .quantity = item.exec_qty,
         .price = item.exec_price,

@@ -140,15 +140,16 @@ void DropCopy::operator()(metrics::Writer &writer) {
 }
 
 void DropCopy::operator()(Rest::SymbolsUpdate &symbols_update) {
+  log::debug("HERE symbols={}"sv, symbols_update.symbols);
   for (auto &symbol : symbols_update.symbols) {
     if (!shared_.dispatcher.can_account_trade_symbol(account_.get_name(), shared_.settings.exchange, symbol))
       continue;
     auto res = symbols_.emplace(symbol);
     assert(res.second);
     if ((*connection_).ready()) {
-      // XXX TODO HANS need to check a latch for each subscription type
       if (shared_.api != tools::API::SPOT)
         account_.request_queue.emplace_back("position"sv, symbol);
+      log::debug(R"(HERE symbol="{}")"sv, symbol);
       account_.request_queue.emplace_back("order"sv, symbol);
       account_.request_queue.emplace_back("execution"sv, symbol);
     }
