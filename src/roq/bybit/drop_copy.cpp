@@ -476,8 +476,10 @@ void DropCopy::operator()(Trace<json::Execution2> const &event) {
       shared_.fills.clear();
     };
     for (auto &item : execution.data) {
+      /* XXX doesn't work with spot
       if (item.exec_type != json::ExecType::TRADE)  // note!
         continue;
+      */
       if (item.order_id != order_id) {
         dispatch();
         order_id = item.order_id;
