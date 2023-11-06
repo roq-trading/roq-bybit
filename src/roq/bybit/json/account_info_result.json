@@ -25,6 +25,10 @@
     {
       "name": "smpGroup",
       "type": "int32_t"
+    },
+    {
+      "name": "isMasterTrader",
+      "type": "bool"
     }
   ]
 }
