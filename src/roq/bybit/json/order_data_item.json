@@ -169,6 +169,10 @@
     {
       "name": "slLimitPrice",
       "type": "double"
+    },
+    {
+      "name": "feeCurrency",
+      "type": "std::string_view"
     }
   ]
 }

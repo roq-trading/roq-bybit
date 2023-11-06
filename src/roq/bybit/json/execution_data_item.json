@@ -109,6 +109,10 @@
     {
       "name": "closedSize",
       "type": "double"
+    },
+    {
+      "name": "seq",
+      "type": "int64_t"
     }
   ]
 }
