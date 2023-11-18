@@ -29,6 +29,10 @@
     {
       "name": "isMasterTrader",
       "type": "bool"
+    },
+    {
+      "name": "spotHedgingStatus",
+      "type": "std::string_view"
     }
   ]
 }
