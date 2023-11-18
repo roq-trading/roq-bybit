@@ -44,7 +44,7 @@ std::string Crypto::create_signature_v2(std::chrono::milliseconds expires) {
 }
 
 std::string Crypto::create_headers_v2(
-    std::string_view const &path,
+    [[maybe_unused]] std::string_view const &path,
     std::string_view const &query,
     std::string_view const &body,
     std::chrono::milliseconds timestamp) {
