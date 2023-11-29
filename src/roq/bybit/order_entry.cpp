@@ -1137,6 +1137,8 @@ void OrderEntry::cancel_all_orders(
     std::string buffer;  // XXX
     if (shared_.dispatcher.get_all_order_symbols(
             [&](auto &symbol) {
+              if (!std::empty(cancel_all_orders.symbol) && symbol != cancel_all_orders.symbol)
+                return;
               auto body = json::cancel_all_orders(buffer, cancel_all_orders, request_id, symbol, shared_.category);
               log::debug(R"(body="{}")"sv, body);
               auto headers = account_.create_headers(path, {}, body);

@@ -28,7 +28,11 @@ auto const SUPPORTS = Mask{
 };
 auto const MBP_ALLOW_REMOVE_NON_EXISTING = true;
 auto const OMS_REQUEST_ID_TYPE = RequestIdType::BASE64;
-auto const OMS_CANCEL_ALL_ORDERS = Mask<Filter>{};
+auto const OMS_CANCEL_ALL_ORDERS = Mask<Filter>{
+    Filter::ACCOUNT,
+    Filter::EXCHANGE,
+    Filter::SYMBOL,
+};
 }  // namespace
 
 // === HELPERS ===
