@@ -19,7 +19,7 @@
     },
     {
       "name": "time",
-      "comment": "std::chrono::milliseconds"
+      "type": "std::chrono::milliseconds"
     }
   ]
 }
