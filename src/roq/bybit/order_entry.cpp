@@ -81,6 +81,14 @@ struct create_metrics final : public core::metrics::Factory {
   explicit create_metrics(auto &settings, auto const &group, auto const &function)
       : core::metrics::Factory(settings.app.name, group, function) {}
 };
+
+auto get_download_trades_lookback(auto const &settings, auto download_trades_is_first) {
+  if (download_trades_is_first) {
+    if (settings.common.download_trades_lookback_on_restart.count())
+      return settings.common.download_trades_lookback_on_restart;
+  }
+  return settings.common.download_trades_lookback;
+}
 }  // namespace
 
 // === IMPLEMENTATION ===
@@ -626,9 +634,10 @@ void OrderEntry::get_execution(std::string_view const &symbol) {
       }
       log::fatal("Unexpected"sv);
     }();
+    auto lookback = get_download_trades_lookback(shared_.settings, download_trades_is_first_);
+    log::info<1>("Download trades: lookback={}"sv, lookback);
     auto end_time = clock::get_realtime() + 1min;  // note! make sure we don't miss anything
-    auto start_time = std::chrono::duration_cast<std::chrono::milliseconds>(
-        end_time - shared_.settings.common.download_trades_lookback);
+    auto start_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - lookback);
     auto query = fmt::format(
         "?category={}&symbol={}&startTime={}&execType=Trade&limit={}"sv,
         category,
@@ -663,6 +672,7 @@ void OrderEntry::get_execution_ack(Trace<web::rest::Response> const &event, std:
       log::debug("execution={}"sv, execution);
       Trace event_2{event, execution};
       (*this)(event_2);
+      download_trades_is_first_ = false;
     };
     auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
       log::warn(R"(error={}, text="{}")"sv, error, text);

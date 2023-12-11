@@ -23,6 +23,11 @@
     {
       "name": "data",
       "type": "OrderBookData"
+    },
+    {
+      "raw": "cts",
+      "name": "cts",
+      "type": "std::chrono::milliseconds"
     }
   ]
 }

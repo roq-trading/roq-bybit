@@ -39,7 +39,14 @@
       "name": "download_trades_lookback",
       "type": "std::chrono::milliseconds",
       "validator": "roq::flags::validators::TimePeriod",
-      "default": "24h",
+      "default": "300s",
+      "description": "how far back to request executions?"
+    },
+    {
+      "name": "download_trades_lookback_on_restart",
+      "type": "std::chrono::milliseconds",
+      "validator": "roq::flags::validators::TimePeriod",
+      "default": "{}",
       "description": "how far back to request executions?"
     },
     {

@@ -183,6 +183,7 @@ struct OrderEntry final : public web::rest::Client::Handler, public json::Wallet
   // state
   ConnectionStatus status_ = {};
   core::Download<OrderEntryState> download_;
+  bool download_trades_is_first_ = true;
 };
 
 }  // namespace bybit
