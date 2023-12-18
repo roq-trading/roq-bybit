@@ -2,7 +2,7 @@
 
 set -x
 
-NAME="roq-binance-futures"
+NAME="roq-bybit"
 
 KERNEL="$(uname -s)"
 MACHINE="$(uname -m)"
