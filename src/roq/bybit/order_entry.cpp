@@ -407,8 +407,8 @@ void OrderEntry::operator()(Trace<json::Wallet> const &event) {
     auto funds_update = FundsUpdate{
         .stream_id = stream_id_,
         .account = account_.get_name(),
-        .margin_mode = {},
         .currency = item.coin,
+        .margin_mode = {},
         .balance = item.wallet_balance,  // XXX item.free ???
         .hold = item.locked,
         .external_account = {},
@@ -496,9 +496,9 @@ void OrderEntry::operator()(Trace<json::PositionInfo> const &event) {
     auto position_update = PositionUpdate{
         .stream_id = stream_id_,
         .account = account_.get_name(),
-        .margin_mode = {},
         .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
+        .margin_mode = {},
         .external_account = {},
         .long_quantity = long_quantity,
         .short_quantity = short_quantity,
