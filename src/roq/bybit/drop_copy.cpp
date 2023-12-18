@@ -343,6 +343,7 @@ void DropCopy::operator()(Trace<json::Wallet> const &event) {
     log::info<4>("event={{wallet={}, trace_info={}}}"sv, wallet, trace_info);
     // XXX probably we need to filter and match --api
     for (auto &item : wallet.coin) {
+      // XXX maybe margin mode is from account_type?
       auto funds_update = FundsUpdate{
           .stream_id = stream_id_,
           .account = account_.get_name(),
@@ -368,6 +369,7 @@ void DropCopy::operator()(Trace<json::Position> const &event) {
       if (shared_.discard_symbol(item.symbol))
         continue;
       // log::debug("item={}"sv, item);
+      auto margin_mode = item.trade_mode == 0 ? MarginMode::CROSS : MarginMode::ISOLATED;
       auto side = json::map(item.side);
       auto quantity = utils::sign(side) * item.size;
       auto long_quantity = std::max(0.0, quantity);
@@ -377,7 +379,7 @@ void DropCopy::operator()(Trace<json::Position> const &event) {
           .account = account_.get_name(),
           .exchange = shared_.settings.exchange,
           .symbol = item.symbol,
-          .margin_mode = {},
+          .margin_mode = margin_mode,
           .external_account = {},
           .long_quantity = long_quantity,
           .short_quantity = short_quantity,
