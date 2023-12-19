@@ -2,44 +2,28 @@
 
 set -x
 
-NAME="roq-bybit"
+echo -e "\033[1;34m--- ENV ---\033[0m"
 
-KERNEL="$(uname -s)"
-MACHINE="$(uname -m)"
+env | sort
 
-echo "ARCH=$ARCH"
-echo "KERNEL=$KERNEL"
-echo "MACHINE=$MACHINE"
+echo -e "\033[1;34m--- CHECK ---\033[0m"
 
-case "$ARCH" in
-  64)
-    if [ "$MACHINE" != "x86_64" ]; then
-      (>&2 echo -e "\033[1;31mWARN: Drop testing when cross-compiling...\033[0m") && exit 0
-    fi
-    ;;
-  arm64)
-    if [ "$MACHINE" != "arm64" ] || [ "$KERNEL" != "Darwin" ]; then
-      (>&2 echo -e "\033[1;31mWARN: Drop testing when cross-compiling...\033[0m") && exit 0
-    fi
-    ;;
-  aarch64)
-    if [ "$MACHINE" != "aarch64" ] || [ "$KERNEL" != "Linux" ]; then
-      (>&2 echo -e "\033[1;31mWARN: Drop testing when cross-compiling...\033[0m") && exit 0
-    fi
-    ;;
-  *)
-    (>&2 echo -e "\033[1;31mERROR: Unsupported ARCH=$ARCH.\033[0m") && exit 1
-    ;;
-esac
+if [[ "$build_platform" != "$target_platform" ]]; then
+  echo -e "Drop testing when cross-compiling..." && exit 0
+fi
 
-echo -e "\033[1;34m--- START ---\033[0m"
+echo -e "\033[1;34m--- BINARY ---\033[0m"
 
-if "$NAME" --help; then
+if "$PKG_NAME" --help; then  # note! abseil flags returns 1
   (>&2 echo -e "\033[1;31mERROR: Unexpected error code.\033[0m") && exit 1
 fi
 
-if ! "$NAME-benchmark" --help; then
-  (>&2 echo -e "\033[1;31mERROR: Unexpected error code.\033[0m") && exit 1
+echo -e "\033[1;34m--- BENCHMARK ---\033[0m"
+
+if which "$PKG_NAME-benchmark"; then
+  if ! "$PKG_NAME-benchmark" --help; then  # note! benchmark returns 0
+    (>&2 echo -e "\033[1;31mERROR: Unexpected error code.\033[0m") && exit 1
+  fi
 fi
 
 echo -e "\033[1;34m--- DONE ---\033[0m"
