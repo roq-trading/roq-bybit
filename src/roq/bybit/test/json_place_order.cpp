@@ -19,8 +19,8 @@ namespace {
 auto create_order() {
   auto order = oms::Order{};
   order.symbol = SYMBOL;
-  order.price_decimals = Decimals::_2;
-  order.quantity_decimals = Decimals::_4;
+  order.price_precision.decimals = Decimals::_2;
+  order.quantity_precision.decimals = Decimals::_4;
   return order;
 }
 }  // namespace

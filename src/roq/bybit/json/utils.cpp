@@ -55,12 +55,14 @@ std::string_view place_order(
       create_order.symbol,
       side.as_raw_text(),
       order_type.as_raw_text(),
-      utils::Number{create_order.quantity, order.quantity_decimals},
+      utils::Number{create_order.quantity, order.quantity_precision.decimals},
       time_in_force.as_raw_text(),
       reduce_only);
   if (!std::isnan(create_order.price))
     fmt::format_to(
-        std::back_inserter(buffer), R"(,"price":"{}")"sv, utils::Number{create_order.price, order.price_decimals});
+        std::back_inserter(buffer),
+        R"(,"price":"{}")"sv,
+        utils::Number{create_order.price, order.price_precision.decimals});
   fmt::format_to(
       std::back_inserter(buffer),
       R"(,"orderLinkId":"{}")"
@@ -86,10 +88,14 @@ std::string_view amend_order(
       order.symbol);
   if (!std::isnan(modify_order.price))
     fmt::format_to(
-        std::back_inserter(buffer), R"(,"price":"{}")"sv, utils::Number{modify_order.price, order.price_decimals});
+        std::back_inserter(buffer),
+        R"(,"price":"{}")"sv,
+        utils::Number{modify_order.price, order.price_precision.decimals});
   if (!std::isnan(modify_order.quantity))
     fmt::format_to(
-        std::back_inserter(buffer), R"(,"qty":"{}")"sv, utils::Number{modify_order.quantity, order.quantity_decimals});
+        std::back_inserter(buffer),
+        R"(,"qty":"{}")"sv,
+        utils::Number{modify_order.quantity, order.quantity_precision.decimals});
   if (!std::empty(order.external_order_id)) {
     fmt::format_to(
         std::back_inserter(buffer),
