@@ -17,7 +17,7 @@ Settings::Settings(args::Parser const &args, flags::Flags const &flags)
       common{flags::Common::create()}, rest{flags::REST::create()}, ws{flags::WS::create()}
 
 {
-  log::debug("settings={}"sv, *this);
+  log::info("settings={}"sv, *this);
 }
 
 }  // namespace bybit
