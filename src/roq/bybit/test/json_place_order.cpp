@@ -34,6 +34,7 @@ TEST_CASE("json_place_order_simple", "[json_place_order]") {
       .symbol = SYMBOL,
       .side = Side::BUY,
       .position_effect = {},
+      .margin_mode = {},
       .max_show_quantity = NaN,
       .order_type = OrderType::LIMIT,
       .time_in_force = TimeInForce::GTC,

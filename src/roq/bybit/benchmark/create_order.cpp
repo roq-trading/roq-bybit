@@ -22,6 +22,7 @@ auto const CREATE_ORDER = CreateOrder{
     .symbol = "BTCUSDT"sv,
     .side = Side::BUY,
     .position_effect = {},
+    .margin_mode = {},
     .max_show_quantity = NaN,
     .order_type = OrderType::LIMIT,
     .time_in_force = TimeInForce::GTC,
