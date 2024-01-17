@@ -598,7 +598,7 @@ void OrderEntry::operator()(Trace<json::OpenOrders> const &event) {
         .external_account = {},
         .external_order_id = item.order_id,
         .client_order_id = {},
-        .status = order_status,
+        .order_status = order_status,
         .quantity = item.qty,
         .price = item.price,
         .stop_price = NaN,  // XXX item.trigger_price ???
@@ -795,9 +795,9 @@ void OrderEntry::place_order_ack(
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto text) {
       auto response = oms::Response{
-          .type = RequestType::CREATE_ORDER,
+          .request_type = RequestType::CREATE_ORDER,
           .origin = origin,
-          .status = status,
+          .request_status = status,
           .error = error,
           .text = text,
           .version = version,
@@ -822,9 +822,9 @@ void OrderEntry::operator()(
   auto &result = place_order.result;
   auto order_status = place_order.ret_code == 0 ? OrderStatus::ACCEPTED : OrderStatus::REJECTED;
   auto response = oms::Response{
-      .type = RequestType::CREATE_ORDER,
+      .request_type = RequestType::CREATE_ORDER,
       .origin = Origin::EXCHANGE,
-      .status = request_status,
+      .request_status = request_status,
       .error = error,
       .text = text,
       .version = version,
@@ -848,7 +848,7 @@ void OrderEntry::operator()(
       .external_account = {},
       .external_order_id = result.order_id,
       .client_order_id = {},
-      .status = order_status,
+      .order_status = order_status,
       .quantity = NaN,
       .price = NaN,
       .stop_price = NaN,
@@ -918,9 +918,9 @@ void OrderEntry::amend_order_ack(
     auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
       log::warn(R"(error={}, text="{}")"sv, error, text);
       auto response = oms::Response{
-          .type = RequestType::MODIFY_ORDER,
+          .request_type = RequestType::MODIFY_ORDER,
           .origin = origin,
-          .status = status,
+          .request_status = status,
           .error = error,
           .text = text,
           .version = version,
@@ -944,9 +944,9 @@ void OrderEntry::operator()(
   auto error = json::map_error(amend_order.ret_code);
   auto text = amend_order.ret_msg;
   auto response = oms::Response{
-      .type = RequestType::MODIFY_ORDER,
+      .request_type = RequestType::MODIFY_ORDER,
       .origin = Origin::EXCHANGE,
-      .status = status,
+      .request_status = status,
       .error = error,
       .text = text,
       .version = version,
@@ -976,7 +976,7 @@ void OrderEntry::operator()(
       .external_account = {},
       .external_order_id = result.order_id,
       .client_order_id = {},
-      .status = order_status,
+      .order_status = order_status,
       .quantity = result.order_qty,
       .price = result.order_price,
       .stop_price = NaN,
@@ -1044,9 +1044,9 @@ void OrderEntry::cancel_order_ack(
     auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
       log::warn(R"(error={}, text="{}")"sv, error, text);
       auto response = oms::Response{
-          .type = RequestType::CANCEL_ORDER,
+          .request_type = RequestType::CANCEL_ORDER,
           .origin = origin,
-          .status = status,
+          .request_status = status,
           .error = error,
           .text = text,
           .version = version,
@@ -1070,9 +1070,9 @@ void OrderEntry::operator()(
   auto error = json::map_error(cancel_order.ret_code);
   auto text = cancel_order.ret_msg;
   auto response = oms::Response{
-      .type = RequestType::CANCEL_ORDER,
+      .request_type = RequestType::CANCEL_ORDER,
       .origin = Origin::EXCHANGE,
-      .status = status,
+      .request_status = status,
       .error = error,
       .text = text,
       .version = version,
@@ -1102,7 +1102,7 @@ void OrderEntry::operator()(
       .external_account = {},
       .external_order_id = result.order_id,
       .client_order_id = {},
-      .status = order_status,
+      .order_status = order_status,
       .quantity = result.order_qty,
       .price = result.order_price,
       .stop_price = NaN,
@@ -1138,7 +1138,7 @@ void OrderEntry::cancel_all_orders(
           .symbol = symbol,
           .side = cancel_all_orders.side,
           .origin = Origin::GATEWAY,
-          .status = RequestStatus::FORWARDED,
+          .request_status = RequestStatus::FORWARDED,
           .error = {},
           .text = {},
           .request_id = request_id,
@@ -1197,7 +1197,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
           .symbol = {},
           .side = {},
           .origin = origin,
-          .status = status,
+          .request_status = status,
           .error = error,
           .text = text,
           .request_id = request_id,
