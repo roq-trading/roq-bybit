@@ -6,9 +6,12 @@
 #include <utility>
 
 #include "roq/mask.hpp"
+
 #include "roq/utils/number.hpp"
 #include "roq/utils/safe_cast.hpp"
 #include "roq/utils/update.hpp"
+
+#include "roq/utils/metrics/const.hpp"
 
 #include "roq/core/metrics/factory.hpp"
 
@@ -145,28 +148,28 @@ void OrderEntry::operator()(Event<Timer> const &event) {
 void OrderEntry::operator()(metrics::Writer &writer) {
   writer
       // counter
-      .write(counter_.disconnect, metrics::COUNTER)
+      .write(counter_.disconnect, utils::metrics::COUNTER)
       // profile
-      .write(profile_.account_info, metrics::PROFILE)
-      .write(profile_.account_info_ack, metrics::PROFILE)
-      .write(profile_.wallet_balance, metrics::PROFILE)
-      .write(profile_.wallet_balance_ack, metrics::PROFILE)
-      .write(profile_.position_info, metrics::PROFILE)
-      .write(profile_.position_info_ack, metrics::PROFILE)
-      .write(profile_.open_orders, metrics::PROFILE)
-      .write(profile_.open_orders_ack, metrics::PROFILE)
-      .write(profile_.execution, metrics::PROFILE)
-      .write(profile_.execution_ack, metrics::PROFILE)
-      .write(profile_.place_order, metrics::PROFILE)
-      .write(profile_.place_order_ack, metrics::PROFILE)
-      .write(profile_.amend_order, metrics::PROFILE)
-      .write(profile_.amend_order_ack, metrics::PROFILE)
-      .write(profile_.cancel_order, metrics::PROFILE)
-      .write(profile_.cancel_order_ack, metrics::PROFILE)
-      .write(profile_.cancel_all_orders, metrics::PROFILE)
-      .write(profile_.cancel_all_orders_ack, metrics::PROFILE)
+      .write(profile_.account_info, utils::metrics::PROFILE)
+      .write(profile_.account_info_ack, utils::metrics::PROFILE)
+      .write(profile_.wallet_balance, utils::metrics::PROFILE)
+      .write(profile_.wallet_balance_ack, utils::metrics::PROFILE)
+      .write(profile_.position_info, utils::metrics::PROFILE)
+      .write(profile_.position_info_ack, utils::metrics::PROFILE)
+      .write(profile_.open_orders, utils::metrics::PROFILE)
+      .write(profile_.open_orders_ack, utils::metrics::PROFILE)
+      .write(profile_.execution, utils::metrics::PROFILE)
+      .write(profile_.execution_ack, utils::metrics::PROFILE)
+      .write(profile_.place_order, utils::metrics::PROFILE)
+      .write(profile_.place_order_ack, utils::metrics::PROFILE)
+      .write(profile_.amend_order, utils::metrics::PROFILE)
+      .write(profile_.amend_order_ack, utils::metrics::PROFILE)
+      .write(profile_.cancel_order, utils::metrics::PROFILE)
+      .write(profile_.cancel_order_ack, utils::metrics::PROFILE)
+      .write(profile_.cancel_all_orders, utils::metrics::PROFILE)
+      .write(profile_.cancel_all_orders_ack, utils::metrics::PROFILE)
       // latency
-      .write(latency_.ping, metrics::LATENCY);
+      .write(latency_.ping, utils::metrics::LATENCY);
 }
 
 uint16_t OrderEntry::operator()(
