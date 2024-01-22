@@ -9,8 +9,6 @@
 
 #include "roq/utils/update.hpp"
 
-#include "roq/utils/metrics/const.hpp"
-
 #include "roq/core/json/parser.hpp"
 
 #include "roq/core/metrics/factory.hpp"
@@ -119,12 +117,12 @@ void Rest::operator()(Event<Timer> const &event) {
 void Rest::operator()(metrics::Writer &writer) {
   writer
       // counter
-      .write(counter_.disconnect, utils::metrics::COUNTER)
+      .write(counter_.disconnect, metrics::Type::COUNTER)
       // profile
-      .write(profile_.instrument_info, utils::metrics::PROFILE)
-      .write(profile_.instrument_info_ack, utils::metrics::PROFILE)
+      .write(profile_.instrument_info, metrics::Type::PROFILE)
+      .write(profile_.instrument_info_ack, metrics::Type::PROFILE)
       // latency
-      .write(latency_.ping, utils::metrics::LATENCY);
+      .write(latency_.ping, metrics::Type::LATENCY);
 }
 
 void Rest::operator()(ConnectionStatus status) {
