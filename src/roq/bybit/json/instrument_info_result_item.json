@@ -91,6 +91,10 @@
       "name": "marginTrading",
       "type": "std::string_view",
       "comment": "????"
+    },
+    {
+      "name": "riskParameters",
+      "comment": "????"
     }
   ]
 }
