@@ -821,7 +821,6 @@ void OrderEntry::operator()(
   auto error = json::map_error(place_order.ret_code);
   auto text = place_order.ret_msg;
   auto &result = place_order.result;
-  auto order_status = place_order.ret_code == 0 ? OrderStatus::ACCEPTED : OrderStatus::REJECTED;
   auto response = oms::Response{
       .request_type = RequestType::CREATE_ORDER,
       .origin = Origin::EXCHANGE,
@@ -833,6 +832,9 @@ void OrderEntry::operator()(
       .quantity = NaN,
       .price = NaN,
   };
+  /*
+  // note! ACCEPTED not managed by fix-bridge
+  auto order_status = place_order.ret_code == 0 ? OrderStatus::ACCEPTED : OrderStatus::REJECTED;
   auto order_update = oms::OrderUpdate{
       .account = account_.get_name(),
       .exchange = shared_.settings.exchange,
@@ -866,8 +868,9 @@ void OrderEntry::operator()(
       .update_type = UpdateType::INCREMENTAL,
       .sending_time_utc = place_order.time,
   };
+  */
   Trace event_2{trace_info, response};
-  (*this)(event_2, user_id, order_id, order_update);
+  (*this)(event_2, user_id, order_id);
 }
 
 void OrderEntry::amend_order(
