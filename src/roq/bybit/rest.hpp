@@ -8,9 +8,9 @@
 #include <string_view>
 #include <vector>
 
-#include "roq/core/metrics/counter.hpp"
-#include "roq/core/metrics/latency.hpp"
-#include "roq/core/metrics/profile.hpp"
+#include "roq/utils/metrics/counter.hpp"
+#include "roq/utils/metrics/latency.hpp"
+#include "roq/utils/metrics/profile.hpp"
 
 #include "roq/io/context.hpp"
 
@@ -83,13 +83,13 @@ struct Rest final : public web::rest::Client::Handler {
   std::vector<std::byte> decode_buffer_;
   // metrics
   struct {
-    core::metrics::Counter disconnect;
+    utils::metrics::Counter disconnect;
   } counter_;
   struct {
-    core::metrics::Profile instrument_info, instrument_info_ack;
+    utils::metrics::Profile instrument_info, instrument_info_ack;
   } profile_;
   struct {
-    core::metrics::Latency ping;
+    utils::metrics::Latency ping;
   } latency_;
   // cache
   Shared &shared_;
