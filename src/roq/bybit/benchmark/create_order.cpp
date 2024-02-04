@@ -36,8 +36,8 @@ auto const CREATE_ORDER = CreateOrder{
 };
 auto const ORDER = []() {
   oms::Order result;
-  result.price_precision.decimals = Decimals::_2;
-  result.quantity_precision.decimals = Decimals::_5;
+  result.price_precision.precision = Precision::_2;
+  result.quantity_precision.precision = Precision::_5;
   return result;
 }();
 auto const REQUEST_ID = "rQAC6wMAAQAA9tJBrf43"sv;

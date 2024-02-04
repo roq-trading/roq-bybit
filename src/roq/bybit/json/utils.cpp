@@ -55,14 +55,12 @@ std::string_view place_order(
       create_order.symbol,
       side.as_raw_text(),
       order_type.as_raw_text(),
-      utils::Number{create_order.quantity, order.quantity_precision.decimals},
+      Decimal{create_order.quantity, order.quantity_precision.precision},
       time_in_force.as_raw_text(),
       reduce_only);
   if (!std::isnan(create_order.price))
     fmt::format_to(
-        std::back_inserter(buffer),
-        R"(,"price":"{}")"sv,
-        utils::Number{create_order.price, order.price_precision.decimals});
+        std::back_inserter(buffer), R"(,"price":"{}")"sv, Decimal{create_order.price, order.price_precision.precision});
   fmt::format_to(
       std::back_inserter(buffer),
       R"(,"orderLinkId":"{}")"
@@ -88,14 +86,12 @@ std::string_view amend_order(
       order.symbol);
   if (!std::isnan(modify_order.price))
     fmt::format_to(
-        std::back_inserter(buffer),
-        R"(,"price":"{}")"sv,
-        utils::Number{modify_order.price, order.price_precision.decimals});
+        std::back_inserter(buffer), R"(,"price":"{}")"sv, Decimal{modify_order.price, order.price_precision.precision});
   if (!std::isnan(modify_order.quantity))
     fmt::format_to(
         std::back_inserter(buffer),
         R"(,"qty":"{}")"sv,
-        utils::Number{modify_order.quantity, order.quantity_precision.decimals});
+        Decimal{modify_order.quantity, order.quantity_precision.precision});
   if (!std::empty(order.external_order_id)) {
     fmt::format_to(
         std::back_inserter(buffer),
@@ -508,9 +504,9 @@ Error map_error(int32_t ret_code) {
       break;
     case 12630:  // Query user loan info error
       break;
-    case 12631:  // Number of decimals has exceeded the maximum precision
+    case 12631:  // Decimal of decimals has exceeded the maximum precision
       break;
-    case 12632:  // Number of decimals has exceeded the maximum precision
+    case 12632:  // Decimal of decimals has exceeded the maximum precision
       break;
   }
   return Error::UNKNOWN;

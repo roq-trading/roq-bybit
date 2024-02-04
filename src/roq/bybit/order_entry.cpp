@@ -7,7 +7,6 @@
 
 #include "roq/mask.hpp"
 
-#include "roq/utils/number.hpp"
 #include "roq/utils/safe_cast.hpp"
 #include "roq/utils/update.hpp"
 
