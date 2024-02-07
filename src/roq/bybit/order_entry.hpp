@@ -87,7 +87,6 @@ struct OrderEntry final : public web::rest::Client::Handler, public json::Wallet
   void operator()(Trace<web::rest::Client::Connected> const &) override;
   void operator()(Trace<web::rest::Client::Disconnected> const &) override;
   void operator()(Trace<web::rest::Client::Latency> const &) override;
-  void operator()(Trace<web::rest::Response> const &, uint64_t request_id, uint64_t opaque) override;
 
   void operator()(ConnectionStatus);
 
