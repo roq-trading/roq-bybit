@@ -146,7 +146,7 @@ void DropCopy::operator()(Rest::SymbolsUpdate &symbols_update) {
   for (auto &symbol : symbols_update.symbols) {
     if (!shared_.dispatcher.can_account_trade_symbol(account_.get_name(), shared_.settings.exchange, symbol))
       continue;
-    auto res = symbols_.emplace(symbol);
+    [[maybe_unused]] auto res = symbols_.emplace(symbol);
     assert(res.second);
     if ((*connection_).ready()) {
       if (shared_.api != tools::API::SPOT)
