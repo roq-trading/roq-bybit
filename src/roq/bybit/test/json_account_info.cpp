@@ -27,6 +27,6 @@ auto const MESSAGE = R"({)"
 
 TEST_CASE("json_account_info_spot", "[json_account_info]") {
   std::vector<std::byte> buffer(8192);
-  auto obj = json::AccountInfo::create(MESSAGE, buffer);
+  json::AccountInfo obj{MESSAGE, buffer};
   CHECK(obj.ret_code == 0);
 }

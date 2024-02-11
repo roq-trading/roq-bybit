@@ -113,6 +113,6 @@ auto const ERROR = R"({)"
 
 TEST_CASE("json_amend_order_error", "[json_amend_order]") {
   std::vector<std::byte> buffer(8192);
-  auto obj = json::AmendOrder::create(ERROR, buffer);
+  json::AmendOrder obj{ERROR, buffer};
   CHECK(obj.ret_code == 10001);
 }

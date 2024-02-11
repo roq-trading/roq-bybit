@@ -77,6 +77,6 @@ auto const MESSAGE = R"({)"
 
 TEST_CASE("json_place_order_response", "[json_place_order]") {
   std::vector<std::byte> buffer(8192);
-  auto obj = json::PlaceOrder::create(MESSAGE, buffer);
+  json::PlaceOrder obj{MESSAGE, buffer};
   CHECK(obj.ret_code == 0);
 }

@@ -52,7 +52,7 @@ auto const OPTION = R"({)"
 
 TEST_CASE("json_subscribe_simple_spot", "[json_subscribe]") {
   std::vector<std::byte> buffer(8192);
-  auto obj = json::Subscribe::create(SPOT, buffer);
+  json::Subscribe obj{SPOT, buffer};
   CHECK(obj.success == true);
 }
 
@@ -82,7 +82,7 @@ TEST_CASE("json_subscribe_parser_spot", "[json_subscribe]") {
 
 TEST_CASE("json_subscribe_simple_linear", "[json_subscribe]") {
   std::vector<std::byte> buffer(8192);
-  auto obj = json::Subscribe::create(LINEAR, buffer);
+  json::Subscribe obj{LINEAR, buffer};
   CHECK(obj.success == true);
 }
 
@@ -112,7 +112,7 @@ TEST_CASE("json_subscribe_parser_linear", "[json_subscribe]") {
 
 TEST_CASE("json_subscribe_simple_inverse", "[json_subscribe]") {
   std::vector<std::byte> buffer(8192);
-  auto obj = json::Subscribe::create(INVERSE, buffer);
+  json::Subscribe obj{INVERSE, buffer};
   CHECK(obj.success == true);
 }
 
@@ -142,7 +142,7 @@ TEST_CASE("json_subscribe_parser_inverse", "[json_subscribe]") {
 
 TEST_CASE("json_subscribe_simple_option", "[json_subscribe]") {
   std::vector<std::byte> buffer(8192);
-  auto obj = json::Subscribe::create(OPTION, buffer);
+  json::Subscribe obj{OPTION, buffer};
   CHECK(obj.success == true);
 }
 

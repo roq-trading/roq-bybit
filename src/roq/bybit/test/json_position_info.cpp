@@ -54,6 +54,6 @@ auto const MESSAGE = R"({)"
 
 TEST_CASE("simple", "[json_position_info]") {
   std::vector<std::byte> buffer(8192);
-  auto position_info = json::PositionInfo::create(MESSAGE, buffer);
+  json::PositionInfo position_info{MESSAGE, buffer};
   REQUIRE(std::size(position_info.result.list) == 1);
 }

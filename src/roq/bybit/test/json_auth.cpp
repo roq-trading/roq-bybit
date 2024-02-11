@@ -25,7 +25,7 @@ auto const MESSAGE = R"({)"
 
 TEST_CASE("json_auth_simple", "[json_auth]") {
   std::vector<std::byte> buffer(8192);
-  auto obj = json::Auth::create(MESSAGE, buffer);
+  json::Auth obj{MESSAGE, buffer};
   CHECK(obj.success == true);
 }
 

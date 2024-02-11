@@ -25,7 +25,7 @@ auto const MESSAGE = R"({)"
 
 TEST_CASE("json_ping_simple", "[json_ping]") {
   std::vector<std::byte> buffer(8192);
-  auto obj = json::Ping::create(MESSAGE, buffer);
+  json::Ping obj{MESSAGE, buffer};
   CHECK(obj.success == true);
 }
 

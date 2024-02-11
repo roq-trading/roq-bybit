@@ -61,6 +61,6 @@ auto const MESSAGE = R"({)"
 
 TEST_CASE("json_cancel_all_orders_response", "[json_cancel_all_orders]") {
   std::vector<std::byte> buffer(8192);
-  auto obj = json::CancelAllOrders::create(MESSAGE, buffer);
+  json::CancelAllOrders obj{MESSAGE, buffer};
   CHECK(obj.ret_code == 0);
 }

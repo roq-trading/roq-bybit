@@ -7,6 +7,8 @@
 
 #include "roq/mask.hpp"
 
+#include "roq/oms/exceptions.hpp"
+
 #include "roq/utils/update.hpp"
 
 #include "roq/core/json/parser.hpp"
@@ -226,7 +228,7 @@ void Rest::get_instrument_info_ack(Trace<web::rest::Response> const &event, uint
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        auto instrument_info = json::InstrumentInfo::create(body, decode_buffer_);
+        json::InstrumentInfo instrument_info{body, decode_buffer_};
         Trace event_2{event, instrument_info};
         (*this)(event_2);
         // XXX HANS NEW ??? create_trace_and_dispatch(*this, event, instrument_info)();

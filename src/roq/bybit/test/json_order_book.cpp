@@ -160,19 +160,19 @@ auto const MESSAGE_50_DELTA = R"({)"
 
 TEST_CASE("json_order_book_simple_1", "[json_order_book]") {
   std::vector<std::byte> buffer(8192);
-  auto obj = json::OrderBook::create(MESSAGE_1, buffer);
+  json::OrderBook obj{MESSAGE_1, buffer};
   CHECK(obj.topic == "orderbook.1.BTCUSDT"sv);
 }
 
 TEST_CASE("json_order_book_simple_50_snapshot", "[json_order_book]") {
   std::vector<std::byte> buffer(8192);
-  auto obj = json::OrderBook::create(MESSAGE_50_SNAPSHOT, buffer);
+  json::OrderBook obj{MESSAGE_50_SNAPSHOT, buffer};
   CHECK(obj.topic == "orderbook.50.BTCUSDT"sv);
 }
 
 TEST_CASE("json_order_book_simple_50_delta", "[json_order_book]") {
   std::vector<std::byte> buffer(8192);
-  auto obj = json::OrderBook::create(MESSAGE_50_DELTA, buffer);
+  json::OrderBook obj{MESSAGE_50_DELTA, buffer};
   CHECK(obj.topic == "orderbook.50.BTCUSDT"sv);
 }
 

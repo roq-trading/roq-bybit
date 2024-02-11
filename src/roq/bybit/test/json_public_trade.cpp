@@ -33,7 +33,7 @@ auto const MESSAGE = R"({)"
 
 TEST_CASE("json_public_trade_simple", "[json_public_trade]") {
   std::vector<std::byte> buffer(8192);
-  auto obj = json::PublicTrade::create(MESSAGE, buffer);
+  json::PublicTrade obj{MESSAGE, buffer};
   CHECK(obj.topic == "publicTrade.BTCUSDT"sv);
 }
 
