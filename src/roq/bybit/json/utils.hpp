@@ -6,7 +6,7 @@
 #include <string>
 #include <string_view>
 
-#include "roq/oms/order.hpp"
+#include "roq/server/oms/order.hpp"
 
 #include "roq/utils/patterns.hpp"
 
@@ -330,12 +330,16 @@ inline roq::OrderStatus map(json::OrderStatus value) {
 extern std::string_view strip_symbol(std::string_view const &topic);
 
 extern std::string_view place_order(
-    std::string &buffer, roq::CreateOrder const &, oms::Order const &, std::string_view const &request_id, Category);
+    std::string &buffer,
+    roq::CreateOrder const &,
+    server::oms::Order const &,
+    std::string_view const &request_id,
+    Category);
 
 extern std::string_view amend_order(
     std::string &buffer,
     roq::ModifyOrder const &,
-    oms::Order const &,
+    server::oms::Order const &,
     std::string_view const &request_id,
     std::string_view const &previous_request_id,
     Category);
@@ -343,7 +347,7 @@ extern std::string_view amend_order(
 extern std::string_view cancel_order(
     std::string &buffer,
     roq::CancelOrder const &,
-    oms::Order const &,
+    server::oms::Order const &,
     std::string_view const &request_id,
     std::string_view const &previous_request_id,
     Category);

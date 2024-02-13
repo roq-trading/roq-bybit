@@ -35,7 +35,7 @@ auto const CREATE_ORDER = CreateOrder{
     .strategy_id = {},
 };
 auto const ORDER = []() {
-  oms::Order result;
+  server::oms::Order result;
   result.price_precision.precision = Precision::_2;
   result.quantity_precision.precision = Precision::_5;
   return result;
@@ -49,7 +49,7 @@ auto const SECRET = "3qFD9aBSKCX6IqgBy4WIAFn0uvE2j3XuI6GP"sv;
 
 void BM_create_order(benchmark::State &state) {
   std::string buffer;
-  oms::Order order;
+  server::oms::Order order;
   for (auto _ : state) {
     json::place_order(buffer, CREATE_ORDER, order, REQUEST_ID, json::Category::SPOT);
   }

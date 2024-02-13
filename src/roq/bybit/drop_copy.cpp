@@ -403,7 +403,7 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
       auto order_type = json::map(item.order_type);
       auto time_in_force = json::map(item.time_in_force);
       auto order_status = json::map(item.order_status);
-      auto order_update = oms::OrderUpdate{
+      auto order_update = server::oms::OrderUpdate{
           .account = account_.get_name(),
           .exchange = shared_.settings.exchange,
           .symbol = item.symbol,

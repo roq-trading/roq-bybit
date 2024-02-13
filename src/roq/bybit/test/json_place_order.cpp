@@ -17,7 +17,7 @@ auto const SYMBOL = "BTCUSDT"sv;
 
 namespace {
 auto create_order() {
-  auto order = oms::Order{};
+  auto order = server::oms::Order{};
   order.symbol = SYMBOL;
   order.price_precision.precision = Precision::_2;
   order.quantity_precision.precision = Precision::_4;

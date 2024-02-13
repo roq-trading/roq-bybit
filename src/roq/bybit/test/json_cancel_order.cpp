@@ -16,7 +16,7 @@ auto SYMBOL = "BTCUSDT"sv;
 
 namespace {
 auto create_order() {
-  auto order = oms::Order{};
+  auto order = server::oms::Order{};
   order.symbol = SYMBOL;
   return order;
 }

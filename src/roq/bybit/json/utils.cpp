@@ -33,7 +33,7 @@ auto map_order_type(auto order_type) -> json::OrderType {
 std::string_view place_order(
     std::string &buffer,
     roq::CreateOrder const &create_order,
-    oms::Order const &order,
+    server::oms::Order const &order,
     std::string_view const &request_id,
     Category category) {
   buffer.clear();
@@ -72,7 +72,7 @@ std::string_view place_order(
 std::string_view amend_order(
     std::string &buffer,
     roq::ModifyOrder const &modify_order,
-    oms::Order const &order,
+    server::oms::Order const &order,
     [[maybe_unused]] std::string_view const &request_id,
     std::string_view const &previous_request_id,
     Category category) {
@@ -111,7 +111,7 @@ std::string_view amend_order(
 std::string_view cancel_order(
     std::string &buffer,
     roq::CancelOrder const &,
-    oms::Order const &order,
+    server::oms::Order const &order,
     [[maybe_unused]] std::string_view const &request_id,
     std::string_view const &previous_request_id,
     Category category) {
