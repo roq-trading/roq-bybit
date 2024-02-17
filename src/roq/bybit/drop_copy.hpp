@@ -2,10 +2,10 @@
 
 #pragma once
 
-#include <absl/container/flat_hash_set.h>
-
 #include <string>
 #include <string_view>
+
+#include "roq/utils/container.hpp"
 
 #include "roq/utils/metrics/counter.hpp"
 #include "roq/utils/metrics/latency.hpp"
@@ -122,7 +122,7 @@ struct DropCopy final : public web::socket::Client::Handler, json::Parser::Handl
   std::chrono::nanoseconds logon_timeout_ = {};
   std::chrono::nanoseconds next_ping_ = {};
   // ...
-  absl::flat_hash_set<std::string> symbols_;
+  utils::unordered_set<std::string> symbols_;
 };
 
 }  // namespace bybit
