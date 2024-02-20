@@ -379,8 +379,8 @@ void MarketData::operator()(Trace<json::OrderBook> const &event, size_t depth) {
           .exchange_time_utc = order_book.timestamp,
           .exchange_sequence = data.cross_sequence,
           .sending_time_utc = {},
-          .price_decimals = {},
-          .quantity_decimals = {},
+          .price_precision = {},
+          .quantity_precision = {},
           .checksum = {},
       };
       try {
