@@ -11,11 +11,21 @@
       "description": "WS public end-point (URI)"
     },
     {
+      "name": "public_host",
+      "type": "std::string",
+      "description": "host (http header) in case uri uses an IP address"
+    },
+    {
       "name": "private_uri",
       "type": "roq::io::web::URI",
       "validator": "roq::core::flags::URI",
       "default": "wss://stream-testnet.bybit.com/v5/private",
       "description": "WS private end-point (URI)"
+    },
+    {
+      "name": "private_host",
+      "type": "std::string",
+      "description": "host (http header) in case uri uses an IP address"
     },
     {
       "name": "ping_freq",

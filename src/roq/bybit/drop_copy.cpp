@@ -60,7 +60,7 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
       // connection
       .interface = {},
       .uris = {&uri, 1},
-      .host = {},
+      .host = settings.ws.private_host,
       .validate_certificate = settings.net.tls_validate_certificate,
       // connection manager
       .connection_timeout = settings.net.connection_timeout,

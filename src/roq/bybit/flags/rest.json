@@ -11,6 +11,11 @@
       "description": "REST end-point (URI)"
     },
     {
+      "name": "host",
+      "type": "std::string",
+      "description": "host (http header) in case uri uses an IP address"
+    },
+    {
       "name": "proxy",
       "type": "roq::io::web::URI",
       "validator": "roq::core::flags::URI",
