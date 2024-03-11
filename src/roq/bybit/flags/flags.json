@@ -7,14 +7,14 @@
       "type": "std::string",
       "required": true,
       "default": "bybit",
-      "description": "exchange identifier (string)"
+      "description": "Exchange identifier (string)"
     },
     {
       "name": "api",
       "type": "std::string",
       "required": true,
       "default": "spot",
-      "description": "what api to use (spot, linear, inverse, option)"
+      "description": "What api to use (spot, linear, inverse, option)"
     }
   ]
 }

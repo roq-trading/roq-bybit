@@ -13,20 +13,20 @@
     {
       "name": "host",
       "type": "std::string",
-      "description": "host (http header) in case uri uses an IP address"
+      "description": "Host (http header) in case uri uses an IP address"
     },
     {
       "name": "proxy",
       "type": "roq::io::web::URI",
       "validator": "roq::core::flags::URI",
-      "description": "proxy end-point (URI)"
+      "description": "Proxy end-point (URI)"
     },
     {
       "name": "ping_freq",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "5s",
-      "description": "ping frequency"
+      "description": "Ping frequency"
     },
     {
       "name": "ping_path",
@@ -40,27 +40,27 @@
       "type": "std::chrono::nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "30s",
-      "description": "request: timeout"
+      "description": "Request: timeout"
     },
     {
       "name": "recv_window",
       "type": "std::chrono::milliseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "5s",
-      "description": "recv window"
+      "description": "Recv window"
     },
     {
       "name": "terminate_on_403",
       "type": "bool",
       "default": false,
-      "description": "terminate on 403?"
+      "description": "Terminate on 403?"
     },
     {
       "name": "back_off_delay",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "30s",
-      "description": "back-off period"
+      "description": "Back-off period"
     }
   ]
 }
