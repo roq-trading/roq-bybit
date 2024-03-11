@@ -1,14 +1,14 @@
 !!! THIS FILE HAS BEEN AUTO-GENERATED !!!
 roq-bybit-flags
-common.rstinc
-rest.rstinc
-ws.rstinc
-flags.rstinc
+flags_.rstinc
+common_.rstinc
+rest_.rstinc
+ws_.rstinc
+flags.hpp
 common.hpp
 rest.hpp
 ws.hpp
-flags.hpp
+flags.cpp
 common.cpp
 rest.cpp
 ws.cpp
-flags.cpp
