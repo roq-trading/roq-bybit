@@ -1,9 +1,9 @@
 !!! THIS FILE HAS BEEN AUTO-GENERATED !!!
 roq-bybit-flags
-flags_.rstinc
-common_.rstinc
-rest_.rstinc
-ws_.rstinc
+flags.rstinc
+common.rstinc
+rest.rstinc
+ws.rstinc
 flags.hpp
 common.hpp
 rest.hpp
