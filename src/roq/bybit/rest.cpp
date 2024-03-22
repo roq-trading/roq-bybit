@@ -82,7 +82,7 @@ struct create_metrics final : public core::metrics::Factory {
 };
 
 auto create_rate_limiter(auto &settings) {
-  return core::limit::RateLimiter{settings.common.request_limit, settings.common.request_limit_interval};
+  return core::limit::RateLimiter{settings.request.limit, settings.request.limit_interval};
 }
 }  // namespace
 

@@ -1,0 +1,20 @@
+{
+  "name": "Request",
+  "type": "flags",
+  "prefix": "request_",
+  "values": [
+    {
+      "name": "limit",
+      "type": "uint32_t",
+      "default": "10",
+      "description": "Request limit per interval"
+    },
+    {
+      "name": "limit_interval",
+      "type": "std::chrono::nanoseconds",
+      "validator": "roq::flags::validators::TimePeriod",
+      "default": "1s",
+      "description": "Request limit monitor interval"
+    }
+  ]
+}

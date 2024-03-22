@@ -1,0 +1,27 @@
+{
+  "name": "Download",
+  "type": "flags",
+  "prefix": "download_",
+  "values": [
+    {
+      "name": "trades_lookback",
+      "type": "std::chrono::milliseconds",
+      "validator": "roq::flags::validators::TimePeriod",
+      "default": "300s",
+      "description": "How far back to request executions?"
+    },
+    {
+      "name": "trades_lookback_on_restart",
+      "type": "std::chrono::milliseconds",
+      "validator": "roq::flags::validators::TimePeriod",
+      "default": "{}",
+      "description": "How far back to request executions?"
+    },
+    {
+      "name": "trades_limit",
+      "type": "uint32_t",
+      "default": 100,
+      "description": "Exchange limit"
+    }
+  ]
+}

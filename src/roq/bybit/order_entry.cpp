@@ -89,10 +89,10 @@ struct create_metrics final : public core::metrics::Factory {
 
 auto get_download_trades_lookback(auto const &settings, auto download_trades_is_first) {
   if (download_trades_is_first) {
-    if (settings.common.download_trades_lookback_on_restart.count())
-      return settings.common.download_trades_lookback_on_restart;
+    if (settings.download.trades_lookback_on_restart.count())
+      return settings.download.trades_lookback_on_restart;
   }
-  return settings.common.download_trades_lookback;
+  return settings.download.trades_lookback;
 }
 }  // namespace
 
@@ -649,7 +649,7 @@ void OrderEntry::get_execution(std::string_view const &symbol) {
         category,
         symbol,
         start_time.count(),
-        shared_.settings.common.download_trades_limit);
+        shared_.settings.download.trades_limit);
     log::debug(R"(query="{}")"sv, query);
     auto headers = account_.create_headers(path, query, {});
     auto request = web::rest::Request{

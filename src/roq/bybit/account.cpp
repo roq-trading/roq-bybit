@@ -39,7 +39,7 @@ auto create_crypto(auto &settings, auto &config, auto &name) -> tools::Crypto {
 
 Account::Account(Settings const &settings, Config const &config, std::string_view const &name)
     : name_{name}, crypto_{create_crypto(settings, config, name_)},
-      rate_limiter{settings.common.request_limit, settings.common.request_limit_interval}, request_queue{rate_limiter} {
+      rate_limiter{settings.request.limit, settings.request.limit_interval}, request_queue{rate_limiter} {
 }
 
 std::string Account::create_signature(std::chrono::milliseconds expires) {
