@@ -82,8 +82,8 @@ auto create_connection(auto &handler, auto &settings, auto &context, auto api) {
       .request_timeout = {},
       .ping_frequency = settings.ws.ping_freq,
       // implementation
-      .decode_buffer_size = settings.common.decode_buffer_size,
-      .encode_buffer_size = settings.common.encode_buffer_size,
+      .decode_buffer_size = settings.misc.decode_buffer_size,
+      .encode_buffer_size = settings.misc.encode_buffer_size,
   };
   return web::socket::Client::create(handler, context, config, []() { return std::string(); });
 }
@@ -130,7 +130,7 @@ MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_i
       ping_frequency_{shared.settings.ws.ping_freq}, spot_{is_spot(shared.api)},
       mbp_depth_{get_mbp_depth(shared.settings, shared.api)}, mbp_topic_{create_mbp_topic(mbp_depth_)},
       connection_{create_connection(*this, shared.settings, context, shared.api)},
-      decode_buffer_(shared.settings.common.decode_buffer_size),
+      decode_buffer_(shared.settings.misc.decode_buffer_size),
       request_id_{static_cast<uint64_t>(stream_id_) * 1000000},  // scale (debugging)
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),

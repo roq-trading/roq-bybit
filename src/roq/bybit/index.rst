@@ -14,16 +14,7 @@ Links
 * `Documentation <https://bybit-exchange.github.io/docs/v5/intro>`__
 
 
-Purpose
--------
-
-* Maintain network connectivity with the Bybit exchange
-* Route exchange updates to connected clients
-* Route client requests to the relevant exchange accounts
-* Stream all messages to an event-log
-
-
-Overview
+Supports
 --------
 
 .. grid::  2
@@ -40,6 +31,8 @@ Overview
         - |checkmark|
       * - Options
         - |checkmark|
+      * - Combos
+        -
 
   .. grid-item-card::  Market Data
 
@@ -87,56 +80,51 @@ Overview
       * - Funds
         - |checkmark|
 
-* Data center located in: TBD
 
-
-Conda
------
+Installing
+----------
 
 * :ref:`Using Conda <tutorial-conda>`
 
-.. tab:: Install
+.. tab:: Stable
 
-  .. code-block:: bash
+  .. code-block:: shell
 
-    $ mamba install \
-          --channel https://roq-trading.com/conda/stable \
-          roq-bybit
+     $ mamba install \
+           --channel https://roq-trading.com/conda/stable \
+           roq-bybit
 
-.. tab:: Configure
+.. tab:: Unstable
 
-  .. code-block:: bash
+  .. code-block:: shell
 
-    $ cp $CONDA_PREFIX/share/roq-bybit/config.toml $CONFIG_FILE_PATH
-
-    # Then modify $CONFIG_FILE_PATH to match your specific configuration
-
-.. tab:: Run
-
-  .. code-block:: bash
-
-    $ roq-bybit \
-          --name "bybit" \
-          --api "spot" \
-          --config_file "$CONFIG_FILE_PATH" \
-          --client_listen_address "$UNIX_SOCKET_PATH" \
-          --service_listen_address "$TCP_LISTEN_PORT" \
-          --flagfile "$FLAG_FILE"
+     $ mamba install \
+           --channel https://roq-trading.com/conda/unstable \
+           roq-bybit
 
 
-Config
-------
+Using
+-----
 
-* :ref:`Common Config <gateway-config>`
+.. code-block:: shell
 
+   $ roq-bybit \
+         --name "bybit" \
+         --api "spot" \
+         --config_file $CONFIG_FILE_PATH \
+         --client_listen_address $UNIX_SOCKET_PATH \
+         --flagfile $ENVIRONMENT_FLAGFILE
+
+
+.. _roq-bybit-flags:
 
 Flags
 -----
 
 * :ref:`Using Flags <abseil-cpp>`
-* :ref:`Common Flags <gateway-flags>`
+* :ref:`Gateway Flags <gateway-flags>`
 
-.. code-block:: bash
+.. code-block:: shell
 
    $ roq-bybit --help
 
@@ -164,27 +152,51 @@ Flags
 
    .. include:: flags/request.rstinc
 
-.. tab:: Common
+.. tab:: Misc
 
-   .. include:: flags/common.rstinc
+   .. include:: flags/misc.rstinc
 
 
 Environments
 ------------
 
-.. code-block:: bash
-
-  $ $CONDA_PREFIX/share/roq-bybit/flags
-
 .. tab:: Prod
 
+   .. code-block:: shell
+
+      $ $CONDA_PREFIX/share/roq-bybit/flags/prod/flags.cfg
+
    .. include:: flags/prod/flags.cfg
-     :code: ini
+     :code: shell
 
 .. tab:: Test
 
+   .. code-block:: shell
+
+      $ $CONDA_PREFIX/share/roq-bybit/flags/test/flags.cfg
+
    .. include:: flags/test/flags.cfg
-     :code: ini
+     :code: shell
+
+
+Configuration
+-------------
+
+* :ref:`Gateway Config <gateway-config>`
+
+.. code-block:: shell
+
+   $ $CONDA_PREFIX/share/roq-bybit/config.toml
+
+.. important::
+
+   The template will be replaced when the software is upgraded.
+   Make a copy and modify to your needs.
+
+.. include:: config.toml
+   :code: toml
+
+
 
 
 Market Data

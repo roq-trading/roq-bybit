@@ -7,14 +7,14 @@
       "name": "limit",
       "type": "uint32_t",
       "default": "10",
-      "description": "Request limit per interval"
+      "description": "Maximum number of requests per interval"
     },
     {
       "name": "limit_interval",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "1s",
-      "description": "Request limit monitor interval"
+      "description": "Monitor interval"
     }
   ]
 }

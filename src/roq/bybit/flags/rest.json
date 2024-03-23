@@ -8,18 +8,18 @@
       "type": "roq::io::web::URI",
       "validator": "roq::core::flags::URI",
       "default": "https://api-testnet.bybit.com",
-      "description": "REST end-point (URI)"
+      "description": "Exchange end-point"
     },
     {
       "name": "host",
       "type": "std::string",
-      "description": "Host (http header) in case uri uses an IP address"
+      "description": "Host (when URI is an IP address)"
     },
     {
       "name": "proxy",
       "type": "roq::io::web::URI",
       "validator": "roq::core::flags::URI",
-      "description": "Proxy end-point (URI)"
+      "description": "Proxy end-point"
     },
     {
       "name": "ping_freq",
@@ -33,34 +33,34 @@
       "type": "std::string",
       "validator": "roq::flags::validators::Path",
       "default": "/v5/market/time",
-      "description": "URI path used for REST connection keep-alive messages"
+      "description": "Ping path"
     },
     {
       "name": "request_timeout",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "30s",
-      "description": "Request: timeout"
+      "description": "Request timeout"
     },
     {
       "name": "recv_window",
       "type": "std::chrono::milliseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "5s",
-      "description": "Recv window"
+      "description": "Receive window (please refer to exchange documentation)"
     },
     {
       "name": "terminate_on_403",
       "type": "bool",
       "default": false,
-      "description": "Terminate on 403?"
+      "description": "(TEST) Trigger program termination after receiving a 403 response code?"
     },
     {
       "name": "back_off_delay",
       "type": "std::chrono::nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "30s",
-      "description": "Back-off period"
+      "description": "(TEST) Time to wait before retrying a rejected request"
     }
   ]
 }

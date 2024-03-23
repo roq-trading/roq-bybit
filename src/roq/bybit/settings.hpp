@@ -6,10 +6,10 @@
 
 #include "roq/server/flags/settings.hpp"
 
-#include "roq/bybit/flags/common.hpp"
 #include "roq/bybit/flags/download.hpp"
 #include "roq/bybit/flags/flags.hpp"
 #include "roq/bybit/flags/mbp.hpp"
+#include "roq/bybit/flags/misc.hpp"
 #include "roq/bybit/flags/request.hpp"
 #include "roq/bybit/flags/rest.hpp"
 #include "roq/bybit/flags/ws.hpp"
@@ -22,7 +22,7 @@ struct Settings final : public server::flags::Settings {
 
   std::string_view exchange;
 
-  flags::Common common;
+  flags::Misc misc;
   flags::REST rest;
   flags::WS ws;
   flags::Download download;
@@ -45,7 +45,7 @@ struct fmt::formatter<roq::bybit::Settings> {
         context.out(),
         R"({{)"
         R"(exchange="{}", )"
-        R"(common={}, )"
+        R"(misc={}, )"
         R"(rest={}, )"
         R"(ws={}, )"
         R"(download={}, )"
@@ -54,7 +54,7 @@ struct fmt::formatter<roq::bybit::Settings> {
         R"(server={})"
         R"(}})"sv,
         value.exchange,
-        value.common,
+        value.misc,
         value.rest,
         value.ws,
         value.download,

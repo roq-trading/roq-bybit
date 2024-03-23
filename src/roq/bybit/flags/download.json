@@ -8,20 +8,20 @@
       "type": "std::chrono::milliseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "300s",
-      "description": "How far back to request executions?"
+      "description": "Lookback period when downloading trades (following a disconnect)"
     },
     {
       "name": "trades_lookback_on_restart",
       "type": "std::chrono::milliseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "{}",
-      "description": "How far back to request executions?"
+      "description": "Lookback period when downloading trades (initial download)"
     },
     {
       "name": "trades_limit",
       "type": "uint32_t",
       "default": 100,
-      "description": "Exchange limit"
+      "description": "Maximum number of trades per response (exchange limit)"
     }
   ]
 }

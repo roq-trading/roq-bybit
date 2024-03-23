@@ -8,24 +8,24 @@
       "type": "roq::io::web::URI",
       "validator": "roq::core::flags::URI",
       "default": "wss://stream-testnet.bybit.com/v5/public",
-      "description": "WS public end-point (URI)"
+      "description": "Exchange end-point"
     },
     {
       "name": "public_host",
       "type": "std::string",
-      "description": "Host (http header) in case uri uses an IP address"
+      "description": "Host (when URI is an IP address)"
     },
     {
       "name": "private_uri",
       "type": "roq::io::web::URI",
       "validator": "roq::core::flags::URI",
       "default": "wss://stream-testnet.bybit.com/v5/private",
-      "description": "WS private end-point (URI)"
+      "description": "Exchange end-point"
     },
     {
       "name": "private_host",
       "type": "std::string",
-      "description": "Host (http header) in case uri uses an IP address"
+      "description": "Host (when URI is an IP address)"
     },
     {
       "name": "ping_freq",
@@ -39,20 +39,20 @@
       "type": "std::chrono::nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "15s",
-      "description": "Request: timeout"
+      "description": "Request timeout"
     },
     {
       "name": "max_subscriptions_per_stream",
       "type": "uint32_t",
       "required": true,
       "default": 100,
-      "description": "Max symbols per connection (count)"
+      "description": "Maximum number of symbols per connection"
     },
     {
       "name": "mbp_depth",
       "type": "uint32_t",
       "default": 0,
-      "description": "MbP depth"
+      "description": "Maximum depth"
     }
   ]
 }
