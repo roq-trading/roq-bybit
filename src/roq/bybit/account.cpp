@@ -38,7 +38,7 @@ auto create_crypto(auto &settings, auto &config, auto &name) -> tools::Crypto {
 // === IMPLEMENTATION ===
 
 Account::Account(Settings const &settings, Config const &config, std::string_view const &name)
-    : name_{name}, crypto_{create_crypto(settings, config, name_)},
+    : name{name}, crypto_{create_crypto(settings, config, name)},
       rate_limiter{settings.request.limit, settings.request.limit_interval}, request_queue{rate_limiter} {
 }
 

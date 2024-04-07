@@ -99,7 +99,7 @@ auto get_download_trades_lookback(auto &settings, auto download_trades_is_first)
 // === IMPLEMENTATION ===
 
 OrderEntry::OrderEntry(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.get_name())},
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.name)},
       connection_{create_connection(*this, shared.settings, context)},
       decode_buffer_(shared.settings.misc.decode_buffer_size),
       counter_{
@@ -223,7 +223,7 @@ void OrderEntry::operator()(Trace<web::rest::Client::Latency> const &event) {
   auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
       .stream_id = stream_id_,
-      .account = account_.get_name(),
+      .account = account_.name,
       .latency = latency.sample,
   };
   create_trace_and_dispatch(handler_, trace_info, external_latency);
@@ -235,7 +235,7 @@ void OrderEntry::operator()(ConnectionStatus status) {
     TraceInfo trace_info;
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,
-        .account = account_.get_name(),
+        .account = account_.name,
         .supports = get_supports(shared_.api.api),
         .transport = Transport::TCP,
         .protocol = Protocol::HTTP,
@@ -390,7 +390,7 @@ void OrderEntry::get_wallet_balance_ack(Trace<web::rest::Response> const &event)
     };
     process_response(event, handle_success, handle_error);
     auto response = Response{
-        .account = account_.get_name(),
+        .account = account_.name,
         .topic = "wallet"sv,
         .symbol = {},
     };
@@ -406,7 +406,7 @@ void OrderEntry::operator()(Trace<json::Wallet> const &event) {
     // XXX maybe margin mode is from account_type?
     auto funds_update = FundsUpdate{
         .stream_id = stream_id_,
-        .account = account_.get_name(),
+        .account = account_.name,
         .currency = item.coin,
         .margin_mode = {},
         .balance = item.wallet_balance,  // XXX item.free ???
@@ -473,7 +473,7 @@ void OrderEntry::get_position_info_ack(Trace<web::rest::Response> const &event, 
     };
     process_response(event, handle_success, handle_error);
     auto response = Response{
-        .account = account_.get_name(),
+        .account = account_.name,
         .topic = "position"sv,
         .symbol = symbol,
     };
@@ -495,7 +495,7 @@ void OrderEntry::operator()(Trace<json::PositionInfo> const &event) {
     auto short_quantity = std::max(0.0, -quantity);
     auto position_update = PositionUpdate{
         .stream_id = stream_id_,
-        .account = account_.get_name(),
+        .account = account_.name,
         .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
         .margin_mode = margin_mode,
@@ -562,7 +562,7 @@ void OrderEntry::get_open_orders_ack(Trace<web::rest::Response> const &event, st
     };
     process_response(event, handle_success, handle_error);
     auto response = Response{
-        .account = account_.get_name(),
+        .account = account_.name,
         .topic = "order"sv,
         .symbol = symbol,
     };
@@ -580,7 +580,7 @@ void OrderEntry::operator()(Trace<json::OpenOrders> const &event) {
     auto time_in_force = json::map(item.time_in_force);
     auto order_status = json::map(item.order_status);
     auto order_update = server::oms::OrderUpdate{
-        .account = account_.get_name(),
+        .account = account_.name,
         .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
         .side = side,
@@ -679,7 +679,7 @@ void OrderEntry::get_execution_ack(Trace<web::rest::Response> const &event, std:
     };
     process_response(event, handle_success, handle_error);
     auto response = Response{
-        .account = account_.get_name(),
+        .account = account_.name,
         .topic = "execution"sv,
         .symbol = symbol,
     };
@@ -699,7 +699,7 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
       return;
     auto trade_update = TradeUpdate{
         .stream_id = stream_id_,
-        .account = account_.get_name(),
+        .account = account_.name,
         .order_id = {},
         .exchange = shared_.settings.exchange,
         .symbol = symbol,
@@ -829,7 +829,7 @@ void OrderEntry::operator()(
   // note! ACCEPTED not managed by fix-bridge
   auto order_status = place_order.ret_code == 0 ? OrderStatus::ACCEPTED : OrderStatus::REJECTED;
   auto order_update = server::oms::OrderUpdate{
-      .account = account_.get_name(),
+      .account = account_.name,
       .exchange = shared_.settings.exchange,
       .symbol = {},
       .side = {},
@@ -956,7 +956,7 @@ void OrderEntry::operator()(
   auto order_status = json::map(result.status);
   auto remaining_quantity = result.order_qty - result.exec_qty;
   auto order_update = server::oms::OrderUpdate{
-      .account = account_.get_name(),
+      .account = account_.name,
       .exchange = shared_.settings.exchange,
       .symbol = result.symbol,
       .side = side,
@@ -1080,7 +1080,7 @@ void OrderEntry::operator()(
   auto order_status = json::map(result.status);
   auto remaining_quantity = result.order_qty - result.exec_qty;
   auto order_update = server::oms::OrderUpdate{
-      .account = account_.get_name(),
+      .account = account_.name,
       .exchange = shared_.settings.exchange,
       .symbol = result.symbol,
       .side = side,
@@ -1125,7 +1125,7 @@ void OrderEntry::cancel_all_orders(
     auto send_ack = [&](auto &symbol) {
       auto cancel_all_orders_ack = CancelAllOrdersAck{
           .stream_id = stream_id_,
-          .account = account_.get_name(),
+          .account = account_.name,
           .order_id = cancel_all_orders.order_id,
           .exchange = cancel_all_orders.exchange,
           .symbol = symbol,
@@ -1171,7 +1171,7 @@ void OrderEntry::cancel_all_orders(
               (*connection_)("order-cancel-all"sv, request, callback);
               send_ack(symbol);
             },
-            account_.get_name())) {
+            account_.name)) {
     } else {
       log::warn("*** NOT POSSIBLE TO CANCEL ALL OPEN ORDERS (NO SYMBOLS) ***"sv);
     }
@@ -1183,7 +1183,7 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
     auto send_ack = [&](auto origin, auto status, Error error, std::string_view const &text) {
       auto cancel_all_orders_ack = CancelAllOrdersAck{
           .stream_id = stream_id_,
-          .account = account_.get_name(),
+          .account = account_.name,
           .order_id = {},
           .exchange = {},
           .symbol = {},
