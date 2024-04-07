@@ -15,11 +15,8 @@
 
 #include "roq/core/limit/rate_limiter.hpp"
 
+#include "roq/bybit/api.hpp"
 #include "roq/bybit/settings.hpp"
-
-#include "roq/bybit/tools/api.hpp"
-
-#include "roq/bybit/json/category.hpp"
 
 namespace roq {
 namespace bybit {
@@ -57,10 +54,8 @@ struct Shared final {
 
  public:
   Settings const &settings;
+  API const api;
   core::limit::RateLimiter rate_limiter;
-
-  tools::API const api;
-  json::Category const category;
 
   core::Symbols symbols;
 };

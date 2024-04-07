@@ -190,10 +190,10 @@ uint32_t Rest::download(RestState state) {
       return 1;
     case DONE:
       (*this)(ConnectionStatus::READY);
-      return {};
+      return 0;
   }
   assert(false);
-  return {};
+  return 0;
 }
 
 // market info
@@ -204,10 +204,10 @@ void Rest::get_instrument_info() {
         "?category={}"
         "&status=Trading"
         "&limit=1000"sv,
-        shared_.category.as_raw_text());
+        shared_.api.category.as_raw_text());
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
-        .path = "/v5/market/instruments-info"sv,
+        .path = shared_.api.market_data.market_instrument_info,
         .query = query,
         .accept = web::http::Accept::APPLICATION_JSON,
         .content_type = {},
@@ -220,7 +220,7 @@ void Rest::get_instrument_info() {
       Trace event{trace_info, response};
       get_instrument_info_ack(event, sequence);
     };
-    (*connection_)("market_info_spot"sv, request, callback);
+    (*connection_)("market-instrument-info"sv, request, callback);
   });
 }
 
@@ -315,12 +315,13 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
     log::info("Symbols {} / {}"sv, counter, std::size(instrument_info.result.list));
 }
 
+// helpers
+
 template <typename SuccessHandler, typename ErrorHandler>
 void Rest::process_response(
     web::rest::Response const &response, SuccessHandler success_handler, ErrorHandler error_handler) {
   try {
     auto [status, category, body] = response.result();
-    // log::debug(R"(status={}, category={}, body="{}")"sv, status, category, body);
     switch (category) {
       using enum web::http::Category;
       case SUCCESS:  // 2xx

@@ -142,7 +142,7 @@ void Gateway::operator()(Rest::SymbolsUpdate &symbols_update) {
 
 void Gateway::ensure_symbol_slices(size_t size) {
   while (std::size(market_data_) < size) {
-    log::debug("Create market-data (user-stream)"sv);
+    log::info("Create market-data (user-stream)"sv);
     auto market_data = std::make_unique<MarketData>(*this, context_, ++stream_id_, shared_, std::size(market_data_));
     MessageInfo message_info;
     Start start;

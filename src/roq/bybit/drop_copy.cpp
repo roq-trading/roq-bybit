@@ -45,11 +45,7 @@ auto get_supports(auto api) {
     result |= SupportType::POSITION;
   return result;
 }
-}  // namespace
 
-// === CONSTANTS ===
-
-namespace {
 auto create_name(auto stream_id) {
   return fmt::format("{}:{}"sv, stream_id, NAME);
 }
@@ -143,16 +139,14 @@ void DropCopy::operator()(metrics::Writer &writer) {
 }
 
 void DropCopy::operator()(Rest::SymbolsUpdate &symbols_update) {
-  log::debug("HERE symbols={}"sv, symbols_update.symbols);
   for (auto &symbol : symbols_update.symbols) {
     if (!shared_.dispatcher.can_account_trade_symbol(account_.get_name(), shared_.settings.exchange, symbol))
       continue;
     [[maybe_unused]] auto res = symbols_.emplace(static_cast<std::string_view>(symbol));
     assert(res.second);
     if ((*connection_).ready()) {
-      if (shared_.api != tools::API::SPOT)
+      if (shared_.api.api != tools::API::SPOT)
         account_.request_queue.emplace_back("position"sv, symbol);
-      log::debug(R"(HERE symbol="{}")"sv, symbol);
       account_.request_queue.emplace_back("order"sv, symbol);
       account_.request_queue.emplace_back("execution"sv, symbol);
     }
@@ -161,7 +155,6 @@ void DropCopy::operator()(Rest::SymbolsUpdate &symbols_update) {
 
 void DropCopy::operator()(Trace<OrderEntry::Response> const &event) {
   auto &[trace_info, response] = event;
-  log::debug(R"(RESPONSE topic="{}", symbol="{}")"sv, response.topic, response.symbol);
   if (response.topic == "wallet"sv) {
     log::debug("WALLET"sv);
   } else if (response.topic == "position"sv) {
@@ -203,7 +196,6 @@ void DropCopy::operator()(web::socket::Client::Ready const &) {
       account_.get_key(),
       expires.count(),
       signature);
-  log::debug(R"(message="{}")"sv, message);
   (*connection_).send_text(message);
   (*this)(ConnectionStatus::LOGIN_SENT);
 }
@@ -236,7 +228,7 @@ void DropCopy::operator()(ConnectionStatus status) {
     auto stream_status = StreamStatus{
         .stream_id = stream_id_,
         .account = account_.get_name(),
-        .supports = get_supports(shared_.api),
+        .supports = get_supports(shared_.api.api),
         .transport = Transport::TCP,
         .protocol = Protocol::WS,
         .encoding = {Encoding::JSON},
@@ -254,7 +246,7 @@ void DropCopy::operator()(ConnectionStatus status) {
 
 void DropCopy::subscribe() {
   subscribe("wallet"sv);
-  if (shared_.api != tools::API::SPOT)
+  if (shared_.api.api != tools::API::SPOT)
     subscribe("position"sv);
   subscribe("order"sv);
   subscribe("execution"sv);
@@ -269,21 +261,18 @@ void DropCopy::subscribe(std::string_view const &topic) {
       R"(}})"sv,
       topic,
       topic);
-  log::debug("message={}"sv, message);
   (*connection_).send_text(message);
 }
 
 void DropCopy::parse(std::string_view const &message) {
   profile_.parse([&]() {
+    auto log_message = [&]() { log::warn(R"(message="{}")"sv, message); };
     try {
-      log::debug(R"(message="{}")"sv, message);
       TraceInfo trace_info;
-      if (json::Parser::dispatch(*this, message, decode_buffer_, trace_info)) {
-      } else {
-        log::fatal(R"(Unexpected: failed to parse message="{}")"sv, message);
-      }
+      if (!json::Parser::dispatch(*this, message, decode_buffer_, trace_info))
+        log_message();
     } catch (...) {
-      log::warn(R"(message="{}")"sv, message);
+      log_message();
       core::tools::UnhandledException::terminate();
     }
   });
@@ -369,9 +358,9 @@ void DropCopy::operator()(Trace<json::Position> const &event) {
     auto &[trace_info, position] = event;
     log::info<4>("event={{position={}, trace_info={}}}"sv, position, trace_info);
     for (auto &item : position.data) {
+      log::info<2>("item={}"sv, item);
       if (shared_.discard_symbol(item.symbol))
         continue;
-      // log::debug("item={}"sv, item);
       auto margin_mode = item.trade_mode == 0 ? MarginMode::CROSS : MarginMode::ISOLATED;
       auto side = json::map(item.side);
       auto quantity = utils::sign(side) * item.size;
@@ -400,6 +389,7 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
     auto &[trace_info, order] = event;
     log::info<4>("event={{order={}, trace_info={}}}"sv, order, trace_info);
     for (auto &item : order.data) {
+      log::info<2>("item={}"sv, item);
       auto side = json::map(item.side);
       auto order_type = json::map(item.order_type);
       auto time_in_force = json::map(item.time_in_force);
@@ -485,6 +475,7 @@ void DropCopy::operator()(Trace<json::Execution2> const &event) {
       shared_.fills.clear();
     };
     for (auto &item : execution.data) {
+      log::info<2>("item={}"sv, item);
       /* XXX doesn't work with spot
       if (item.exec_type != json::ExecType::TRADE)  // note!
         continue;

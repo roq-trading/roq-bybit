@@ -37,6 +37,8 @@ auto const SUPPORTS = Mask{
     SupportType::TRADE_SUMMARY,
     SupportType::STATISTICS,
 };
+
+auto const REQUEST_ID = uint64_t{1000000};
 }  // namespace
 
 // === HELPERS ===
@@ -127,11 +129,10 @@ struct create_metrics final : public core::metrics::Factory {
 
 MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared, size_t index)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, index_{index},
-      ping_frequency_{shared.settings.ws.ping_freq}, spot_{is_spot(shared.api)},
-      mbp_depth_{get_mbp_depth(shared.settings, shared.api)}, mbp_topic_{create_mbp_topic(mbp_depth_)},
-      connection_{create_connection(*this, shared.settings, context, shared.api)},
-      decode_buffer_(shared.settings.misc.decode_buffer_size),
-      request_id_{static_cast<uint64_t>(stream_id_) * 1000000},  // scale (debugging)
+      ping_frequency_{shared.settings.ws.ping_freq}, spot_{is_spot(shared.api.api)},
+      mbp_depth_{get_mbp_depth(shared.settings, shared.api.api)}, mbp_topic_{create_mbp_topic(mbp_depth_)},
+      connection_{create_connection(*this, shared.settings, context, shared.api.api)},
+      decode_buffer_(shared.settings.misc.decode_buffer_size), request_id_{stream_id_ * REQUEST_ID},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -261,7 +262,6 @@ void MarketData::subscribe(std::string_view const &topic, std::span<Symbol const
       ++request_id_,
       topic,
       fmt::join(symbols, separator));
-  log::debug("message={}"sv, message);
   (*connection_).send_text(message);
 }
 
@@ -274,20 +274,18 @@ void MarketData::send_ping(std::chrono::nanoseconds now) {
       R"("op":"ping")"
       R"(}})"sv,
       now.count());
-  // log::debug("message={}"sv, message);
   (*connection_).send_text(message);
 }
 
 void MarketData::parse(std::string_view const &message) {
   profile_.parse([&]() {
+    auto log_message = [&]() { log::warn(R"(message="{}")"sv, message); };
     try {
       TraceInfo trace_info;
-      if (json::Parser::dispatch(*this, message, decode_buffer_, trace_info)) {
-      } else {
-        log::fatal(R"(Unexpected: failed to parse message="{}")"sv, message);
-      }
+      if (!json::Parser::dispatch(*this, message, decode_buffer_, trace_info))
+        log_message();
     } catch (...) {
-      log::warn(R"(message="{}")"sv, message);
+      log_message();
       core::tools::UnhandledException::terminate();
     }
   });
@@ -317,7 +315,6 @@ void MarketData::operator()(Trace<json::OrderBook> const &event, size_t depth) {
   profile_.order_book([&]() {
     auto &[trace_info, order_book] = event;
     log::info<3>("event={{order_book={}, trace_info={}}}"sv, order_book, trace_info);
-    // log::debug("order_book={}"sv, order_book);
     (*connection_).touch(trace_info.source_receive_time);
     auto update_type = json::map(order_book.type);
     auto &data = order_book.data;
@@ -398,7 +395,6 @@ void MarketData::operator()(Trace<json::PublicTrade> const &event) {
     auto &trace_info = event.trace_info;
     auto &public_trade = event.value;
     log::info<3>("event={{public_trade={}, trace_info={}}}"sv, public_trade, trace_info);
-    // log::debug("public_trade={}"sv, public_trade);
     (*connection_).touch(trace_info.source_receive_time);
     auto &trades = shared_.trades;
     trades.clear();
@@ -448,10 +444,9 @@ void MarketData::operator()(Trace<json::Tickers> const &event) {
   profile_.tickers([&]() {
     auto &[trace_info, tickers] = event;
     log::info<3>("event={{tickers={}, trace_info={}}}"sv, tickers, trace_info);
-    // log::debug("tickers={}"sv, tickers);
     (*connection_).touch(trace_info.source_receive_time);
     auto &data = tickers.data;
-    switch (shared_.api) {
+    switch (shared_.api.api) {
       using enum tools::API;
       case UNDEFINED:
         break;
@@ -498,7 +493,7 @@ void MarketData::operator()(Trace<json::Tickers> const &event) {
         break;
       }
     }
-    auto statistics = std::array<Statistics, 4>{{
+    std::array<Statistics, 4> statistics{{
         {
             .type = StatisticsType::HIGHEST_TRADED_PRICE,
             .value = data.high_price24h,
