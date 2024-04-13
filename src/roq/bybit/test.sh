@@ -59,5 +59,4 @@ $PREFIX ./roq-bybit \
   --cache_database_uri "$DATABASE_URI" \
   --cache_database_name "roq" \
   --enable_portfolio=true \
-  --test_oms_disable_local_cache=true \
   $@
