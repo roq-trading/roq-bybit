@@ -6,16 +6,35 @@
 roq-bybit
 =========
 
+.. tab:: Stable
 
-Links
------
+  .. code-block:: shell
 
-* `Website <https://www.bybit.com/en-US/>`__
-* `Documentation <https://bybit-exchange.github.io/docs/v5/intro>`__
+     $ mamba install \
+           --channel https://roq-trading.com/conda/stable \
+           roq-bybit
+
+.. tab:: Unstable
+
+  .. code-block:: shell
+
+     $ mamba install \
+           --channel https://roq-trading.com/conda/unstable \
+           roq-bybit
+
+
+:code:`roq-bybit`
+-----------------
+
+
+Description
+~~~~~~~~~~~
+
+:code:`roq-bybit` is a gateway
 
 
 Supports
---------
+~~~~~~~~
 
 .. grid::  2
   :gutter: 2
@@ -81,48 +100,10 @@ Supports
         - |checkmark|
 
 
-Installing
-----------
-
-* :ref:`Using Conda <tutorial-conda>`
-
-.. tab:: Stable
-
-  .. code-block:: shell
-
-     $ mamba install \
-           --channel https://roq-trading.com/conda/stable \
-           roq-bybit
-
-.. tab:: Unstable
-
-  .. code-block:: shell
-
-     $ mamba install \
-           --channel https://roq-trading.com/conda/unstable \
-           roq-bybit
-
-
-Using
------
-
-.. code-block:: shell
-
-   $ roq-bybit \
-         --name "bybit" \
-         --api "spot" \
-         --config_file $CONFIG_FILE_PATH \
-         --client_listen_address $UNIX_SOCKET_PATH \
-         --flagfile $ENVIRONMENT_FLAGFILE
-
-
 .. _roq-bybit-flags:
 
 Flags
------
-
-* :ref:`Using Flags <abseil-cpp>`
-* :ref:`Gateway Flags <gateway-flags>`
+~~~~~
 
 .. code-block:: shell
 
@@ -158,7 +139,7 @@ Flags
 
 
 Environments
-------------
+~~~~~~~~~~~~
 
 .. tab:: Prod
 
@@ -180,9 +161,7 @@ Environments
 
 
 Configuration
--------------
-
-* :ref:`Gateway Config <gateway-config>`
+~~~~~~~~~~~~~
 
 .. code-block:: shell
 
@@ -197,10 +176,8 @@ Configuration
    :code: toml
 
 
-
-
 Market Data
------------
+~~~~~~~~~~~
 
 .. tab:: Live
 
@@ -297,7 +274,7 @@ Market Data
 
 
 Statistics
-~~~~~~~~~~
+^^^^^^^^^^
 
 .. list-table::
   :header-rows: 1
@@ -320,7 +297,7 @@ Statistics
 
 
 Order Management
-----------------
+~~~~~~~~~~~~~~~~
 
 .. tab:: Live
 
@@ -411,8 +388,9 @@ Order Management
       -
       -
 
+
 Order Types
-~~~~~~~~~~~
+^^^^^^^^^^^
 
 .. list-table::
   :header-rows: 1
@@ -429,7 +407,7 @@ Order Types
 
 
 Time in Force
-~~~~~~~~~~~~~
+^^^^^^^^^^^^^
 
 .. list-table::
   :header-rows: 1
@@ -449,14 +427,15 @@ Time in Force
 
 
 Position Effect
-~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^
 
 .. note::
 
   Not supported
 
+
 Execution Instructions
-~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. list-table::
   :header-rows: 1
@@ -470,7 +449,7 @@ Execution Instructions
 
 
 Account Management
-------------------
+~~~~~~~~~~~~~~~~~~
 
 .. tab:: Live
 
@@ -580,7 +559,7 @@ Streams
 
 
 Constraints
------------
+~~~~~~~~~~~
 
 * The gateway can not simultaneously support all product categories due to
   overlapping symbol names, e.g. BTCUSDT being both spot and linear.
@@ -595,8 +574,27 @@ Constraints
   .. note::
      The :code:`execution` channel will independently report the fills.
 
+
 Comments
---------
+~~~~~~~~
 
 * :code:`TopOfBook` is based on :code:`orderbook.1` for spot and :code:`tickers`
   for all other categories.
+
+
+References
+----------
+
+Common
+~~~~~~
+
+* :ref:`Using Conda <tutorial-conda>`
+* :ref:`Using Flags <abseil-cpp>`
+* :ref:`Gateway Flags <gateway-flags>`
+* :ref:`Gateway Config <gateway-config>`
+
+Bybit
+~~~~~
+
+* `Website <https://www.bybit.com/en-US/>`__
+* `Documentation <https://bybit-exchange.github.io/docs/v5/intro>`__
