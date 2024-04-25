@@ -26,9 +26,10 @@ template <typename R>
 R create_accounts(auto &settings, auto &config) {
   using result_type = std::remove_cvref<R>::type;
   result_type result;
-  for (auto &[_, account] : config.accounts)
-    result.try_emplace(
-        static_cast<std::string_view>(account.name), std::make_unique<Account>(settings, config, account.name));
+  for (auto &[_, account] : config.accounts) {
+    auto obj = std::make_unique<Account>(settings, config, account.name);
+    result.try_emplace(static_cast<std::string_view>(account.name), std::move(obj));
+  }
   return result;
 }
 
@@ -36,10 +37,11 @@ template <typename R>
 R create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
   using result_type = std::remove_cvref<R>::type;
   result_type result;
-  for (auto &[name, account] : accounts)
-    result.try_emplace(
-        static_cast<std::string_view>(name),
-        std::make_unique<OrderEntry>(gateway, context, ++stream_id, *account, shared));
+  for (auto &[_, item] : accounts) {
+    auto &account = *item;
+    auto obj = std::make_unique<OrderEntry>(gateway, context, ++stream_id, account, shared);
+    result.try_emplace(static_cast<std::string_view>(account.name), std::move(obj));
+  }
   return result;
 }
 
@@ -47,10 +49,11 @@ template <typename R>
 R create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
   using result_type = std::remove_cvref<R>::type;
   result_type result;
-  for (auto &[name, account] : accounts)
-    result.try_emplace(
-        static_cast<std::string_view>(name),
-        std::make_unique<DropCopy>(gateway, context, ++stream_id, *account, shared));
+  for (auto &[_, item] : accounts) {
+    auto &account = *item;
+    auto obj = std::make_unique<DropCopy>(gateway, context, ++stream_id, account, shared);
+    result.try_emplace(static_cast<std::string_view>(account.name), std::move(obj));
+  }
   return result;
 }
 }  // namespace
