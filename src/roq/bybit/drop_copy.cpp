@@ -494,6 +494,9 @@ void DropCopy::operator()(Trace<json::Execution2> const &event) {
           .quantity = item.exec_qty,
           .price = item.exec_price,
           .liquidity = liquidity,
+          .quote_quantity = NaN,
+          .commission_quantity = NaN,
+          .commission_currency = {},
       };
       shared_.fills.emplace_back(std::move(fill));
     }
