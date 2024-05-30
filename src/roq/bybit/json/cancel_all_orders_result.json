@@ -4,12 +4,13 @@
   "values": [
     {
       "name": "success",
-      "type": "int32_t",
+      "type": "std/int32",
       "comment": "S..."
     },
     {
       "name": "list",
-      "type": "std::span<CancelAllOrdersResultItem const>",
+      "type": "CancelAllOrdersResultItem",
+      "array": "std/span",
       "comment": ".LIO"
     }
   ]

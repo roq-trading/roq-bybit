@@ -4,63 +4,63 @@
   "values": [
     {
       "name": "coin",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "equity",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "usdValue",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "walletBalance",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "free",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "locked",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "availableToWithdraw",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "availableToBorrow",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "borrowAmount",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "accruedInterest",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "totalOrderIM",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "totalPositionIM",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "totalPositionMM",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "unrealisedPnl",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "cumRealisedPnl",
-      "type": "double"
+      "type": "std/double"
     }
   ]
 }

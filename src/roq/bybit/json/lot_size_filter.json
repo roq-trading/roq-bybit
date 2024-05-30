@@ -4,35 +4,35 @@
   "values": [
     {
       "name": "basePrecision",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "quotePrecision",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "minOrderQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "maxOrderQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "minOrderAmt",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "maxOrderAmt",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "qtyStep",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "postOnlyMaxOrderQty",
-      "type": "double"
+      "type": "std/double"
     }
   ]
 }

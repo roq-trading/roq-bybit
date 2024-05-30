@@ -4,15 +4,15 @@
   "values": [
     {
       "name": "minPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "maxPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "tickSize",
-      "type": "double"
+      "type": "std/double"
     }
   ]
 }

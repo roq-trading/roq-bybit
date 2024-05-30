@@ -12,7 +12,7 @@
     },
     {
       "name": "host",
-      "type": "std::string",
+      "type": "std/string",
       "description": "Host (when URI is an IP address)"
     },
     {
@@ -23,41 +23,41 @@
     },
     {
       "name": "ping_freq",
-      "type": "std::chrono::nanoseconds",
+      "type": "std/nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "5s",
       "description": "Ping frequency"
     },
     {
       "name": "ping_path",
-      "type": "std::string",
+      "type": "std/string",
       "validator": "roq::flags::validators::Path",
       "default": "/v5/market/time",
       "description": "Ping path"
     },
     {
       "name": "request_timeout",
-      "type": "std::chrono::nanoseconds",
+      "type": "std/nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "30s",
       "description": "Request timeout"
     },
     {
       "name": "recv_window",
-      "type": "std::chrono::milliseconds",
+      "type": "std/milliseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "5s",
       "description": "Receive window (please refer to exchange documentation)"
     },
     {
       "name": "terminate_on_403",
-      "type": "bool",
+      "type": "std/bool",
       "default": false,
       "description": "(TEST) Trigger program termination after receiving a 403 response code?"
     },
     {
       "name": "back_off_delay",
-      "type": "std::chrono::nanoseconds",
+      "type": "std/nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "30s",
       "description": "(TEST) Time to wait before retrying a rejected request"

@@ -5,7 +5,7 @@
   "values": [
     {
       "name": "allow_price_inversion",
-      "type": "bool",
+      "type": "std/bool",
       "default": false,
       "description": "Allow price inversion?"
     }

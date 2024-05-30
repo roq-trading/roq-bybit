@@ -4,11 +4,12 @@
   "values": [
     {
       "name": "list",
-      "type": "std::span<ExecutionResultItem const>"
+      "type": "ExecutionResultItem",
+      "array": "std/span"
     },
     {
       "name": "nextPageCursor",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "category",

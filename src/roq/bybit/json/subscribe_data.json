@@ -4,11 +4,13 @@
   "values": [
     {
       "name": "failTopics",
-      "type": "std::span<std::string_view const>"
+      "type": "std/string_view",
+      "array": "std/span"
     },
     {
       "name": "successTopics",
-      "type": "std::span<std::string_view const>"
+      "type": "std/string_view",
+      "array": "std/span"
     }
   ]
 }

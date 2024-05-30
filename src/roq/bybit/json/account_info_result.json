@@ -4,35 +4,35 @@
   "values": [
     {
       "name": "marginMode",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "updatedTime",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "unifiedMarginStatus",
-      "type": "int32_t"
+      "type": "std/int32"
     },
     {
       "name": "dcpStatus",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "timeWindow",
-      "type": "int32_t"
+      "type": "std/int32"
     },
     {
       "name": "smpGroup",
-      "type": "int32_t"
+      "type": "std/int32"
     },
     {
       "name": "isMasterTrader",
-      "type": "bool"
+      "type": "std/bool"
     },
     {
       "name": "spotHedgingStatus",
-      "type": "std::string_view"
+      "type": "std/string_view"
     }
   ]
 }

@@ -4,7 +4,7 @@
   "values": [
     {
       "name": "symbol",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "comment": "SLIO"
     },
     {
@@ -14,197 +14,197 @@
     },
     {
       "name": "lastPrice",
-      "type": "double",
+      "type": "std/double",
       "comment": "SLIO"
     },
     {
       "name": "highPrice24h",
-      "type": "double",
+      "type": "std/double",
       "comment": "SLIO"
     },
     {
       "name": "lowPrice24h",
-      "type": "double",
+      "type": "std/double",
       "comment": "SLIO"
     },
     {
       "name": "prevPrice24h",
-      "type": "double",
+      "type": "std/double",
       "comment": "SLI."
     },
     {
       "name": "volume24h",
-      "type": "double",
+      "type": "std/double",
       "comment": "SLI."
     },
     {
       "name": "turnover24h",
-      "type": "double",
+      "type": "std/double",
       "comment": "SLIO"
     },
     {
       "name": "price24hPcnt",
-      "type": "double",
+      "type": "std/double",
       "comment": "SLI."
     },
     {
       "name": "usdIndexPrice",
-      "type": "double",
+      "type": "std/double",
       "comment": "S..."
     },
     {
       "name": "prevPrice1h",
-      "type": "double",
+      "type": "std/double",
       "comment": ".LI."
     },
     {
       "name": "markPrice",
-      "type": "double",
+      "type": "std/double",
       "comment": ".LIO"
     },
     {
       "name": "markPriceIv",
-      "type": "double",
+      "type": "std/double",
       "comment": "...O"
     },
     {
       "name": "indexPrice",
-      "type": "double",
+      "type": "std/double",
       "comment": ".LIO"
     },
     {
       "name": "underlyingPrice",
-      "type": "double",
+      "type": "std/double",
       "comment": "...O"
     },
     {
       "name": "openInterest",
-      "type": "double",
+      "type": "std/double",
       "comment": ".LIO"
     },
     {
       "name": "openInterestValue",
-      "type": "double",
+      "type": "std/double",
       "comment": ".LI."
     },
     {
       "name": "nextFundingTime",
-      "type": "std::chrono::milliseconds",
+      "type": "std/milliseconds",
       "comment": ".LI."
     },
     {
       "name": "fundingRate",
-      "type": "double",
+      "type": "std/double",
       "comment": ".LI."
     },
     {
       "name": "bid1Price",
-      "type": "double",
+      "type": "std/double",
       "comment": ".LI."
     },
     {
       "name": "bid1Size",
-      "type": "double",
+      "type": "std/double",
       "comment": ".LI."
     },
     {
       "name": "ask1Price",
-      "type": "double",
+      "type": "std/double",
       "comment": ".LI."
     },
     {
       "name": "ask1Size",
-      "type": "double",
+      "type": "std/double",
       "comment": ".LI."
     },
     {
       "name": "deliveryTime",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "comment": "..I."
     },
     {
       "name": "basisRate",
-      "type": "double",
+      "type": "std/double",
       "comment": "..I."
     },
     {
       "name": "deliveryFeeRate",
-      "type": "double",
+      "type": "std/double",
       "comment": "..I."
     },
     {
       "name": "predictedDeliveryPrice",
-      "type": "double",
+      "type": "std/double",
       "comment": "..IO"
     },
     {
       "name": "basis",
-      "type": "double",
+      "type": "std/double",
       "comment": "..I."
     },
     {
       "name": "bidPrice",
-      "type": "double",
+      "type": "std/double",
       "comment": "...O"
     },
     {
       "name": "bidSize",
-      "type": "double",
+      "type": "std/double",
       "comment": "...O"
     },
     {
       "name": "bidIv",
-      "type": "double",
+      "type": "std/double",
       "comment": "...O"
     },
     {
       "name": "askPrice",
-      "type": "double",
+      "type": "std/double",
       "comment": "...O"
     },
     {
       "name": "askSize",
-      "type": "double",
+      "type": "std/double",
       "comment": "...O"
     },
     {
       "name": "askIv",
-      "type": "double",
+      "type": "std/double",
       "comment": "...O"
     },
     {
       "name": "totalVolume",
-      "type": "double",
+      "type": "std/double",
       "comment": "...O"
     },
     {
       "name": "totalTurnover",
-      "type": "double",
+      "type": "std/double",
       "comment": "...O"
     },
     {
       "name": "delta",
-      "type": "double",
+      "type": "std/double",
       "comment": "...O"
     },
     {
       "name": "gamma",
-      "type": "double",
+      "type": "std/double",
       "comment": "...O"
     },
     {
       "name": "vega",
-      "type": "double",
+      "type": "std/double",
       "comment": "...O"
     },
     {
       "name": "theta",
-      "type": "double",
+      "type": "std/double",
       "comment": "...O"
     },
     {
       "name": "change24h",
-      "type": "double",
+      "type": "std/double",
       "comment": "...O"
     }
   ]

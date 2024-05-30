@@ -5,13 +5,13 @@
   "values": [
     {
       "name": "limit",
-      "type": "uint32_t",
+      "type": "std/uint32",
       "default": "10",
       "description": "Maximum number of requests per interval"
     },
     {
       "name": "limit_interval",
-      "type": "std::chrono::nanoseconds",
+      "type": "std/nanoseconds",
       "validator": "roq::flags::validators::TimePeriod",
       "default": "1s",
       "description": "Monitor interval"

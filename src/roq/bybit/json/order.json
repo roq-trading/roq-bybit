@@ -4,19 +4,20 @@
   "values": [
     {
       "name": "id",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "topic",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "creationTime",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "data",
-      "type": "std::span<OrderDataItem const>"
+      "type": "OrderDataItem",
+      "array": "std/span"
     }
   ]
 }

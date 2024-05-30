@@ -4,15 +4,15 @@
   "values": [
     {
       "name": "minLeverage",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "maxLeverage",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "leverageStep",
-      "type": "double"
+      "type": "std/double"
     }
   ]
 }

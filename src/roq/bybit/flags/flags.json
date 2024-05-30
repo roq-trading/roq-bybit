@@ -4,14 +4,14 @@
   "values": [
     {
       "name": "exchange",
-      "type": "std::string",
+      "type": "std/string",
       "required": true,
       "default": "bybit",
       "description": "Exchange identifier"
     },
     {
       "name": "api",
-      "type": "std::string",
+      "type": "std/string",
       "required": true,
       "default": "spot",
       "description": "API (:code:`spot`, :code:`linear`, :code:`inverse` or :code:`option`)"

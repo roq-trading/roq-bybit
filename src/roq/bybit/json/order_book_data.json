@@ -5,27 +5,29 @@
     {
       "raw": "s",
       "name": "symbol",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "raw": "b",
       "name": "bids",
-      "type": "std::span<OrderBookLevel const>"
+      "type": "OrderBookLevel",
+      "array": "std/span"
     },
     {
       "raw": "a",
       "name": "asks",
-      "type": "std::span<OrderBookLevel const>"
+      "type": "OrderBookLevel",
+      "array": "std/span"
     },
     {
       "raw": "u",
       "name": "update_id",
-      "type": "uint64_t"
+      "type": "std/uint64"
     },
     {
       "raw": "seq",
       "name": "cross_sequence",
-      "type": "uint64_t"
+      "type": "std/uint64"
     }
   ]
 }

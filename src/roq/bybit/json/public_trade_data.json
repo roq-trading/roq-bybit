@@ -5,12 +5,12 @@
     {
       "raw": "T",
       "name": "timestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "raw": "s",
       "name": "symbol",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "raw": "S",
@@ -20,27 +20,27 @@
     {
       "raw": "v",
       "name": "quantity",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "raw": "p",
       "name": "price",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "raw": "L",
       "name": "direction",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "raw": "i",
       "name": "trade_id",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "raw": "BT",
       "name": "block_trade",
-      "type": "bool"
+      "type": "std/bool"
     }
   ]
 }

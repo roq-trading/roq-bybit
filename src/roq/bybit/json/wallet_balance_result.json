@@ -4,7 +4,8 @@
   "values": [
     {
       "name": "list",
-      "type": "std::span<WalletBalanceResultItem const>"
+      "type": "WalletBalanceResultItem",
+      "array": "std/span"
     }
   ]
 }

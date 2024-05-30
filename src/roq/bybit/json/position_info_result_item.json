@@ -4,19 +4,19 @@
   "values": [
     {
       "name": "positionIdx",
-      "type": "int32_t"
+      "type": "std/int32"
     },
     {
       "name": "riskId",
-      "type": "int32_t"
+      "type": "std/int32"
     },
     {
       "name": "riskLimitValue",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "symbol",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "side",
@@ -24,23 +24,23 @@
     },
     {
       "name": "size",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "avgPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "positionValue",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "tradeMode",
-      "type": "int32_t"
+      "type": "std/int32"
     },
     {
       "name": "autoAddMargin",
-      "type": "int32_t"
+      "type": "std/int32"
     },
     {
       "name": "positionStatus",
@@ -48,27 +48,27 @@
     },
     {
       "name": "leverage",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "markPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "liqPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "bustPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "positionIM",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "positionMM",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "tpslMode",
@@ -76,35 +76,35 @@
     },
     {
       "name": "takeProfit",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "stopLoss",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "trailingStop",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "unrealisedPnl",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "cumRealisedPnl",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "adlRankIndicator",
-      "type": "int32_t"
+      "type": "std/int32"
     },
     {
       "name": "createdTime",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "updatedTime",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     }
   ]
 }

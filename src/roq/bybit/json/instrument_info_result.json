@@ -8,11 +8,12 @@
     },
     {
       "name": "list",
-      "type": "std::span<InstrumentInfoResultItem const>"
+      "type": "InstrumentInfoResultItem",
+      "array": "std/span"
     },
     {
       "name": "nextPageCursor",
-      "type": "std::string_view"
+      "type": "std/string_view"
     }
   ]
 }

@@ -4,12 +4,12 @@
   "values": [
     {
       "name": "id",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "comment": "...O"
     },
     {
       "name": "topic",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "type",
@@ -18,7 +18,7 @@
     {
       "raw": "ts",
       "name": "timestamp",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "data",
@@ -27,7 +27,7 @@
     {
       "raw": "cts",
       "name": "cts",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     }
   ]
 }

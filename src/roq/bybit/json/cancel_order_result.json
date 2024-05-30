@@ -4,31 +4,31 @@
   "values": [
     {
       "name": "orderId",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "orderLinkId",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "symbol",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "createTime",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "cancelTime",
-      "type": "std::chrono::milliseconds"
+      "type": "std/milliseconds"
     },
     {
       "name": "orderPrice",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "orderQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "orderType",
@@ -48,15 +48,15 @@
     },
     {
       "name": "accountId",
-      "type": "std::string_view"
+      "type": "std/string_view"
     },
     {
       "name": "execQty",
-      "type": "double"
+      "type": "std/double"
     },
     {
       "name": "orderCategory",
-      "type": "int32_t"
+      "type": "std/int32"
     }
   ]
 }

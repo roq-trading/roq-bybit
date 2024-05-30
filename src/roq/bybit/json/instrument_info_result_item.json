@@ -4,7 +4,7 @@
   "values": [
     {
       "name": "symbol",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "comment": "SLIO"
     },
     {
@@ -19,37 +19,37 @@
     },
     {
       "name": "baseCoin",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "comment": "SLIO"
     },
     {
       "name": "quoteCoin",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "comment": "SLIO"
     },
     {
       "name": "launchTime",
-      "type": "std::chrono::milliseconds",
+      "type": "std/milliseconds",
       "comment": ".LIO"
     },
     {
       "name": "deliveryTime",
-      "type": "std::chrono::milliseconds",
+      "type": "std/milliseconds",
       "comment": ".LIO"
     },
     {
       "name": "deliveryFeeRate",
-      "type": "double",
+      "type": "std/double",
       "comment": ".LIO"
     },
     {
       "name": "priceScale",
-      "type": "double",
+      "type": "std/double",
       "comment": ".LI."
     },
     {
       "name": "innovation",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "comment": "S..."
     },
     {
@@ -74,22 +74,22 @@
     },
     {
       "name": "unifiedMarginTrade",
-      "type": "bool",
+      "type": "std/bool",
       "comment": ".LI."
     },
     {
       "name": "fundingInterval",
-      "type": "int32_t",
+      "type": "std/int32",
       "comment": ".LI. minutes"
     },
     {
       "name": "settleCoin",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "comment": ".LIO"
     },
     {
       "name": "marginTrading",
-      "type": "std::string_view",
+      "type": "std/string_view",
       "comment": "????"
     },
     {
