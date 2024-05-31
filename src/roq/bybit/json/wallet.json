@@ -1,10 +1,10 @@
 {
-  "name": "Wallet",
+  "name": "roq/bybit/json/Wallet",
   "type": "comp",
   "values": [
     {
       "name": "accountType",
-      "type": "AccountType"
+      "type": "roq/bybit/json/AccountType"
     },
     {
       "name": "accountLTV",
@@ -48,7 +48,7 @@
     },
     {
       "name": "coin",
-      "type": "WalletBalanceItem",
+      "type": "roq/bybit/json/WalletBalanceItem",
       "array": "std/span"
     }
   ]

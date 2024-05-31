@@ -1,10 +1,10 @@
 {
-  "name": "WalletBalanceResultItem",
+  "name": "roq/bybit/json/WalletBalanceResultItem",
   "type": "item",
   "values": [
     {
       "name": "accountType",
-      "type": "AccountType"
+      "type": "roq/bybit/json/AccountType"
     },
     {
       "name": "accountLTV",

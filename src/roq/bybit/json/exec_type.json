@@ -1,5 +1,5 @@
 {
-  "name": "ExecType",
+  "name": "roq/bybit/json/ExecType",
   "type": "enum",
   "values": [
     {

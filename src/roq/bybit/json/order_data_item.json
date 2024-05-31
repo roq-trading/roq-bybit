@@ -1,5 +1,5 @@
 {
-  "name": "OrderDataItem",
+  "name": "roq/bybit/json/OrderDataItem",
   "type": "item",
   "values": [
     {
@@ -36,7 +36,7 @@
     },
     {
       "name": "side",
-      "type": "Side"
+      "type": "roq/bybit/json/Side"
     },
     {
       "name": "positionIdx",
@@ -44,15 +44,15 @@
     },
     {
       "name": "orderStatus",
-      "type": "OrderStatus"
+      "type": "roq/bybit/json/OrderStatus"
     },
     {
       "name": "cancelType",
-      "type": "CancelType"
+      "type": "roq/bybit/json/CancelType"
     },
     {
       "name": "rejectReason",
-      "type": "RejectReason"
+      "type": "roq/bybit/json/RejectReason"
     },
     {
       "name": "avgPrice",
@@ -80,15 +80,15 @@
     },
     {
       "name": "timeInForce",
-      "type": "TimeInForce"
+      "type": "roq/bybit/json/TimeInForce"
     },
     {
       "name": "orderType",
-      "type": "OrderType"
+      "type": "roq/bybit/json/OrderType"
     },
     {
       "name": "stopOrderType",
-      "type": "StopOrderType"
+      "type": "roq/bybit/json/StopOrderType"
     },
     {
       "name": "orderIv",
@@ -120,7 +120,7 @@
     },
     {
       "name": "triggerBy",
-      "type": "TriggerBy"
+      "type": "roq/bybit/json/TriggerBy"
     },
     {
       "name": "lastPriceOnCreated",
@@ -160,7 +160,7 @@
     },
     {
       "name": "tpSlMode",
-      "type": "TpSlMode"
+      "type": "roq/bybit/json/TpSlMode"
     },
     {
       "name": "tpLimitPrice",

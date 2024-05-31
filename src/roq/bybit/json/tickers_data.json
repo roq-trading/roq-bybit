@@ -1,5 +1,5 @@
 {
-  "name": "TickersData",
+  "name": "roq/bybit/json/TickersData",
   "type": "comp",
   "values": [
     {
@@ -9,7 +9,7 @@
     },
     {
       "name": "tickDirection",
-      "type": "TickDirection",
+      "type": "roq/bybit/json/TickDirection",
       "comment": ".LI."
     },
     {

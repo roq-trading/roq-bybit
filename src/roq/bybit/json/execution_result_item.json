@@ -1,5 +1,5 @@
 {
-  "name": "ExecutionResultItem",
+  "name": "roq/bybit/json/ExecutionResultItem",
   "type": "item",
   "values": [
     {
@@ -16,7 +16,7 @@
     },
     {
       "name": "side",
-      "type": "Side"
+      "type": "roq/bybit/json/Side"
     },
     {
       "name": "orderPrice",
@@ -32,11 +32,11 @@
     },
     {
       "name": "orderType",
-      "type": "OrderType"
+      "type": "roq/bybit/json/OrderType"
     },
     {
       "name": "stopOrderType",
-      "type": "StopOrderType"
+      "type": "roq/bybit/json/StopOrderType"
     },
     {
       "name": "execFee",
@@ -56,7 +56,7 @@
     },
     {
       "name": "execType",
-      "type": "ExecType"
+      "type": "roq/bybit/json/ExecType"
     },
     {
       "name": "execValue",

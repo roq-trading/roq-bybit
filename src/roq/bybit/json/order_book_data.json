@@ -1,5 +1,5 @@
 {
-  "name": "OrderBookData",
+  "name": "roq/bybit/json/OrderBookData",
   "type": "comp",
   "values": [
     {
@@ -10,13 +10,13 @@
     {
       "raw": "b",
       "name": "bids",
-      "type": "OrderBookLevel",
+      "type": "roq/bybit/json/OrderBookLevel",
       "array": "std/span"
     },
     {
       "raw": "a",
       "name": "asks",
-      "type": "OrderBookLevel",
+      "type": "roq/bybit/json/OrderBookLevel",
       "array": "std/span"
     },
     {

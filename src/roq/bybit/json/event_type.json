@@ -1,5 +1,5 @@
 {
-  "name": "EventType",
+  "name": "roq/bybit/json/EventType",
   "type": "enum",
   "values": [
     {

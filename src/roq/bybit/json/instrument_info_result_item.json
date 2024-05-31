@@ -1,5 +1,5 @@
 {
-  "name": "InstrumentInfoResultItem",
+  "name": "roq/bybit/json/InstrumentInfoResultItem",
   "type": "item",
   "values": [
     {
@@ -9,12 +9,12 @@
     },
     {
       "name": "optionsType",
-      "type": "OptionsType",
+      "type": "roq/bybit/json/OptionsType",
       "comment": "...O"
     },
     {
       "name": "contractType",
-      "type": "ContractType",
+      "type": "roq/bybit/json/ContractType",
       "comment": ".LI."
     },
     {
@@ -54,22 +54,22 @@
     },
     {
       "name": "status",
-      "type": "Status",
+      "type": "roq/bybit/json/Status",
       "comment": "SLIO"
     },
     {
       "name": "leverageFilter",
-      "type": "LeverageFilter",
+      "type": "roq/bybit/json/LeverageFilter",
       "comment": ".LI."
     },
     {
       "name": "lotSizeFilter",
-      "type": "LotSizeFilter",
+      "type": "roq/bybit/json/LotSizeFilter",
       "comment": "SLIO"
     },
     {
       "name": "priceFilter",
-      "type": "PriceFilter",
+      "type": "roq/bybit/json/PriceFilter",
       "comment": "SLIO"
     },
     {

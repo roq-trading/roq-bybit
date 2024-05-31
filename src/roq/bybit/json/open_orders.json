@@ -1,5 +1,5 @@
 {
-  "name": "OpenOrders",
+  "name": "roq/bybit/json/OpenOrders",
   "type": "comp",
   "values": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "name": "result",
-      "type": "OpenOrdersResult"
+      "type": "roq/bybit/json/OpenOrdersResult"
     },
     {
       "name": "retExtInfo"

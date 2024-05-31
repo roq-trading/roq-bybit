@@ -1,5 +1,5 @@
 {
-  "name": "CancelType",
+  "name": "roq/bybit/json/CancelType",
   "type": "enum",
   "values": [
     {

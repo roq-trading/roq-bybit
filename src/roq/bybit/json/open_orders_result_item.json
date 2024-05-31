@@ -1,5 +1,5 @@
 {
-  "name": "OpenOrdersResultItem",
+  "name": "roq/bybit/json/OpenOrdersResultItem",
   "type": "item",
   "values": [
     {
@@ -28,7 +28,7 @@
     },
     {
       "name": "side",
-      "type": "Side"
+      "type": "roq/bybit/json/Side"
     },
     {
       "name": "isLeverage",
@@ -40,11 +40,11 @@
     },
     {
       "name": "orderStatus",
-      "type": "OrderStatus"
+      "type": "roq/bybit/json/OrderStatus"
     },
     {
       "name": "cancelType",
-      "type": "CancelType"
+      "type": "roq/bybit/json/CancelType"
     },
     {
       "name": "rejectReason",
@@ -76,15 +76,15 @@
     },
     {
       "name": "timeInForce",
-      "type": "TimeInForce"
+      "type": "roq/bybit/json/TimeInForce"
     },
     {
       "name": "orderType",
-      "type": "OrderType"
+      "type": "roq/bybit/json/OrderType"
     },
     {
       "name": "stopOrderType",
-      "type": "StopOrderType"
+      "type": "roq/bybit/json/StopOrderType"
     },
     {
       "name": "orderIv",
@@ -104,11 +104,11 @@
     },
     {
       "name": "tpTriggerBy",
-      "type": "TriggerBy"
+      "type": "roq/bybit/json/TriggerBy"
     },
     {
       "name": "slTriggerBy",
-      "type": "TriggerBy"
+      "type": "roq/bybit/json/TriggerBy"
     },
     {
       "name": "triggerDirection",
@@ -116,7 +116,7 @@
     },
     {
       "name": "triggerBy",
-      "type": "TriggerBy"
+      "type": "roq/bybit/json/TriggerBy"
     },
     {
       "name": "lastPriceOnCreated",

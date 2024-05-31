@@ -1,5 +1,5 @@
 {
-  "name": "ContractType",
+  "name": "roq/bybit/json/ContractType",
   "type": "enum",
   "values": [
     {

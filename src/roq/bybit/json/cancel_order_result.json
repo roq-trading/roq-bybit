@@ -1,5 +1,5 @@
 {
-  "name": "CancelOrderResult",
+  "name": "roq/bybit/json/CancelOrderResult",
   "type": "comp",
   "values": [
     {
@@ -32,19 +32,19 @@
     },
     {
       "name": "orderType",
-      "type": "OrderType"
+      "type": "roq/bybit/json/OrderType"
     },
     {
       "name": "side",
-      "type": "Side"
+      "type": "roq/bybit/json/Side"
     },
     {
       "name": "status",
-      "type": "OrderStatus"
+      "type": "roq/bybit/json/OrderStatus"
     },
     {
       "name": "timeInForce",
-      "type": "TimeInForce"
+      "type": "roq/bybit/json/TimeInForce"
     },
     {
       "name": "accountId",

@@ -1,5 +1,5 @@
 {
-  "name": "OrderBook",
+  "name": "roq/bybit/json/OrderBook",
   "type": "comp",
   "values": [
     {
@@ -13,7 +13,7 @@
     },
     {
       "name": "type",
-      "type": "EventType"
+      "type": "roq/bybit/json/EventType"
     },
     {
       "raw": "ts",
@@ -22,7 +22,7 @@
     },
     {
       "name": "data",
-      "type": "OrderBookData"
+      "type": "roq/bybit/json/OrderBookData"
     },
     {
       "raw": "cts",

@@ -1,5 +1,5 @@
 {
-  "name": "Side",
+  "name": "roq/bybit/json/Side",
   "type": "enum",
   "values": [
     {

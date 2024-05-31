@@ -1,5 +1,5 @@
 {
-  "name": "Category",
+  "name": "roq/bybit/json/Category",
   "type": "enum",
   "values": [
     {

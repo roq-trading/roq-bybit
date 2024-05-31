@@ -1,5 +1,5 @@
 {
-  "name": "Message",
+  "name": "roq/bybit/json/Message",
   "type": "comp",
   "values": [
     {
@@ -29,7 +29,7 @@
     },
     {
       "name": "type",
-      "type": "EventType",
+      "type": "roq/bybit/json/EventType",
       "comment": "orderbook.1"
     },
     {
@@ -43,7 +43,7 @@
     },
     {
       "name": "op",
-      "type": "Operation",
+      "type": "roq/bybit/json/Operation",
       "comment": "auth"
     },
     {

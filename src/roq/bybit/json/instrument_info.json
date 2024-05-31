@@ -1,5 +1,5 @@
 {
-  "name": "InstrumentInfo",
+  "name": "roq/bybit/json/InstrumentInfo",
   "type": "comp",
   "values": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "name": "result",
-      "type": "InstrumentInfoResult"
+      "type": "roq/bybit/json/InstrumentInfoResult"
     },
     {
       "name": "retExtInfo"

@@ -1,5 +1,5 @@
 {
-  "name": "WalletBalance",
+  "name": "roq/bybit/json/WalletBalance",
   "type": "comp",
   "values": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "name": "result",
-      "type": "WalletBalanceResult"
+      "type": "roq/bybit/json/WalletBalanceResult"
     },
     {
       "name": "retExtInfo"

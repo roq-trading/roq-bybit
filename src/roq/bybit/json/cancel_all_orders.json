@@ -1,5 +1,5 @@
 {
-  "name": "CancelAllOrders",
+  "name": "roq/bybit/json/CancelAllOrders",
   "type": "comp",
   "values": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "name": "result",
-      "type": "CancelAllOrdersResult"
+      "type": "roq/bybit/json/CancelAllOrdersResult"
     },
     {
       "name": "retExtInfo"

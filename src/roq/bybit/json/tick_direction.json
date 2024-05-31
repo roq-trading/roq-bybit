@@ -1,5 +1,5 @@
 {
-  "name": "TickDirection",
+  "name": "roq/bybit/json/TickDirection",
   "type": "enum",
   "values": [
     {

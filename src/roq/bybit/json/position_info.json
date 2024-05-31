@@ -1,5 +1,5 @@
 {
-  "name": "PositionInfo",
+  "name": "roq/bybit/json/PositionInfo",
   "type": "comp",
   "values": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "name": "result",
-      "type": "PositionInfoResult"
+      "type": "roq/bybit/json/PositionInfoResult"
     },
     {
       "name": "retExtInfo"

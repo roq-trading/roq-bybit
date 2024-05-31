@@ -1,11 +1,11 @@
 {
-  "name": "WS",
+  "name": "roq/bybit/flags/WS",
   "type": "flags",
   "prefix": "ws_",
   "values": [
     {
       "name": "public_uri",
-      "type": "roq::io::web::URI",
+      "type": "roq/io/web/URI",
       "validator": "roq::core::flags::URI",
       "default": "wss://stream-testnet.bybit.com/v5/public",
       "description": "Exchange end-point"
@@ -17,7 +17,7 @@
     },
     {
       "name": "private_uri",
-      "type": "roq::io::web::URI",
+      "type": "roq/io/web/URI",
       "validator": "roq::core::flags::URI",
       "default": "wss://stream-testnet.bybit.com/v5/private",
       "description": "Exchange end-point"

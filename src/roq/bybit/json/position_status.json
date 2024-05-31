@@ -1,5 +1,5 @@
 {
-  "name": "PositionStatus",
+  "name": "roq/bybit/json/PositionStatus",
   "type": "enum",
   "values": [
     {

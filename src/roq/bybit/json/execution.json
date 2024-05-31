@@ -1,5 +1,5 @@
 {
-  "name": "Execution",
+  "name": "roq/bybit/json/Execution",
   "type": "comp",
   "values": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "name": "result",
-      "type": "ExecutionResult"
+      "type": "roq/bybit/json/ExecutionResult"
     },
     {
       "name": "retExtInfo"

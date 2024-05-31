@@ -1,5 +1,5 @@
 {
-  "name": "PublicTradeData",
+  "name": "roq/bybit/json/PublicTradeData",
   "type": "item",
   "values": [
     {
@@ -15,7 +15,7 @@
     {
       "raw": "S",
       "name": "side",
-      "type": "Side"
+      "type": "roq/bybit/json/Side"
     },
     {
       "raw": "v",

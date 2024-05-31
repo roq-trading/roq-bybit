@@ -1,5 +1,5 @@
 {
-  "name": "StopOrderType",
+  "name": "roq/bybit/json/StopOrderType",
   "type": "enum",
   "values": [
     {

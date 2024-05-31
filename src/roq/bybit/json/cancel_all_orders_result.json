@@ -1,5 +1,5 @@
 {
-  "name": "CancelAllOrdersResult",
+  "name": "roq/bybit/json/CancelAllOrdersResult",
   "type": "comp",
   "values": [
     {
@@ -9,7 +9,7 @@
     },
     {
       "name": "list",
-      "type": "CancelAllOrdersResultItem",
+      "type": "roq/bybit/json/CancelAllOrdersResultItem",
       "array": "std/span",
       "comment": ".LIO"
     }

@@ -1,5 +1,5 @@
 {
-  "name": "Request",
+  "name": "roq/bybit/flags/Request",
   "type": "flags",
   "prefix": "request_",
   "values": [

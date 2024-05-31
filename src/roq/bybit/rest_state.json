@@ -1,5 +1,5 @@
 {
-  "name": "RestState",
+  "name": "roq/bybit/RestState",
   "type": "enum",
   "values": [
     {

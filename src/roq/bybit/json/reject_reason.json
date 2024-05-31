@@ -1,5 +1,5 @@
 {
-  "name": "RejectReason",
+  "name": "roq/bybit/json/RejectReason",
   "type": "enum",
   "values": [
     {

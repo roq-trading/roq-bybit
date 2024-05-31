@@ -1,5 +1,5 @@
 {
-  "name": "TriggerBy",
+  "name": "roq/bybit/json/TriggerBy",
   "type": "enum",
   "values": [
     {

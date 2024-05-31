@@ -1,5 +1,5 @@
 {
-  "name": "CancelAllOrdersResultItem",
+  "name": "roq/bybit/json/CancelAllOrdersResultItem",
   "type": "item",
   "values": [
     {

@@ -1,14 +1,14 @@
 {
-  "name": "InstrumentInfoResult",
+  "name": "roq/bybit/json/InstrumentInfoResult",
   "type": "comp",
   "values": [
     {
       "name": "category",
-      "type": "Category"
+      "type": "roq/bybit/json/Category"
     },
     {
       "name": "list",
-      "type": "InstrumentInfoResultItem",
+      "type": "roq/bybit/json/InstrumentInfoResultItem",
       "array": "std/span"
     },
     {

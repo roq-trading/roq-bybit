@@ -1,5 +1,5 @@
 {
-  "name": "PlaceOrderResult",
+  "name": "roq/bybit/json/PlaceOrderResult",
   "type": "comp",
   "values": [
     {

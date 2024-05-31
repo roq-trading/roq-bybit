@@ -1,5 +1,5 @@
 {
-  "name": "Order",
+  "name": "roq/bybit/json/Order",
   "type": "comp",
   "values": [
     {
@@ -16,7 +16,7 @@
     },
     {
       "name": "data",
-      "type": "OrderDataItem",
+      "type": "roq/bybit/json/OrderDataItem",
       "array": "std/span"
     }
   ]

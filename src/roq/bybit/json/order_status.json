@@ -1,5 +1,5 @@
 {
-  "name": "OrderStatus",
+  "name": "roq/bybit/json/OrderStatus",
   "type": "enum",
   "values": [
     {

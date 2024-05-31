@@ -1,5 +1,5 @@
 {
-  "name": "Tickers",
+  "name": "roq/bybit/json/Tickers",
   "type": "comp",
   "values": [
     {
@@ -8,7 +8,7 @@
     },
     {
       "name": "type",
-      "type": "EventType"
+      "type": "roq/bybit/json/EventType"
     },
     {
       "raw": "cs",
@@ -22,7 +22,7 @@
     },
     {
       "name": "data",
-      "type": "TickersData"
+      "type": "roq/bybit/json/TickersData"
     },
     {
       "name": "id",

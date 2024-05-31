@@ -1,10 +1,10 @@
 {
-  "name": "WalletBalanceResult",
+  "name": "roq/bybit/json/WalletBalanceResult",
   "type": "comp",
   "values": [
     {
       "name": "list",
-      "type": "WalletBalanceResultItem",
+      "type": "roq/bybit/json/WalletBalanceResultItem",
       "array": "std/span"
     }
   ]

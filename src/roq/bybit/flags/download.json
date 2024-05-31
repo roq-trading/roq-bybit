@@ -1,5 +1,5 @@
 {
-  "name": "Download",
+  "name": "roq/bybit/flags/Download",
   "type": "flags",
   "prefix": "download_",
   "values": [

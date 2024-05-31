@@ -1,5 +1,5 @@
 {
-  "name": "API",
+  "name": "roq/bybit/tools/API",
   "type": "enum",
   "values": [
     {

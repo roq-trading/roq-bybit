@@ -1,5 +1,5 @@
 {
-  "name": "AccountInfoResult",
+  "name": "roq/bybit/json/AccountInfoResult",
   "type": "comp",
   "values": [
     {

@@ -1,10 +1,10 @@
 {
-  "name": "ExecutionResult",
+  "name": "roq/bybit/json/ExecutionResult",
   "type": "comp",
   "values": [
     {
       "name": "list",
-      "type": "ExecutionResultItem",
+      "type": "roq/bybit/json/ExecutionResultItem",
       "array": "std/span"
     },
     {
@@ -13,7 +13,7 @@
     },
     {
       "name": "category",
-      "type": "Category"
+      "type": "roq/bybit/json/Category"
     }
   ]
 }

@@ -1,10 +1,10 @@
 {
-  "name": "Ping",
+  "name": "roq/bybit/json/Ping",
   "type": "comp",
   "values": [
     {
       "name": "op",
-      "type": "Operation"
+      "type": "roq/bybit/json/Operation"
     },
     {
       "name": "success",

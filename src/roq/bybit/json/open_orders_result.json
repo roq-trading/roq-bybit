@@ -1,10 +1,10 @@
 {
-  "name": "OpenOrdersResult",
+  "name": "roq/bybit/json/OpenOrdersResult",
   "type": "comp",
   "values": [
     {
       "name": "list",
-      "type": "OpenOrdersResultItem",
+      "type": "roq/bybit/json/OpenOrdersResultItem",
       "array": "std/span"
     },
     {
@@ -13,7 +13,7 @@
     },
     {
       "name": "category",
-      "type": "Category"
+      "type": "roq/bybit/json/Category"
     }
   ]
 }

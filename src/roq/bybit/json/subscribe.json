@@ -1,10 +1,10 @@
 {
-  "name": "Subscribe",
+  "name": "roq/bybit/json/Subscribe",
   "type": "comp",
   "values": [
     {
       "name": "op",
-      "type": "Operation"
+      "type": "roq/bybit/json/Operation"
     },
     {
       "name": "success",
@@ -24,11 +24,11 @@
     },
     {
       "name": "data",
-      "type": "SubscribeData"
+      "type": "roq/bybit/json/SubscribeData"
     },
     {
       "name": "type",
-      "type": "EventType"
+      "type": "roq/bybit/json/EventType"
     }
   ]
 }

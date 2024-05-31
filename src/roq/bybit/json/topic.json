@@ -1,5 +1,5 @@
 {
-  "name": "Topic",
+  "name": "roq/bybit/json/Topic",
   "type": "enum",
   "values": [
     {

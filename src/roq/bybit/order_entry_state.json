@@ -1,5 +1,5 @@
 {
-  "name": "OrderEntryState",
+  "name": "roq/bybit/OrderEntryState",
   "type": "enum",
   "values": [
     {

@@ -1,5 +1,5 @@
 {
-  "name": "PositionInfoResultItem",
+  "name": "roq/bybit/json/PositionInfoResultItem",
   "type": "item",
   "values": [
     {
@@ -20,7 +20,7 @@
     },
     {
       "name": "side",
-      "type": "Side"
+      "type": "roq/bybit/json/Side"
     },
     {
       "name": "size",
@@ -44,7 +44,7 @@
     },
     {
       "name": "positionStatus",
-      "type": "PositionStatus"
+      "type": "roq/bybit/json/PositionStatus"
     },
     {
       "name": "leverage",
@@ -72,7 +72,7 @@
     },
     {
       "name": "tpslMode",
-      "type": "TpSlMode"
+      "type": "roq/bybit/json/TpSlMode"
     },
     {
       "name": "takeProfit",
