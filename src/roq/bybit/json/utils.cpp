@@ -31,11 +31,7 @@ auto map_order_type(auto order_type) -> json::OrderType {
 }  // namespace
 
 std::string_view place_order(
-    std::string &buffer,
-    roq::CreateOrder const &create_order,
-    server::oms::Order const &order,
-    std::string_view const &request_id,
-    Category category) {
+    std::string &buffer, roq::CreateOrder const &create_order, server::oms::Order const &order, std::string_view const &request_id, Category category) {
   buffer.clear();
   auto side = map(create_order.side);
   auto order_type = map_order_type(create_order.order_type);
@@ -59,8 +55,7 @@ std::string_view place_order(
       time_in_force.as_raw_text(),
       reduce_only);
   if (!std::isnan(create_order.price))
-    fmt::format_to(
-        std::back_inserter(buffer), R"(,"price":"{}")"sv, Decimal{create_order.price, order.price_precision.precision});
+    fmt::format_to(std::back_inserter(buffer), R"(,"price":"{}")"sv, Decimal{create_order.price, order.price_precision.precision});
   fmt::format_to(
       std::back_inserter(buffer),
       R"(,"orderLinkId":"{}")"
@@ -85,13 +80,9 @@ std::string_view amend_order(
       category.as_raw_text(),
       order.symbol);
   if (!std::isnan(modify_order.price))
-    fmt::format_to(
-        std::back_inserter(buffer), R"(,"price":"{}")"sv, Decimal{modify_order.price, order.price_precision.precision});
+    fmt::format_to(std::back_inserter(buffer), R"(,"price":"{}")"sv, Decimal{modify_order.price, order.price_precision.precision});
   if (!std::isnan(modify_order.quantity))
-    fmt::format_to(
-        std::back_inserter(buffer),
-        R"(,"qty":"{}")"sv,
-        Decimal{modify_order.quantity, order.quantity_precision.precision});
+    fmt::format_to(std::back_inserter(buffer), R"(,"qty":"{}")"sv, Decimal{modify_order.quantity, order.quantity_precision.precision});
   if (!std::empty(order.external_order_id)) {
     fmt::format_to(
         std::back_inserter(buffer),
@@ -140,11 +131,7 @@ std::string_view cancel_order(
 }
 
 std::string_view cancel_all_orders(
-    std::string &buffer,
-    roq::CancelAllOrders const &,
-    [[maybe_unused]] std::string_view const &request_id,
-    std::string_view const &symbol,
-    Category category) {
+    std::string &buffer, roq::CancelAllOrders const &, [[maybe_unused]] std::string_view const &request_id, std::string_view const &symbol, Category category) {
   buffer.clear();
   fmt::format_to(
       std::back_inserter(buffer),

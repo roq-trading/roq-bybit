@@ -26,11 +26,7 @@ struct Crypto final {
 
   std::string create_signature_v2(std::chrono::milliseconds expires);
 
-  std::string create_headers_v2(
-      std::string_view const &path,
-      std::string_view const &query,
-      std::string_view const &body,
-      std::chrono::milliseconds now);
+  std::string create_headers_v2(std::string_view const &path, std::string_view const &query, std::string_view const &body, std::chrono::milliseconds now);
 
  private:
   using MAC = utils::mac::HMAC<utils::hash::SHA256>;

@@ -44,10 +44,7 @@ std::string Crypto::create_signature_v2(std::chrono::milliseconds expires) {
 }
 
 std::string Crypto::create_headers_v2(
-    [[maybe_unused]] std::string_view const &path,
-    std::string_view const &query,
-    std::string_view const &body,
-    std::chrono::milliseconds timestamp) {
+    [[maybe_unused]] std::string_view const &path, std::string_view const &query, std::string_view const &body, std::chrono::milliseconds timestamp) {
   assert(!std::empty(path));
   auto query_or_body = [&]() {
     if (std::empty(query))

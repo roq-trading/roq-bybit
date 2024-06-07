@@ -329,12 +329,7 @@ inline roq::OrderStatus map(json::OrderStatus value) {
 
 extern std::string_view strip_symbol(std::string_view const &topic);
 
-extern std::string_view place_order(
-    std::string &buffer,
-    roq::CreateOrder const &,
-    server::oms::Order const &,
-    std::string_view const &request_id,
-    Category);
+extern std::string_view place_order(std::string &buffer, roq::CreateOrder const &, server::oms::Order const &, std::string_view const &request_id, Category);
 
 extern std::string_view amend_order(
     std::string &buffer,
@@ -353,11 +348,7 @@ extern std::string_view cancel_order(
     Category);
 
 extern std::string_view cancel_all_orders(
-    std::string &buffer,
-    roq::CancelAllOrders const &,
-    std::string_view const &request_id,
-    std::string_view const &symbol,
-    Category);
+    std::string &buffer, roq::CancelAllOrders const &, std::string_view const &request_id, std::string_view const &symbol, Category);
 
 extern Error map_error(int32_t ret_code);
 

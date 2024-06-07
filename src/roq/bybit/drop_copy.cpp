@@ -77,16 +77,14 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
 }
 
 struct create_metrics final : public core::metrics::Factory {
-  explicit create_metrics(auto &settings, auto const &group, auto const &function)
-      : core::metrics::Factory(settings.app.name, group, function) {}
+  explicit create_metrics(auto &settings, auto const &group, auto const &function) : core::metrics::Factory(settings.app.name, group, function) {}
 };
 }  // namespace
 
 // === IMPLEMENTATION ===
 
 DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)},
-      connection_{create_connection(*this, shared.settings, context)},
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, connection_{create_connection(*this, shared.settings, context)},
       decode_buffer_(shared.settings.misc.decode_buffer_size),
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
@@ -302,8 +300,7 @@ void DropCopy::operator()(Trace<json::Subscribe> const &event) {
   auto &req_id = subscribe.req_id;
   if (req_id.compare("wallet"sv) == 0) {
     account_.request_queue.emplace_back(req_id, std::string{});
-  } else if (
-      req_id.compare("position"sv) == 0 || req_id.compare("order"sv) == 0 || req_id.compare("execution"sv) == 0) {
+  } else if (req_id.compare("position"sv) == 0 || req_id.compare("order"sv) == 0 || req_id.compare("execution"sv) == 0) {
     for (auto &symbol : symbols_)
       account_.request_queue.emplace_back(req_id, symbol);
   } else {
@@ -427,13 +424,11 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
           .update_type = UpdateType::INCREMENTAL,
           .sending_time_utc = order.creation_time,
       };
-      if (shared_.update_order(
-              item.order_link_id, stream_id_, trace_info, order_update, [&]([[maybe_unused]] auto &order) {
-                // no fills here
-              })) {
+      if (shared_.update_order(item.order_link_id, stream_id_, trace_info, order_update, [&]([[maybe_unused]] auto &order) {
+            // no fills here
+          })) {
       } else {
-        log::warn<1>(
-            R"(*** EXTERNAL ORDER *** (order_id="{}", order_link_id="{}"))"sv, item.order_id, item.order_link_id);
+        log::warn<1>(R"(*** EXTERNAL ORDER *** (order_id="{}", order_link_id="{}"))"sv, item.order_id, item.order_link_id);
       }
     }
   });

@@ -61,9 +61,8 @@ R create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts
 // === IMPLEMENTATION ===
 
 Gateway::Gateway(server::Dispatcher &dispatcher, Settings const &settings, Config const &config, io::Context &context)
-    : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(settings, config)}, context_{context},
-      shared_{dispatcher, settings}, rest_{*this, context_, ++stream_id_, shared_},
-      order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, accounts_, shared_)},
+    : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(settings, config)}, context_{context}, shared_{dispatcher, settings},
+      rest_{*this, context_, ++stream_id_, shared_}, order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, accounts_, shared_)},
       drop_copy_{create_drop_copy<decltype(drop_copy_)>(*this, context_, stream_id_, accounts_, shared_)} {
 }
 
@@ -121,8 +120,7 @@ void Gateway::operator()(Trace<StatisticsUpdate> const &event, bool is_last) {
   dispatcher_(event, is_last);
 }
 
-void Gateway::operator()(
-    Trace<TradeUpdate> const &event, bool is_last, uint8_t user_id, std::string_view const &request_id) {
+void Gateway::operator()(Trace<TradeUpdate> const &event, bool is_last, uint8_t user_id, std::string_view const &request_id) {
   dispatcher_(event, is_last, user_id, request_id);
 }
 
@@ -159,27 +157,20 @@ void Gateway::operator()(Trace<OrderEntry::Response> const &event) {
   get_drop_copy(response.account)(event);
 }
 
-uint16_t Gateway::operator()(
-    Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
+uint16_t Gateway::operator()(Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
   assert(!std::empty(event.value.account));
   return get_order_entry(event.value.account)(event, order, request_id);
 }
 
 uint16_t Gateway::operator()(
-    Event<ModifyOrder> const &event,
-    server::oms::Order const &order,
-    std::string_view const &request_id,
-    std::string_view const &previous_request_id) {
+    Event<ModifyOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
   assert(!std::empty(event.value.account));
   assert(event.value.account == order.account);
   return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);
 }
 
 uint16_t Gateway::operator()(
-    Event<CancelOrder> const &event,
-    server::oms::Order const &order,
-    std::string_view const &request_id,
-    std::string_view const &previous_request_id) {
+    Event<CancelOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
   assert(!std::empty(event.value.account));
   assert(event.value.account == order.account);
   return get_order_entry(event.value.account)(event, order, request_id, previous_request_id);

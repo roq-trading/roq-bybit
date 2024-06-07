@@ -13,11 +13,7 @@ namespace json {
 
 // === IMPLEMENTATION ===
 
-bool WalletParser::dispatch(
-    Handler &handler,
-    std::string_view const &message,
-    std::span<std::byte> const &buffer,
-    TraceInfo const &trace_info) {
+bool WalletParser::dispatch(Handler &handler, std::string_view const &message, std::span<std::byte> const &buffer, TraceInfo const &trace_info) {
   core::json::Buffer buffer_2{buffer};
   core::json::Parser parser{message};
   auto root = parser.root();

@@ -120,19 +120,17 @@ auto create_mbp_topic(size_t depth) {
 }
 
 struct create_metrics final : public core::metrics::Factory {
-  explicit create_metrics(auto &settings, auto const &group, auto const &function)
-      : core::metrics::Factory(settings.app.name, group, function) {}
+  explicit create_metrics(auto &settings, auto const &group, auto const &function) : core::metrics::Factory(settings.app.name, group, function) {}
 };
 }  // namespace
 
 // === IMPLEMENTATION ===
 
 MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared, size_t index)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, index_{index},
-      ping_frequency_{shared.settings.ws.ping_freq}, spot_{is_spot(shared.api.api)},
-      mbp_depth_{get_mbp_depth(shared.settings, shared.api.api)}, mbp_topic_{create_mbp_topic(mbp_depth_)},
-      connection_{create_connection(*this, shared.settings, context, shared.api.api)},
-      decode_buffer_(shared.settings.misc.decode_buffer_size), request_id_{stream_id_ * REQUEST_ID},
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, index_{index}, ping_frequency_{shared.settings.ws.ping_freq},
+      spot_{is_spot(shared.api.api)}, mbp_depth_{get_mbp_depth(shared.settings, shared.api.api)}, mbp_topic_{create_mbp_topic(mbp_depth_)},
+      connection_{create_connection(*this, shared.settings, context, shared.api.api)}, decode_buffer_(shared.settings.misc.decode_buffer_size),
+      request_id_{stream_id_ * REQUEST_ID},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },

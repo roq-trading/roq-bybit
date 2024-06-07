@@ -38,16 +38,15 @@ auto create_crypto(auto &settings, auto &config, auto &name) -> tools::Crypto {
 // === IMPLEMENTATION ===
 
 Account::Account(Settings const &settings, Config const &config, std::string_view const &name)
-    : name{name}, crypto_{create_crypto(settings, config, name)},
-      rate_limiter{settings.request.limit, settings.request.limit_interval}, request_queue{rate_limiter} {
+    : name{name}, crypto_{create_crypto(settings, config, name)}, rate_limiter{settings.request.limit, settings.request.limit_interval},
+      request_queue{rate_limiter} {
 }
 
 std::string Account::create_signature(std::chrono::milliseconds expires) {
   return crypto_.create_signature_v2(expires);
 }
 
-std::string Account::create_headers(
-    std::string_view const &path, std::string_view const &query, std::string_view const &body) {
+std::string Account::create_headers(std::string_view const &path, std::string_view const &query, std::string_view const &body) {
   auto now = clock::get_realtime();
   return crypto_.create_headers_v2(path, query, body, utils::safe_cast(now));
 }

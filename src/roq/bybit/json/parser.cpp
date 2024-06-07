@@ -55,11 +55,7 @@ bool dispatch_helper_flatten_wallet(auto &handler, auto &buffer, auto &trace_inf
 
 // === IMPLEMENTATION ===
 
-bool Parser::dispatch(
-    Handler &handler,
-    std::string_view const &message,
-    std::span<std::byte> const &buffer,
-    TraceInfo const &trace_info) {
+bool Parser::dispatch(Handler &handler, std::string_view const &message, std::span<std::byte> const &buffer, TraceInfo const &trace_info) {
   Message message_{message, buffer};
   auto topic = parse_topic(message_.topic);
   switch (topic) {
