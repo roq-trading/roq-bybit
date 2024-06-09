@@ -14,7 +14,6 @@
       "name": "trades_lookback_on_restart",
       "type": "std/milliseconds",
       "validator": "roq::flags::validators::TimePeriod",
-      "default": "{}",
       "description": "Lookback period when downloading trades (initial download)"
     },
     {
