@@ -757,7 +757,7 @@ void OrderEntry::place_order(Event<CreateOrder> const &event, server::oms::Order
         .quality_of_service = {},
     };
     auto callback = [this, user_id = message_info.source, order_id = create_order.order_id]([[maybe_unused]] auto &request_id, auto &response) {
-      auto version = uint32_t{1};
+      uint32_t version = 1;
       TraceInfo trace_info;
       Trace event{trace_info, response};
       place_order_ack(event, user_id, order_id, version);
