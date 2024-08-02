@@ -55,7 +55,7 @@ struct OrderEntry final : public web::rest::Client::Handler, public json::Wallet
 
   OrderEntry(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
 
-  OrderEntry(OrderEntry &&) = delete;
+  OrderEntry(OrderEntry &&) = default;
   OrderEntry(OrderEntry const &) = delete;
 
   bool ready() const { return status_ == ConnectionStatus::READY; }

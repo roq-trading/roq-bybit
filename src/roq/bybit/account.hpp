@@ -21,7 +21,7 @@ namespace bybit {
 struct Account final {
   Account(Settings const &, Config const &, std::string_view const &name);
 
-  Account(Account &&) = delete;
+  Account(Account &&) = default;
   Account(Account const &) = delete;
 
   std::string_view get_key() const { return crypto_.get_key(); }
