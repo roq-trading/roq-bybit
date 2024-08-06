@@ -16,6 +16,7 @@
 
 #include "roq/web/rest/client.hpp"
 
+#include "roq/bybit/json/map.hpp"
 #include "roq/bybit/json/utils.hpp"
 
 using namespace std::literals;
@@ -479,7 +480,7 @@ void OrderEntry::operator()(Trace<json::PositionInfo> const &event) {
     if (shared_.discard_symbol(item.symbol))
       continue;
     auto margin_mode = item.trade_mode == 0 ? MarginMode::CROSS : MarginMode::ISOLATED;
-    auto side = json::map(item.side);
+    Side side = json::Map{item.side};
     auto quantity = utils::sign(side) * item.size;
     auto long_quantity = std::max(0.0, quantity);
     auto short_quantity = std::max(0.0, -quantity);
@@ -565,27 +566,23 @@ void OrderEntry::operator()(Trace<json::OpenOrders> const &event) {
   log::info<2>("open_orders={}"sv, open_orders);
   for (auto &item : open_orders.result.list) {
     log::info<2>("item={}"sv, item);
-    auto side = json::map(item.side);
-    auto order_type = json::map(item.order_type);
-    auto time_in_force = json::map(item.time_in_force);
-    auto order_status = json::map(item.order_status);
     auto order_update = server::oms::OrderUpdate{
         .account = account_.name,
         .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
-        .side = side,
+        .side = json::Map{item.side},
         .position_effect = {},
         .margin_mode = {},
         .max_show_quantity = NaN,
-        .order_type = order_type,
-        .time_in_force = time_in_force,
+        .order_type = json::Map{item.order_type},
+        .time_in_force = json::Map{item.time_in_force},
         .execution_instructions = {},
         .create_time_utc = item.created_time,
         .update_time_utc = item.updated_time,
         .external_account = {},
         .external_order_id = item.order_id,
         .client_order_id = {},
-        .order_status = order_status,
+        .order_status = json::Map{item.order_status},
         .quantity = item.qty,
         .price = item.price,
         .stop_price = NaN,  // XXX item.trigger_price ???
@@ -718,7 +715,7 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
       order_id = item.order_id;
       order_link_id = item.order_link_id;
       symbol = item.symbol;
-      side = json::map(item.side);
+      side = json::Map{item.side};
       exec_time = item.exec_time;
     }
     auto liquidity = item.is_maker ? Liquidity::MAKER : Liquidity::TAKER;
@@ -932,28 +929,24 @@ void OrderEntry::operator()(Trace<json::AmendOrder> const &event, uint8_t user_i
       .price = NaN,
   };
   auto &result = amend_order.result;
-  auto side = json::map(result.side);
-  auto order_type = json::map(result.order_type);
-  auto time_in_force = json::map(result.time_in_force);
-  auto order_status = json::map(result.status);
   auto remaining_quantity = result.order_qty - result.exec_qty;
   auto order_update = server::oms::OrderUpdate{
       .account = account_.name,
       .exchange = shared_.settings.exchange,
       .symbol = result.symbol,
-      .side = side,
+      .side = json::Map{result.side},
       .position_effect = {},
       .margin_mode = {},
       .max_show_quantity = NaN,
-      .order_type = order_type,
-      .time_in_force = time_in_force,
+      .order_type = json::Map{result.order_type},
+      .time_in_force = json::Map{result.time_in_force},
       .execution_instructions = {},
       .create_time_utc = {},
       .update_time_utc = {},
       .external_account = {},
       .external_order_id = result.order_id,
       .client_order_id = {},
-      .order_status = order_status,
+      .order_status = json::Map{result.status},
       .quantity = result.order_qty,
       .price = result.order_price,
       .stop_price = NaN,
@@ -1053,28 +1046,24 @@ void OrderEntry::operator()(Trace<json::CancelOrder> const &event, uint8_t user_
       .price = NaN,
   };
   auto &result = cancel_order.result;
-  auto side = json::map(result.side);
-  auto order_type = json::map(result.order_type);
-  auto time_in_force = json::map(result.time_in_force);
-  auto order_status = json::map(result.status);
   auto remaining_quantity = result.order_qty - result.exec_qty;
   auto order_update = server::oms::OrderUpdate{
       .account = account_.name,
       .exchange = shared_.settings.exchange,
       .symbol = result.symbol,
-      .side = side,
+      .side = json::Map{result.side},
       .position_effect = {},
       .margin_mode = {},
       .max_show_quantity = NaN,
-      .order_type = order_type,
-      .time_in_force = time_in_force,
+      .order_type = json::Map{result.order_type},
+      .time_in_force = json::Map{result.time_in_force},
       .execution_instructions = {},
       .create_time_utc = {},
       .update_time_utc = utils::safe_cast(result.cancel_time),
       .external_account = {},
       .external_order_id = result.order_id,
       .client_order_id = {},
-      .order_status = order_status,
+      .order_status = json::Map{result.status},
       .quantity = result.order_qty,
       .price = result.order_price,
       .stop_price = NaN,

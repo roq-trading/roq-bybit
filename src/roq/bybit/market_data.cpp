@@ -18,6 +18,7 @@
 
 #include "roq/web/socket/client.hpp"
 
+#include "roq/bybit/json/map.hpp"
 #include "roq/bybit/json/utils.hpp"
 
 using namespace std::literals;
@@ -314,7 +315,6 @@ void MarketData::operator()(Trace<json::OrderBook> const &event, size_t depth) {
     auto &[trace_info, order_book] = event;
     log::info<3>("event={{order_book={}, trace_info={}}}"sv, order_book, trace_info);
     (*connection_).touch(trace_info.source_receive_time);
-    auto update_type = json::map(order_book.type);
     auto &data = order_book.data;
     if (depth == 1) {
       auto helper = [](auto &levels) -> std::pair<double, double> {
@@ -341,7 +341,7 @@ void MarketData::operator()(Trace<json::OrderBook> const &event, size_t depth) {
               .ask_price = ask_price,
               .ask_quantity = ask_quantity,
           },
-          .update_type = update_type,
+          .update_type = json::Map{order_book.type},
           .exchange_time_utc = order_book.timestamp,
           .exchange_sequence = data.cross_sequence,
           .sending_time_utc = {},
@@ -371,7 +371,7 @@ void MarketData::operator()(Trace<json::OrderBook> const &event, size_t depth) {
           .symbol = data.symbol,
           .bids = shared_.bids,
           .asks = shared_.asks,
-          .update_type = update_type,
+          .update_type = json::Map{order_book.type},
           .exchange_time_utc = order_book.timestamp,
           .exchange_sequence = data.cross_sequence,
           .sending_time_utc = {},
@@ -422,9 +422,8 @@ void MarketData::operator()(Trace<json::PublicTrade> const &event) {
         dispatch(previous);
         previous = item.symbol;
       }
-      auto side = json::map(item.side);
       auto trade_2 = Trade{
-          .side = side,
+          .side = json::Map{item.side},
           .price = item.price,
           .quantity = item.quantity,
           .trade_id = item.trade_id,

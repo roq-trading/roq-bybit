@@ -2,40 +2,20 @@
 
 #include "roq/bybit/json/utils.hpp"
 
+#include "roq/bybit/json/map.hpp"
+
 using namespace std::literals;
 
 namespace roq {
 namespace bybit {
 namespace json {
 
-std::string_view strip_symbol(std::string_view const &topic) {
-  auto sep = topic.find_last_of('.');
-  if (sep == topic.npos || sep == std::size(topic))
-    return topic;
-  return topic.substr(sep + 1);
-}
-
-namespace {
-auto map_order_type(auto order_type) -> json::OrderType {
-  switch (order_type) {
-    using enum roq::OrderType;
-    case UNDEFINED:
-      break;
-    case MARKET:
-      return json::OrderType::MARKET;
-    case LIMIT:
-      return json::OrderType::LIMIT;
-  }
-  return {};
-}
-}  // namespace
-
 std::string_view place_order(
     std::string &buffer, roq::CreateOrder const &create_order, server::oms::Order const &order, std::string_view const &request_id, Category category) {
   buffer.clear();
-  auto side = map(create_order.side);
-  auto order_type = map_order_type(create_order.order_type);
-  auto time_in_force = map(create_order.time_in_force);
+  auto side = map<Side>(create_order.side);
+  auto order_type = map<OrderType>(create_order.order_type);
+  auto time_in_force = static_cast<TimeInForce>(Map{create_order.time_in_force});
   auto reduce_only = create_order.execution_instructions.has(ExecutionInstruction::DO_NOT_INCREASE);
   fmt::format_to(
       std::back_inserter(buffer),

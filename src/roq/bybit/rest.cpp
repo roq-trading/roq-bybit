@@ -17,6 +17,7 @@
 
 #include "roq/web/rest/client.hpp"
 
+#include "roq/bybit/json/map.hpp"
 #include "roq/bybit/json/utils.hpp"
 
 using namespace std::literals;
@@ -253,14 +254,12 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
   for (auto &item : instrument_info.result.list) {
     log::info<2>("item={}"sv, item);
     auto discard = shared_.discard_symbol(item.symbol);
-    auto security_type = json::map(item.contract_type, item.options_type);
-    auto option_type = json::map(item.options_type);
     auto reference_data = ReferenceData{
         .stream_id = stream_id_,
         .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
         .description = item.symbol,
-        .security_type = security_type,
+        .security_type = json::Map{item.contract_type, item.options_type},
         .base_currency = item.base_coin,
         .quote_currency = item.quote_coin,
         .margin_currency = {},
@@ -271,7 +270,7 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
         .min_trade_vol = item.lot_size_filter.min_order_qty,
         .max_trade_vol = item.lot_size_filter.max_order_qty,
         .trade_vol_step_size = NaN,
-        .option_type = option_type,
+        .option_type = json::Map{item.options_type},
         .strike_currency = {},
         .strike_price = NaN,
         .underlying = {},
@@ -291,12 +290,11 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
     if (symbols_.emplace(item.symbol).second)  // only include new
       symbols.emplace_back(item.symbol);
     ++counter;
-    auto trading_status = json::map(item.status);
     auto market_status = MarketStatus{
         .stream_id = stream_id_,
         .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
-        .trading_status = trading_status,
+        .trading_status = json::Map(item.status),
         .exchange_time_utc = {},
         .exchange_sequence = {},
         .sending_time_utc = instrument_info.time,

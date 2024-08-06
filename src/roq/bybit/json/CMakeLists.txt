@@ -1,6 +1,6 @@
 set(TARGET_NAME ${PROJECT_NAME}-json)
 
-set(SOURCES parser.cpp utils.cpp wallet_parser.cpp)
+set(SOURCES map.cpp parser.cpp utils.cpp wallet_parser.cpp)
 
 include(RoqAutogen)
 
