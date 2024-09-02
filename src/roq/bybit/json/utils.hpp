@@ -14,8 +14,6 @@
 
 #include "roq/core/json/parser.hpp"
 
-#include "roq/core/charconv/datetime.hpp"
-
 #include "roq/bybit/json/category.hpp"
 
 namespace roq {
@@ -29,16 +27,17 @@ inline void update(T &result, core::json::Value const &value) {
 
 template <>
 inline void update(std::chrono::milliseconds &result, core::json::Value const &value) {
+  using result_type = std::remove_reference<decltype(result)>::type;
   return std::visit(
       utils::overloaded{
-          [&](core::json::Null const &) { result = std::chrono::milliseconds{}; },
+          [&](core::json::Null const &) { result = result_type{}; },
           [](bool) { throw std::bad_cast{}; },
-          [&](int64_t value) { result = std::chrono::milliseconds{value}; },
-          [&](double value) { result = std::chrono::milliseconds{static_cast<int64_t>(value * 1e3)}; },
+          [&](int64_t value) { result = result_type{value}; },
+          [&](double value) { result = result_type{static_cast<int64_t>(value * 1e3)}; },
           [&](std::string_view const &value) {
             auto tmp = utils::charconv::from_chars<int64_t>(value);
             // note! have seen 1000
-            result = std::chrono::milliseconds{tmp > 1000 ? tmp : 0};
+            result = result_type{tmp > 1000 ? tmp : 0};
           },
           [](core::json::Object const &) { throw std::bad_cast{}; },
           [](core::json::Array const &) { throw std::bad_cast{}; },
@@ -48,15 +47,16 @@ inline void update(std::chrono::milliseconds &result, core::json::Value const &v
 
 template <>
 inline void update(std::chrono::microseconds &result, core::json::Value const &value) {
+  using result_type = std::remove_reference<decltype(result)>::type;
   return std::visit(
       utils::overloaded{
-          [&](core::json::Null const &) { result = std::chrono::microseconds{}; },
+          [&](core::json::Null const &) { result = result_type{}; },
           [](bool) { throw std::bad_cast{}; },
-          [&](int64_t value) { result = std::chrono::microseconds{value}; },
-          [&](double value) { result = std::chrono::microseconds{static_cast<int64_t>(value * 1e6)}; },
+          [&](int64_t value) { result = result_type{value}; },
+          [&](double value) { result = result_type{static_cast<int64_t>(value * 1e6)}; },
           [&](std::string_view const &value) {
             auto tmp = utils::charconv::from_chars<double>(value);
-            result = std::chrono::microseconds{static_cast<int64_t>(tmp * 1e6)};
+            result = result_type{static_cast<int64_t>(tmp * 1e6)};
           },
           [](core::json::Object const &) { throw std::bad_cast{}; },
           [](core::json::Array const &) { throw std::bad_cast{}; },
@@ -66,15 +66,16 @@ inline void update(std::chrono::microseconds &result, core::json::Value const &v
 
 template <>
 inline void update(std::chrono::nanoseconds &result, core::json::Value const &value) {
+  using result_type = std::remove_reference<decltype(result)>::type;
   return std::visit(
       utils::overloaded{
-          [&](core::json::Null const &) { result = std::chrono::nanoseconds{}; },
+          [&](core::json::Null const &) { result = result_type{}; },
           [](bool) { throw std::bad_cast{}; },
-          [&](int64_t value) { result = std::chrono::nanoseconds{value}; },
-          [&](double value) { result = std::chrono::nanoseconds{static_cast<int64_t>(value * 1e9)}; },
+          [&](int64_t value) { result = result_type{value}; },
+          [&](double value) { result = result_type{static_cast<int64_t>(value * 1e9)}; },
           [&](std::string_view const &value) {
             auto tmp = utils::charconv::from_chars<double>(value);
-            result = std::chrono::nanoseconds{static_cast<int64_t>(tmp * 1e9)};
+            result = result_type{static_cast<int64_t>(tmp * 1e9)};
           },
           [](core::json::Object const &) { throw std::bad_cast{}; },
           [](core::json::Array const &) { throw std::bad_cast{}; },
