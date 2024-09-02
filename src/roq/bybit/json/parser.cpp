@@ -30,7 +30,7 @@ constexpr auto parse_mbp_depth(auto const &value) {
   ++pos1;
   auto pos2 = value.find_first_of('.', pos1);
   auto sub = value.substr(pos1, pos2 - pos1);
-  return utils::charconv::from_chars<size_t>(sub);
+  return utils::charconv::from_chars<uint32_t>(sub);
 }
 
 // static_assert(parse_mbp_depth("orderbook.1.xxx"sv) == 1);
