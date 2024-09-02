@@ -10,9 +10,10 @@
 
 #include "roq/utils/patterns.hpp"
 
+#include "roq/utils/charconv/from_chars.hpp"
+
 #include "roq/core/json/parser.hpp"
 
-#include "roq/core/charconv.hpp"
 #include "roq/core/charconv/datetime.hpp"
 
 #include "roq/bybit/json/category.hpp"
@@ -35,7 +36,7 @@ inline void update(std::chrono::milliseconds &result, core::json::Value const &v
           [&](int64_t value) { result = std::chrono::milliseconds{value}; },
           [&](double value) { result = std::chrono::milliseconds{static_cast<int64_t>(value * 1e3)}; },
           [&](std::string_view const &value) {
-            auto tmp = core::from_chars<int64_t>(value);
+            auto tmp = utils::charconv::from_chars<int64_t>(value);
             // note! have seen 1000
             result = std::chrono::milliseconds{tmp > 1000 ? tmp : 0};
           },
@@ -54,7 +55,7 @@ inline void update(std::chrono::microseconds &result, core::json::Value const &v
           [&](int64_t value) { result = std::chrono::microseconds{value}; },
           [&](double value) { result = std::chrono::microseconds{static_cast<int64_t>(value * 1e6)}; },
           [&](std::string_view const &value) {
-            auto tmp = core::from_chars<double>(value);
+            auto tmp = utils::charconv::from_chars<double>(value);
             result = std::chrono::microseconds{static_cast<int64_t>(tmp * 1e6)};
           },
           [](core::json::Object const &) { throw std::bad_cast{}; },
@@ -72,7 +73,7 @@ inline void update(std::chrono::nanoseconds &result, core::json::Value const &va
           [&](int64_t value) { result = std::chrono::nanoseconds{value}; },
           [&](double value) { result = std::chrono::nanoseconds{static_cast<int64_t>(value * 1e9)}; },
           [&](std::string_view const &value) {
-            auto tmp = core::from_chars<double>(value);
+            auto tmp = utils::charconv::from_chars<double>(value);
             result = std::chrono::nanoseconds{static_cast<int64_t>(tmp * 1e9)};
           },
           [](core::json::Object const &) { throw std::bad_cast{}; },

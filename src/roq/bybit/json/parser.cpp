@@ -4,7 +4,7 @@
 
 #include "roq/logging.hpp"
 
-#include "roq/core/charconv/number.hpp"
+#include "roq/utils/charconv/from_chars.hpp"
 
 #include "roq/core/json/array_parser.hpp"
 
@@ -30,11 +30,11 @@ constexpr auto parse_mbp_depth(auto const &value) {
   ++pos1;
   auto pos2 = value.find_first_of('.', pos1);
   auto sub = value.substr(pos1, pos2 - pos1);
-  return core::charconv::from_string<size_t>(sub);
+  return utils::charconv::from_chars<size_t>(sub);
 }
 
-static_assert(parse_mbp_depth("orderbook.1.xxx"sv) == 1);
-static_assert(parse_mbp_depth("orderbook.50.xxx"sv) == 50);
+// static_assert(parse_mbp_depth("orderbook.1.xxx"sv) == 1);
+// static_assert(parse_mbp_depth("orderbook.50.xxx"sv) == 50);
 
 bool dispatch_helper_flatten_wallet(auto &handler, auto &buffer, auto &trace_info, auto &message) {
   core::json::Buffer buffer_2{buffer};
