@@ -10,8 +10,6 @@
 
 #include "roq/clock.hpp"
 
-#include "roq/core/utils.hpp"
-
 #include "roq/bybit/json/utils.hpp"
 
 using namespace std::literals;
