@@ -10,13 +10,11 @@
 #include "roq/utils/safe_cast.hpp"
 #include "roq/utils/update.hpp"
 
-#include "roq/core/charconv.hpp"
+#include "roq/web/socket/client.hpp"
 
 #include "roq/core/tools/exception.hpp"
 
 #include "roq/core/metrics/factory.hpp"
-
-#include "roq/web/socket/client.hpp"
 
 #include "roq/bybit/json/map.hpp"
 #include "roq/bybit/json/utils.hpp"
@@ -39,7 +37,7 @@ auto const SUPPORTS = Mask{
     SupportType::STATISTICS,
 };
 
-uint64_t const REQUEST_ID = 1000000;
+uint64_t const REQUEST_ID = 1'000'000;
 }  // namespace
 
 // === HELPERS ===
