@@ -33,6 +33,14 @@
     {
       "name": "postOnlyMaxOrderQty",
       "type": "std/double"
+    },
+    {
+      "name": "maxMktOrderQty",
+      "type": "std/double"
+    },
+    {
+      "name": "minNotionalValue",
+      "type": "std/double"
     }
   ]
 }

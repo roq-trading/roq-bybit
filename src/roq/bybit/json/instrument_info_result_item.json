@@ -95,6 +95,25 @@
     {
       "name": "riskParameters",
       "comment": "????"
+    },
+    {
+      "name": "copyTrading",
+      "type": "std/string_view"
+    },
+    {
+      "name": "upperFundingRate",
+      "type": "std/string_view"
+    },
+    {
+      "name": "lowerFundingRate",
+      "type": "std/string_view"
+    },
+    {
+      "name": "isPreListing",
+      "type": "std/bool"
+    },
+    {
+      "name": "preListingInfo"
     }
   ]
 }
