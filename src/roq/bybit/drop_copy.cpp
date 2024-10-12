@@ -451,6 +451,7 @@ void DropCopy::operator()(Trace<json::Execution2> const &event) {
           .side = side,
           .position_effect = {},
           .margin_mode = {},
+          .quantity_type = {},
           .create_time_utc = utils::safe_cast(exec_time),
           .update_time_utc = utils::safe_cast(exec_time),
           .external_account = {},

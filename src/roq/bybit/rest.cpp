@@ -262,6 +262,7 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
         .security_type = json::Map{item.contract_type, item.options_type},
         .base_currency = item.base_coin,
         .quote_currency = item.quote_coin,
+        .settlement_currency = item.settle_coin,
         .margin_currency = {},
         .commission_currency = {},
         .tick_size = item.price_filter.tick_size,
