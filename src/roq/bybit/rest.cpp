@@ -255,7 +255,6 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
   for (auto &item : instrument_info.result.list) {
     log::info<2>("item={}"sv, item);
     auto discard = shared_.discard_symbol(item.symbol);
-    auto multiplier = 1.0;  // XXX FIXME can't be true for futures...
     auto reference_data = ReferenceData{
         .stream_id = stream_id_,
         .exchange = shared_.settings.exchange,
@@ -268,7 +267,7 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
         .margin_currency = {},
         .commission_currency = {},
         .tick_size = item.price_filter.tick_size,
-        .multiplier = multiplier,
+        .multiplier = NaN,
         .min_notional = NaN,
         .min_trade_vol = item.lot_size_filter.min_order_qty,
         .max_trade_vol = item.lot_size_filter.max_order_qty,
