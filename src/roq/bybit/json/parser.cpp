@@ -113,6 +113,10 @@ bool Parser::dispatch(Handler &handler, std::string_view const &message, std::sp
       create_trace_and_dispatch(handler, trace_info, ping);
       return true;
     }
+    case PONG: {
+      // note! don't process (only the option api)
+      return true;
+    }
     case SUBSCRIBE: {
       Subscribe subscribe{message, buffer};
       create_trace_and_dispatch(handler, trace_info, subscribe);

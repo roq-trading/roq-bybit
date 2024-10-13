@@ -9,6 +9,7 @@
 
 #include "roq/server/oms/exceptions.hpp"
 
+#include "roq/utils/safe_cast.hpp"
 #include "roq/utils/update.hpp"
 
 #include "roq/utils/metrics/factory.hpp"
@@ -254,6 +255,7 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
   for (auto &item : instrument_info.result.list) {
     log::info<2>("item={}"sv, item);
     auto discard = shared_.discard_symbol(item.symbol);
+    auto multiplier = 1.0;  // XXX FIXME can't be true for futures...
     auto reference_data = ReferenceData{
         .stream_id = stream_id_,
         .exchange = shared_.settings.exchange,
@@ -266,7 +268,7 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
         .margin_currency = {},
         .commission_currency = {},
         .tick_size = item.price_filter.tick_size,
-        .multiplier = 1.0,
+        .multiplier = multiplier,
         .min_notional = NaN,
         .min_trade_vol = item.lot_size_filter.min_order_qty,
         .max_trade_vol = item.lot_size_filter.max_order_qty,
@@ -276,10 +278,10 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
         .strike_price = NaN,
         .underlying = {},
         .time_zone = {},
-        .issue_date = {},
+        .issue_date = utils::safe_cast{item.launch_time},
         .settlement_date = {},
         .expiry_datetime = {},
-        .expiry_datetime_utc = {},
+        .expiry_datetime_utc = utils::safe_cast{item.delivery_time},
         .exchange_time_utc = {},
         .exchange_sequence = {},
         .sending_time_utc = instrument_info.time,
