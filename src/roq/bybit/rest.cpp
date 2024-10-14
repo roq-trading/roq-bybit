@@ -261,6 +261,7 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
         .symbol = item.symbol,
         .description = item.symbol,
         .security_type = json::Map{item.contract_type, item.options_type},
+        .cfi_code = {},
         .base_currency = item.base_coin,
         .quote_currency = item.quote_coin,
         .settlement_currency = item.settle_coin,
