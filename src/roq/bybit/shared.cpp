@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <cctype>
 
-#include <magic_enum.hpp>
+#include <magic_enum/magic_enum.hpp>
 
 #include "roq/logging.hpp"
 
