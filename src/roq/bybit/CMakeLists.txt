@@ -46,15 +46,15 @@ target_link_libraries(
   PRIVATE ${PROJECT_NAME}-json
           ${PROJECT_NAME}-tools
           ${PROJECT_NAME}-flags
-          roq-server::roq-server
-          roq-server::roq-server-flags
-          roq-web::roq-web
+          roq-api::roq-api
           roq-core::roq-core
+          roq-flags::roq-flags
           roq-io::roq-io
           roq-logging::roq-logging
           roq-logging::roq-logging-flags
-          roq-flags::roq-flags
-          roq-api::roq-api
+          roq-server::roq-server
+          roq-server::roq-server-flags
+          roq-web::roq-web
           fmt::fmt
           unordered_dense::unordered_dense)
 
