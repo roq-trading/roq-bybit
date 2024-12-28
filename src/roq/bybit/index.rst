@@ -10,7 +10,7 @@ roq-bybit
 
   .. code-block:: shell
 
-     $ mamba install \
+     $ conda install \
            --channel https://roq-trading.com/conda/stable \
            roq-bybit
 
@@ -18,7 +18,7 @@ roq-bybit
 
   .. code-block:: shell
 
-     $ mamba install \
+     $ conda install \
            --channel https://roq-trading.com/conda/unstable \
            roq-bybit
 
