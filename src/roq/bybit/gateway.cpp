@@ -10,6 +10,8 @@
 
 #include "roq/clock.hpp"
 
+#include "roq/server/oms/exceptions.hpp"
+
 #include "roq/bybit/json/utils.hpp"
 
 using namespace std::literals;
@@ -177,6 +179,14 @@ uint16_t Gateway::operator()(
 uint16_t Gateway::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
   assert(!std::empty(event.value.account));
   return get_order_entry(event.value.account)(event, request_id);
+}
+
+uint16_t Gateway::operator()(Event<MassQuote> const &) {
+  throw server::oms::NotSupported{"not supported"sv};
+}
+
+uint16_t Gateway::operator()(Event<CancelQuotes> const &) {
+  throw server::oms::NotSupported{"not supported"sv};
 }
 
 void Gateway::operator()(metrics::Writer &writer) {
