@@ -114,6 +114,10 @@
     },
     {
       "name": "preListingInfo"
+    },
+    {
+      "name": "stTag",
+      "type": "std/string_view"
     }
   ]
 }

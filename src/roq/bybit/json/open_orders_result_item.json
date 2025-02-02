@@ -153,6 +153,26 @@
     {
       "name": "updatedTime",
       "type": "std/milliseconds"
+    },
+    {
+      "name": "slLimitPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "createType",
+      "type": "std/string_view"
+    },
+    {
+      "name": "tpslMode",
+      "type": "std/string_view"
+    },
+    {
+      "name": "tpLimitPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "marketUnit",
+      "type": "std/string_view"
     }
   ]
 }

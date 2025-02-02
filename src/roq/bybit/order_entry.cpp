@@ -339,7 +339,7 @@ void OrderEntry::get_wallet_balance() {
         case LINEAR:
           return "UNIFIED"sv;
         case INVERSE:
-          return "CONTRACT"sv;
+          return "UNIFIED"sv;
         case OPTION:
           return "UNIFIED"sv;
       }

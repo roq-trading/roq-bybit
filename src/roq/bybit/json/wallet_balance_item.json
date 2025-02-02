@@ -61,6 +61,22 @@
     {
       "name": "cumRealisedPnl",
       "type": "std/double"
+    },
+    {
+      "name": "bonus",
+      "type": "std/double"
+    },
+    {
+      "name": "collateralSwitch",
+      "type": "std/bool"
+    },
+    {
+      "name": "spotHedgingQty",
+      "type": "std/double"
+    },
+    {
+      "name": "marginCollateral",
+      "type": "std/bool"
     }
   ]
 }

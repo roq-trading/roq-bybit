@@ -113,6 +113,34 @@
     {
       "name": "updatedTime",
       "type": "std/milliseconds"
+    },
+    {
+      "name": "sessionAvgPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "curRealisedPnl",
+      "type": "std/double"
+    },
+    {
+      "name": "tpslMode",
+      "type": "std/string_view"
+    },
+    {
+      "name": "leverageSysUpdatedTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "mmrSysUpdatedTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "seq",
+      "type": "std/uint64"
+    },
+    {
+      "name": "isReduceOnly",
+      "type": "std/bool"
     }
   ]
 }

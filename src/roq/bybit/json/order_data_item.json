@@ -173,6 +173,22 @@
     {
       "name": "feeCurrency",
       "type": "std/string_view"
+    },
+    {
+      "name": "tpslMode",
+      "type": "std/string_view"
+    },
+    {
+      "name": "createType",
+      "type": "std/string_view"
+    },
+    {
+      "name": "marketUnit",
+      "type": "std/string_view"
+    },
+    {
+      "name": "closedPnl",
+      "type": "std/double"
     }
   ]
 }
