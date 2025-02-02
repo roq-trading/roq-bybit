@@ -101,6 +101,10 @@
     {
       "name": "closedSize",
       "type": "std/double"
+    },
+    {
+      "name": "feeCurrency",
+      "type": "std/string_view"
     }
   ]
 }
