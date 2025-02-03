@@ -105,6 +105,18 @@
     {
       "name": "feeCurrency",
       "type": "std/string_view"
+    },
+    {
+      "name": "createType",
+      "type": "std/string_view"
+    },
+    {
+      "name": "seq",
+      "type": "std/uint64"
+    },
+    {
+      "name": "marketUnit",
+      "type": "std/string_view"
     }
   ]
 }
