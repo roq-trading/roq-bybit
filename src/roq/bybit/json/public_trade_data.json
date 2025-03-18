@@ -41,6 +41,11 @@
       "raw": "BT",
       "name": "block_trade",
       "type": "std/bool"
+    },
+    {
+      "raw": "RPI",
+      "name": "unknown",
+      "type": "std/bool"
     }
   ]
 }
