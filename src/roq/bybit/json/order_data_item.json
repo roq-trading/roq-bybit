@@ -189,6 +189,14 @@
     {
       "name": "closedPnl",
       "type": "std/double"
+    },
+    {
+      "name": "slippageTolerance",
+      "type": "std/double"
+    },
+    {
+      "name": "slippageToleranceType",
+      "type": "std/string_view"
     }
   ]
 }

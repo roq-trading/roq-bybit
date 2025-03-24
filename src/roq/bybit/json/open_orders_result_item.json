@@ -173,6 +173,22 @@
     {
       "name": "marketUnit",
       "type": "std/string_view"
+    },
+    {
+      "name": "trailingPercentage",
+      "type": "std/double"
+    },
+    {
+      "name": "trailingValue",
+      "type": "std/double"
+    },
+    {
+      "name": "basePrice",
+      "type": "std/double"
+    },
+    {
+      "name": "activationPrice",
+      "type": "std/double"
     }
   ]
 }

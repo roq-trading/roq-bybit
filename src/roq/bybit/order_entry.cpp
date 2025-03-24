@@ -335,7 +335,7 @@ void OrderEntry::get_wallet_balance() {
         case UNDEFINED:
           break;
         case SPOT:
-          return "SPOT"sv;
+          return "UNIFIED"sv;
         case LINEAR:
           return "UNIFIED"sv;
         case INVERSE:
