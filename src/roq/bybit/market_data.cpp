@@ -339,7 +339,7 @@ void MarketData::operator()(Trace<json::OrderBook> const &event, size_t depth) {
               .ask_price = ask_price,
               .ask_quantity = ask_quantity,
           },
-          .update_type = json::Map{order_book.type},
+          .update_type = map(order_book.type),
           .exchange_time_utc = order_book.timestamp,
           .exchange_sequence = data.cross_sequence,
           .sending_time_utc = {},
@@ -369,7 +369,7 @@ void MarketData::operator()(Trace<json::OrderBook> const &event, size_t depth) {
           .symbol = data.symbol,
           .bids = shared_.bids,
           .asks = shared_.asks,
-          .update_type = json::Map{order_book.type},
+          .update_type = map(order_book.type),
           .exchange_time_utc = order_book.timestamp,
           .exchange_sequence = data.cross_sequence,
           .sending_time_utc = {},
@@ -421,7 +421,7 @@ void MarketData::operator()(Trace<json::PublicTrade> const &event) {
         previous = item.symbol;
       }
       auto trade_2 = Trade{
-          .side = json::Map{item.side},
+          .side = map(item.side),
           .price = item.price,
           .quantity = item.quantity,
           .trade_id = item.trade_id,

@@ -13,8 +13,8 @@ namespace json {
 std::string_view place_order(
     std::string &buffer, roq::CreateOrder const &create_order, server::oms::Order const &order, std::string_view const &request_id, Category category) {
   buffer.clear();
-  auto side = map<Side>(create_order.side);
-  auto order_type = map<OrderType>(create_order.order_type);
+  auto side = map(create_order.side).template get<Side>();
+  auto order_type = map(create_order.order_type).template get<OrderType>();
   auto time_in_force = static_cast<TimeInForce>(Map{create_order.time_in_force});
   auto reduce_only = create_order.execution_instructions.has(ExecutionInstruction::DO_NOT_INCREASE);
   fmt::format_to(

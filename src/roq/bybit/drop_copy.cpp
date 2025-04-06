@@ -361,7 +361,7 @@ void DropCopy::operator()(Trace<json::Position> const &event) {
       if (shared_.discard_symbol(item.symbol))
         continue;
       auto margin_mode = item.trade_mode == 0 ? MarginMode::CROSS : MarginMode::ISOLATED;
-      auto side = json::map<Side>(item.side);
+      auto side = map(item.side).template get<Side>();
       auto quantity = utils::sign(side) * item.size;
       auto long_quantity = std::max(0.0, quantity);
       auto short_quantity = std::max(0.0, -quantity);
@@ -393,19 +393,19 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
           .account = account_.name,
           .exchange = shared_.settings.exchange,
           .symbol = item.symbol,
-          .side = json::Map{item.side},
+          .side = map(item.side),
           .position_effect = {},
           .margin_mode = {},
           .max_show_quantity = NaN,
-          .order_type = json::Map{item.order_type},
-          .time_in_force = json::Map{item.time_in_force},
+          .order_type = map(item.order_type),
+          .time_in_force = map(item.time_in_force),
           .execution_instructions = {},
           .create_time_utc = item.created_time,
           .update_time_utc = item.updated_time,
           .external_account = {},
           .external_order_id = item.order_id,
           .client_order_id = {},
-          .order_status = json::Map{item.order_status},
+          .order_status = map(item.order_status),
           .quantity = item.qty,
           .price = item.price,
           .stop_price = NaN,
@@ -479,7 +479,7 @@ void DropCopy::operator()(Trace<json::Execution2> const &event) {
         order_id = item.order_id;
         order_link_id = item.order_link_id;
         symbol = item.symbol;
-        side = json::Map{item.side};
+        side = map(item.side);
         exec_time = item.exec_time;
       }
       auto liquidity = item.is_maker ? Liquidity::MAKER : Liquidity::TAKER;

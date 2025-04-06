@@ -2,180 +2,91 @@
 
 #include "roq/bybit/json/map.hpp"
 
-#include "roq/logging.hpp"
-
 using namespace std::literals;
 
 namespace roq {
-namespace bybit {
-namespace json {
-
-// === HELPERS ===
 
 namespace {
-// note! constexpr helper for static testing
 template <typename... Args>
-struct Helper final {
-  explicit constexpr Helper(std::tuple<Args...> const &args) : args_{args} {}
-  explicit constexpr Helper(Args &&...args_) : args_{std::forward<Args>(args_)...} {}
+using Helper = detail::MapHelper<Args...>;
+}
 
-  template <typename R>
-  constexpr operator R();
+// bybit::json => roq
 
- private:
-  std::tuple<Args...> const args_;
-};
-
-// ==> roq
-
-// EventType ==> roq::UpdateType
+// bybit::json::EventType ==> roq::UpdateType
 
 template <>
 template <>
-constexpr Helper<EventType>::operator roq::UpdateType() {
+constexpr Helper<bybit::json::EventType>::operator std::optional<roq::UpdateType>() const {
   switch (std::get<0>(args_)) {
-    using enum EventType::type_t;
+    using enum bybit::json::EventType::type_t;
     case UNDEFINED__:
-      return {};
+      return UpdateType::UNDEFINED;
     case UNKNOWN__:
-      break;
+      return UpdateType::UNDEFINED;
     case ERROR:
-      break;
+      return UpdateType::UNDEFINED;
     case SNAPSHOT:
       return UpdateType::SNAPSHOT;
     case DELTA:
       return UpdateType::INCREMENTAL;
     case COMMAND_RESP:
-      return {};  // note!
+      return UpdateType::UNDEFINED;
   }
-  roq::log::fatal("Unexpected"sv);
+  return {};
 }
 
-static_assert(static_cast<roq::UpdateType>(Helper{EventType{EventType::UNDEFINED__}}) == roq::UpdateType::UNDEFINED);
-static_assert(static_cast<roq::UpdateType>(Helper{EventType{EventType::SNAPSHOT}}) == roq::UpdateType::SNAPSHOT);
-static_assert(static_cast<roq::UpdateType>(Helper{EventType{EventType::DELTA}}) == roq::UpdateType::INCREMENTAL);
-static_assert(static_cast<roq::UpdateType>(Helper{EventType{EventType::COMMAND_RESP}}) == roq::UpdateType::UNDEFINED);
-
-// Status ==> roq::TradingStatus
+static_assert(Helper{bybit::json::EventType{bybit::json::EventType::UNDEFINED__}} == roq::UpdateType::UNDEFINED);
+static_assert(Helper{bybit::json::EventType{bybit::json::EventType::SNAPSHOT}} == roq::UpdateType::SNAPSHOT);
+static_assert(Helper{bybit::json::EventType{bybit::json::EventType::DELTA}} == roq::UpdateType::INCREMENTAL);
+static_assert(Helper{bybit::json::EventType{bybit::json::EventType::COMMAND_RESP}} == roq::UpdateType::UNDEFINED);
 
 template <>
 template <>
-constexpr Helper<Status>::operator roq::TradingStatus() {
-  switch (std::get<0>(args_)) {
-    using enum Status::type_t;
-    case UNDEFINED__:
-      return {};
-    case UNKNOWN__:
-      break;
-    case PRE_LAUNCH:
-      return {};  // note!
-    case TRADING:
-      return roq::TradingStatus::OPEN;
-    case SETTLING:
-      return {};  // note!
-    case DELIVERING:
-      return {};  // note!
-    case CLOSED:
-      return roq::TradingStatus::CLOSE;
-  }
-  roq::log::fatal("Unexpected"sv);
+std::optional<roq::UpdateType> Map<bybit::json::EventType>::helper() const {
+  return Helper{args_};
 }
 
-static_assert(static_cast<roq::TradingStatus>(Helper{Status{Status::UNDEFINED__}}) == roq::TradingStatus::UNDEFINED);
-static_assert(static_cast<roq::TradingStatus>(Helper{Status{Status::PRE_LAUNCH}}) == roq::TradingStatus::UNDEFINED);
-static_assert(static_cast<roq::TradingStatus>(Helper{Status{Status::TRADING}}) == roq::TradingStatus::OPEN);
-static_assert(static_cast<roq::TradingStatus>(Helper{Status{Status::SETTLING}}) == roq::TradingStatus::UNDEFINED);
-static_assert(static_cast<roq::TradingStatus>(Helper{Status{Status::DELIVERING}}) == roq::TradingStatus::UNDEFINED);
-static_assert(static_cast<roq::TradingStatus>(Helper{Status{Status::CLOSED}}) == roq::TradingStatus::CLOSE);
-
-// Side ==> roq::Side
+// bybit::json::OptionsType ==> roq::OptionType
 
 template <>
 template <>
-constexpr Helper<Side>::operator roq::Side() {
+constexpr Helper<bybit::json::OptionsType>::operator std::optional<roq::OptionType>() const {
   switch (std::get<0>(args_)) {
-    using enum Side::type_t;
+    using enum bybit::json::OptionsType::type_t;
     case UNDEFINED__:
-      return {};
+      return roq::OptionType::UNDEFINED;
     case UNKNOWN__:
-      break;
-    case NONE:
-      return {};  // note!
-    case BUY:
-      return roq::Side::BUY;
-    case SELL:
-      return roq::Side::SELL;
+      return roq::OptionType::UNDEFINED;
+    case CALL:
+      return roq::OptionType::CALL;
+    case PUT:
+      return roq::OptionType::PUT;
   }
-  roq::log::fatal("Unexpected"sv);
+  return {};
 }
 
-static_assert(static_cast<roq::Side>(Helper{Side{Side::UNDEFINED__}}) == roq::Side::UNDEFINED);
-static_assert(static_cast<roq::Side>(Helper{Side{Side::NONE}}) == roq::Side::UNDEFINED);
-static_assert(static_cast<roq::Side>(Helper{Side{Side::BUY}}) == roq::Side::BUY);
-static_assert(static_cast<roq::Side>(Helper{Side{Side::SELL}}) == roq::Side::SELL);
-
-// OrderType ==> roq::OrderType
+static_assert(Helper{bybit::json::OptionsType{bybit::json::OptionsType::UNDEFINED__}} == roq::OptionType::UNDEFINED);
+static_assert(Helper{bybit::json::OptionsType{bybit::json::OptionsType::CALL}} == roq::OptionType::CALL);
+static_assert(Helper{bybit::json::OptionsType{bybit::json::OptionsType::PUT}} == roq::OptionType::PUT);
 
 template <>
 template <>
-constexpr Helper<OrderType>::operator roq::OrderType() {
-  switch (std::get<0>(args_)) {
-    using enum json::OrderType::type_t;
-    case UNDEFINED__:
-      return {};
-    case UNKNOWN__:
-      break;
-    case UNKNOWN:
-      break;
-    case MARKET:
-      return roq::OrderType::MARKET;
-    case LIMIT:
-      return roq::OrderType::LIMIT;
-  }
-  roq::log::fatal("Unexpected"sv);
+std::optional<roq::OptionType> Map<bybit::json::OptionsType>::helper() const {
+  return Helper{args_};
 }
 
-static_assert(static_cast<roq::OrderType>(Helper{OrderType{OrderType::UNDEFINED__}}) == roq::OrderType::UNDEFINED);
-static_assert(static_cast<roq::OrderType>(Helper{OrderType{OrderType::MARKET}}) == roq::OrderType::MARKET);
-static_assert(static_cast<roq::OrderType>(Helper{OrderType{OrderType::LIMIT}}) == roq::OrderType::LIMIT);
-
-// TimeInForce ==> roq::TimeInForce
+// bybit::json::OrderStatus ==> roq::OrderStatus
 
 template <>
 template <>
-constexpr Helper<TimeInForce>::operator roq::TimeInForce() {
+constexpr Helper<bybit::json::OrderStatus>::operator std::optional<roq::OrderStatus>() const {
   switch (std::get<0>(args_)) {
-    using enum json::TimeInForce::type_t;
+    using enum bybit::json::OrderStatus::type_t;
     case UNDEFINED__:
-      return {};
+      return roq::OrderStatus::UNDEFINED;
     case UNKNOWN__:
-      break;
-    case GTC:
-      return roq::TimeInForce::GTC;
-    case FOK:
-      return roq::TimeInForce::FOK;
-    case IOC:
-      return roq::TimeInForce::IOC;
-  }
-  roq::log::fatal("Unexpected"sv);
-}
-
-static_assert(static_cast<roq::TimeInForce>(Helper{TimeInForce{TimeInForce::UNDEFINED__}}) == roq::TimeInForce::UNDEFINED);
-static_assert(static_cast<roq::TimeInForce>(Helper{TimeInForce{TimeInForce::GTC}}) == roq::TimeInForce::GTC);
-static_assert(static_cast<roq::TimeInForce>(Helper{TimeInForce{TimeInForce::FOK}}) == roq::TimeInForce::FOK);
-static_assert(static_cast<roq::TimeInForce>(Helper{TimeInForce{TimeInForce::IOC}}) == roq::TimeInForce::IOC);
-
-// OrderStatus ==> roq::OrderStatus
-
-template <>
-template <>
-constexpr Helper<OrderStatus>::operator roq::OrderStatus() {
-  switch (std::get<0>(args_)) {
-    using enum json::OrderStatus::type_t;
-    case UNDEFINED__:
-      return {};
-    case UNKNOWN__:
-      break;
+      return roq::OrderStatus::UNDEFINED;
     case CREATED:
       return roq::OrderStatus::WORKING;
     case NEW:
@@ -191,60 +102,176 @@ constexpr Helper<OrderStatus>::operator roq::OrderStatus() {
     case CANCELLED:
       return roq::OrderStatus::CANCELED;
     case UNTRIGGERED:
-      return {};  // note!
+      return roq::OrderStatus::UNDEFINED;
     case TRIGGERED:
-      return {};  // note!
+      return roq::OrderStatus::UNDEFINED;
     case DEACTIVATED:
-      return {};  // note!
+      return roq::OrderStatus::UNDEFINED;
     case ACTIVE:
-      return {};  // note!
+      return roq::OrderStatus::UNDEFINED;
   }
-  roq::log::fatal("Unexpected"sv);
+  return {};
 }
 
-static_assert(static_cast<roq::OrderStatus>(Helper{OrderStatus{OrderStatus::UNDEFINED__}}) == roq::OrderStatus::UNDEFINED);
-static_assert(static_cast<roq::OrderStatus>(Helper{OrderStatus{OrderStatus::CREATED}}) == roq::OrderStatus::WORKING);
-static_assert(static_cast<roq::OrderStatus>(Helper{OrderStatus{OrderStatus::NEW}}) == roq::OrderStatus::WORKING);
-static_assert(static_cast<roq::OrderStatus>(Helper{OrderStatus{OrderStatus::REJECTED}}) == roq::OrderStatus::REJECTED);
-static_assert(static_cast<roq::OrderStatus>(Helper{OrderStatus{OrderStatus::PARTIALLY_FILLED}}) == roq::OrderStatus::WORKING);
-static_assert(static_cast<roq::OrderStatus>(Helper{OrderStatus{OrderStatus::PARTIALLY_FILLED_CANCELED}}) == roq::OrderStatus::CANCELED);
-static_assert(static_cast<roq::OrderStatus>(Helper{OrderStatus{OrderStatus::FILLED}}) == roq::OrderStatus::COMPLETED);
-static_assert(static_cast<roq::OrderStatus>(Helper{OrderStatus{OrderStatus::CANCELLED}}) == roq::OrderStatus::CANCELED);
-static_assert(static_cast<roq::OrderStatus>(Helper{OrderStatus{OrderStatus::UNTRIGGERED}}) == roq::OrderStatus::UNDEFINED);
-static_assert(static_cast<roq::OrderStatus>(Helper{OrderStatus{OrderStatus::TRIGGERED}}) == roq::OrderStatus::UNDEFINED);
-static_assert(static_cast<roq::OrderStatus>(Helper{OrderStatus{OrderStatus::DEACTIVATED}}) == roq::OrderStatus::UNDEFINED);
-static_assert(static_cast<roq::OrderStatus>(Helper{OrderStatus{OrderStatus::ACTIVE}}) == roq::OrderStatus::UNDEFINED);
-
-// OptionsType ==> roq::OptionType
+static_assert(Helper{bybit::json::OrderStatus{bybit::json::OrderStatus::UNDEFINED__}} == roq::OrderStatus::UNDEFINED);
+static_assert(Helper{bybit::json::OrderStatus{bybit::json::OrderStatus::CREATED}} == roq::OrderStatus::WORKING);
+static_assert(Helper{bybit::json::OrderStatus{bybit::json::OrderStatus::NEW}} == roq::OrderStatus::WORKING);
+static_assert(Helper{bybit::json::OrderStatus{bybit::json::OrderStatus::REJECTED}} == roq::OrderStatus::REJECTED);
+static_assert(Helper{bybit::json::OrderStatus{bybit::json::OrderStatus::PARTIALLY_FILLED}} == roq::OrderStatus::WORKING);
+static_assert(Helper{bybit::json::OrderStatus{bybit::json::OrderStatus::PARTIALLY_FILLED_CANCELED}} == roq::OrderStatus::CANCELED);
+static_assert(Helper{bybit::json::OrderStatus{bybit::json::OrderStatus::FILLED}} == roq::OrderStatus::COMPLETED);
+static_assert(Helper{bybit::json::OrderStatus{bybit::json::OrderStatus::CANCELLED}} == roq::OrderStatus::CANCELED);
+static_assert(Helper{bybit::json::OrderStatus{bybit::json::OrderStatus::UNTRIGGERED}} == roq::OrderStatus::UNDEFINED);
+static_assert(Helper{bybit::json::OrderStatus{bybit::json::OrderStatus::TRIGGERED}} == roq::OrderStatus::UNDEFINED);
+static_assert(Helper{bybit::json::OrderStatus{bybit::json::OrderStatus::DEACTIVATED}} == roq::OrderStatus::UNDEFINED);
+static_assert(Helper{bybit::json::OrderStatus{bybit::json::OrderStatus::ACTIVE}} == roq::OrderStatus::UNDEFINED);
 
 template <>
 template <>
-constexpr Helper<OptionsType>::operator roq::OptionType() {
+std::optional<roq::OrderStatus> Map<bybit::json::OrderStatus>::helper() const {
+  return Helper{args_};
+}
+
+// bybit::json::OrderType ==> roq::OrderType
+
+template <>
+template <>
+constexpr Helper<bybit::json::OrderType>::operator std::optional<roq::OrderType>() const {
   switch (std::get<0>(args_)) {
-    using enum OptionsType::type_t;
+    using enum bybit::json::OrderType::type_t;
     case UNDEFINED__:
-      return {};
+      return roq::OrderType::UNDEFINED;
     case UNKNOWN__:
-      break;
-    case CALL:
-      return roq::OptionType::CALL;
-    case PUT:
-      return roq::OptionType::PUT;
+      return roq::OrderType::UNDEFINED;
+    case UNKNOWN:
+      return roq::OrderType::UNDEFINED;
+    case MARKET:
+      return roq::OrderType::MARKET;
+    case LIMIT:
+      return roq::OrderType::LIMIT;
   }
-  roq::log::fatal("Unexpected"sv);
+  return {};
 }
 
-static_assert(static_cast<roq::OptionType>(Helper{OptionsType{OptionsType::UNDEFINED__}}) == roq::OptionType::UNDEFINED);
-static_assert(static_cast<roq::OptionType>(Helper{OptionsType{OptionsType::CALL}}) == roq::OptionType::CALL);
-static_assert(static_cast<roq::OptionType>(Helper{OptionsType{OptionsType::PUT}}) == roq::OptionType::PUT);
-
-// { ContractType, OptionsType } ==> roq::SecurityType
+static_assert(Helper{bybit::json::OrderType{bybit::json::OrderType::UNDEFINED__}} == roq::OrderType::UNDEFINED);
+static_assert(Helper{bybit::json::OrderType{bybit::json::OrderType::MARKET}} == roq::OrderType::MARKET);
+static_assert(Helper{bybit::json::OrderType{bybit::json::OrderType::LIMIT}} == roq::OrderType::LIMIT);
 
 template <>
 template <>
-constexpr Helper<ContractType, OptionsType>::operator roq::SecurityType() {
+std::optional<roq::OrderType> Map<bybit::json::OrderType>::helper() const {
+  return Helper{args_};
+}
+
+// bybit::json::Side ==> roq::Side
+
+template <>
+template <>
+constexpr Helper<bybit::json::Side>::operator std::optional<roq::Side>() const {
+  switch (std::get<0>(args_)) {
+    using enum bybit::json::Side::type_t;
+    case UNDEFINED__:
+      return roq::Side::UNDEFINED;
+    case UNKNOWN__:
+      return roq::Side::UNDEFINED;
+    case NONE:
+      return roq::Side::UNDEFINED;
+    case BUY:
+      return roq::Side::BUY;
+    case SELL:
+      return roq::Side::SELL;
+  }
+  return {};
+}
+
+static_assert(Helper{bybit::json::Side{bybit::json::Side::UNDEFINED__}} == roq::Side::UNDEFINED);
+static_assert(Helper{bybit::json::Side{bybit::json::Side::NONE}} == roq::Side::UNDEFINED);
+static_assert(Helper{bybit::json::Side{bybit::json::Side::BUY}} == roq::Side::BUY);
+static_assert(Helper{bybit::json::Side{bybit::json::Side::SELL}} == roq::Side::SELL);
+
+template <>
+template <>
+std::optional<roq::Side> Map<bybit::json::Side>::helper() const {
+  return Helper{args_};
+}
+
+// bybit::json::Status ==> roq::TradingStatus
+
+template <>
+template <>
+constexpr Helper<bybit::json::Status>::operator std::optional<roq::TradingStatus>() const {
+  switch (std::get<0>(args_)) {
+    using enum bybit::json::Status::type_t;
+    case UNDEFINED__:
+      return roq::TradingStatus::UNDEFINED;
+    case UNKNOWN__:
+      return roq::TradingStatus::UNDEFINED;
+    case PRE_LAUNCH:
+      return roq::TradingStatus::UNDEFINED;
+    case TRADING:
+      return roq::TradingStatus::OPEN;
+    case SETTLING:
+      return roq::TradingStatus::UNDEFINED;
+    case DELIVERING:
+      return roq::TradingStatus::UNDEFINED;
+    case CLOSED:
+      return roq::TradingStatus::CLOSE;
+  }
+  return {};
+}
+
+static_assert(Helper{bybit::json::Status{bybit::json::Status::UNDEFINED__}} == roq::TradingStatus::UNDEFINED);
+static_assert(Helper{bybit::json::Status{bybit::json::Status::PRE_LAUNCH}} == roq::TradingStatus::UNDEFINED);
+static_assert(Helper{bybit::json::Status{bybit::json::Status::TRADING}} == roq::TradingStatus::OPEN);
+static_assert(Helper{bybit::json::Status{bybit::json::Status::SETTLING}} == roq::TradingStatus::UNDEFINED);
+static_assert(Helper{bybit::json::Status{bybit::json::Status::DELIVERING}} == roq::TradingStatus::UNDEFINED);
+static_assert(Helper{bybit::json::Status{bybit::json::Status::CLOSED}} == roq::TradingStatus::CLOSE);
+
+template <>
+template <>
+std::optional<roq::TradingStatus> Map<bybit::json::Status>::helper() const {
+  return Helper{args_};
+}
+
+// bybit::json::TimeInForce ==> roq::TimeInForce
+
+template <>
+template <>
+constexpr Helper<bybit::json::TimeInForce>::operator std::optional<roq::TimeInForce>() const {
+  switch (std::get<0>(args_)) {
+    using enum bybit::json::TimeInForce::type_t;
+    case UNDEFINED__:
+      return roq::TimeInForce::UNDEFINED;
+    case UNKNOWN__:
+      return roq::TimeInForce::UNDEFINED;
+    case GTC:
+      return roq::TimeInForce::GTC;
+    case FOK:
+      return roq::TimeInForce::FOK;
+    case IOC:
+      return roq::TimeInForce::IOC;
+  }
+  return {};
+}
+
+static_assert(Helper{bybit::json::TimeInForce{bybit::json::TimeInForce::UNDEFINED__}} == roq::TimeInForce::UNDEFINED);
+static_assert(Helper{bybit::json::TimeInForce{bybit::json::TimeInForce::GTC}} == roq::TimeInForce::GTC);
+static_assert(Helper{bybit::json::TimeInForce{bybit::json::TimeInForce::FOK}} == roq::TimeInForce::FOK);
+static_assert(Helper{bybit::json::TimeInForce{bybit::json::TimeInForce::IOC}} == roq::TimeInForce::IOC);
+
+template <>
+template <>
+std::optional<roq::TimeInForce> Map<bybit::json::TimeInForce>::helper() const {
+  return Helper{args_};
+}
+
+// bybit::json::{ ContractType, OptionsType } ==> roq::SecurityType
+
+template <>
+template <>
+constexpr Helper<bybit::json::ContractType, bybit::json::OptionsType>::operator std::optional<roq::SecurityType>() const {
   switch (std::get<1>(args_)) {
-    using enum OptionsType::type_t;
+    using enum bybit::json::OptionsType::type_t;
     case UNDEFINED__:
     case UNKNOWN__:
       break;
@@ -253,7 +280,7 @@ constexpr Helper<ContractType, OptionsType>::operator roq::SecurityType() {
       return SecurityType::OPTION;
   }
   switch (std::get<0>(args_)) {
-    using enum ContractType::type_t;
+    using enum bybit::json::ContractType::type_t;
     case UNDEFINED__:
     case UNKNOWN__:
       break;
@@ -268,175 +295,137 @@ constexpr Helper<ContractType, OptionsType>::operator roq::SecurityType() {
 }
 
 static_assert(
-    static_cast<roq::SecurityType>(Helper{ContractType{ContractType::UNDEFINED__}, OptionsType{OptionsType::UNDEFINED__}}) == roq::SecurityType::SPOT);
-static_assert(static_cast<roq::SecurityType>(Helper{ContractType{ContractType::UNDEFINED__}, OptionsType{OptionsType::CALL}}) == roq::SecurityType::OPTION);
-static_assert(static_cast<roq::SecurityType>(Helper{ContractType{ContractType::UNDEFINED__}, OptionsType{OptionsType::PUT}}) == roq::SecurityType::OPTION);
+    Helper{bybit::json::ContractType{bybit::json::ContractType::UNDEFINED__}, bybit::json::OptionsType{bybit::json::OptionsType::UNDEFINED__}} ==
+    roq::SecurityType::SPOT);
 static_assert(
-    static_cast<roq::SecurityType>(Helper{ContractType{ContractType::INVERSE_PERPETUAL}, OptionsType{OptionsType::UNDEFINED__}}) == roq::SecurityType::SWAP);
+    Helper{bybit::json::ContractType{bybit::json::ContractType::UNDEFINED__}, bybit::json::OptionsType{bybit::json::OptionsType::CALL}} ==
+    roq::SecurityType::OPTION);
 static_assert(
-    static_cast<roq::SecurityType>(Helper{ContractType{ContractType::LINEAR_PERPETUAL}, OptionsType{OptionsType::UNDEFINED__}}) == roq::SecurityType::SWAP);
+    Helper{bybit::json::ContractType{bybit::json::ContractType::UNDEFINED__}, bybit::json::OptionsType{bybit::json::OptionsType::PUT}} ==
+    roq::SecurityType::OPTION);
 static_assert(
-    static_cast<roq::SecurityType>(Helper{ContractType{ContractType::LINEAR_FUTURES}, OptionsType{OptionsType::UNDEFINED__}}) == roq::SecurityType::FUTURES);
+    Helper{bybit::json::ContractType{bybit::json::ContractType::INVERSE_PERPETUAL}, bybit::json::OptionsType{bybit::json::OptionsType::UNDEFINED__}} ==
+    roq::SecurityType::SWAP);
 static_assert(
-    static_cast<roq::SecurityType>(Helper{ContractType{ContractType::INVERSE_FUTURES}, OptionsType{OptionsType::UNDEFINED__}}) == roq::SecurityType::FUTURES);
+    Helper{bybit::json::ContractType{bybit::json::ContractType::LINEAR_PERPETUAL}, bybit::json::OptionsType{bybit::json::OptionsType::UNDEFINED__}} ==
+    roq::SecurityType::SWAP);
+static_assert(
+    Helper{bybit::json::ContractType{bybit::json::ContractType::LINEAR_FUTURES}, bybit::json::OptionsType{bybit::json::OptionsType::UNDEFINED__}} ==
+    roq::SecurityType::FUTURES);
+static_assert(
+    Helper{bybit::json::ContractType{bybit::json::ContractType::INVERSE_FUTURES}, bybit::json::OptionsType{bybit::json::OptionsType::UNDEFINED__}} ==
+    roq::SecurityType::FUTURES);
+
+template <>
+template <>
+std::optional<roq::SecurityType> Map<bybit::json::ContractType, bybit::json::OptionsType>::helper() const {
+  return Helper{args_};
+}
 
 // roq ==>
 
-// roq::Side ==> Side
+// roq::OrderType ==> bybit::json::OrderType
 
 template <>
 template <>
-constexpr Helper<roq::Side>::operator Side() {
-  switch (std::get<0>(args_)) {
-    using enum roq::Side;
-    case UNDEFINED:
-      return {};
-    case BUY:
-      return Side::BUY;
-    case SELL:
-      return Side::SELL;
-  }
-  roq::log::fatal("Unexpected"sv);
-}
-
-static_assert(static_cast<Side>(Helper{roq::Side::UNDEFINED}) == Side::UNDEFINED__);
-static_assert(static_cast<Side>(Helper{roq::Side::BUY}) == Side::BUY);
-static_assert(static_cast<Side>(Helper{roq::Side::SELL}) == Side::SELL);
-
-template <>
-template <>
-constexpr Helper<roq::OrderType>::operator OrderType() {
+constexpr Helper<roq::OrderType>::operator std::optional<bybit::json::OrderType>() const {
   switch (std::get<0>(args_)) {
     using enum roq::OrderType;
     case UNDEFINED:
-      return {};
+      return bybit::json::OrderType::UNDEFINED__;
     case MARKET:
-      return json::OrderType::MARKET;
+      return bybit::json::OrderType::MARKET;
     case LIMIT:
-      return json::OrderType::LIMIT;
+      return bybit::json::OrderType::LIMIT;
   }
-  roq::log::fatal("Unexpected"sv);
+  return {};
 }
 
-static_assert(static_cast<OrderType>(Helper{roq::OrderType::UNDEFINED}) == OrderType::UNDEFINED__);
-static_assert(static_cast<OrderType>(Helper{roq::OrderType::MARKET}) == OrderType::MARKET);
-static_assert(static_cast<OrderType>(Helper{roq::OrderType::LIMIT}) == OrderType::LIMIT);
+static_assert(Helper{roq::OrderType::UNDEFINED} == bybit::json::OrderType{bybit::json::OrderType::UNDEFINED__});
+static_assert(Helper{roq::OrderType::MARKET} == bybit::json::OrderType{bybit::json::OrderType::MARKET});
+static_assert(Helper{roq::OrderType::LIMIT} == bybit::json::OrderType{bybit::json::OrderType::LIMIT});
 
 template <>
 template <>
-constexpr Helper<roq::TimeInForce>::operator TimeInForce() {
+std::optional<bybit::json::OrderType> Map<roq::OrderType>::helper() const {
+  return Helper{args_};
+}
+
+// roq::Side ==> bybit::json::Side
+
+template <>
+template <>
+constexpr Helper<roq::Side>::operator std::optional<bybit::json::Side>() const {
+  switch (std::get<0>(args_)) {
+    using enum roq::Side;
+    case UNDEFINED:
+      return bybit::json::Side::UNDEFINED__;
+    case BUY:
+      return bybit::json::Side::BUY;
+    case SELL:
+      return bybit::json::Side::SELL;
+  }
+  return {};
+}
+
+static_assert(Helper{roq::Side::UNDEFINED} == bybit::json::Side{bybit::json::Side::UNDEFINED__});
+static_assert(Helper{roq::Side::BUY} == bybit::json::Side{bybit::json::Side::BUY});
+static_assert(Helper{roq::Side::SELL} == bybit::json::Side{bybit::json::Side::SELL});
+
+template <>
+template <>
+std::optional<bybit::json::Side> Map<roq::Side>::helper() const {
+  return Helper{args_};
+}
+
+// roq::TimeInForce ==> bybit::json::TimeInForce
+
+template <>
+template <>
+constexpr Helper<roq::TimeInForce>::operator std::optional<bybit::json::TimeInForce>() const {
   switch (std::get<0>(args_)) {
     using enum roq::TimeInForce;
     case UNDEFINED:
-      return {};
+      return bybit::json::TimeInForce::UNDEFINED__;
     case GFD:
-      return {};  // note!
+      return bybit::json::TimeInForce::UNDEFINED__;
     case GTC:
-      return json::TimeInForce::GTC;
+      return bybit::json::TimeInForce::GTC;
     case OPG:
-      return {};  // note!
+      return bybit::json::TimeInForce::UNDEFINED__;
     case IOC:
-      return json::TimeInForce::IOC;
+      return bybit::json::TimeInForce::IOC;
     case FOK:
-      return json::TimeInForce::FOK;
+      return bybit::json::TimeInForce::FOK;
     case GTX:
-      return {};  // note!
+      return bybit::json::TimeInForce::UNDEFINED__;
     case GTD:
-      return {};  // note!
+      return bybit::json::TimeInForce::UNDEFINED__;
     case AT_THE_CLOSE:
-      return {};  // note!
+      return bybit::json::TimeInForce::UNDEFINED__;
     case GOOD_THROUGH_CROSSING:
-      return {};  // note!
+      return bybit::json::TimeInForce::UNDEFINED__;
     case AT_CROSSING:
-      return {};
+      return bybit::json::TimeInForce::UNDEFINED__;
     case GOOD_FOR_TIME:
-      return {};
+      return bybit::json::TimeInForce::UNDEFINED__;
     case GFA:
-      return {};  // note!
+      return bybit::json::TimeInForce::UNDEFINED__;
     case GFM:
-      return {};  // note!
+      return bybit::json::TimeInForce::UNDEFINED__;
   }
-  roq::log::fatal("Unexpected"sv);
+  return {};
 }
 
-static_assert(static_cast<TimeInForce>(Helper{roq::TimeInForce::UNDEFINED}) == TimeInForce::UNDEFINED__);
-static_assert(static_cast<TimeInForce>(Helper{roq::TimeInForce::GTC}) == TimeInForce::GTC);
-static_assert(static_cast<TimeInForce>(Helper{roq::TimeInForce::IOC}) == TimeInForce::IOC);
-static_assert(static_cast<TimeInForce>(Helper{roq::TimeInForce::FOK}) == TimeInForce::FOK);
-}  // namespace
-
-// === IMPLEMENTATION ===
-
-// ==> roq
+static_assert(Helper{roq::TimeInForce::UNDEFINED} == bybit::json::TimeInForce{bybit::json::TimeInForce::UNDEFINED__});
+static_assert(Helper{roq::TimeInForce::GTC} == bybit::json::TimeInForce{bybit::json::TimeInForce::GTC});
+static_assert(Helper{roq::TimeInForce::IOC} == bybit::json::TimeInForce{bybit::json::TimeInForce::IOC});
+static_assert(Helper{roq::TimeInForce::FOK} == bybit::json::TimeInForce{bybit::json::TimeInForce::FOK});
 
 template <>
 template <>
-Map<EventType>::operator roq::UpdateType() {
+std::optional<bybit::json::TimeInForce> Map<roq::TimeInForce>::helper() const {
   return Helper{args_};
 }
 
-template <>
-template <>
-Map<Status>::operator roq::TradingStatus() {
-  return Helper{args_};
-}
-
-template <>
-template <>
-Map<Side>::operator roq::Side() {
-  return Helper{args_};
-}
-
-template <>
-template <>
-Map<OrderType>::operator roq::OrderType() {
-  return Helper{args_};
-}
-
-template <>
-template <>
-Map<TimeInForce>::operator roq::TimeInForce() {
-  return Helper{args_};
-}
-
-template <>
-template <>
-Map<OrderStatus>::operator roq::OrderStatus() {
-  return Helper{args_};
-}
-
-template <>
-template <>
-Map<OptionsType>::operator roq::OptionType() {
-  return Helper{args_};
-}
-
-template <>
-template <>
-Map<ContractType, OptionsType>::operator roq::SecurityType() {
-  return Helper{args_};
-}
-
-// roq ==>
-
-template <>
-template <>
-Map<roq::Side>::operator Side() {
-  return Helper{args_};
-}
-
-template <>
-template <>
-Map<roq::OrderType>::operator OrderType() {
-  return Helper{args_};
-}
-
-template <>
-template <>
-Map<roq::TimeInForce>::operator TimeInForce() {
-  return Helper{args_};
-}
-
-}  // namespace json
-}  // namespace bybit
 }  // namespace roq
