@@ -24,4 +24,4 @@ roq_gitignore(OUTPUT .gitignore SOURCES ${TARGET_NAME} ${AUTOGEN_HEADERS})
 
 add_dependencies(${TARGET_NAME} ${TARGET_NAME}-autogen-headers)
 
-target_link_libraries(${TARGET_NAME} PRIVATE roq-core::roq-core roq-utils::roq-utils fmt::fmt)
+target_link_libraries(${TARGET_NAME} PRIVATE roq-utils::roq-utils fmt::fmt)
