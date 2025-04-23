@@ -119,7 +119,7 @@ auto create_mbp_topic(size_t depth) {
 }
 
 struct create_metrics final : public utils::metrics::Factory {
-  create_metrics(auto &settings, auto &group, auto const &function) : utils::metrics::Factory(settings.app.name, group, function) {}
+  create_metrics(auto &settings, auto &group, auto const &function) : utils::metrics::Factory{settings.app.name, group, function} {}
 };
 }  // namespace
 
