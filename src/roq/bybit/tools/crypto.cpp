@@ -47,8 +47,9 @@ std::string Crypto::create_headers_v2(
     [[maybe_unused]] std::string_view const &path, std::string_view const &query, std::string_view const &body, std::chrono::milliseconds timestamp) {
   assert(!std::empty(path));
   auto query_or_body = [&]() {
-    if (std::empty(query))
+    if (std::empty(query)) {
       return body;
+    }
     assert(std::empty(body));
     assert(query[0] == '?');
     return query.substr(1);

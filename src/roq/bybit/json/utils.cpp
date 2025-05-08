@@ -34,8 +34,9 @@ std::string_view place_order(
       Decimal{create_order.quantity, order.quantity_precision.precision},
       time_in_force.as_raw_text(),
       reduce_only);
-  if (!std::isnan(create_order.price))
+  if (!std::isnan(create_order.price)) {
     fmt::format_to(std::back_inserter(buffer), R"(,"price":"{}")"sv, Decimal{create_order.price, order.price_precision.precision});
+  }
   fmt::format_to(
       std::back_inserter(buffer),
       R"(,"orderLinkId":"{}")"
@@ -59,10 +60,12 @@ std::string_view amend_order(
       R"("symbol":"{}")"sv,
       category.as_raw_text(),
       order.symbol);
-  if (!std::isnan(modify_order.price))
+  if (!std::isnan(modify_order.price)) {
     fmt::format_to(std::back_inserter(buffer), R"(,"price":"{}")"sv, Decimal{modify_order.price, order.price_precision.precision});
-  if (!std::isnan(modify_order.quantity))
+  }
+  if (!std::isnan(modify_order.quantity)) {
     fmt::format_to(std::back_inserter(buffer), R"(,"qty":"{}")"sv, Decimal{modify_order.quantity, order.quantity_precision.precision});
+  }
   if (!std::empty(order.external_order_id)) {
     fmt::format_to(
         std::back_inserter(buffer),

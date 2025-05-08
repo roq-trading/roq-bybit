@@ -43,8 +43,9 @@ auto get_supports(auto api) {
       SupportType::TRADE,
       SupportType::FUNDS,
   };
-  if (api != tools::API::SPOT)
+  if (api != tools::API::SPOT) {
     result |= SupportType::POSITION;
+  }
   return result;
 }
 
@@ -140,13 +141,15 @@ void DropCopy::operator()(metrics::Writer &writer) {
 
 void DropCopy::operator()(Rest::SymbolsUpdate &symbols_update) {
   for (auto &symbol : symbols_update.symbols) {
-    if (!shared_.dispatcher.can_account_trade_symbol(account_.name, shared_.settings.exchange, symbol))
+    if (!shared_.dispatcher.can_account_trade_symbol(account_.name, shared_.settings.exchange, symbol)) {
       continue;
+    }
     [[maybe_unused]] auto res = symbols_.emplace(static_cast<std::string_view>(symbol));
     assert(res.second);
     if ((*connection_).ready()) {
-      if (shared_.api.api != tools::API::SPOT)
+      if (shared_.api.api != tools::API::SPOT) {
         account_.request_queue.emplace_back("position"sv, symbol);
+      }
       account_.request_queue.emplace_back("order"sv, symbol);
       account_.request_queue.emplace_back("execution"sv, symbol);
     }
@@ -246,8 +249,9 @@ void DropCopy::operator()(ConnectionStatus status) {
 
 void DropCopy::subscribe() {
   subscribe("wallet"sv);
-  if (shared_.api.api != tools::API::SPOT)
+  if (shared_.api.api != tools::API::SPOT) {
     subscribe("position"sv);
+  }
   subscribe("order"sv);
   subscribe("execution"sv);
 }
@@ -269,8 +273,9 @@ void DropCopy::parse(std::string_view const &message) {
     auto log_message = [&]() { log::warn(R"(message="{}")"sv, message); };
     try {
       TraceInfo trace_info;
-      if (!json::Parser::dispatch(*this, message, decode_buffer_, trace_info))
+      if (!json::Parser::dispatch(*this, message, decode_buffer_, trace_info)) {
         log_message();
+      }
     } catch (...) {
       log_message();
       utils::exceptions::Unhandled::terminate();
@@ -303,8 +308,9 @@ void DropCopy::operator()(Trace<json::Subscribe> const &event) {
   if (req_id.compare("wallet"sv) == 0) {
     account_.request_queue.emplace_back(req_id, std::string{});
   } else if (req_id.compare("position"sv) == 0 || req_id.compare("order"sv) == 0 || req_id.compare("execution"sv) == 0) {
-    for (auto &symbol : symbols_)
+    for (auto &symbol : symbols_) {
       account_.request_queue.emplace_back(req_id, symbol);
+    }
   } else {
     log::warn(R"(Unexpected: req_id="{}")"sv, req_id);
   }
@@ -358,8 +364,9 @@ void DropCopy::operator()(Trace<json::Position> const &event) {
     log::info<4>("event={{position={}, trace_info={}}}"sv, position, trace_info);
     for (auto &item : position.data) {
       log::info<2>("item={}"sv, item);
-      if (shared_.discard_symbol(item.symbol))
+      if (shared_.discard_symbol(item.symbol)) {
         continue;
+      }
       auto margin_mode = item.trade_mode == 0 ? MarginMode::CROSS : MarginMode::ISOLATED;
       auto side = map(item.side).template get<Side>();
       auto quantity = utils::sign(side) * item.size;
@@ -441,8 +448,9 @@ void DropCopy::operator()(Trace<json::Execution2> const &event) {
     Side side = {};
     std::chrono::nanoseconds exec_time = {};
     auto dispatch = [&]() {
-      if (std::empty(shared_.fills))
+      if (std::empty(shared_.fills)) {
         return;
+      }
       auto trade_update = TradeUpdate{
           .stream_id = stream_id_,
           .account = account_.name,

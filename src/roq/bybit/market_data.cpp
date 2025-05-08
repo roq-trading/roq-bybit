@@ -159,8 +159,9 @@ void MarketData::operator()(Event<Stop> const &) {
 void MarketData::operator()(Event<Timer> const &event) {
   auto now = event.value.now;
   (*connection_).refresh(now);
-  if (ready() && next_ping_ < now)
+  if (ready() && next_ping_ < now) {
     send_ping(now);
+  }
 }
 
 void MarketData::operator()(metrics::Writer &writer) {
@@ -178,8 +179,9 @@ void MarketData::operator()(metrics::Writer &writer) {
 }
 
 void MarketData::subscribe(size_t start_from) {
-  if (ready())
+  if (ready()) {
     subscribe(shared_.symbols.get_slice(index_, start_from));
+  }
 }
 
 void MarketData::operator()(web::socket::Client::Connected const &) {
@@ -240,10 +242,12 @@ void MarketData::operator()(ConnectionStatus status) {
 }
 
 void MarketData::subscribe(std::span<Symbol const> const &symbols) {
-  if (std::empty(symbols))
+  if (std::empty(symbols)) {
     return;
-  if (spot_)
+  }
+  if (spot_) {
     subscribe("orderbook.1"sv, symbols);
+  }
   subscribe(mbp_topic_, symbols);
   subscribe("publicTrade"sv, symbols);
   subscribe("tickers"sv, symbols);
@@ -281,8 +285,9 @@ void MarketData::parse(std::string_view const &message) {
     auto log_message = [&]() { log::warn(R"(message="{}")"sv, message); };
     try {
       TraceInfo trace_info;
-      if (!json::Parser::dispatch(*this, message, decode_buffer_, trace_info))
+      if (!json::Parser::dispatch(*this, message, decode_buffer_, trace_info)) {
         log_message();
+      }
     } catch (...) {
       log_message();
       utils::exceptions::Unhandled::terminate();
@@ -361,10 +366,12 @@ void MarketData::operator()(Trace<json::OrderBook> const &event, size_t depth) {
         };
         result.emplace_back(std::move(mbp_update));
       };
-      for (auto &item : data.bids)
+      for (auto &item : data.bids) {
         emplace_back(shared_.bids, item);
-      for (auto &item : data.asks)
+      }
+      for (auto &item : data.asks) {
         emplace_back(shared_.asks, item);
+      }
       auto market_by_price_update = MarketByPriceUpdate{
           .stream_id = stream_id_,
           .exchange = shared_.settings.exchange,
@@ -401,8 +408,9 @@ void MarketData::operator()(Trace<json::PublicTrade> const &event) {
       if (std::empty(symbol)) {
         assert(std::empty(trades));
       }
-      if (std::empty(trades))
+      if (std::empty(trades)) {
         return;
+      }
       auto trade_summary = TradeSummary{
           .stream_id = stream_id_,
           .exchange = shared_.settings.exchange,

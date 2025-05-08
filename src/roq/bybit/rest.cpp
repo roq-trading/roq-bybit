@@ -164,8 +164,9 @@ void Rest::operator()(Trace<web::rest::Client::Connected> const &) {
 void Rest::operator()(Trace<web::rest::Client::Disconnected> const &) {
   ++counter_.disconnect;
   (*this)(ConnectionStatus::DISCONNECTED);
-  if (!download_.downloading())
+  if (!download_.downloading()) {
     download_.reset();
+  }
 }
 
 void Rest::operator()(Trace<web::rest::Client::Latency> const &event) {
@@ -289,10 +290,12 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
         .discard = discard,
     };
     create_trace_and_dispatch(handler_, trace_info, reference_data, true);
-    if (discard)
+    if (discard) {
       continue;
-    if (symbols_.emplace(item.symbol).second)  // only include new
+    }
+    if (symbols_.emplace(item.symbol).second) {  // only include new
       symbols.emplace_back(item.symbol);
+    }
     ++counter;
     auto market_status = MarketStatus{
         .stream_id = stream_id_,
@@ -311,8 +314,9 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
     };
     handler_(symbols_update);
   }
-  if (counter > 0)
+  if (counter > 0) {
     log::info("Symbols {} / {}"sv, counter, std::size(instrument_info.result.list));
+  }
 }
 
 // helpers

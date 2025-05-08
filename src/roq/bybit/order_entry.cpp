@@ -41,8 +41,9 @@ auto get_supports(auto api) {
       SupportType::ORDER_ACK,
       SupportType::FUNDS,
   };
-  if (api != tools::API::SPOT)
+  if (api != tools::API::SPOT) {
     result |= SupportType::MODIFY_ORDER;
+  }
   return result;
 }
 }  // namespace
@@ -90,8 +91,9 @@ struct create_metrics final : public utils::metrics::Factory {
 
 auto get_download_trades_lookback(auto &settings, auto download_trades_is_first) {
   if (download_trades_is_first) {
-    if (settings.download.trades_lookback_on_restart.count())
+    if (settings.download.trades_lookback_on_restart.count()) {
       return settings.download.trades_lookback_on_restart;
+    }
   }
   return settings.download.trades_lookback;
 }
@@ -142,8 +144,9 @@ void OrderEntry::operator()(Event<Stop> const &) {
 void OrderEntry::operator()(Event<Timer> const &event) {
   auto now = event.value.now;
   (*connection_).refresh(now);
-  if (ready())
+  if (ready()) {
     check_request_queue(now);
+  }
 }
 
 void OrderEntry::operator()(metrics::Writer &writer) {
@@ -207,8 +210,9 @@ void OrderEntry::operator()(Trace<web::rest::Client::Connected> const &) {
 void OrderEntry::operator()(Trace<web::rest::Client::Disconnected> const &) {
   ++counter_.disconnect;
   (*this)(ConnectionStatus::DISCONNECTED);
-  if (!download_.downloading())
+  if (!download_.downloading()) {
     download_.reset();
+  }
 }
 
 void OrderEntry::operator()(Trace<web::rest::Client::Latency> const &event) {
@@ -313,8 +317,9 @@ void OrderEntry::get_account_info_ack(Trace<web::rest::Response> const &event, [
     };
     auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
       log::warn(R"(error={}, text="{}")"sv, error, text);
-      if (download_.downloading())
+      if (download_.downloading()) {
         download_.retry(STATE);
+      }
     };
     process_response(event, handle_success, handle_error);
   });
@@ -478,8 +483,9 @@ void OrderEntry::operator()(Trace<json::PositionInfo> const &event) {
   log::info<2>("position_info={}"sv, position_info);
   for (auto &item : position_info.result.list) {
     log::info<2>("item={}"sv, item);
-    if (shared_.discard_symbol(item.symbol))
+    if (shared_.discard_symbol(item.symbol)) {
       continue;
+    }
     auto margin_mode = item.trade_mode == 0 ? MarginMode::CROSS : MarginMode::ISOLATED;
     Side side = map(item.side);
     auto quantity = utils::sign(side) * item.size;
@@ -679,8 +685,9 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
   Side side = {};
   std::chrono::nanoseconds exec_time = {};
   auto dispatch = [&]() {
-    if (std::empty(shared_.fills))
+    if (std::empty(shared_.fills)) {
       return;
+    }
     auto trade_update = TradeUpdate{
         .stream_id = stream_id_,
         .account = account_.name,
@@ -738,8 +745,9 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
 
 void OrderEntry::place_order(Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
   profile_.place_order([&]() {
-    if (!ready())
+    if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
+    }
     auto &[message_info, create_order] = event;
     auto path = shared_.api.simple.order_create;
     std::string buffer;  // XXX
@@ -856,10 +864,12 @@ void OrderEntry::amend_order(
     [[maybe_unused]] std::string_view const &request_id,
     std::string_view const &previous_request_id) {
   profile_.amend_order([&]() {
-    if (shared_.api.api == tools::API::SPOT)
+    if (shared_.api.api == tools::API::SPOT) {
       throw server::oms::NotSupported{"amend_order"sv};
-    if (!ready())
+    }
+    if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
+    }
     auto &[message_info, modify_order] = event;
     auto path = shared_.api.simple.order_amend;
     std::string buffer;  // XXX
@@ -975,8 +985,9 @@ void OrderEntry::cancel_order(
     [[maybe_unused]] std::string_view const &request_id,
     std::string_view const &previous_request_id) {
   profile_.cancel_order([&]() {
-    if (!ready())
+    if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
+    }
     auto &[message_info, cancel_order] = event;
     auto path = shared_.api.simple.order_cancel;
     std::string buffer;  // XXX
@@ -1088,8 +1099,9 @@ void OrderEntry::operator()(Trace<json::CancelOrder> const &event, uint8_t user_
 
 void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, [[maybe_unused]] std::string_view const &request_id) {
   profile_.cancel_all_orders([&]() {
-    if (!ready()) [[unlikely]]
+    if (!ready()) [[unlikely]] {
       throw server::oms::NotReady{"not ready"sv};
+    }
     auto &cancel_all_orders = event.value;
     auto send_ack = [&](auto &symbol) {
       auto cancel_all_orders_ack = CancelAllOrdersAck{
@@ -1118,8 +1130,9 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, [[maybe_
     std::string buffer;  // XXX
     if (shared_.dispatcher.get_all_order_symbols(
             [&](auto &symbol) {
-              if (!std::empty(cancel_all_orders.symbol) && symbol != cancel_all_orders.symbol)
+              if (!std::empty(cancel_all_orders.symbol) && symbol != cancel_all_orders.symbol) {
                 return;
+              }
               auto body = json::cancel_all_orders(buffer, cancel_all_orders, request_id, symbol, shared_.api.category);
               auto headers = account_.create_headers(path, {}, body);
               auto request = web::rest::Request{

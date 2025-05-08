@@ -29,8 +29,9 @@ auto create_crypto(auto &settings, auto &config, auto &name) -> tools::Crypto {
     ready = false;
     log::warn(R"(Unexpected: missing secret for name="{}")"sv, name);
   }
-  if (!ready)
+  if (!ready) {
     log::fatal("Invalid config"sv);
+  }
   return {key, secret, settings.rest.recv_window};
 }
 }  // namespace

@@ -18,8 +18,9 @@ auto create_api(auto &settings) {
   std::string value{settings.app.api};
   std::transform(std::begin(value), std::end(value), std::begin(value), ::toupper);
   auto result = magic_enum::enum_cast<tools::API>(value);
-  if (!result.has_value())
+  if (!result.has_value()) {
     log::fatal(R"(Unexpected: api="{}")"sv, value);
+  }
   return *result;
 }
 
