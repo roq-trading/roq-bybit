@@ -27,7 +27,7 @@ inline void update(T &result, core::json::Value const &value) {
 
 template <>
 inline void update(std::chrono::milliseconds &result, core::json::Value const &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
+  using result_type = std::remove_cvref_t<decltype(result)>;
   return std::visit(
       utils::overloaded{
           [&](core::json::Null const &) { result = result_type{}; },
@@ -47,7 +47,7 @@ inline void update(std::chrono::milliseconds &result, core::json::Value const &v
 
 template <>
 inline void update(std::chrono::microseconds &result, core::json::Value const &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
+  using result_type = std::remove_cvref_t<decltype(result)>;
   return std::visit(
       utils::overloaded{
           [&](core::json::Null const &) { result = result_type{}; },
@@ -66,7 +66,7 @@ inline void update(std::chrono::microseconds &result, core::json::Value const &v
 
 template <>
 inline void update(std::chrono::nanoseconds &result, core::json::Value const &value) {
-  using result_type = std::remove_reference<decltype(result)>::type;
+  using result_type = std::remove_cvref_t<decltype(result)>;
   return std::visit(
       utils::overloaded{
           [&](core::json::Null const &) { result = result_type{}; },

@@ -24,7 +24,7 @@ namespace bybit {
 namespace {
 template <typename R>
 R create_accounts(auto &settings, auto &config) {
-  using result_type = std::remove_cvref<R>::type;
+  using result_type = std::remove_cvref_t<R>;
   result_type result;
   for (auto &[_, account] : config.accounts) {
     auto obj = std::make_unique<Account>(settings, config, account.name);
@@ -35,7 +35,7 @@ R create_accounts(auto &settings, auto &config) {
 
 template <typename R>
 R create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
-  using result_type = std::remove_cvref<R>::type;
+  using result_type = std::remove_cvref_t<R>;
   result_type result;
   for (auto &[_, item] : accounts) {
     auto &account = *item;
@@ -47,7 +47,7 @@ R create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accoun
 
 template <typename R>
 R create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
-  using result_type = std::remove_cvref<R>::type;
+  using result_type = std::remove_cvref_t<R>;
   result_type result;
   for (auto &[_, item] : accounts) {
     auto &account = *item;
