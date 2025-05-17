@@ -20,9 +20,9 @@ template <>
 constexpr Helper<bybit::json::EventType>::operator std::optional<roq::UpdateType>() const {
   switch (std::get<0>(args_)) {
     using enum bybit::json::EventType::type_t;
-    case _UNDEFINED:
+    case UNDEFINED_INTERNAL:
       return UpdateType::UNDEFINED;
-    case _UNKNOWN:
+    case UNKNOWN_INTERNAL:
       return UpdateType::UNDEFINED;
     case ERROR:
       return UpdateType::UNDEFINED;
@@ -36,7 +36,7 @@ constexpr Helper<bybit::json::EventType>::operator std::optional<roq::UpdateType
   return {};
 }
 
-static_assert(Helper{bybit::json::EventType{bybit::json::EventType::_UNDEFINED}} == roq::UpdateType::UNDEFINED);
+static_assert(Helper{bybit::json::EventType{bybit::json::EventType::UNDEFINED_INTERNAL}} == roq::UpdateType::UNDEFINED);
 static_assert(Helper{bybit::json::EventType{bybit::json::EventType::SNAPSHOT}} == roq::UpdateType::SNAPSHOT);
 static_assert(Helper{bybit::json::EventType{bybit::json::EventType::DELTA}} == roq::UpdateType::INCREMENTAL);
 static_assert(Helper{bybit::json::EventType{bybit::json::EventType::COMMAND_RESP}} == roq::UpdateType::UNDEFINED);
@@ -54,9 +54,9 @@ template <>
 constexpr Helper<bybit::json::OptionsType>::operator std::optional<roq::OptionType>() const {
   switch (std::get<0>(args_)) {
     using enum bybit::json::OptionsType::type_t;
-    case _UNDEFINED:
+    case UNDEFINED_INTERNAL:
       return roq::OptionType::UNDEFINED;
-    case _UNKNOWN:
+    case UNKNOWN_INTERNAL:
       return roq::OptionType::UNDEFINED;
     case CALL:
       return roq::OptionType::CALL;
@@ -66,7 +66,7 @@ constexpr Helper<bybit::json::OptionsType>::operator std::optional<roq::OptionTy
   return {};
 }
 
-static_assert(Helper{bybit::json::OptionsType{bybit::json::OptionsType::_UNDEFINED}} == roq::OptionType::UNDEFINED);
+static_assert(Helper{bybit::json::OptionsType{bybit::json::OptionsType::UNDEFINED_INTERNAL}} == roq::OptionType::UNDEFINED);
 static_assert(Helper{bybit::json::OptionsType{bybit::json::OptionsType::CALL}} == roq::OptionType::CALL);
 static_assert(Helper{bybit::json::OptionsType{bybit::json::OptionsType::PUT}} == roq::OptionType::PUT);
 
@@ -83,9 +83,9 @@ template <>
 constexpr Helper<bybit::json::OrderStatus>::operator std::optional<roq::OrderStatus>() const {
   switch (std::get<0>(args_)) {
     using enum bybit::json::OrderStatus::type_t;
-    case _UNDEFINED:
+    case UNDEFINED_INTERNAL:
       return roq::OrderStatus::UNDEFINED;
-    case _UNKNOWN:
+    case UNKNOWN_INTERNAL:
       return roq::OrderStatus::UNDEFINED;
     case CREATED:
       return roq::OrderStatus::WORKING;
@@ -113,7 +113,7 @@ constexpr Helper<bybit::json::OrderStatus>::operator std::optional<roq::OrderSta
   return {};
 }
 
-static_assert(Helper{bybit::json::OrderStatus{bybit::json::OrderStatus::_UNDEFINED}} == roq::OrderStatus::UNDEFINED);
+static_assert(Helper{bybit::json::OrderStatus{bybit::json::OrderStatus::UNDEFINED_INTERNAL}} == roq::OrderStatus::UNDEFINED);
 static_assert(Helper{bybit::json::OrderStatus{bybit::json::OrderStatus::CREATED}} == roq::OrderStatus::WORKING);
 static_assert(Helper{bybit::json::OrderStatus{bybit::json::OrderStatus::NEW}} == roq::OrderStatus::WORKING);
 static_assert(Helper{bybit::json::OrderStatus{bybit::json::OrderStatus::REJECTED}} == roq::OrderStatus::REJECTED);
@@ -139,9 +139,9 @@ template <>
 constexpr Helper<bybit::json::OrderType>::operator std::optional<roq::OrderType>() const {
   switch (std::get<0>(args_)) {
     using enum bybit::json::OrderType::type_t;
-    case _UNDEFINED:
+    case UNDEFINED_INTERNAL:
       return roq::OrderType::UNDEFINED;
-    case _UNKNOWN:
+    case UNKNOWN_INTERNAL:
       return roq::OrderType::UNDEFINED;
     case UNKNOWN:
       return roq::OrderType::UNDEFINED;
@@ -153,7 +153,7 @@ constexpr Helper<bybit::json::OrderType>::operator std::optional<roq::OrderType>
   return {};
 }
 
-static_assert(Helper{bybit::json::OrderType{bybit::json::OrderType::_UNDEFINED}} == roq::OrderType::UNDEFINED);
+static_assert(Helper{bybit::json::OrderType{bybit::json::OrderType::UNDEFINED_INTERNAL}} == roq::OrderType::UNDEFINED);
 static_assert(Helper{bybit::json::OrderType{bybit::json::OrderType::MARKET}} == roq::OrderType::MARKET);
 static_assert(Helper{bybit::json::OrderType{bybit::json::OrderType::LIMIT}} == roq::OrderType::LIMIT);
 
@@ -170,9 +170,9 @@ template <>
 constexpr Helper<bybit::json::Side>::operator std::optional<roq::Side>() const {
   switch (std::get<0>(args_)) {
     using enum bybit::json::Side::type_t;
-    case _UNDEFINED:
+    case UNDEFINED_INTERNAL:
       return roq::Side::UNDEFINED;
-    case _UNKNOWN:
+    case UNKNOWN_INTERNAL:
       return roq::Side::UNDEFINED;
     case NONE:
       return roq::Side::UNDEFINED;
@@ -184,7 +184,7 @@ constexpr Helper<bybit::json::Side>::operator std::optional<roq::Side>() const {
   return {};
 }
 
-static_assert(Helper{bybit::json::Side{bybit::json::Side::_UNDEFINED}} == roq::Side::UNDEFINED);
+static_assert(Helper{bybit::json::Side{bybit::json::Side::UNDEFINED_INTERNAL}} == roq::Side::UNDEFINED);
 static_assert(Helper{bybit::json::Side{bybit::json::Side::NONE}} == roq::Side::UNDEFINED);
 static_assert(Helper{bybit::json::Side{bybit::json::Side::BUY}} == roq::Side::BUY);
 static_assert(Helper{bybit::json::Side{bybit::json::Side::SELL}} == roq::Side::SELL);
@@ -202,9 +202,9 @@ template <>
 constexpr Helper<bybit::json::Status>::operator std::optional<roq::TradingStatus>() const {
   switch (std::get<0>(args_)) {
     using enum bybit::json::Status::type_t;
-    case _UNDEFINED:
+    case UNDEFINED_INTERNAL:
       return roq::TradingStatus::UNDEFINED;
-    case _UNKNOWN:
+    case UNKNOWN_INTERNAL:
       return roq::TradingStatus::UNDEFINED;
     case PRE_LAUNCH:
       return roq::TradingStatus::UNDEFINED;
@@ -220,7 +220,7 @@ constexpr Helper<bybit::json::Status>::operator std::optional<roq::TradingStatus
   return {};
 }
 
-static_assert(Helper{bybit::json::Status{bybit::json::Status::_UNDEFINED}} == roq::TradingStatus::UNDEFINED);
+static_assert(Helper{bybit::json::Status{bybit::json::Status::UNDEFINED_INTERNAL}} == roq::TradingStatus::UNDEFINED);
 static_assert(Helper{bybit::json::Status{bybit::json::Status::PRE_LAUNCH}} == roq::TradingStatus::UNDEFINED);
 static_assert(Helper{bybit::json::Status{bybit::json::Status::TRADING}} == roq::TradingStatus::OPEN);
 static_assert(Helper{bybit::json::Status{bybit::json::Status::SETTLING}} == roq::TradingStatus::UNDEFINED);
@@ -240,9 +240,9 @@ template <>
 constexpr Helper<bybit::json::TimeInForce>::operator std::optional<roq::TimeInForce>() const {
   switch (std::get<0>(args_)) {
     using enum bybit::json::TimeInForce::type_t;
-    case _UNDEFINED:
+    case UNDEFINED_INTERNAL:
       return roq::TimeInForce::UNDEFINED;
-    case _UNKNOWN:
+    case UNKNOWN_INTERNAL:
       return roq::TimeInForce::UNDEFINED;
     case GTC:
       return roq::TimeInForce::GTC;
@@ -254,7 +254,7 @@ constexpr Helper<bybit::json::TimeInForce>::operator std::optional<roq::TimeInFo
   return {};
 }
 
-static_assert(Helper{bybit::json::TimeInForce{bybit::json::TimeInForce::_UNDEFINED}} == roq::TimeInForce::UNDEFINED);
+static_assert(Helper{bybit::json::TimeInForce{bybit::json::TimeInForce::UNDEFINED_INTERNAL}} == roq::TimeInForce::UNDEFINED);
 static_assert(Helper{bybit::json::TimeInForce{bybit::json::TimeInForce::GTC}} == roq::TimeInForce::GTC);
 static_assert(Helper{bybit::json::TimeInForce{bybit::json::TimeInForce::FOK}} == roq::TimeInForce::FOK);
 static_assert(Helper{bybit::json::TimeInForce{bybit::json::TimeInForce::IOC}} == roq::TimeInForce::IOC);
@@ -272,8 +272,8 @@ template <>
 constexpr Helper<bybit::json::ContractType, bybit::json::OptionsType>::operator std::optional<roq::SecurityType>() const {
   switch (std::get<1>(args_)) {
     using enum bybit::json::OptionsType::type_t;
-    case _UNDEFINED:
-    case _UNKNOWN:
+    case UNDEFINED_INTERNAL:
+    case UNKNOWN_INTERNAL:
       break;
     case CALL:
     case PUT:
@@ -281,8 +281,8 @@ constexpr Helper<bybit::json::ContractType, bybit::json::OptionsType>::operator 
   }
   switch (std::get<0>(args_)) {
     using enum bybit::json::ContractType::type_t;
-    case _UNDEFINED:
-    case _UNKNOWN:
+    case UNDEFINED_INTERNAL:
+    case UNKNOWN_INTERNAL:
       break;
     case INVERSE_PERPETUAL:
     case LINEAR_PERPETUAL:
@@ -295,25 +295,25 @@ constexpr Helper<bybit::json::ContractType, bybit::json::OptionsType>::operator 
 }
 
 static_assert(
-    Helper{bybit::json::ContractType{bybit::json::ContractType::_UNDEFINED}, bybit::json::OptionsType{bybit::json::OptionsType::_UNDEFINED}} ==
+    Helper{bybit::json::ContractType{bybit::json::ContractType::UNDEFINED_INTERNAL}, bybit::json::OptionsType{bybit::json::OptionsType::UNDEFINED_INTERNAL}} ==
     roq::SecurityType::SPOT);
 static_assert(
-    Helper{bybit::json::ContractType{bybit::json::ContractType::_UNDEFINED}, bybit::json::OptionsType{bybit::json::OptionsType::CALL}} ==
+    Helper{bybit::json::ContractType{bybit::json::ContractType::UNDEFINED_INTERNAL}, bybit::json::OptionsType{bybit::json::OptionsType::CALL}} ==
     roq::SecurityType::OPTION);
 static_assert(
-    Helper{bybit::json::ContractType{bybit::json::ContractType::_UNDEFINED}, bybit::json::OptionsType{bybit::json::OptionsType::PUT}} ==
+    Helper{bybit::json::ContractType{bybit::json::ContractType::UNDEFINED_INTERNAL}, bybit::json::OptionsType{bybit::json::OptionsType::PUT}} ==
     roq::SecurityType::OPTION);
 static_assert(
-    Helper{bybit::json::ContractType{bybit::json::ContractType::INVERSE_PERPETUAL}, bybit::json::OptionsType{bybit::json::OptionsType::_UNDEFINED}} ==
+    Helper{bybit::json::ContractType{bybit::json::ContractType::INVERSE_PERPETUAL}, bybit::json::OptionsType{bybit::json::OptionsType::UNDEFINED_INTERNAL}} ==
     roq::SecurityType::SWAP);
 static_assert(
-    Helper{bybit::json::ContractType{bybit::json::ContractType::LINEAR_PERPETUAL}, bybit::json::OptionsType{bybit::json::OptionsType::_UNDEFINED}} ==
+    Helper{bybit::json::ContractType{bybit::json::ContractType::LINEAR_PERPETUAL}, bybit::json::OptionsType{bybit::json::OptionsType::UNDEFINED_INTERNAL}} ==
     roq::SecurityType::SWAP);
 static_assert(
-    Helper{bybit::json::ContractType{bybit::json::ContractType::LINEAR_FUTURES}, bybit::json::OptionsType{bybit::json::OptionsType::_UNDEFINED}} ==
+    Helper{bybit::json::ContractType{bybit::json::ContractType::LINEAR_FUTURES}, bybit::json::OptionsType{bybit::json::OptionsType::UNDEFINED_INTERNAL}} ==
     roq::SecurityType::FUTURES);
 static_assert(
-    Helper{bybit::json::ContractType{bybit::json::ContractType::INVERSE_FUTURES}, bybit::json::OptionsType{bybit::json::OptionsType::_UNDEFINED}} ==
+    Helper{bybit::json::ContractType{bybit::json::ContractType::INVERSE_FUTURES}, bybit::json::OptionsType{bybit::json::OptionsType::UNDEFINED_INTERNAL}} ==
     roq::SecurityType::FUTURES);
 
 template <>
@@ -332,7 +332,7 @@ constexpr Helper<roq::OrderType>::operator std::optional<bybit::json::OrderType>
   switch (std::get<0>(args_)) {
     using enum roq::OrderType;
     case UNDEFINED:
-      return bybit::json::OrderType::_UNDEFINED;
+      return bybit::json::OrderType::UNDEFINED_INTERNAL;
     case MARKET:
       return bybit::json::OrderType::MARKET;
     case LIMIT:
@@ -341,7 +341,7 @@ constexpr Helper<roq::OrderType>::operator std::optional<bybit::json::OrderType>
   return {};
 }
 
-static_assert(Helper{roq::OrderType::UNDEFINED} == bybit::json::OrderType{bybit::json::OrderType::_UNDEFINED});
+static_assert(Helper{roq::OrderType::UNDEFINED} == bybit::json::OrderType{bybit::json::OrderType::UNDEFINED_INTERNAL});
 static_assert(Helper{roq::OrderType::MARKET} == bybit::json::OrderType{bybit::json::OrderType::MARKET});
 static_assert(Helper{roq::OrderType::LIMIT} == bybit::json::OrderType{bybit::json::OrderType::LIMIT});
 
@@ -359,7 +359,7 @@ constexpr Helper<roq::Side>::operator std::optional<bybit::json::Side>() const {
   switch (std::get<0>(args_)) {
     using enum roq::Side;
     case UNDEFINED:
-      return bybit::json::Side::_UNDEFINED;
+      return bybit::json::Side::UNDEFINED_INTERNAL;
     case BUY:
       return bybit::json::Side::BUY;
     case SELL:
@@ -368,7 +368,7 @@ constexpr Helper<roq::Side>::operator std::optional<bybit::json::Side>() const {
   return {};
 }
 
-static_assert(Helper{roq::Side::UNDEFINED} == bybit::json::Side{bybit::json::Side::_UNDEFINED});
+static_assert(Helper{roq::Side::UNDEFINED} == bybit::json::Side{bybit::json::Side::UNDEFINED_INTERNAL});
 static_assert(Helper{roq::Side::BUY} == bybit::json::Side{bybit::json::Side::BUY});
 static_assert(Helper{roq::Side::SELL} == bybit::json::Side{bybit::json::Side::SELL});
 
@@ -386,38 +386,38 @@ constexpr Helper<roq::TimeInForce>::operator std::optional<bybit::json::TimeInFo
   switch (std::get<0>(args_)) {
     using enum roq::TimeInForce;
     case UNDEFINED:
-      return bybit::json::TimeInForce::_UNDEFINED;
+      return bybit::json::TimeInForce::UNDEFINED_INTERNAL;
     case GFD:
-      return bybit::json::TimeInForce::_UNDEFINED;
+      return bybit::json::TimeInForce::UNDEFINED_INTERNAL;
     case GTC:
       return bybit::json::TimeInForce::GTC;
     case OPG:
-      return bybit::json::TimeInForce::_UNDEFINED;
+      return bybit::json::TimeInForce::UNDEFINED_INTERNAL;
     case IOC:
       return bybit::json::TimeInForce::IOC;
     case FOK:
       return bybit::json::TimeInForce::FOK;
     case GTX:
-      return bybit::json::TimeInForce::_UNDEFINED;
+      return bybit::json::TimeInForce::UNDEFINED_INTERNAL;
     case GTD:
-      return bybit::json::TimeInForce::_UNDEFINED;
+      return bybit::json::TimeInForce::UNDEFINED_INTERNAL;
     case AT_THE_CLOSE:
-      return bybit::json::TimeInForce::_UNDEFINED;
+      return bybit::json::TimeInForce::UNDEFINED_INTERNAL;
     case GOOD_THROUGH_CROSSING:
-      return bybit::json::TimeInForce::_UNDEFINED;
+      return bybit::json::TimeInForce::UNDEFINED_INTERNAL;
     case AT_CROSSING:
-      return bybit::json::TimeInForce::_UNDEFINED;
+      return bybit::json::TimeInForce::UNDEFINED_INTERNAL;
     case GOOD_FOR_TIME:
-      return bybit::json::TimeInForce::_UNDEFINED;
+      return bybit::json::TimeInForce::UNDEFINED_INTERNAL;
     case GFA:
-      return bybit::json::TimeInForce::_UNDEFINED;
+      return bybit::json::TimeInForce::UNDEFINED_INTERNAL;
     case GFM:
-      return bybit::json::TimeInForce::_UNDEFINED;
+      return bybit::json::TimeInForce::UNDEFINED_INTERNAL;
   }
   return {};
 }
 
-static_assert(Helper{roq::TimeInForce::UNDEFINED} == bybit::json::TimeInForce{bybit::json::TimeInForce::_UNDEFINED});
+static_assert(Helper{roq::TimeInForce::UNDEFINED} == bybit::json::TimeInForce{bybit::json::TimeInForce::UNDEFINED_INTERNAL});
 static_assert(Helper{roq::TimeInForce::GTC} == bybit::json::TimeInForce{bybit::json::TimeInForce::GTC});
 static_assert(Helper{roq::TimeInForce::IOC} == bybit::json::TimeInForce{bybit::json::TimeInForce::IOC});
 static_assert(Helper{roq::TimeInForce::FOK} == bybit::json::TimeInForce{bybit::json::TimeInForce::FOK});

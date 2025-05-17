@@ -60,8 +60,8 @@ bool Parser::dispatch(Handler &handler, std::string_view const &message, std::sp
   auto topic = parse_topic(message_.topic);
   switch (topic) {
     using enum Topic::type_t;
-    case _UNDEFINED:
-    case _UNKNOWN:
+    case UNDEFINED_INTERNAL:
+    case UNKNOWN_INTERNAL:
       break;
     case ORDERBOOK: {
       OrderBook order_book{message, buffer};
@@ -100,8 +100,8 @@ bool Parser::dispatch(Handler &handler, std::string_view const &message, std::sp
   }
   switch (message_.op) {
     using enum Operation::type_t;
-    case _UNDEFINED:
-    case _UNKNOWN:
+    case UNDEFINED_INTERNAL:
+    case UNKNOWN_INTERNAL:
       break;
     case AUTH: {
       Auth auth{message, buffer};
@@ -125,8 +125,8 @@ bool Parser::dispatch(Handler &handler, std::string_view const &message, std::sp
   }
   switch (message_.type) {
     using enum EventType::type_t;
-    case _UNDEFINED:
-    case _UNKNOWN:
+    case UNDEFINED_INTERNAL:
+    case UNKNOWN_INTERNAL:
       break;
     case ERROR: {
       // XXX check that this is a real message
