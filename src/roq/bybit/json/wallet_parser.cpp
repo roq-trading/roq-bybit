@@ -18,9 +18,9 @@ bool WalletParser::dispatch(Handler &handler, std::string_view const &message, s
   core::json::Parser parser{message};
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::Object>(root)) {
-    if (key.compare("result"sv) == 0) {
+    if (key == "result"sv) {
       for (auto [key_2, value_2] : std::get<core::json::Object>(value)) {
-        if (key_2.compare("list"sv) == 0) {
+        if (key_2 == "list"sv) {
           for (auto item : std::get<core::json::Array>(value_2)) {
             Wallet wallet{item, buffer_2};
             create_trace_and_dispatch(handler, trace_info, wallet);

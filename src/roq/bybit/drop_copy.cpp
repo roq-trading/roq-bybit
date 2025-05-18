@@ -305,9 +305,9 @@ void DropCopy::operator()(Trace<json::Subscribe> const &event) {
   auto &[trace_info, subscribe] = event;
   log::info<4>("event={{subscribe={}, trace_info={}}}"sv, subscribe, trace_info);
   auto &req_id = subscribe.req_id;
-  if (req_id.compare("wallet"sv) == 0) {
+  if (req_id == "wallet"sv) {
     account_.request_queue.emplace_back(req_id, std::string{});
-  } else if (req_id.compare("position"sv) == 0 || req_id.compare("order"sv) == 0 || req_id.compare("execution"sv) == 0) {
+  } else if (req_id == "position"sv || req_id == "order"sv || req_id == "execution"sv) {
     for (auto &symbol : symbols_) {
       account_.request_queue.emplace_back(req_id, symbol);
     }
@@ -444,7 +444,9 @@ void DropCopy::operator()(Trace<json::Execution2> const &event) {
     auto &trace_info = event.trace_info;
     auto &execution = event.value;
     log::info<4>("event={{execution={}, trace_info={}}}"sv, execution, trace_info);
-    std::string_view order_id, order_link_id, symbol;
+    std::string_view order_id;
+    std::string_view order_link_id;
+    std::string_view symbol;
     Side side = {};
     std::chrono::nanoseconds exec_time = {};
     auto dispatch = [&]() {

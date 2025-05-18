@@ -47,10 +47,8 @@ struct Shared final {
   std::vector<Trade> trades;
   std::vector<Fill> fills;
 
- public:
   server::Dispatcher &dispatcher;
 
- public:
   Settings const &settings;
   API const api;
   core::limit::RateLimiter rate_limiter;

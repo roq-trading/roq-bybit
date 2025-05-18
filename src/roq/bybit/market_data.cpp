@@ -323,7 +323,8 @@ void MarketData::operator()(Trace<json::OrderBook> const &event, size_t depth) {
     auto &data = order_book.data;
     if (depth == 1) {
       auto helper = [](auto &levels) -> std::pair<double, double> {
-        double price = NaN, quantity = NaN;
+        double price = NaN;
+        double quantity = NaN;
         // first non-zero quantity
         for (auto &item : levels) {
           if (utils::compare(item.quantity, 0.0) > 0) {
@@ -438,7 +439,7 @@ void MarketData::operator()(Trace<json::PublicTrade> const &event) {
           .taker_order_id = {},
           .maker_order_id = {},
       };
-      trades.emplace_back(std::move(trade_2));
+      trades.emplace_back(trade_2);  // XXX FIXME TODO std::move ?
       utils::update_max(timestamp, item.timestamp);
     }
     dispatch(previous);

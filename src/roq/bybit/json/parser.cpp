@@ -41,7 +41,7 @@ bool dispatch_helper_flatten_wallet(auto &handler, auto &buffer, auto &trace_inf
   core::json::Parser parser{message};
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::Object>(root)) {
-    if (key.compare("data"sv) == 0) {
+    if (key == "data"sv) {
       for (auto item : std::get<core::json::Array>(value)) {
         Wallet wallet{item, buffer_2};
         create_trace_and_dispatch(handler, trace_info, wallet);

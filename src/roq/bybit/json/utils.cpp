@@ -127,6 +127,8 @@ std::string_view cancel_all_orders(
   return buffer;
 }
 
+// NOLINTBEGIN(readability-magic-numbers)
+
 Error map_error(int32_t ret_code) {
   switch (ret_code) {
     case 0:
@@ -481,6 +483,8 @@ Error map_error(int32_t ret_code) {
   }
   return Error::UNKNOWN;
 }
+
+// NOLINTEND(readability-magic-numbers)
 
 }  // namespace json
 }  // namespace bybit

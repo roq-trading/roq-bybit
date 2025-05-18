@@ -268,13 +268,13 @@ uint32_t OrderEntry::download(OrderEntryState state) {
 void OrderEntry::check_request_queue(std::chrono::nanoseconds now) {
   auto request = [&](auto &message) {
     auto &[topic, symbol] = message;
-    if (topic.compare("wallet"sv) == 0) {
+    if (topic == "wallet"sv) {
       get_wallet_balance();
-    } else if (topic.compare("position"sv) == 0) {
+    } else if (topic == "position"sv) {
       get_position_info(symbol);
-    } else if (topic.compare("order"sv) == 0) {
+    } else if (topic == "order"sv) {
       get_open_orders(symbol);
-    } else if (topic.compare("execution"sv) == 0) {
+    } else if (topic == "execution"sv) {
       get_execution(symbol);
     }
   };
@@ -738,7 +738,7 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
         .commission_quantity = item.exec_fee,  // XXX ???
         .commission_currency = {},
     };
-    shared_.fills.emplace_back(std::move(fill));
+    shared_.fills.emplace_back(fill);  // XXX FIXME TODO std::move ?
   }
   dispatch();
 }
@@ -780,7 +780,7 @@ void OrderEntry::place_order_ack(Trace<web::rest::Response> const &event, uint8_
       Trace event_2{event, place_order};
       (*this)(event_2, user_id, order_id, version);
     };
-    auto handle_error = [&](auto origin, auto status, auto error, auto text) {
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       auto response = server::oms::Response{
           .request_type = RequestType::CREATE_ORDER,
           .origin = origin,
