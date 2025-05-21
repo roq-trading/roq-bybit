@@ -149,7 +149,7 @@ void OrderEntry::operator()(Event<Timer> const &event) {
   }
 }
 
-void OrderEntry::operator()(metrics::Writer &writer) {
+void OrderEntry::operator()(metrics::Writer &writer) const {
   writer
       // counter
       .write(counter_.disconnect, metrics::Type::COUNTER)

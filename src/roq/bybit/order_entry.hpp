@@ -63,7 +63,7 @@ struct OrderEntry final : public web::rest::Client::Handler, public json::Wallet
   void operator()(Event<Stop> const &);
   void operator()(Event<Timer> const &);
 
-  void operator()(metrics::Writer &);
+  void operator()(metrics::Writer &) const;
 
   uint16_t operator()(Event<CreateOrder> const &, server::oms::Order const &, std::string_view const &request_id);
   uint16_t operator()(Event<ModifyOrder> const &, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id);

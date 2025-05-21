@@ -164,7 +164,7 @@ void MarketData::operator()(Event<Timer> const &event) {
   }
 }
 
-void MarketData::operator()(metrics::Writer &writer) {
+void MarketData::operator()(metrics::Writer &writer) const {
   writer
       // counter
       .write(counter_.disconnect, metrics::Type::COUNTER)
