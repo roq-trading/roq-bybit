@@ -40,6 +40,9 @@ auto const SUPPORTS = Mask{
 };
 
 uint64_t const REQUEST_ID = 1'000'000;
+
+size_t const DEPTH_25 = 25;
+size_t const DEPTH_50 = 50;
 }  // namespace
 
 // === HELPERS ===
@@ -103,13 +106,13 @@ auto get_mbp_depth(auto &settings, auto api) -> size_t {
       case UNDEFINED:
         break;
       case SPOT:
-        return 50;
+        return DEPTH_50;
       case LINEAR:
-        return 50;
+        return DEPTH_50;
       case INVERSE:
-        return 50;
+        return DEPTH_50;
       case OPTION:
-        return 25;
+        return DEPTH_25;
     }
     log::fatal("Unexpected"sv);
   }

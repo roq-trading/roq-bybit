@@ -106,8 +106,8 @@ TEST_CASE("json_wallet_parser", "[json_wallet]") {
       auto &[trace_info, wallet_balance] = event;
       CHECK(wallet_balance.account_type == json::AccountType::SPOT);
       REQUIRE(std::size(wallet_balance.coin) == 1);
-      auto &c0 = wallet_balance.coin[0];
-      CHECK(c0.coin == "USDT"sv);
+      auto &coin_0 = wallet_balance.coin[0];
+      CHECK(coin_0.coin == "USDT"sv);
     }
     void operator()(Trace<json::Position> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }
@@ -137,8 +137,8 @@ TEST_CASE("json_wallet_parser_2", "[json_wallet]") {
       auto &[trace_info, wallet_balance] = event;
       CHECK(wallet_balance.account_type == json::AccountType::SPOT);
       REQUIRE(std::size(wallet_balance.coin) == 1);
-      auto &c0 = wallet_balance.coin[0];
-      CHECK(c0.coin == "USDT"sv);
+      auto &coin_0 = wallet_balance.coin[0];
+      CHECK(coin_0.coin == "USDT"sv);
     }
     void operator()(Trace<json::Position> const &) override { FAIL(); }
     void operator()(Trace<json::Order> const &) override { FAIL(); }

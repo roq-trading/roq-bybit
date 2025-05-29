@@ -124,8 +124,8 @@ TEST_CASE("json_wallet_balance_spot", "[json_wallet_balance]") {
       auto &[trace_info, wallet_balance] = event;
       CHECK(wallet_balance.account_type == json::AccountType::SPOT);
       REQUIRE(std::size(wallet_balance.coin) == 5);
-      auto &c0 = wallet_balance.coin[0];
-      CHECK(c0.coin == "BTC"sv);
+      auto &coin_0 = wallet_balance.coin[0];
+      CHECK(coin_0.coin == "BTC"sv);
     }
 
     bool found = false;
