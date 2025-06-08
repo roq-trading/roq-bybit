@@ -348,6 +348,7 @@ void DropCopy::operator()(Trace<json::Wallet> const &event) {
           .margin_mode = {},
           .balance = item.wallet_balance,  // XXX item.free ???
           .hold = item.locked,
+          .borrowed = NaN,
           .external_account = {},
           .update_type = UpdateType::INCREMENTAL,
           .exchange_time_utc = {},
