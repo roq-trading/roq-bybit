@@ -256,6 +256,12 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
   for (auto &item : instrument_info.result.list) {
     log::info<2>("item={}"sv, item);
     auto discard = shared_.discard_symbol(item.symbol);
+    auto trade_vol_step_size = [&]() {
+      if (shared_.api.category == json::Category::type_t::SPOT) {
+        return item.lot_size_filter.base_precision;
+      }
+      return item.lot_size_filter.qty_step;
+    }();
     auto reference_data = ReferenceData{
         .stream_id = stream_id_,
         .exchange = shared_.settings.exchange,
@@ -274,7 +280,7 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
         .min_notional = NaN,
         .min_trade_vol = item.lot_size_filter.min_order_qty,
         .max_trade_vol = item.lot_size_filter.max_order_qty,
-        .trade_vol_step_size = NaN,
+        .trade_vol_step_size = trade_vol_step_size,
         .option_type = map(item.options_type),
         .strike_currency = {},
         .strike_price = NaN,
