@@ -8,48 +8,64 @@
     },
     {
       "name": "accountLTV",
-      "type": "std/string_view"
+      "type": "std/double"
     },
     {
       "name": "accountIMRate",
-      "type": "std/string_view"
+      "type": "std/double"
     },
     {
       "name": "accountMMRate",
-      "type": "std/string_view"
+      "type": "std/double"
     },
     {
       "name": "totalEquity",
-      "type": "std/string_view"
+      "type": "std/double"
     },
     {
       "name": "totalWalletBalance",
-      "type": "std/string_view"
+      "type": "std/double"
     },
     {
       "name": "totalMarginBalance",
-      "type": "std/string_view"
+      "type": "std/double"
     },
     {
       "name": "totalAvailableBalance",
-      "type": "std/string_view"
+      "type": "std/double"
     },
     {
       "name": "totalPerpUPL",
-      "type": "std/string_view"
+      "type": "std/double"
     },
     {
       "name": "totalInitialMargin",
-      "type": "std/string_view"
+      "type": "std/double"
     },
     {
       "name": "totalMaintenanceMargin",
-      "type": "std/string_view"
+      "type": "std/double"
     },
     {
       "name": "coin",
       "type": "roq/bybit/json/WalletBalanceItem",
       "array": "std/span"
+    },
+    {
+      "name": "totalMaintenanceMarginByMp",
+      "type": "std/double"
+    },
+    {
+      "name": "accountMMRateByMp",
+      "type": "std/double"
+    },
+    {
+      "name": "accountIMRateByMp",
+      "type": "std/double"
+    },
+    {
+      "name": "totalInitialMarginByMp",
+      "type": "std/double"
     }
   ]
 }
