@@ -739,7 +739,7 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
         .quote_amount = NaN,
         .commission_amount = item.exec_fee,  // XXX ???
         .commission_currency = {},
-        .profit_loss_amount = NaN,
+        .profit_loss_cost_amount = NaN,
     };
     shared_.fills.emplace_back(fill);  // XXX FIXME TODO std::move ?
   }
