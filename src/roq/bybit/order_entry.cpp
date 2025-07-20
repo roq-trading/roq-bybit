@@ -732,7 +732,7 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
       multiplier = ref_data.multiplier;
     }
     auto liquidity = item.is_maker ? Liquidity::MAKER : Liquidity::TAKER;
-    auto profit_loss_cost_amount = utils::compute_profit_loss_cost_amount(side, item.exec_qty, item.exec_price, multiplier);
+    auto profit_loss_amount = utils::compute_profit_loss_amount(side, item.exec_qty, item.exec_price, multiplier);
     auto fill = Fill{
         .exchange_time_utc = item.exec_time,
         .external_trade_id = item.exec_id,
@@ -743,7 +743,7 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
         .quote_amount = NaN,
         .commission_amount = item.exec_fee,  // XXX ???
         .commission_currency = {},
-        .profit_loss_cost_amount = profit_loss_cost_amount,
+        .profit_loss_amount = profit_loss_amount,
     };
     shared_.fills.emplace_back(fill);  // XXX FIXME TODO std::move ?
   }
