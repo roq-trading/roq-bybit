@@ -143,6 +143,7 @@ MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_i
           .order_book = create_metrics(shared.settings, name_, "order_book"sv),
           .trade = create_metrics(shared.settings, name_, "trade"sv),
           .tickers = create_metrics(shared.settings, name_, "tickers"sv),
+          .kline = create_metrics(shared.settings, name_, "kline"sv),
       },
       latency_{
           .ping = create_metrics(shared.settings, name_, "ping"sv),
@@ -176,6 +177,7 @@ void MarketData::operator()(metrics::Writer &writer) const {
       .write(profile_.order_book, metrics::Type::PROFILE)
       .write(profile_.trade, metrics::Type::PROFILE)
       .write(profile_.tickers, metrics::Type::PROFILE)
+      .write(profile_.kline, metrics::Type::PROFILE)
       // latency
       .write(latency_.ping, metrics::Type::LATENCY)
       .write(latency_.heartbeat, metrics::Type::LATENCY);
@@ -254,6 +256,7 @@ void MarketData::subscribe(std::span<Symbol const> const &symbols) {
   subscribe(mbp_topic_, symbols);
   subscribe("publicTrade"sv, symbols);
   subscribe("tickers"sv, symbols);
+  subscribe("kline"sv, symbols, 1min);
 }
 
 void MarketData::subscribe(std::string_view const &topic, std::span<Symbol const> const &symbols) {
@@ -267,6 +270,22 @@ void MarketData::subscribe(std::string_view const &topic, std::span<Symbol const
       R"(}})"sv,
       ++request_id_,
       topic,
+      fmt::join(symbols, separator));
+  (*connection_).send_text(message);
+}
+
+void MarketData::subscribe(std::string_view const &topic, std::span<Symbol const> const &symbols, std::chrono::minutes interval) {
+  assert(!std::empty(symbols));
+  auto separator = fmt::format(R"(","{}.)"sv, topic);
+  auto message = fmt::format(
+      R"({{)"
+      R"("req_id":"{}",)"
+      R"("op":"subscribe",)"
+      R"("args":["{}.{}.{}"])"
+      R"(}})"sv,
+      ++request_id_,
+      topic,
+      interval.count(),
       fmt::join(symbols, separator));
   (*connection_).send_text(message);
 }
@@ -401,8 +420,7 @@ void MarketData::operator()(Trace<json::OrderBook> const &event, size_t depth) {
 
 void MarketData::operator()(Trace<json::PublicTrade> const &event) {
   profile_.trade([&]() {
-    auto &trace_info = event.trace_info;
-    auto &public_trade = event.value;
+    auto &[trace_info, public_trade] = event;
     log::info<3>("event={{public_trade={}, trace_info={}}}"sv, public_trade, trace_info);
     (*connection_).touch(trace_info.source_receive_time);
     auto &trades = shared_.trades;
@@ -539,6 +557,46 @@ void MarketData::operator()(Trace<json::Tickers> const &event) {
         .sending_time_utc = tickers.timestamp,
     };
     create_trace_and_dispatch(handler_, trace_info, statistics_update, true);
+  });
+}
+
+void MarketData::operator()(Trace<json::Kline> const &event) {
+  profile_.kline([&]() {
+    auto &[trace_info, kline] = event;
+    log::info<3>("event={{kline={}, trace_info={}}}"sv, kline, trace_info);
+    (*connection_).touch(trace_info.source_receive_time);
+    auto &bars = shared_.bars;
+    bars.clear();
+    for (auto &item : kline.data) {
+      if (!item.confirm) {
+        continue;
+      }
+      auto bar = Bar{
+          .end_time_utc = item.end,
+          .open = item.open,
+          .high = item.high,
+          .low = item.low,
+          .close = item.close,
+          .volume = item.volume,
+          .turnover = item.turnover,
+          .count = {},
+      };
+      bars.emplace_back(std::move(bar));
+    }
+    if (!std::empty(bars)) {
+      auto time_series_update = TimeSeriesUpdate{
+          .stream_id = stream_id_,
+          .exchange = shared_.settings.exchange,
+          .symbol = kline.symbol,
+          .source = TimeSeriesSource::TRADES,
+          .frequency = 1min,
+          .origin = Origin::EXCHANGE,
+          .bars = bars,
+          .update_type = UpdateType::INCREMENTAL,
+      };
+      log::info("time_series_update={}"sv, time_series_update);
+      create_trace_and_dispatch(handler_, trace_info, time_series_update, true);
+    }
   });
 }
 

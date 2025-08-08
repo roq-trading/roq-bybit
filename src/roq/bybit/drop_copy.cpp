@@ -334,6 +334,10 @@ void DropCopy::operator()(Trace<json::Tickers> const &) {
   log::fatal("Unexpected"sv);
 }
 
+void DropCopy::operator()(Trace<json::Kline> const &) {
+  log::fatal("Unexpected"sv);
+}
+
 void DropCopy::operator()(Trace<json::Wallet> const &event) {
   profile_.wallet([&]() {
     auto &[trace_info, wallet] = event;

@@ -46,6 +46,10 @@
       "raw": "RPI",
       "name": "unknown",
       "type": "std/bool"
+    },
+    {
+      "name": "seq",
+      "type": "std/uint64"
     }
   ]
 }

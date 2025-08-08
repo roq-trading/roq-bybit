@@ -30,6 +30,8 @@ set(AUTOGEN_SCHEMAS
     instrument_info.json
     instrument_info_result_item.json
     instrument_info_result.json
+    kline_item.json
+    kline.json
     leverage_filter.json
     lot_size_filter.json
     message.json

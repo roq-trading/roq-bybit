@@ -65,6 +65,7 @@ TEST_CASE("json_subscribe_parser_spot", "[json_subscribe]") {
     void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
     void operator()(Trace<json::PublicTrade> const &) override { FAIL(); }
     void operator()(Trace<json::Tickers> const &) override { FAIL(); }
+    void operator()(Trace<json::Kline> const &) override { FAIL(); }
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
     void operator()(Trace<json::Wallet> const &) override { FAIL(); }
@@ -95,6 +96,7 @@ TEST_CASE("json_subscribe_parser_linear", "[json_subscribe]") {
     void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
     void operator()(Trace<json::PublicTrade> const &) override { FAIL(); }
     void operator()(Trace<json::Tickers> const &) override { FAIL(); }
+    void operator()(Trace<json::Kline> const &) override { FAIL(); }
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
     void operator()(Trace<json::Wallet> const &) override { FAIL(); }
@@ -125,6 +127,7 @@ TEST_CASE("json_subscribe_parser_inverse", "[json_subscribe]") {
     void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
     void operator()(Trace<json::PublicTrade> const &) override { FAIL(); }
     void operator()(Trace<json::Tickers> const &) override { FAIL(); }
+    void operator()(Trace<json::Kline> const &) override { FAIL(); }
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
     void operator()(Trace<json::Wallet> const &) override { FAIL(); }
@@ -155,6 +158,7 @@ TEST_CASE("json_subscribe_parser_option", "[json_subscribe]") {
     void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
     void operator()(Trace<json::PublicTrade> const &) override { FAIL(); }
     void operator()(Trace<json::Tickers> const &) override { FAIL(); }
+    void operator()(Trace<json::Kline> const &) override { FAIL(); }
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
     void operator()(Trace<json::Wallet> const &) override { FAIL(); }

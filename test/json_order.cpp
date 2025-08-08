@@ -77,6 +77,7 @@ TEST_CASE("json_order_parser", "[json_order]") {
     void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
     void operator()(Trace<json::PublicTrade> const &) override { FAIL(); }
     void operator()(Trace<json::Tickers> const &) override { FAIL(); }
+    void operator()(Trace<json::Kline> const &) override { FAIL(); }
     // private
     void operator()(Trace<json::Auth> const &) override { FAIL(); }
     void operator()(Trace<json::Wallet> const &) override { FAIL(); }

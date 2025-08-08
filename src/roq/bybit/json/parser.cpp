@@ -25,6 +25,14 @@ auto parse_topic(auto const &value) {
   return Topic{value.substr(0, value.find_first_of('.'))};
 }
 
+auto parse_kline_symbol(auto const &value) {
+  auto pos = value.find_last_of('.');
+  if (pos == value.npos) {
+    return std::string_view{};
+  }
+  return value.substr(pos + 1);
+}
+
 constexpr auto parse_mbp_depth(auto const &value) {
   auto pos1 = value.find_first_of('.');
   ++pos1;
@@ -78,6 +86,12 @@ bool Parser::dispatch(Handler &handler, std::string_view const &message, std::sp
     case TICKERS: {
       Tickers tickers{message, buffer};
       create_trace_and_dispatch(handler, trace_info, tickers);
+      return true;
+    }
+    case KLINE: {
+      Kline kline{message, buffer};
+      kline.symbol = parse_kline_symbol(message_.topic);
+      create_trace_and_dispatch(handler, trace_info, kline);
       return true;
     }
     case WALLET:

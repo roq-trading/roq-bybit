@@ -11,6 +11,7 @@
 #include "roq/bybit/json/subscribe.hpp"
 
 // public
+#include "roq/bybit/json/kline.hpp"
 #include "roq/bybit/json/order_book.hpp"
 #include "roq/bybit/json/public_trade.hpp"
 #include "roq/bybit/json/tickers.hpp"
@@ -37,6 +38,7 @@ struct Parser final {
     virtual void operator()(Trace<json::OrderBook> const &, size_t depth) = 0;
     virtual void operator()(Trace<json::PublicTrade> const &) = 0;
     virtual void operator()(Trace<json::Tickers> const &) = 0;
+    virtual void operator()(Trace<json::Kline> const &) = 0;
     // private stream
     virtual void operator()(Trace<json::Wallet> const &) = 0;
     virtual void operator()(Trace<json::Position> const &) = 0;

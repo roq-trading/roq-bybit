@@ -25,6 +25,8 @@ execution_result.hpp
 instrument_info.hpp
 instrument_info_result_item.hpp
 instrument_info_result.hpp
+kline_item.hpp
+kline.hpp
 leverage_filter.hpp
 lot_size_filter.hpp
 message.hpp
@@ -95,6 +97,8 @@ execution_result.cpp
 instrument_info.cpp
 instrument_info_result_item.cpp
 instrument_info_result.cpp
+kline_item.cpp
+kline.cpp
 leverage_filter.cpp
 lot_size_filter.cpp
 message.cpp

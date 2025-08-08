@@ -12,6 +12,9 @@
       "name": "tickers"
     },
     {
+      "name": "kline"
+    },
+    {
       "name": "wallet"
     },
     {
