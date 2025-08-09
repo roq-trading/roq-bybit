@@ -1,5 +1,5 @@
 {
-  "name": "roq/bybit/json/InstrumentInfoResult",
+  "name": "roq/bybit/json/InstrumentsInfoResult",
   "type": "comp",
   "values": [
     {
@@ -8,7 +8,7 @@
     },
     {
       "name": "list",
-      "type": "roq/bybit/json/InstrumentInfoResultItem",
+      "type": "roq/bybit/json/InstrumentsInfoResultItem",
       "array": "std/span"
     },
     {

@@ -96,8 +96,10 @@ Rest::Rest(Handler &handler, io::Context &context, uint16_t stream_id, Shared &s
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
       profile_{
-          .instrument_info = create_metrics(shared.settings, name_, "instrument_info"sv),
-          .instrument_info_ack = create_metrics(shared.settings, name_, "instrument_info_ack"sv),
+          .instruments_info = create_metrics(shared.settings, name_, "instruments_info"sv),
+          .instruments_info_ack = create_metrics(shared.settings, name_, "instruments_info_ack"sv),
+          .kline = create_metrics(shared.settings, name_, "kline"sv),
+          .kline_ack = create_metrics(shared.settings, name_, "kline_ack"sv),
       },
       latency_{
           .ping = create_metrics(shared.settings, name_, "ping"sv),
@@ -115,8 +117,11 @@ void Rest::operator()(Event<Stop> const &) {
 }
 
 void Rest::operator()(Event<Timer> const &event) {
-  auto now = event.value.now;
-  (*connection_).refresh(now);
+  auto &[message_info, timer] = event;
+  (*connection_).refresh(timer.now);
+  if (ready()) {
+    check_request_queue(timer.now);
+  }
 }
 
 void Rest::operator()(metrics::Writer &writer) const {
@@ -124,8 +129,10 @@ void Rest::operator()(metrics::Writer &writer) const {
       // counter
       .write(counter_.disconnect, metrics::Type::COUNTER)
       // profile
-      .write(profile_.instrument_info, metrics::Type::PROFILE)
-      .write(profile_.instrument_info_ack, metrics::Type::PROFILE)
+      .write(profile_.instruments_info, metrics::Type::PROFILE)
+      .write(profile_.instruments_info_ack, metrics::Type::PROFILE)
+      .write(profile_.kline, metrics::Type::PROFILE)
+      .write(profile_.kline_ack, metrics::Type::PROFILE)
       // latency
       .write(latency_.ping, metrics::Type::LATENCY);
 }
@@ -186,8 +193,8 @@ uint32_t Rest::download(RestState state) {
     case UNDEFINED:
       assert(false);
       break;
-    case GET_INSTRUMENT_INFO:
-      get_instrument_info();
+    case GET_INSTRUMENTS_INFO:
+      get_instruments_info();
       return 1;
     case DONE:
       (*this)(ConnectionStatus::READY);
@@ -197,10 +204,10 @@ uint32_t Rest::download(RestState state) {
   return 0;
 }
 
-// market info
+// instruments-info
 
-void Rest::get_instrument_info() {
-  profile_.instrument_info([&]() {
+void Rest::get_instruments_info() {
+  profile_.instruments_info([&]() {
     auto query = fmt::format(
         "?category={}"
         "&status=Trading"
@@ -208,7 +215,7 @@ void Rest::get_instrument_info() {
         shared_.api.category.as_raw_text());
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
-        .path = shared_.api.market_data.market_instrument_info,
+        .path = shared_.api.market_data.instruments_info,
         .query = query,
         .accept = web::http::Accept::APPLICATION_JSON,
         .content_type = {},
@@ -219,23 +226,23 @@ void Rest::get_instrument_info() {
     auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
       TraceInfo trace_info;
       Trace event{trace_info, response};
-      get_instrument_info_ack(event, sequence);
+      get_instruments_info_ack(event, sequence);
     };
     (*connection_)("market-instrument-info"sv, request, callback);
   });
 }
 
-void Rest::get_instrument_info_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
-  auto const STATE = RestState::GET_INSTRUMENT_INFO;
-  profile_.instrument_info_ack([&]() {
+void Rest::get_instruments_info_ack(Trace<web::rest::Response> const &event, uint32_t sequence) {
+  auto const STATE = RestState::GET_INSTRUMENTS_INFO;
+  profile_.instruments_info_ack([&]() {
     auto handle_success = [&](auto &body) {
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        json::InstrumentInfo instrument_info{body, decode_buffer_};
-        Trace event_2{event, instrument_info};
+        json::InstrumentsInfo instruments_info{body, decode_buffer_};
+        Trace event_2{event, instruments_info};
         (*this)(event_2);
-        // XXX HANS NEW ??? create_trace_and_dispatch(*this, event, instrument_info)();
+        // XXX HANS NEW ??? create_trace_and_dispatch(*this, event, instruments_info)();
         download_.check(STATE);
       }
     };
@@ -247,13 +254,13 @@ void Rest::get_instrument_info_ack(Trace<web::rest::Response> const &event, uint
   });
 }
 
-void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
-  auto &[trace_info, instrument_info] = event;
-  log::info<4>("instrument_info={}"sv, instrument_info);
+void Rest::operator()(Trace<json::InstrumentsInfo> const &event) {
+  auto &[trace_info, instruments_info] = event;
+  log::info<4>("instruments_info={}"sv, instruments_info);
   std::vector<Symbol> symbols;
-  symbols.reserve(std::size(instrument_info.result.list));  // alloc
+  symbols.reserve(std::size(instruments_info.result.list));  // alloc
   size_t counter = 0;
-  for (auto &item : instrument_info.result.list) {
+  for (auto &item : instruments_info.result.list) {
     log::info<2>("item={}"sv, item);
     auto discard = shared_.discard_symbol(item.symbol);
     auto trade_vol_step_size = [&]() {
@@ -292,7 +299,7 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
         .expiry_datetime_utc = utils::safe_cast{item.delivery_time},
         .exchange_time_utc = {},
         .exchange_sequence = {},
-        .sending_time_utc = instrument_info.time,
+        .sending_time_utc = instruments_info.time,
         .discard = discard,
     };
     create_trace_and_dispatch(handler_, trace_info, reference_data, true);
@@ -310,7 +317,7 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
         .trading_status = map(item.status),
         .exchange_time_utc = {},
         .exchange_sequence = {},
-        .sending_time_utc = instrument_info.time,
+        .sending_time_utc = instruments_info.time,
     };
     create_trace_and_dispatch(handler_, trace_info, market_status, true);
   }
@@ -321,11 +328,99 @@ void Rest::operator()(Trace<json::InstrumentInfo> const &event) {
     handler_(symbols_update);
   }
   if (counter > 0) {
-    log::info("Symbols {} / {}"sv, counter, std::size(instrument_info.result.list));
+    log::info("Symbols {} / {}"sv, counter, std::size(instruments_info.result.list));
   }
 }
 
+// kline
+
+void Rest::get_kline(std::string_view const &symbol) {
+  profile_.kline([&]() {
+    auto now = clock::get_realtime<std::chrono::milliseconds>();
+    auto start = now - shared_.settings.download.time_series_lookback;
+    auto query = fmt::format(
+        "?category={}"
+        "&symbol={}"
+        "&interval=1"
+        "&start={}"
+        "&limit=1000"sv,
+        shared_.api.category.as_raw_text(),
+        symbol,
+        start.count());
+    auto request = web::rest::Request{
+        .method = web::http::Method::GET,
+        .path = shared_.api.market_data.kline,
+        .query = query,
+        .accept = web::http::Accept::APPLICATION_JSON,
+        .content_type = {},
+        .headers = {},
+        .body = {},
+        .quality_of_service = {},
+    };
+    auto callback = [this, symbol = std::string{symbol}]([[maybe_unused]] auto &request_id, auto &response) {
+      TraceInfo trace_info;
+      Trace event{trace_info, response};
+      get_kline_ack(event, symbol);
+    };
+    (*connection_)("kline"sv, request, callback);
+  });
+}
+
+void Rest::get_kline_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
+  profile_.instruments_info_ack([&]() {
+    auto handle_success = [&](auto &body) {
+      json::KlineResponse kline{body, decode_buffer_};
+      assert(kline.result.symbol == symbol);
+      Trace event_2{event, kline};
+      (*this)(event_2);
+      // XXX HANS NEW ??? create_trace_and_dispatch(*this, event, kline)();
+    };
+    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
+      log::warn(R"(error={}, text="{}")"sv, error, text);
+      // ???
+    };
+    process_response(event, handle_success, handle_error);
+  });
+}
+
+void Rest::operator()(Trace<json::KlineResponse> const &event) {
+  auto &[trace_info, kline_response] = event;
+  auto &bars = shared_.bars;
+  bars.clear();
+  for (auto &item : kline_response.result.list) {
+    auto bar = Bar{
+        .end_time_utc = item.start_time + 1min,
+        .open = item.open_price,
+        .high = item.high_price,
+        .low = item.low_price,
+        .close = item.close_price,
+        .volume = item.volume,
+        .turnover = item.turnover,
+        .count = {},
+    };
+    bars.emplace_back(std::move(bar));
+  }
+  auto time_series_update = TimeSeriesUpdate{
+      .stream_id = stream_id_,
+      .exchange = shared_.settings.exchange,
+      .symbol = kline_response.result.symbol,
+      .source = TimeSeriesSource::TRADES,
+      .frequency = 1min,
+      .origin = Origin::EXCHANGE,
+      .bars = bars,
+      .update_type = UpdateType::SNAPSHOT,
+      .exchange_time_utc = kline_response.time,
+  };
+  create_trace_and_dispatch(handler_, trace_info, time_series_update, true);
+}
+
 // helpers
+
+void Rest::check_request_queue(std::chrono::nanoseconds now) {
+  auto can_request = [&](auto now) { return shared_.rate_limiter.can_request(now); };
+  auto request = [&](auto &symbol) { get_kline(symbol); };
+  shared_.time_series_request_queue.dispatch(can_request, request, now);
+}
 
 template <typename SuccessHandler, typename ErrorHandler>
 void Rest::process_response(web::rest::Response const &response, SuccessHandler success_handler, ErrorHandler error_handler) {

@@ -1,5 +1,5 @@
 {
-  "name": "roq/bybit/json/InstrumentInfo",
+  "name": "roq/bybit/json/KlineResponse",
   "type": "comp",
   "values": [
     {
@@ -12,7 +12,7 @@
     },
     {
       "name": "result",
-      "type": "roq/bybit/json/InstrumentInfoResult"
+      "type": "roq/bybit/json/KlineResponseResult"
     },
     {
       "name": "retExtInfo"

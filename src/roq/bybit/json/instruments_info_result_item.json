@@ -1,5 +1,5 @@
 {
-  "name": "roq/bybit/json/InstrumentInfoResultItem",
+  "name": "roq/bybit/json/InstrumentsInfoResultItem",
   "type": "item",
   "values": [
     {

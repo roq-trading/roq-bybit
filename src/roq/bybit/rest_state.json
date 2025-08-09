@@ -3,7 +3,7 @@
   "type": "enum",
   "values": [
     {
-      "name": "get_instrument_info"
+      "name": "get_instruments_info"
     },
     {
       "name": "done"

@@ -256,7 +256,9 @@ void MarketData::subscribe(std::span<Symbol const> const &symbols) {
   subscribe(mbp_topic_, symbols);
   subscribe("publicTrade"sv, symbols);
   subscribe("tickers"sv, symbols);
-  subscribe("kline"sv, symbols, 1min);
+  if (shared_.settings.download.time_series_lookback.count()) {
+    subscribe("kline"sv, symbols, 1min);
+  }
 }
 
 void MarketData::subscribe(std::string_view const &topic, std::span<Symbol const> const &symbols) {
@@ -288,6 +290,10 @@ void MarketData::subscribe(std::string_view const &topic, std::span<Symbol const
       interval.count(),
       fmt::join(symbols, separator));
   (*connection_).send_text(message);
+  // request snapshot
+  for (auto &symbol : symbols) {
+    shared_.time_series_request_queue.emplace_back(symbol);
+  }
 }
 
 void MarketData::send_ping(std::chrono::nanoseconds now) {
@@ -572,7 +578,7 @@ void MarketData::operator()(Trace<json::Kline> const &event) {
         continue;
       }
       auto bar = Bar{
-          .end_time_utc = item.end,
+          .end_time_utc = item.start + 1min,  // note! end-time is 1ms before next start-time
           .open = item.open,
           .high = item.high,
           .low = item.low,
@@ -594,7 +600,7 @@ void MarketData::operator()(Trace<json::Kline> const &event) {
           .bars = bars,
           .update_type = UpdateType::INCREMENTAL,
       };
-      log::info("time_series_update={}"sv, time_series_update);
+      log::debug("time_series_update={}"sv, time_series_update);
       create_trace_and_dispatch(handler_, trace_info, time_series_update, true);
     }
   });

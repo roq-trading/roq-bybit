@@ -1,0 +1,25 @@
+{
+  "name": "roq/bybit/json/InstrumentsInfo",
+  "type": "comp",
+  "values": [
+    {
+      "name": "retCode",
+      "type": "std/int32"
+    },
+    {
+      "name": "retMsg",
+      "type": "std/string_view"
+    },
+    {
+      "name": "result",
+      "type": "roq/bybit/json/InstrumentsInfoResult"
+    },
+    {
+      "name": "retExtInfo"
+    },
+    {
+      "name": "time",
+      "type": "std/milliseconds"
+    }
+  ]
+}

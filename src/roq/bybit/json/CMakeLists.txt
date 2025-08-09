@@ -27,11 +27,14 @@ set(AUTOGEN_SCHEMAS
     execution.json
     execution_result_item.json
     execution_result.json
-    instrument_info.json
-    instrument_info_result_item.json
-    instrument_info_result.json
+    instruments_info.json
+    instruments_info_result_item.json
+    instruments_info_result.json
     kline_item.json
     kline.json
+    kline_response.json
+    kline_response_result_item.json
+    kline_response_result.json
     leverage_filter.json
     lot_size_filter.json
     message.json

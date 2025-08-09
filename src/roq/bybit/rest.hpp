@@ -23,7 +23,8 @@
 #include "roq/bybit/rest_state.hpp"
 #include "roq/bybit/shared.hpp"
 
-#include "roq/bybit/json/instrument_info.hpp"
+#include "roq/bybit/json/instruments_info.hpp"
+#include "roq/bybit/json/kline_response.hpp"
 
 namespace roq {
 namespace bybit {
@@ -38,6 +39,7 @@ struct Rest final : public web::rest::Client::Handler {
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
     virtual void operator()(Trace<ReferenceData> const &, bool is_last) = 0;
     virtual void operator()(Trace<MarketStatus> const &, bool is_last) = 0;
+    virtual void operator()(Trace<TimeSeriesUpdate> const &, bool is_last) = 0;
     // cross-communication
     virtual void operator()(SymbolsUpdate &) = 0;
   };
@@ -63,9 +65,15 @@ struct Rest final : public web::rest::Client::Handler {
 
   uint32_t download(RestState);
 
-  void get_instrument_info();
-  void get_instrument_info_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::InstrumentInfo> const &);
+  void get_instruments_info();
+  void get_instruments_info_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+  void operator()(Trace<json::InstrumentsInfo> const &);
+
+  void get_kline(std::string_view const &symbol);
+  void get_kline_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
+  void operator()(Trace<json::KlineResponse> const &);
+
+  void check_request_queue(std::chrono::nanoseconds now);
 
   template <typename SuccessHandler, typename ErrorHandler>
   void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);
@@ -84,7 +92,7 @@ struct Rest final : public web::rest::Client::Handler {
     utils::metrics::Counter disconnect;
   } counter_;
   struct {
-    utils::metrics::Profile instrument_info, instrument_info_ack;
+    utils::metrics::Profile instruments_info, instruments_info_ack, kline, kline_ack;
   } profile_;
   struct {
     utils::metrics::Latency ping;

@@ -59,4 +59,5 @@ $PREFIX ./roq-bybit \
   --cache_database_uri "$DATABASE_URI" \
   --cache_database_name "roq" \
   --enable_portfolio=true \
+  --download_time_series_lookback=2h \
   $@

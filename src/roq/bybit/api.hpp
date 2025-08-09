@@ -15,7 +15,8 @@ namespace bybit {
 
 struct API final {
   struct {
-    std::string_view market_instrument_info;
+    std::string_view instruments_info;
+    std::string_view kline;
   } market_data;
 
   struct {

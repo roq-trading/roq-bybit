@@ -11,6 +11,7 @@
 #include "roq/server.hpp"
 
 #include "roq/core/symbols.hpp"
+#include "roq/core/timer_queue.hpp"
 
 #include "roq/core/limit/rate_limiter.hpp"
 
@@ -60,6 +61,8 @@ struct Shared final {
   core::limit::RateLimiter rate_limiter;
 
   core::Symbols symbols;
+
+  core::TimerQueue<std::string> time_series_request_queue;
 };
 
 }  // namespace bybit
