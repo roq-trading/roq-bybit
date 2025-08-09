@@ -578,7 +578,7 @@ void MarketData::operator()(Trace<json::Kline> const &event) {
         continue;
       }
       auto bar = Bar{
-          .end_time_utc = item.start + 1min,  // note! end-time is 1ms before next start-time
+          .begin_time_utc = item.start,
           .open_price = item.open,
           .high_price = item.high,
           .low_price = item.low,
@@ -587,6 +587,7 @@ void MarketData::operator()(Trace<json::Kline> const &event) {
           .base_amount = NaN,
           .quote_amount = item.turnover,
           .number_of_trades = {},
+          .vwap = NaN,
       };
       bars.emplace_back(std::move(bar));
     }
@@ -595,7 +596,7 @@ void MarketData::operator()(Trace<json::Kline> const &event) {
           .stream_id = stream_id_,
           .exchange = shared_.settings.exchange,
           .symbol = kline.symbol,
-          .data_source = DataSource::TRADES,
+          .data_source = DataSource::TRADE_SUMMARY,
           .interval = Interval::_60,
           .origin = Origin::EXCHANGE,
           .bars = bars,

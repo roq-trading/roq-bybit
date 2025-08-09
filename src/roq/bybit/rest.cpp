@@ -389,7 +389,7 @@ void Rest::operator()(Trace<json::KlineResponse> const &event) {
   bars.clear();
   for (auto &item : kline_response.result.list) {
     auto bar = Bar{
-        .end_time_utc = item.start_time + 1min,
+        .begin_time_utc = item.start_time,
         .open_price = item.open_price,
         .high_price = item.high_price,
         .low_price = item.low_price,
@@ -398,6 +398,7 @@ void Rest::operator()(Trace<json::KlineResponse> const &event) {
         .base_amount = NaN,
         .quote_amount = item.turnover,
         .number_of_trades = {},
+        .vwap = NaN,
     };
     bars.emplace_back(std::move(bar));
   }
@@ -405,7 +406,7 @@ void Rest::operator()(Trace<json::KlineResponse> const &event) {
       .stream_id = stream_id_,
       .exchange = shared_.settings.exchange,
       .symbol = kline_response.result.symbol,
-      .data_source = DataSource::TRADES,
+      .data_source = DataSource::TRADE_SUMMARY,
       .interval = Interval::_60,
       .origin = Origin::EXCHANGE,
       .bars = bars,
