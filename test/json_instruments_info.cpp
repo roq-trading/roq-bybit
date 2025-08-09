@@ -4,7 +4,7 @@
 
 #include "roq/core/json/parser.hpp"
 
-#include "roq/bybit/json/instrument_info.hpp"
+#include "roq/bybit/json/instruments_info.hpp"
 
 using namespace roq;
 using namespace roq::bybit;
@@ -258,26 +258,26 @@ auto const OPTION = R"({)"
                     R"(})"sv;
 }  // namespace
 
-TEST_CASE("json_instrument_info_spot", "[json_instrument_info]") {
+TEST_CASE("json_instruments_info_spot", "[json_instruments_info]") {
   std::vector<std::byte> buffer(8192);
-  json::InstrumentInfo obj{SPOT, buffer};
+  json::InstrumentsInfo obj{SPOT, buffer};
   CHECK(obj.ret_code == 0);
 }
 
-TEST_CASE("json_instrument_info_linear", "[json_instrument_info]") {
+TEST_CASE("json_instruments_info_linear", "[json_instruments_info]") {
   std::vector<std::byte> buffer(8192);
-  json::InstrumentInfo obj{LINEAR, buffer};
+  json::InstrumentsInfo obj{LINEAR, buffer};
   CHECK(obj.ret_code == 0);
 }
 
-TEST_CASE("json_instrument_info_inverse", "[json_instrument_info]") {
+TEST_CASE("json_instruments_info_inverse", "[json_instruments_info]") {
   std::vector<std::byte> buffer(8192);
-  json::InstrumentInfo obj{INVERSE, buffer};
+  json::InstrumentsInfo obj{INVERSE, buffer};
   CHECK(obj.ret_code == 0);
 }
 
-TEST_CASE("json_instrument_info_option", "[json_instrument_info]") {
+TEST_CASE("json_instruments_info_option", "[json_instruments_info]") {
   std::vector<std::byte> buffer(8192);
-  json::InstrumentInfo obj{OPTION, buffer};
+  json::InstrumentsInfo obj{OPTION, buffer};
   CHECK(obj.ret_code == 0);
 }

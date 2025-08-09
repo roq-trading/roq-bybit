@@ -599,6 +599,7 @@ void MarketData::operator()(Trace<json::Kline> const &event) {
           .origin = Origin::EXCHANGE,
           .bars = bars,
           .update_type = UpdateType::INCREMENTAL,
+          .exchange_time_utc = kline.timestamp,
       };
       log::debug("time_series_update={}"sv, time_series_update);
       create_trace_and_dispatch(handler_, trace_info, time_series_update, true);
