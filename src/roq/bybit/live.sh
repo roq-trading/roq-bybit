@@ -30,5 +30,5 @@ $PREFIX ./roq-bybit \
   --ws_public_uri "$WS_PUBLIC_URI" \
   --ws_private_uri "$WS_PRIVATE_URI" \
   --time_series_lookback=12h \
-  --download_time_series_lookback=12h \
+  --download_time_series_lookback=6h \
   $@
