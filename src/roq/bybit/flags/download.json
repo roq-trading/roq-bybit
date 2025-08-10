@@ -28,6 +28,12 @@
       "validator": "roq/flags/validators/TimePeriod",
       "default": "0s",
       "description": "Lookback period when downloading time-series"
+    },
+    {
+      "name": "time_series_limit",
+      "type": "std/uint32",
+      "default": 1000,
+      "description": "Maximum number of bars per response (exchange limit)"
     }
   ]
 }

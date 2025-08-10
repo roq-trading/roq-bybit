@@ -343,10 +343,11 @@ void Rest::get_kline(std::string_view const &symbol) {
         "&symbol={}"
         "&interval=1"
         "&start={}"
-        "&limit=1000"sv,
+        "&limit={}"sv,
         shared_.api.category.as_raw_text(),
         symbol,
-        start.count());
+        start.count(),
+        shared_.settings.download.time_series_limit);
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
         .path = shared_.api.market_data.kline,
