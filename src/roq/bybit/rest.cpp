@@ -334,6 +334,7 @@ void Rest::operator()(Trace<json::InstrumentsInfo> const &event) {
 
 // kline
 
+// TODO paginate by splitting begin/end by interval and limit
 void Rest::get_kline(std::string_view const &symbol) {
   profile_.kline([&]() {
     auto now = clock::get_realtime<std::chrono::milliseconds>();
