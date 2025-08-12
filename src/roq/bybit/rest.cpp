@@ -391,7 +391,7 @@ void Rest::operator()(Trace<json::KlineResponse> const &event) {
   bars.clear();
   for (auto &item : kline_response.result.list) {
     auto bar = Bar{
-        .begin_time_utc = item.start_time,
+        .begin_time_utc = utils::safe_cast(item.start_time),
         .confirmed = true,
         .open_price = item.open_price,
         .high_price = item.high_price,

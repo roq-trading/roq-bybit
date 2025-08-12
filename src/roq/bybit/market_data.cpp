@@ -578,7 +578,7 @@ void MarketData::operator()(Trace<json::Kline> const &event) {
         continue;
       }
       auto bar = Bar{
-          .begin_time_utc = item.start,
+          .begin_time_utc = utils::safe_cast(item.start),
           .confirmed = item.confirm,
           .open_price = item.open,
           .high_price = item.high,
