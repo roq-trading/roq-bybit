@@ -410,7 +410,7 @@ void Rest::operator()(Trace<json::KlineResponse> const &event) {
       .exchange = shared_.settings.exchange,
       .symbol = kline_response.result.symbol,
       .data_source = DataSource::TRADE_SUMMARY,
-      .interval = Interval::_60,
+      .interval = shared_.settings_time_series_interval,
       .origin = Origin::EXCHANGE,
       .bars = bars,
       .update_type = UpdateType::SNAPSHOT,

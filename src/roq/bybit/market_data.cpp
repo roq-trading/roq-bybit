@@ -574,7 +574,7 @@ void MarketData::operator()(Trace<json::Kline> const &event) {
     auto &bars = shared_.bars;
     bars.clear();
     for (auto &item : kline.data) {
-      if (!item.confirm) {
+      if (!item.confirm && !shared_.settings.time_series.realtime) {
         continue;
       }
       auto bar = Bar{
@@ -598,7 +598,7 @@ void MarketData::operator()(Trace<json::Kline> const &event) {
           .exchange = shared_.settings.exchange,
           .symbol = kline.symbol,
           .data_source = DataSource::TRADE_SUMMARY,
-          .interval = Interval::_60,
+          .interval = shared_.settings_time_series_interval,
           .origin = Origin::EXCHANGE,
           .bars = bars,
           .update_type = UpdateType::INCREMENTAL,

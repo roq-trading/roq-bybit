@@ -57,6 +57,7 @@ struct Shared final {
   server::Dispatcher &dispatcher;
 
   Settings const &settings;
+  Interval const settings_time_series_interval;
   API const api;
   core::limit::RateLimiter rate_limiter;
 
