@@ -23,11 +23,9 @@
       "description": "Maximum number of trades per response (exchange limit)"
     },
     {
-      "name": "time_series_lookback",
-      "type": "std/milliseconds",
-      "validator": "roq/flags/validators/TimePeriod",
-      "default": "0s",
-      "description": "Lookback period when downloading time-series"
+      "name": "time_series",
+      "type": "std/bool",
+      "description": "Download time-series?"
     },
     {
       "name": "time_series_limit",

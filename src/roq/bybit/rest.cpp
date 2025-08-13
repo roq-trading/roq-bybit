@@ -338,7 +338,7 @@ void Rest::operator()(Trace<json::InstrumentsInfo> const &event) {
 void Rest::get_kline(std::string_view const &symbol) {
   profile_.kline([&]() {
     auto now = clock::get_realtime<std::chrono::milliseconds>();
-    auto start = now - shared_.settings.download.time_series_lookback;
+    auto start = now - shared_.settings.time_series.lookback;
     auto query = fmt::format(
         "?category={}"
         "&symbol={}"
@@ -410,7 +410,7 @@ void Rest::operator()(Trace<json::KlineResponse> const &event) {
       .exchange = shared_.settings.exchange,
       .symbol = kline_response.result.symbol,
       .data_source = DataSource::TRADE_SUMMARY,
-      .interval = shared_.settings_time_series_interval,
+      .interval = shared_.settings.time_series.interval,
       .origin = Origin::EXCHANGE,
       .bars = bars,
       .update_type = UpdateType::SNAPSHOT,

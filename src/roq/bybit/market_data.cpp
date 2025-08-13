@@ -256,7 +256,7 @@ void MarketData::subscribe(std::span<Symbol const> const &symbols) {
   subscribe(mbp_topic_, symbols);
   subscribe("publicTrade"sv, symbols);
   subscribe("tickers"sv, symbols);
-  if (shared_.settings.download.time_series_lookback.count()) {
+  if (shared_.settings.download.time_series && shared_.settings.time_series.lookback.count()) {
     subscribe("kline"sv, symbols, 1min);
   }
 }
@@ -598,7 +598,7 @@ void MarketData::operator()(Trace<json::Kline> const &event) {
           .exchange = shared_.settings.exchange,
           .symbol = kline.symbol,
           .data_source = DataSource::TRADE_SUMMARY,
-          .interval = shared_.settings_time_series_interval,
+          .interval = shared_.settings.time_series.interval,
           .origin = Origin::EXCHANGE,
           .bars = bars,
           .update_type = UpdateType::INCREMENTAL,
