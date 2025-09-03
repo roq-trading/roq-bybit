@@ -2,6 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/bybit/json/order.hpp"
 #include "roq/bybit/json/parser.hpp"
 
@@ -63,7 +65,7 @@ auto const MESSAGE_SPOT = R"({)"
 }  // namespace
 
 TEST_CASE("json_order_spot", "[json_order]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Order obj{MESSAGE_SPOT, buffer};
   CHECK(obj.id == "460579-1405980802291926784-ff9c1866-f679-4fde-9e43-833c96d09967"sv);
 }
@@ -87,7 +89,7 @@ TEST_CASE("json_order_parser", "[json_order]") {
 
     bool found = false;
   } handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   auto res = json::Parser::dispatch(handler, MESSAGE_SPOT, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
@@ -147,7 +149,7 @@ auto const MESSAGE_LINEAR = R"({)"
 }  // namespace
 
 TEST_CASE("json_order_linear", "[json_order]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Order obj{MESSAGE_LINEAR, buffer};
   CHECK(obj.topic == "order"sv);
 }

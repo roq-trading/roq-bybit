@@ -2,6 +2,7 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
 #include "roq/core/json/parser.hpp"
 
 #include "roq/bybit/json/parser.hpp"
@@ -51,7 +52,7 @@ auto const OPTION = R"({)"
 }  // namespace
 
 TEST_CASE("json_subscribe_simple_spot", "[json_subscribe]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Subscribe obj{SPOT, buffer};
   CHECK(obj.success == true);
 }
@@ -75,14 +76,14 @@ TEST_CASE("json_subscribe_parser_spot", "[json_subscribe]") {
 
     bool found = false;
   } handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   auto res = json::Parser::dispatch(handler, SPOT, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
 }
 
 TEST_CASE("json_subscribe_simple_linear", "[json_subscribe]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Subscribe obj{LINEAR, buffer};
   CHECK(obj.success == true);
 }
@@ -106,14 +107,14 @@ TEST_CASE("json_subscribe_parser_linear", "[json_subscribe]") {
 
     bool found = false;
   } handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   auto res = json::Parser::dispatch(handler, LINEAR, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
 }
 
 TEST_CASE("json_subscribe_simple_inverse", "[json_subscribe]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Subscribe obj{INVERSE, buffer};
   CHECK(obj.success == true);
 }
@@ -137,14 +138,14 @@ TEST_CASE("json_subscribe_parser_inverse", "[json_subscribe]") {
 
     bool found = false;
   } handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   auto res = json::Parser::dispatch(handler, INVERSE, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
 }
 
 TEST_CASE("json_subscribe_simple_option", "[json_subscribe]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Subscribe obj{OPTION, buffer};
   CHECK(obj.success == true);
 }
@@ -168,7 +169,7 @@ TEST_CASE("json_subscribe_parser_option", "[json_subscribe]") {
 
     bool found = false;
   } handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   auto res = json::Parser::dispatch(handler, OPTION, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);

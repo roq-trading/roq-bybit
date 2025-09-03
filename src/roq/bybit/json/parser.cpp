@@ -44,14 +44,13 @@ constexpr auto parse_mbp_depth(auto const &value) {
 // static_assert(parse_mbp_depth("orderbook.1.xxx"sv) == 1);
 // static_assert(parse_mbp_depth("orderbook.50.xxx"sv) == 50);
 
-bool dispatch_helper_flatten_wallet(auto &handler, auto &buffer, auto &trace_info, auto &message) {
-  core::json::Buffer buffer_2{buffer};
+bool dispatch_helper_flatten_wallet(auto &handler, auto &buffer_stack, auto &trace_info, auto &message) {
   core::json::Parser parser{message};
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::Object>(root)) {
     if (key == "data"sv) {
       for (auto item : std::get<core::json::Array>(value)) {
-        Wallet wallet{item, buffer_2};
+        Wallet wallet{item, buffer_stack};
         create_trace_and_dispatch(handler, trace_info, wallet);
       }
       return true;
@@ -63,8 +62,8 @@ bool dispatch_helper_flatten_wallet(auto &handler, auto &buffer, auto &trace_inf
 
 // === IMPLEMENTATION ===
 
-bool Parser::dispatch(Handler &handler, std::string_view const &message, std::span<std::byte> const &buffer, TraceInfo const &trace_info) {
-  Message message_{message, buffer};
+bool Parser::dispatch(Handler &handler, std::string_view const &message, core::json::BufferStack &buffer_stack, TraceInfo const &trace_info) {
+  Message message_{message, buffer_stack};
   auto topic = parse_topic(message_.topic);
   switch (topic) {
     using enum Topic::type_t;
@@ -72,42 +71,42 @@ bool Parser::dispatch(Handler &handler, std::string_view const &message, std::sp
     case UNKNOWN_INTERNAL:
       break;
     case ORDERBOOK: {
-      OrderBook order_book{message, buffer};
+      OrderBook order_book{message, buffer_stack};
       auto mbp_depth = parse_mbp_depth(message_.topic);
       create_trace_and_dispatch(handler, trace_info, order_book, mbp_depth);
       return true;
       break;
     }
     case PUBLIC_TRADE: {
-      PublicTrade public_trade{message, buffer};
+      PublicTrade public_trade{message, buffer_stack};
       create_trace_and_dispatch(handler, trace_info, public_trade);
       return true;
     }
     case TICKERS: {
-      Tickers tickers{message, buffer};
+      Tickers tickers{message, buffer_stack};
       create_trace_and_dispatch(handler, trace_info, tickers);
       return true;
     }
     case KLINE: {
-      Kline kline{message, buffer};
+      Kline kline{message, buffer_stack};
       kline.symbol = parse_kline_symbol(message_.topic);
       create_trace_and_dispatch(handler, trace_info, kline);
       return true;
     }
     case WALLET:
-      return dispatch_helper_flatten_wallet(handler, buffer, trace_info, message);
+      return dispatch_helper_flatten_wallet(handler, buffer_stack, trace_info, message);
     case POSITION: {
-      Position position{message, buffer};
+      Position position{message, buffer_stack};
       create_trace_and_dispatch(handler, trace_info, position);
       return true;
     }
     case ORDER: {
-      Order order{message, buffer};
+      Order order{message, buffer_stack};
       create_trace_and_dispatch(handler, trace_info, order);
       return true;
     }
     case EXECUTION: {
-      Execution2 execution{message, buffer};
+      Execution2 execution{message, buffer_stack};
       create_trace_and_dispatch(handler, trace_info, execution);
       return true;
     }
@@ -118,12 +117,12 @@ bool Parser::dispatch(Handler &handler, std::string_view const &message, std::sp
     case UNKNOWN_INTERNAL:
       break;
     case AUTH: {
-      Auth auth{message, buffer};
+      Auth auth{message, buffer_stack};
       create_trace_and_dispatch(handler, trace_info, auth);
       return true;
     }
     case PING: {
-      Ping ping{message, buffer};
+      Ping ping{message, buffer_stack};
       create_trace_and_dispatch(handler, trace_info, ping);
       return true;
     }
@@ -132,7 +131,7 @@ bool Parser::dispatch(Handler &handler, std::string_view const &message, std::sp
       return true;
     }
     case SUBSCRIBE: {
-      Subscribe subscribe{message, buffer};
+      Subscribe subscribe{message, buffer_stack};
       create_trace_and_dispatch(handler, trace_info, subscribe);
       return true;
     }
@@ -144,7 +143,7 @@ bool Parser::dispatch(Handler &handler, std::string_view const &message, std::sp
       break;
     case ERROR: {
       // XXX check that this is a real message
-      Error error{message, buffer};
+      Error error{message, buffer_stack};
       create_trace_and_dispatch(handler, trace_info, error);
       return true;
     }
@@ -152,7 +151,7 @@ bool Parser::dispatch(Handler &handler, std::string_view const &message, std::sp
     case DELTA:
       break;
     case COMMAND_RESP: {
-      Subscribe subscribe{message, buffer};
+      Subscribe subscribe{message, buffer_stack};
       create_trace_and_dispatch(handler, trace_info, subscribe);
       return true;
     }

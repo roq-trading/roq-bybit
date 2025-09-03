@@ -2,6 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/bybit/json/parser.hpp"
 
 using namespace roq;
@@ -116,7 +118,7 @@ TEST_CASE("json_wallet_parser", "[json_wallet]") {
 
     bool found = false;
   } handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   auto res = json::Parser::dispatch(handler, MESSAGE, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
@@ -148,7 +150,7 @@ TEST_CASE("json_wallet_parser_2", "[json_wallet]") {
 
     bool found = false;
   } handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   auto res = json::Parser::dispatch(handler, MESSAGE_2, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);

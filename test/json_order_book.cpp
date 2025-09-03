@@ -2,6 +2,7 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
 #include "roq/core/json/parser.hpp"
 
 #include "roq/bybit/json/order_book.hpp"
@@ -159,19 +160,19 @@ auto const MESSAGE_50_DELTA = R"({)"
 }  // namespace
 
 TEST_CASE("json_order_book_simple_1", "[json_order_book]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::OrderBook obj{MESSAGE_1, buffer};
   CHECK(obj.topic == "orderbook.1.BTCUSDT"sv);
 }
 
 TEST_CASE("json_order_book_simple_50_snapshot", "[json_order_book]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::OrderBook obj{MESSAGE_50_SNAPSHOT, buffer};
   CHECK(obj.topic == "orderbook.50.BTCUSDT"sv);
 }
 
 TEST_CASE("json_order_book_simple_50_delta", "[json_order_book]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::OrderBook obj{MESSAGE_50_DELTA, buffer};
   CHECK(obj.topic == "orderbook.50.BTCUSDT"sv);
 }
@@ -195,7 +196,7 @@ TEST_CASE("json_order_book_parser", "[json_order_book]") {
 
     bool found = false;
   } handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   auto res = json::Parser::dispatch(handler, MESSAGE_1, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);

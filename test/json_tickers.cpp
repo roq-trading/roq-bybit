@@ -2,6 +2,7 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
 #include "roq/core/json/parser.hpp"
 
 #include "roq/bybit/json/parser.hpp"
@@ -132,7 +133,7 @@ auto const OPTION = R"({)"
 // spot
 
 TEST_CASE("json_tickers_simple_spot", "[json_tickers]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Tickers obj{SPOT, buffer};
   CHECK(obj.topic == "tickers.BTCUSDT"sv);
 }
@@ -156,7 +157,7 @@ TEST_CASE("json_tickers_parser_spot", "[json_tickers]") {
 
     bool found = false;
   } handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   auto res = json::Parser::dispatch(handler, SPOT, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
@@ -165,7 +166,7 @@ TEST_CASE("json_tickers_parser_spot", "[json_tickers]") {
 // linear
 
 TEST_CASE("json_tickers_simple_linear", "[json_tickers]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Tickers obj{LINEAR, buffer};
   CHECK(obj.topic == "tickers.BTCUSDT"sv);
 }
@@ -189,7 +190,7 @@ TEST_CASE("json_tickers_parser_linear", "[json_tickers]") {
 
     bool found = false;
   } handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   auto res = json::Parser::dispatch(handler, LINEAR, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
@@ -198,7 +199,7 @@ TEST_CASE("json_tickers_parser_linear", "[json_tickers]") {
 // inverse
 
 TEST_CASE("json_tickers_simple_inverse", "[json_tickers]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Tickers obj{INVERSE, buffer};
   CHECK(obj.topic == "tickers.BTCUSDM23"sv);
 }
@@ -222,7 +223,7 @@ TEST_CASE("json_tickers_parser_inverse", "[json_tickers]") {
 
     bool found = false;
   } handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   auto res = json::Parser::dispatch(handler, INVERSE, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
@@ -231,7 +232,7 @@ TEST_CASE("json_tickers_parser_inverse", "[json_tickers]") {
 // option
 
 TEST_CASE("json_tickers_simple_option", "[json_tickers]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Tickers obj{OPTION, buffer};
   CHECK(obj.topic == "tickers.BTC-28APR23-30000-C"sv);
 }
@@ -255,7 +256,7 @@ TEST_CASE("json_tickers_parser_option", "[json_tickers]") {
 
     bool found = false;
   } handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   auto res = json::Parser::dispatch(handler, OPTION, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);

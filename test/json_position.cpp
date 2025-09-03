@@ -2,6 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/bybit/json/parser.hpp"
 #include "roq/bybit/json/position.hpp"
 
@@ -53,7 +55,7 @@ auto const MESSAGE_LINEAR = R"({)"
 }  // namespace
 
 TEST_CASE("json_position_linear", "[json_position]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Position obj{MESSAGE_LINEAR, buffer};
   CHECK(obj.topic == "position"sv);
 }
@@ -77,7 +79,7 @@ TEST_CASE("json_position_parser", "[json_position]") {
 
     bool found = false;
   } handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   auto res = json::Parser::dispatch(handler, MESSAGE_LINEAR, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
@@ -123,7 +125,7 @@ auto const MESSAGE_SIDE_NONE = R"({)"
 }  // namespace
 
 TEST_CASE("json_position_side_none", "[json_position]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Position obj{MESSAGE_SIDE_NONE, buffer};
   CHECK(obj.topic == "position"sv);
 }

@@ -2,6 +2,7 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
 #include "roq/core/json/parser.hpp"
 
 #include "roq/bybit/json/parser.hpp"
@@ -32,7 +33,7 @@ auto const MESSAGE = R"({)"
 }  // namespace
 
 TEST_CASE("json_public_trade_simple", "[json_public_trade]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::PublicTrade obj{MESSAGE, buffer};
   CHECK(obj.topic == "publicTrade.BTCUSDT"sv);
 }
@@ -56,7 +57,7 @@ TEST_CASE("json_public_trade_parser", "[json_public_trade]") {
 
     bool found = false;
   } handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   auto res = json::Parser::dispatch(handler, MESSAGE, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);

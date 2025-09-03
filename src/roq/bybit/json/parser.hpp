@@ -6,6 +6,8 @@
 
 #include "roq/trace_info.hpp"
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/bybit/json/error.hpp"
 #include "roq/bybit/json/ping.hpp"
 #include "roq/bybit/json/subscribe.hpp"
@@ -46,7 +48,7 @@ struct Parser final {
     virtual void operator()(Trace<json::Execution2> const &) = 0;
   };
 
-  static bool dispatch(Handler &, std::string_view const &message, std::span<std::byte> const &, TraceInfo const &);
+  static bool dispatch(Handler &, std::string_view const &message, core::json::BufferStack &, TraceInfo const &);
 };
 
 }  // namespace json

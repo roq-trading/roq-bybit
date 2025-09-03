@@ -2,6 +2,7 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
 #include "roq/core/json/parser.hpp"
 
 #include "roq/bybit/json/instruments_info.hpp"
@@ -259,8 +260,9 @@ auto const OPTION = R"({)"
 }  // namespace
 
 TEST_CASE("json_instruments_info_spot", "[json_instruments_info]") {
-  std::vector<std::byte> buffer(8192);
-  json::InstrumentsInfo obj{SPOT, buffer};
+  // std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer_stack{8192, 1};
+  json::InstrumentsInfo obj{SPOT, buffer_stack};
   CHECK(obj.ret_code == 0);
 }
 

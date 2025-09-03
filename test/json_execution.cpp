@@ -2,6 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/bybit/json/execution.hpp"
 #include "roq/bybit/json/parser.hpp"
 
@@ -105,7 +107,7 @@ auto const MESSAGE = R"({)"
 }  // namespace
 
 TEST_CASE("json_execution_simple", "[json_execution]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Execution obj{MESSAGE, buffer};
   CHECK(obj.ret_code == 0);
 }
@@ -167,7 +169,7 @@ TEST_CASE("json_execution_parser", "[json_execution]") {
 
     bool found = false;
   } handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   auto res = json::Parser::dispatch(handler, MESSAGE_LINEAR, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);

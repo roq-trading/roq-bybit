@@ -2,6 +2,7 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
 #include "roq/core/json/parser.hpp"
 
 #include "roq/bybit/json/auth.hpp"
@@ -24,7 +25,7 @@ auto const MESSAGE = R"({)"
 }  // namespace
 
 TEST_CASE("json_auth_simple", "[json_auth]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::Auth obj{MESSAGE, buffer};
   CHECK(obj.success == true);
 }
@@ -48,7 +49,7 @@ TEST_CASE("json_auth_parser", "[json_auth]") {
 
     bool found = false;
   } handler;
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   auto res = json::Parser::dispatch(handler, MESSAGE, buffer, {});
   CHECK(res == true);
   CHECK(handler.found == true);
