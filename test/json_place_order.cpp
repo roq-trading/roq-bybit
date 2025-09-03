@@ -2,6 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/bybit/json/place_order.hpp"
 #include "roq/bybit/json/utils.hpp"
 
@@ -77,7 +79,7 @@ auto const MESSAGE = R"({)"
 }  // namespace
 
 TEST_CASE("json_place_order_response", "[json_place_order]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::PlaceOrder obj{MESSAGE, buffer};
   CHECK(obj.ret_code == 0);
 }

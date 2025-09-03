@@ -2,6 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/bybit/json/position_info.hpp"
 
 using namespace roq;
@@ -53,7 +55,7 @@ auto const MESSAGE = R"({)"
 }  // namespace
 
 TEST_CASE("simple", "[json_position_info]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::PositionInfo position_info{MESSAGE, buffer};
   REQUIRE(std::size(position_info.result.list) == 1);
 }

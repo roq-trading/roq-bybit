@@ -2,6 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/bybit/json/account_info.hpp"
 
 using namespace roq;
@@ -26,7 +28,7 @@ auto const MESSAGE = R"({)"
 }  // namespace
 
 TEST_CASE("json_account_info_spot", "[json_account_info]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::AccountInfo obj{MESSAGE, buffer};
   CHECK(obj.ret_code == 0);
 }

@@ -13,8 +13,7 @@ namespace json {
 
 // === IMPLEMENTATION ===
 
-bool WalletParser::dispatch(Handler &handler, std::string_view const &message, std::span<std::byte> const &buffer, TraceInfo const &trace_info) {
-  core::json::Buffer buffer_2{buffer};
+bool WalletParser::dispatch(Handler &handler, std::string_view const &message, core::json::BufferStack &buffer_stack, TraceInfo const &trace_info) {
   core::json::Parser parser{message};
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::Object>(root)) {
@@ -22,7 +21,7 @@ bool WalletParser::dispatch(Handler &handler, std::string_view const &message, s
       for (auto [key_2, value_2] : std::get<core::json::Object>(value)) {
         if (key_2 == "list"sv) {
           for (auto item : std::get<core::json::Array>(value_2)) {
-            Wallet wallet{item, buffer_2};
+            Wallet wallet{item, buffer_stack};
             create_trace_and_dispatch(handler, trace_info, wallet);
           }
           return true;

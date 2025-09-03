@@ -260,26 +260,26 @@ auto const OPTION = R"({)"
 }  // namespace
 
 TEST_CASE("json_instruments_info_spot", "[json_instruments_info]") {
-  // std::vector<std::byte> buffer(8192);
+  // core::json::BufferStack buffer{8192,1};
   core::json::BufferStack buffer_stack{8192, 1};
   json::InstrumentsInfo obj{SPOT, buffer_stack};
   CHECK(obj.ret_code == 0);
 }
 
 TEST_CASE("json_instruments_info_linear", "[json_instruments_info]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192,1};
   json::InstrumentsInfo obj{LINEAR, buffer};
   CHECK(obj.ret_code == 0);
 }
 
 TEST_CASE("json_instruments_info_inverse", "[json_instruments_info]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192,1};
   json::InstrumentsInfo obj{INVERSE, buffer};
   CHECK(obj.ret_code == 0);
 }
 
 TEST_CASE("json_instruments_info_option", "[json_instruments_info]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192,1};
   json::InstrumentsInfo obj{OPTION, buffer};
   CHECK(obj.ret_code == 0);
 }

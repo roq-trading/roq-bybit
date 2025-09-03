@@ -2,6 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/bybit/json/amend_order.hpp"
 #include "roq/bybit/json/utils.hpp"
 
@@ -112,7 +114,7 @@ auto const ERROR = R"({)"
 }
 
 TEST_CASE("json_amend_order_error", "[json_amend_order]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::AmendOrder obj{ERROR, buffer};
   CHECK(obj.ret_code == 10001);
 }

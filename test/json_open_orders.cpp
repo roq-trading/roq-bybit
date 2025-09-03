@@ -2,6 +2,8 @@
 
 #include <catch2/catch_all.hpp>
 
+#include "roq/core/json/buffer_stack.hpp"
+
 #include "roq/bybit/json/open_orders.hpp"
 
 using namespace roq;
@@ -25,7 +27,7 @@ auto const EMPTY = R"({)"
 }  // namespace
 
 TEST_CASE("json_open_orders_empty", "[json_open_orders]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::OpenOrders obj{EMPTY, buffer};
   CHECK(obj.ret_code == 0);
 }
@@ -82,7 +84,7 @@ auto const MESSAGE_SPOT = R"({)"
 }  // namespace
 
 TEST_CASE("json_open_orders_spot", "[json_open_orders]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::OpenOrders obj{MESSAGE_SPOT, buffer};
   CHECK(obj.ret_code == 0);
 }
@@ -142,7 +144,7 @@ auto const MESSAGE_LINEAR = R"({)"
 }  // namespace
 
 TEST_CASE("json_open_orders_linear", "[json_open_orders]") {
-  std::vector<std::byte> buffer(8192);
+  core::json::BufferStack buffer{8192, 1};
   json::OpenOrders obj{MESSAGE_LINEAR, buffer};
   CHECK(obj.ret_code == 0);
 }
