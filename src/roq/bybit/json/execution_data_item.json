@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/ExecutionDataItem",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "category",

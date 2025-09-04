@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/InstrumentsInfoResultItem",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "symbol",

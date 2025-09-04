@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/Subscribe",
-  "type": "comp",
+  "type": "dictionary",
   "values": [
     {
       "name": "op",

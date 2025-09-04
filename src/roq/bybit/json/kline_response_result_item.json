@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/KlineResponseResultItem",
-  "type": "array_item",
+  "type": "by_index",
   "values": [
     {
       "name": "start_time",

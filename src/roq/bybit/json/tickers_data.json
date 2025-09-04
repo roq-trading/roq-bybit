@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/TickersData",
-  "type": "comp",
+  "type": "dictionary",
   "values": [
     {
       "name": "symbol",

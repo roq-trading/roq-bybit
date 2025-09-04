@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/LotSizeFilter",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "basePrecision",

@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/AccountInfo",
-  "type": "comp",
+  "type": "dictionary",
   "values": [
     {
       "name": "retCode",

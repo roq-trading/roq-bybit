@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/Message",
-  "type": "comp",
+  "type": "dictionary",
   "values": [
     {
       "name": "id",

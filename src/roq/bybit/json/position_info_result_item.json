@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/PositionInfoResultItem",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "positionIdx",

@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/Wallet",
-  "type": "comp",
+  "type": "dictionary",
   "values": [
     {
       "name": "accountType",

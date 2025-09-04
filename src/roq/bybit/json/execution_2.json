@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/Execution2",
-  "type": "comp",
+  "type": "dictionary",
   "values": [
     {
       "name": "id",

@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/OrderBookLevel",
-  "type": "array_item",
+  "type": "by_index",
   "values": [
     {
       "name": "price",

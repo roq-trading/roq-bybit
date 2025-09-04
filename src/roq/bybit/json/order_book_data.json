@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/OrderBookData",
-  "type": "comp",
+  "type": "dictionary",
   "values": [
     {
       "raw": "s",

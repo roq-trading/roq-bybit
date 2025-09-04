@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/PlaceOrderResult",
-  "type": "comp",
+  "type": "dictionary",
   "values": [
     {
       "name": "orderId",

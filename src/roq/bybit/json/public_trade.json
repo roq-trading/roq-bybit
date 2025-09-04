@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/PublicTrade",
-  "type": "comp",
+  "type": "dictionary",
   "values": [
     {
       "name": "topic",

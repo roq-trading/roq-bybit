@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/PublicTradeData",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "raw": "T",

@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/AmendOrderResult",
-  "type": "comp",
+  "type": "dictionary",
   "values": [
     {
       "name": "orderId",

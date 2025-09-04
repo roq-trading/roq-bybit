@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/LeverageFilter",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "minLeverage",

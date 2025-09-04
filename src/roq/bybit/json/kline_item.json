@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/KlineItem",
-  "type": "item",
+  "type": "dictionary",
   "values": [
     {
       "name": "start",

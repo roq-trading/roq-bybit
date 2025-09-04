@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/WalletBalanceResult",
-  "type": "comp",
+  "type": "dictionary",
   "values": [
     {
       "name": "list",

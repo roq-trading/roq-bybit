@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/AccountInfoResult",
-  "type": "comp",
+  "type": "dictionary",
   "values": [
     {
       "name": "marginMode",

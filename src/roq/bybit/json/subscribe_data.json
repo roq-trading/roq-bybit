@@ -1,6 +1,6 @@
 {
   "name": "roq/bybit/json/SubscribeData",
-  "type": "comp",
+  "type": "dictionary",
   "values": [
     {
       "name": "failTopics",

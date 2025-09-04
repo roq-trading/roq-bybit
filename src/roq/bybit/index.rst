@@ -6,20 +6,20 @@
 roq-bybit
 =========
 
-.. tab:: Stable
-
-  .. code-block:: shell
-
-     $ conda install \
-           --channel https://roq-trading.com/conda/stable \
-           roq-bybit
-
 .. tab:: Unstable
 
   .. code-block:: shell
 
      $ conda install \
            --channel https://roq-trading.com/conda/unstable \
+           roq-bybit
+
+.. tab:: Stable
+
+  .. code-block:: shell
+
+     $ conda install \
+           --channel https://roq-trading.com/conda/stable \
            roq-bybit
 
 
