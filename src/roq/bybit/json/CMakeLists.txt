@@ -1,6 +1,6 @@
 set(TARGET_NAME ${PROJECT_NAME}-json)
 
-set(SOURCES map.cpp parser.cpp utils.cpp wallet_parser.cpp)
+set(SOURCES map.cpp parser.cpp utils.cpp)
 
 include(RoqAutogen)
 
@@ -75,6 +75,8 @@ set(AUTOGEN_SCHEMAS
     topic.json
     tp_sl_mode.json
     trigger_by.json
+    wallet_ack.json
+    wallet_ack_result.json
     wallet_balance_item.json
     wallet_balance.json
     wallet_balance_result_item.json

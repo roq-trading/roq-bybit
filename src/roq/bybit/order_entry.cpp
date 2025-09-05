@@ -47,7 +47,7 @@ auto get_supports(auto api) {
   return result;
 }
 
-size_t const MAX_DECODE_BUFFER_DEPTH = 1;
+size_t const MAX_DECODE_BUFFER_DEPTH = 2;
 }  // namespace
 
 // === CONSTANTS ===
@@ -379,10 +379,9 @@ void OrderEntry::get_wallet_balance_ack(Trace<web::rest::Response> const &event)
       return;
     }
     auto handle_success = [&](auto &body) {
-      if (json::WalletParser::dispatch(*this, body, decode_buffer_, event)) {
-      } else {
-        log::warn(R"(Unexpected: message="{}")"sv, body);
-      }
+      json::WalletAck wallet_ack{body, decode_buffer_};
+      Trace event_2{event, wallet_ack};
+      (*this)(event_2);
     };
     auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
       log::warn(R"(error={}, text="{}")"sv, error, text);
@@ -397,26 +396,28 @@ void OrderEntry::get_wallet_balance_ack(Trace<web::rest::Response> const &event)
   });
 }
 
-void OrderEntry::operator()(Trace<json::Wallet> const &event) {
-  auto &[trace_info, wallet] = event;
-  log::info<2>("wallet={}"sv, wallet);
-  for (auto &item : wallet.coin) {
+void OrderEntry::operator()(Trace<json::WalletAck> const &event) {
+  auto &[trace_info, wallet_ack] = event;
+  log::info<2>("wallet_ack={}"sv, wallet_ack);
+  for (auto &item : wallet_ack.result.list) {
     log::info<2>("item={}"sv, item);
-    // XXX maybe margin mode is from account_type?
-    auto funds_update = FundsUpdate{
-        .stream_id = stream_id_,
-        .account = account_.name,
-        .currency = item.coin,
-        .margin_mode = {},
-        .balance = item.wallet_balance,  // XXX item.free ???
-        .hold = item.locked,
-        .borrowed = NaN,
-        .external_account = {},
-        .update_type = UpdateType::SNAPSHOT,
-        .exchange_time_utc = {},
-        .sending_time_utc = {},  // XXX lost when flattened
-    };
-    create_trace_and_dispatch(handler_, trace_info, funds_update, true);
+    for (auto &item_2 : item.coin) {
+      // XXX maybe margin mode is from account_type?
+      auto funds_update = FundsUpdate{
+          .stream_id = stream_id_,
+          .account = account_.name,
+          .currency = item_2.coin,
+          .margin_mode = {},
+          .balance = item_2.wallet_balance,  // XXX item.free ???
+          .hold = item_2.locked,
+          .borrowed = NaN,
+          .external_account = {},
+          .update_type = UpdateType::SNAPSHOT,
+          .exchange_time_utc = {},
+          .sending_time_utc = {},  // XXX lost when flattened
+      };
+      create_trace_and_dispatch(handler_, trace_info, funds_update, true);
+    }
   }
 }
 

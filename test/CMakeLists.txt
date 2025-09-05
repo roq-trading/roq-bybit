@@ -21,7 +21,7 @@ set(SOURCES
     json_public_trade.cpp
     json_subscribe.cpp
     json_tickers.cpp
-    json_wallet_balance.cpp
+    json_wallet_ack.cpp
     json_wallet.cpp
     main.cpp)
 

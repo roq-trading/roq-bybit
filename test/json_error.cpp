@@ -24,7 +24,7 @@ auto const MESSAGE = R"({)"
 }  // namespace
 
 TEST_CASE("json_error_simple", "[json_error]") {
-  core::json::BufferStack buffer{8192,1};
+  core::json::BufferStack buffer{8192, 1};
   json::Error obj{MESSAGE, buffer};
   CHECK(obj.ret_code == 10004);
 }

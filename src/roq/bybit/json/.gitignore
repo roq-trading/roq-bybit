@@ -70,6 +70,8 @@ time_in_force.hpp
 topic.hpp
 tp_sl_mode.hpp
 trigger_by.hpp
+wallet_ack.hpp
+wallet_ack_result.hpp
 wallet_balance_item.hpp
 wallet_balance.hpp
 wallet_balance_result_item.hpp
@@ -145,6 +147,8 @@ time_in_force.cpp
 topic.cpp
 tp_sl_mode.cpp
 trigger_by.cpp
+wallet_ack.cpp
+wallet_ack_result.cpp
 wallet_balance_item.cpp
 wallet_balance.cpp
 wallet_balance_result_item.cpp
