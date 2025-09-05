@@ -44,6 +44,12 @@ constexpr auto parse_mbp_depth(auto const &value) {
 // static_assert(parse_mbp_depth("orderbook.1.xxx"sv) == 1);
 // static_assert(parse_mbp_depth("orderbook.50.xxx"sv) == 50);
 
+template <typename T, typename... Args>
+void dispatch_helper(auto &handler, auto &message, auto &buffer_stack, auto &trace_info, Args &&...args) {
+  T obj{message, buffer_stack};
+  create_trace_and_dispatch(handler, trace_info, obj, std::forward<Args>(args)...);
+}
+
 bool dispatch_helper_flatten_wallet(auto &handler, auto &buffer_stack, auto &trace_info, auto &message) {
   core::json::Parser parser{message};
   auto root = parser.root();
@@ -71,90 +77,65 @@ bool Parser::dispatch(Handler &handler, std::string_view const &message, core::j
     case UNKNOWN_INTERNAL:
       break;
     case ORDERBOOK: {
-      OrderBook order_book{message, buffer_stack};
       auto mbp_depth = parse_mbp_depth(message_.topic);
-      create_trace_and_dispatch(handler, trace_info, order_book, mbp_depth);
-      return true;
-      break;
-    }
-    case PUBLIC_TRADE: {
-      PublicTrade public_trade{message, buffer_stack};
-      create_trace_and_dispatch(handler, trace_info, public_trade);
+      dispatch_helper<OrderBook>(handler, message, buffer_stack, trace_info, mbp_depth);
       return true;
     }
-    case TICKERS: {
-      Tickers tickers{message, buffer_stack};
-      create_trace_and_dispatch(handler, trace_info, tickers);
+    case PUBLIC_TRADE:
+      dispatch_helper<PublicTrade>(handler, message, buffer_stack, trace_info);
       return true;
-    }
-    case KLINE: {
-      Kline kline{message, buffer_stack};
-      kline.symbol = parse_kline_symbol(message_.topic);
-      create_trace_and_dispatch(handler, trace_info, kline);
+    case TICKERS:
+      dispatch_helper<Tickers>(handler, message, buffer_stack, trace_info);
       return true;
-    }
+    case KLINE:
+      dispatch_helper<Kline>(handler, message, buffer_stack, trace_info);
+      return true;
     case WALLET:
       return dispatch_helper_flatten_wallet(handler, buffer_stack, trace_info, message);
-    case POSITION: {
-      Position position{message, buffer_stack};
-      create_trace_and_dispatch(handler, trace_info, position);
+    case POSITION:
+      dispatch_helper<Position>(handler, message, buffer_stack, trace_info);
       return true;
-    }
-    case ORDER: {
-      Order order{message, buffer_stack};
-      create_trace_and_dispatch(handler, trace_info, order);
+    case ORDER:
+      dispatch_helper<Order>(handler, message, buffer_stack, trace_info);
       return true;
-    }
-    case EXECUTION: {
-      Execution2 execution{message, buffer_stack};
-      create_trace_and_dispatch(handler, trace_info, execution);
+    case EXECUTION:
+      dispatch_helper<Execution2>(handler, message, buffer_stack, trace_info);
       return true;
-    }
   }
   switch (message_.op) {
     using enum Operation::type_t;
     case UNDEFINED_INTERNAL:
     case UNKNOWN_INTERNAL:
       break;
-    case AUTH: {
-      Auth auth{message, buffer_stack};
-      create_trace_and_dispatch(handler, trace_info, auth);
+    case AUTH:
+      dispatch_helper<Auth>(handler, message, buffer_stack, trace_info);
       return true;
-    }
-    case PING: {
-      Ping ping{message, buffer_stack};
-      create_trace_and_dispatch(handler, trace_info, ping);
+    case PING:
+      dispatch_helper<Ping>(handler, message, buffer_stack, trace_info);
       return true;
-    }
     case PONG: {
       // note! don't process (only the option api)
       return true;
     }
-    case SUBSCRIBE: {
-      Subscribe subscribe{message, buffer_stack};
-      create_trace_and_dispatch(handler, trace_info, subscribe);
+    case SUBSCRIBE:
+      dispatch_helper<Subscribe>(handler, message, buffer_stack, trace_info);
       return true;
-    }
   }
   switch (message_.type) {
     using enum EventType::type_t;
     case UNDEFINED_INTERNAL:
     case UNKNOWN_INTERNAL:
       break;
-    case ERROR: {
+    case ERROR:
       // XXX check that this is a real message
-      Error error{message, buffer_stack};
-      create_trace_and_dispatch(handler, trace_info, error);
+      dispatch_helper<Error>(handler, message, buffer_stack, trace_info);
       return true;
-    }
     case SNAPSHOT:
     case DELTA:
       break;
-    case COMMAND_RESP: {
-      Subscribe subscribe{message, buffer_stack};
-      create_trace_and_dispatch(handler, trace_info, subscribe);
+    case COMMAND_RESP:
+      dispatch_helper<Subscribe>(handler, message, buffer_stack, trace_info);
       return true;
-    }
   }
   return false;
 }
