@@ -18,17 +18,44 @@ namespace roq {
 namespace bybit {
 namespace json {
 
+// === constants ===
+
+namespace {
+auto const FIELD_DATA = "data"sv;
+}
+
 // === HELPERS ===
 
 namespace {
+template <typename T, typename... Args>
+void dispatch_helper(auto &handler, auto &message, auto &buffer_stack, auto &trace_info, Args &&...args) {
+  T obj{message, buffer_stack};
+  create_trace_and_dispatch(handler, trace_info, obj, std::forward<Args>(args)...);
+}
+
+bool dispatch_helper_flatten_wallet(auto &handler, auto &buffer_stack, auto &trace_info, auto &message) {
+  core::json::Parser parser{message};
+  auto root = parser.root();
+  for (auto [key, value] : std::get<core::json::Object>(root)) {
+    if (key == FIELD_DATA) {
+      for (auto item : std::get<core::json::Array>(value)) {
+        Wallet wallet{item, buffer_stack};
+        create_trace_and_dispatch(handler, trace_info, wallet);
+      }
+      return true;
+    }
+  }
+  return false;
+}
+
 auto parse_topic(auto const &value) {
   return Topic{value.substr(0, value.find_first_of('.'))};
 }
 
-auto parse_kline_symbol(auto const &value) {
+auto parse_kline_symbol(auto const &value) -> std::string_view {
   auto pos = value.find_last_of('.');
   if (pos == value.npos) {
-    return std::string_view{};
+    return {};
   }
   return value.substr(pos + 1);
 }
@@ -43,41 +70,22 @@ constexpr auto parse_mbp_depth(auto const &value) {
 
 // static_assert(parse_mbp_depth("orderbook.1.xxx"sv) == 1);
 // static_assert(parse_mbp_depth("orderbook.50.xxx"sv) == 50);
-
-template <typename T, typename... Args>
-void dispatch_helper(auto &handler, auto &message, auto &buffer_stack, auto &trace_info, Args &&...args) {
-  T obj{message, buffer_stack};
-  create_trace_and_dispatch(handler, trace_info, obj, std::forward<Args>(args)...);
-}
-
-bool dispatch_helper_flatten_wallet(auto &handler, auto &buffer_stack, auto &trace_info, auto &message) {
-  core::json::Parser parser{message};
-  auto root = parser.root();
-  for (auto [key, value] : std::get<core::json::Object>(root)) {
-    if (key == "data"sv) {
-      for (auto item : std::get<core::json::Array>(value)) {
-        Wallet wallet{item, buffer_stack};
-        create_trace_and_dispatch(handler, trace_info, wallet);
-      }
-      return true;
-    }
-  }
-  return false;
-}
 }  // namespace
 
 // === IMPLEMENTATION ===
 
-bool Parser::dispatch(Handler &handler, std::string_view const &message, core::json::BufferStack &buffer_stack, TraceInfo const &trace_info) {
-  Message message_{message, buffer_stack};
-  auto topic = parse_topic(message_.topic);
+bool Parser::dispatch(
+    Handler &handler, std::string_view const &message, core::json::BufferStack &buffer_stack, TraceInfo const &trace_info, bool allow_unknown_event_types) {
+  Message message_2{message, buffer_stack};
+  auto topic = parse_topic(message_2.topic);
   switch (topic) {
     using enum Topic::type_t;
     case UNDEFINED_INTERNAL:
-    case UNKNOWN_INTERNAL:
       break;
+    case UNKNOWN_INTERNAL:
+      break;  // note! we only expect the topics we have subscribed to
     case ORDERBOOK: {
-      auto mbp_depth = parse_mbp_depth(message_.topic);
+      auto mbp_depth = parse_mbp_depth(message_2.topic);
       dispatch_helper<OrderBook>(handler, message, buffer_stack, trace_info, mbp_depth);
       return true;
     }
@@ -102,10 +110,14 @@ bool Parser::dispatch(Handler &handler, std::string_view const &message, core::j
       dispatch_helper<Execution2>(handler, message, buffer_stack, trace_info);
       return true;
   }
-  switch (message_.op) {
+  switch (message_2.op) {
     using enum Operation::type_t;
     case UNDEFINED_INTERNAL:
+      break;
     case UNKNOWN_INTERNAL:
+      if (allow_unknown_event_types) {
+        return false;
+      }
       break;
     case AUTH:
       dispatch_helper<Auth>(handler, message, buffer_stack, trace_info);
@@ -114,17 +126,21 @@ bool Parser::dispatch(Handler &handler, std::string_view const &message, core::j
       dispatch_helper<Ping>(handler, message, buffer_stack, trace_info);
       return true;
     case PONG: {
-      // note! don't process (only the option api)
+      // note! drop (only the option api)
       return true;
     }
     case SUBSCRIBE:
       dispatch_helper<Subscribe>(handler, message, buffer_stack, trace_info);
       return true;
   }
-  switch (message_.type) {
+  switch (message_2.type) {
     using enum EventType::type_t;
     case UNDEFINED_INTERNAL:
+      break;
     case UNKNOWN_INTERNAL:
+      if (allow_unknown_event_types) {
+        return false;
+      }
       break;
     case ERROR:
       // XXX check that this is a real message
@@ -132,12 +148,13 @@ bool Parser::dispatch(Handler &handler, std::string_view const &message, core::j
       return true;
     case SNAPSHOT:
     case DELTA:
+      // note! drop
       break;
     case COMMAND_RESP:
       dispatch_helper<Subscribe>(handler, message, buffer_stack, trace_info);
       return true;
   }
-  return false;
+  log::fatal(R"(Unexpected: message="{}")"sv, message);
 }
 
 }  // namespace json
