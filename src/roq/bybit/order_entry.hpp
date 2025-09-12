@@ -119,8 +119,7 @@ struct OrderEntry final : public web::rest::Client::Handler {
   void cancel_all_orders_ack(Trace<web::rest::Response> const &, std::string_view const &request_id);
   void operator()(Trace<json::CancelAllOrders> const &);
 
-  template <typename SuccessHandler, typename ErrorHandler>
-  void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);
+  void process_response(web::rest::Response const &, auto error_handler, auto success_handler);
 
   template <typename... Args>
   void operator()(Trace<server::oms::Response> const &, uint8_t user_id, uint64_t order_id, Args &&...);
@@ -164,6 +163,8 @@ struct OrderEntry final : public web::rest::Client::Handler {
   ConnectionStatus status_ = {};
   core::Download<OrderEntryState> download_;
   bool download_trades_is_first_ = true;
+  //
+  std::string encode_buffer_;
 };
 
 }  // namespace bybit

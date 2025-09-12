@@ -77,8 +77,7 @@ struct Rest final : public web::rest::Client::Handler {
 
   void check_request_queue(std::chrono::nanoseconds now);
 
-  template <typename SuccessHandler, typename ErrorHandler>
-  void process_response(web::rest::Response const &, SuccessHandler, ErrorHandler);
+  void process_response(web::rest::Response const &, auto error_handler, auto success_handler);
 
  private:
   Handler &handler_;

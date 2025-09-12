@@ -13,8 +13,6 @@
 
 #include "roq/utils/metrics/factory.hpp"
 
-#include "roq/web/rest/client.hpp"
-
 #include "roq/server/oms/exceptions.hpp"
 
 #include "roq/bybit/json/map.hpp"
@@ -285,6 +283,8 @@ void OrderEntry::check_request_queue(std::chrono::nanoseconds now) {
   }
 }
 
+// account
+
 void OrderEntry::get_account_info() {
   profile_.account_info([&]() {
     auto path = shared_.api.simple.account_info;
@@ -304,26 +304,30 @@ void OrderEntry::get_account_info() {
       Trace event{trace_info, response};
       get_account_info_ack(event, sequence);
     };
-    (*connection_)("account-info"sv, request, callback);
+    (*connection_)("account"sv, request, callback);
   });
 }
 
 void OrderEntry::get_account_info_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
-  auto constexpr const STATE = OrderEntryState::ACCOUNT_INFO;
+  auto const STATE = OrderEntryState::ACCOUNT_INFO;
   profile_.account_info_ack([&]() {
-    auto handle_success = [&](auto &body) {
-      json::AccountInfo account_info{body, decode_buffer_};
-      Trace event_2{event, account_info};
-      (*this)(event_2);
-      download_.check_relaxed(STATE);
-    };
-    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
-      log::warn(R"(error={}, text="{}")"sv, error, text);
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+      log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
       if (download_.downloading()) {
         download_.retry(STATE);
       }
     };
-    process_response(event, handle_success, handle_error);
+    auto handle_success = [&](auto &body) {
+      json::AccountInfo account_info{body, decode_buffer_};
+      if (account_info.ret_code == 0) {
+        Trace event_2{event, account_info};
+        (*this)(event_2);
+        download_.check_relaxed(STATE);
+      } else {
+        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(account_info.ret_code), account_info.ret_msg);
+      }
+    };
+    process_response(event, handle_error, handle_success);
   });
 }
 
@@ -332,6 +336,8 @@ void OrderEntry::operator()(Trace<json::AccountInfo> const &event) {
   log::info<2>("account_info={}"sv, account_info);
   // XXX HANS maybe do something with unified account ???
 }
+
+// wallet
 
 void OrderEntry::get_wallet_balance() {
   profile_.wallet_balance([&]() {
@@ -369,7 +375,7 @@ void OrderEntry::get_wallet_balance() {
       Trace event{trace_info, response};
       get_wallet_balance_ack(event);
     };
-    (*connection_)("account-wallet-balance"sv, request, callback);
+    (*connection_)("wallet"sv, request, callback);
   });
 }
 
@@ -378,15 +384,19 @@ void OrderEntry::get_wallet_balance_ack(Trace<web::rest::Response> const &event)
     if (event.value.status() == web::http::Status::NOT_FOUND) {
       return;
     }
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+      log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
+    };
     auto handle_success = [&](auto &body) {
       json::WalletAck wallet_ack{body, decode_buffer_};
-      Trace event_2{event, wallet_ack};
-      (*this)(event_2);
+      if (wallet_ack.ret_code == 0) {
+        Trace event_2{event, wallet_ack};
+        (*this)(event_2);
+      } else {
+        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(wallet_ack.ret_code), wallet_ack.ret_msg);
+      }
     };
-    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
-      log::warn(R"(error={}, text="{}")"sv, error, text);
-    };
-    process_response(event, handle_success, handle_error);
+    process_response(event, handle_error, handle_success);
     auto response = Response{
         .account = account_.name,
         .topic = "wallet"sv,
@@ -420,6 +430,8 @@ void OrderEntry::operator()(Trace<json::WalletAck> const &event) {
     }
   }
 }
+
+// position
 
 void OrderEntry::get_position_info(std::string_view const &symbol) {
   profile_.position_info([&]() {
@@ -458,21 +470,25 @@ void OrderEntry::get_position_info(std::string_view const &symbol) {
       Trace event{trace_info, response};
       get_position_info_ack(event, symbol);
     };
-    (*connection_)("position-list"sv, request, callback);
+    (*connection_)("position"sv, request, callback);
   });
 }
 
 void OrderEntry::get_position_info_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.position_info_ack([&]() {
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+      log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
+    };
     auto handle_success = [&](auto &body) {
       json::PositionInfo position_info{body, decode_buffer_};
-      Trace event_2{event, position_info};
-      (*this)(event_2);
+      if (position_info.ret_code == 0) {
+        Trace event_2{event, position_info};
+        (*this)(event_2);
+      } else {
+        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(position_info.ret_code), position_info.ret_msg);
+      }
     };
-    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
-      log::warn(R"(error={}, text="{}")"sv, error, text);
-    };
-    process_response(event, handle_success, handle_error);
+    process_response(event, handle_error, handle_success);
     auto response = Response{
         .account = account_.name,
         .topic = "position"sv,
@@ -512,6 +528,8 @@ void OrderEntry::operator()(Trace<json::PositionInfo> const &event) {
   }
 }
 
+// orders
+
 void OrderEntry::get_open_orders(std::string_view const &symbol) {
   profile_.open_orders([&]() {
     auto path = shared_.api.simple.order_realtime;
@@ -548,21 +566,25 @@ void OrderEntry::get_open_orders(std::string_view const &symbol) {
       Trace event{trace_info, response};
       get_open_orders_ack(event, symbol);
     };
-    (*connection_)("order-realtime"sv, request, callback);
+    (*connection_)("orders"sv, request, callback);
   });
 }
 
 void OrderEntry::get_open_orders_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.open_orders_ack([&]() {
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+      log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
+    };
     auto handle_success = [&](auto &body) {
       json::OpenOrders open_orders{body, decode_buffer_};
-      Trace event_2{event, open_orders};
-      (*this)(event_2);
+      if (open_orders.ret_code == 0) {
+        Trace event_2{event, open_orders};
+        (*this)(event_2);
+      } else {
+        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(open_orders.ret_code), open_orders.ret_msg);
+      }
     };
-    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
-      log::warn(R"(error={}, text="{}")"sv, error, text);
-    };
-    process_response(event, handle_success, handle_error);
+    process_response(event, handle_error, handle_success);
     auto response = Response{
         .account = account_.name,
         .topic = "order"sv,
@@ -615,6 +637,8 @@ void OrderEntry::operator()(Trace<json::OpenOrders> const &event) {
   }
 }
 
+// fills
+
 void OrderEntry::get_execution(std::string_view const &symbol) {
   profile_.execution([&]() {
     auto path = shared_.api.simple.execution_list;
@@ -662,16 +686,20 @@ void OrderEntry::get_execution(std::string_view const &symbol) {
 
 void OrderEntry::get_execution_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.execution_ack([&]() {
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+      log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
+    };
     auto handle_success = [&](auto &body) {
       json::Execution execution{body, decode_buffer_};
-      Trace event_2{event, execution};
-      (*this)(event_2);
+      if (execution.ret_code == 0) {
+        Trace event_2{event, execution};
+        (*this)(event_2);
+      } else {
+        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(execution.ret_code), execution.ret_msg);
+      }
       download_trades_is_first_ = false;
     };
-    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
-      log::warn(R"(error={}, text="{}")"sv, error, text);
-    };
-    process_response(event, handle_success, handle_error);
+    process_response(event, handle_error, handle_success);
     auto response = Response{
         .account = account_.name,
         .topic = "execution"sv,
@@ -753,6 +781,8 @@ void OrderEntry::operator()(Trace<json::Execution> const &event) {
   dispatch();
 }
 
+// place order
+
 void OrderEntry::place_order(Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
   profile_.place_order([&]() {
     if (!ready()) {
@@ -760,8 +790,7 @@ void OrderEntry::place_order(Event<CreateOrder> const &event, server::oms::Order
     }
     auto &[message_info, create_order] = event;
     auto path = shared_.api.simple.order_create;
-    std::string buffer;  // XXX
-    auto body = json::place_order(buffer, create_order, order, request_id, shared_.api.category);
+    auto body = json::place_order(encode_buffer_, create_order, order, request_id, shared_.api.category);
     auto headers = account_.create_headers(path, {}, body);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
@@ -774,23 +803,19 @@ void OrderEntry::place_order(Event<CreateOrder> const &event, server::oms::Order
         .quality_of_service = {},
     };
     auto callback = [this, user_id = message_info.source, order_id = create_order.order_id]([[maybe_unused]] auto &request_id, auto &response) {
-      uint32_t version = 1;
+      auto version = 1;
       TraceInfo trace_info;
       Trace event{trace_info, response};
       place_order_ack(event, user_id, order_id, version);
     };
-    (*connection_)("order-create"sv, request, callback);
+    (*connection_)(request_id, request, callback);
   });
 }
 
 void OrderEntry::place_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.place_order_ack([&]() {
-    auto handle_success = [&](auto &body) {
-      json::PlaceOrder place_order{body, decode_buffer_};
-      Trace event_2{event, place_order};
-      (*this)(event_2, user_id, order_id, version);
-    };
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+      log::debug(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
       auto response = server::oms::Response{
           .request_type = RequestType::CREATE_ORDER,
           .origin = origin,
@@ -805,7 +830,13 @@ void OrderEntry::place_order_ack(Trace<web::rest::Response> const &event, uint8_
       Trace event_2{event, response};
       (*this)(event_2, user_id, order_id);
     };
-    process_response(event, handle_success, handle_error);
+    auto handle_success = [&](auto &body) {
+      json::PlaceOrder place_order{body, decode_buffer_};
+      // note! ret_code checked below
+      Trace event_2{event, place_order};
+      (*this)(event_2, user_id, order_id, version);
+    };
+    process_response(event, handle_error, handle_success);
   });
 }
 
@@ -868,11 +899,10 @@ void OrderEntry::operator()(Trace<json::PlaceOrder> const &event, uint8_t user_i
   (*this)(event_2, user_id, order_id);
 }
 
+// amend order
+
 void OrderEntry::amend_order(
-    Event<ModifyOrder> const &event,
-    server::oms::Order const &order,
-    [[maybe_unused]] std::string_view const &request_id,
-    std::string_view const &previous_request_id) {
+    Event<ModifyOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
   profile_.amend_order([&]() {
     if (shared_.api.api == tools::API::SPOT) {
       throw server::oms::NotSupported{"amend_order"sv};
@@ -882,8 +912,7 @@ void OrderEntry::amend_order(
     }
     auto &[message_info, modify_order] = event;
     auto path = shared_.api.simple.order_amend;
-    std::string buffer;  // XXX
-    auto body = json::amend_order(buffer, modify_order, order, request_id, previous_request_id, shared_.api.category);
+    auto body = json::amend_order(encode_buffer_, modify_order, order, request_id, previous_request_id, shared_.api.category);
     auto headers = account_.create_headers(path, {}, body);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
@@ -901,19 +930,14 @@ void OrderEntry::amend_order(
       Trace event{trace_info, response};
       amend_order_ack(event, user_id, order_id, version);
     };
-    (*connection_)("order-amend"sv, request, callback);
+    (*connection_)(request_id, request, callback);
   });
 }
 
 void OrderEntry::amend_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.amend_order_ack([&]() {
-    auto handle_success = [&](auto &body) {
-      json::AmendOrder amend_order{body, decode_buffer_};
-      Trace event_2{event, amend_order};
-      (*this)(event_2, user_id, order_id, version);
-    };
-    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
-      log::warn(R"(error={}, text="{}")"sv, error, text);
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+      log::debug(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
       auto response = server::oms::Response{
           .request_type = RequestType::MODIFY_ORDER,
           .origin = origin,
@@ -928,7 +952,13 @@ void OrderEntry::amend_order_ack(Trace<web::rest::Response> const &event, uint8_
       Trace event_2{event, response};
       (*this)(event_2, user_id, order_id);
     };
-    process_response(event, handle_success, handle_error);
+    auto handle_success = [&](auto &body) {
+      json::AmendOrder amend_order{body, decode_buffer_};
+      // note! ret_code checked below
+      Trace event_2{event, amend_order};
+      (*this)(event_2, user_id, order_id, version);
+    };
+    process_response(event, handle_error, handle_success);
   });
 }
 
@@ -989,19 +1019,17 @@ void OrderEntry::operator()(Trace<json::AmendOrder> const &event, uint8_t user_i
   (*this)(event_2, user_id, order_id, order_update);
 }
 
+// cancel order
+
 void OrderEntry::cancel_order(
-    Event<CancelOrder> const &event,
-    server::oms::Order const &order,
-    [[maybe_unused]] std::string_view const &request_id,
-    std::string_view const &previous_request_id) {
+    Event<CancelOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
   profile_.cancel_order([&]() {
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[message_info, cancel_order] = event;
     auto path = shared_.api.simple.order_cancel;
-    std::string buffer;  // XXX
-    auto body = json::cancel_order(buffer, cancel_order, order, request_id, previous_request_id, shared_.api.category);
+    auto body = json::cancel_order(encode_buffer_, cancel_order, order, request_id, previous_request_id, shared_.api.category);
     auto headers = account_.create_headers(path, {}, body);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
@@ -1019,19 +1047,14 @@ void OrderEntry::cancel_order(
       Trace event{trace_info, response};
       cancel_order_ack(event, user_id, order_id, version);
     };
-    (*connection_)("order-cancel"sv, request, callback);
+    (*connection_)(request_id, request, callback);
   });
 }
 
 void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
   profile_.cancel_order_ack([&]() {
-    auto handle_success = [&](auto &body) {
-      json::CancelOrder cancel_order{body, decode_buffer_};
-      Trace event_2{event, cancel_order};
-      (*this)(event_2, user_id, order_id, version);
-    };
-    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
-      log::warn(R"(error={}, text="{}")"sv, error, text);
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+      log::debug(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
       auto response = server::oms::Response{
           .request_type = RequestType::CANCEL_ORDER,
           .origin = origin,
@@ -1046,7 +1069,13 @@ void OrderEntry::cancel_order_ack(Trace<web::rest::Response> const &event, uint8
       Trace event_2{event, response};
       (*this)(event_2, user_id, order_id);
     };
-    process_response(event, handle_success, handle_error);
+    auto handle_success = [&](auto &body) {
+      json::CancelOrder cancel_order{body, decode_buffer_};
+      // note! ret_code checked below
+      Trace event_2{event, cancel_order};
+      (*this)(event_2, user_id, order_id, version);
+    };
+    process_response(event, handle_error, handle_success);
   });
 }
 
@@ -1107,12 +1136,14 @@ void OrderEntry::operator()(Trace<json::CancelOrder> const &event, uint8_t user_
   (*this)(event_2, user_id, order_id, order_update);
 }
 
-void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, [[maybe_unused]] std::string_view const &request_id) {
+// cancel all orders
+
+void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
   profile_.cancel_all_orders([&]() {
     if (!ready()) [[unlikely]] {
       throw server::oms::NotReady{"not ready"sv};
     }
-    auto &cancel_all_orders = event.value;
+    auto &[message_info, cancel_all_orders] = event;
     auto send_ack = [&](auto &symbol) {
       auto cancel_all_orders_ack = CancelAllOrdersAck{
           .stream_id = stream_id_,
@@ -1137,13 +1168,12 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, [[maybe_
       shared_(event_2);
     };
     auto path = shared_.api.simple.order_cancel_all;
-    std::string buffer;  // XXX
     if (shared_.dispatcher.get_all_order_symbols(
             [&](auto &symbol) {
               if (!std::empty(cancel_all_orders.symbol) && symbol != cancel_all_orders.symbol) {
                 return;
               }
-              auto body = json::cancel_all_orders(buffer, cancel_all_orders, request_id, symbol, shared_.api.category);
+              auto body = json::cancel_all_orders(encode_buffer_, cancel_all_orders, request_id, symbol, shared_.api.category);
               auto headers = account_.create_headers(path, {}, body);
               auto request = web::rest::Request{
                   .method = web::http::Method::POST,
@@ -1160,7 +1190,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, [[maybe_
                 Trace event{trace_info, response};
                 cancel_all_orders_ack(event, request_id);
               };
-              (*connection_)("order-cancel-all"sv, request, callback);
+              (*connection_)(request_id, request, callback);  // XXX FIXME TODO potentially many requests with same request_id
               send_ack(symbol);
             },
             account_.name)) {
@@ -1194,17 +1224,18 @@ void OrderEntry::cancel_all_orders_ack(Trace<web::rest::Response> const &event, 
       Trace event_2{event, cancel_all_orders_ack};
       shared_(event_2);
     };
+    auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
+      log::debug(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
+      send_ack(origin, RequestStatus::REJECTED, error, text);
+    };
     auto handle_success = [&](auto &body) {
       json::CancelAllOrders cancel_all_orders{body, decode_buffer_};
+      // XXX FIXME TODO ret_code ???
       Trace event_2{event, cancel_all_orders};
       (*this)(event_2);
       send_ack(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {});
     };
-    auto handle_error = [&]([[maybe_unused]] auto origin, [[maybe_unused]] auto status, auto error, auto text) {
-      log::warn(R"(error={}, text="{}")"sv, error, text);
-      send_ack(origin, RequestStatus::REJECTED, error, text);
-    };
-    process_response(event, handle_success, handle_error);
+    process_response(event, handle_error, handle_success);
   });
 }
 
@@ -1215,16 +1246,21 @@ void OrderEntry::operator()(Trace<json::CancelAllOrders> const &event) {
 
 // helpers
 
-template <typename SuccessHandler, typename ErrorHandler>
-void OrderEntry::process_response(web::rest::Response const &response, SuccessHandler success_handler, ErrorHandler error_handler) {
+void OrderEntry::process_response(web::rest::Response const &response, auto error_handler, auto success_handler) {
   try {
     auto [status, category, body] = response.result();
     switch (category) {
       using enum web::http::Category;
-      case SUCCESS:  // 2xx
+      case UNKNOWN:
+      case INFORMATIONAL_RESPONSE:
+        response.expect(web::http::Status::OK);  // throws
+        break;
+      case SUCCESS:
         success_handler(body);
         break;
-      case CLIENT_ERROR:  // 4xx
+      case REDIRECTION:
+        log::fatal("Unexpected: URL is being redirected"sv);
+      case CLIENT_ERROR:
         switch (status) {
           using enum web::http::Status;
           case FORBIDDEN:           // 403
@@ -1239,19 +1275,15 @@ void OrderEntry::process_response(web::rest::Response const &response, SuccessHa
           case CONFLICT:  // 409
             assert(false);
             [[fallthrough]];
-          default: {
-            // json::Error error{body};
-            // error_handler(Origin::EXCHANGE, RequestStatus::REJECTED, json::guess_error(error.code), error.msg);
-          }
+          default:
+            error_handler(Origin::EXCHANGE, RequestStatus::REJECTED, Error::UNKNOWN, ""sv);
         }
         break;
-      case SERVER_ERROR: {  // 5xx
+      case SERVER_ERROR: {
         auto text = fmt::format("{}"sv, status);
         error_handler(Origin::EXCHANGE, RequestStatus::ERROR, Error::UNKNOWN, text);
         break;
       }
-      default:
-        response.expect(web::http::Status::OK);  // throws
     }
   } catch (server::oms::Exception &e) {
     log::warn(R"(Exception type={}, what="{}")"sv, typeid(e).name(), e.what());
