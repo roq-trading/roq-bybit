@@ -1,6 +1,6 @@
 set(TARGET_NAME ${PROJECT_NAME}-json)
 
-set(SOURCES map.cpp parser.cpp utils.cpp)
+set(SOURCES encoder.cpp map.cpp parser.cpp utils.cpp)
 
 include(RoqAutogen)
 

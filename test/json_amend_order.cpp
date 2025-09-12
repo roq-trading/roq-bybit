@@ -5,7 +5,7 @@
 #include "roq/core/json/buffer_stack.hpp"
 
 #include "roq/bybit/json/amend_order.hpp"
-#include "roq/bybit/json/utils.hpp"
+#include "roq/bybit/json/encoder.hpp"
 
 using namespace roq;
 using namespace roq::bybit;
@@ -42,7 +42,7 @@ TEST_CASE("json_amend_order_price", "[json_amend_order]") {
   auto order = create_order();
   auto request_id = "2345"sv;
   auto previous_request_id = "1234"sv;
-  json::amend_order(buffer, modify_order, order, request_id, previous_request_id, json::Category::SPOT);
+  json::Encoder::amend_order(buffer, modify_order, order, request_id, previous_request_id, json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"
@@ -67,7 +67,7 @@ TEST_CASE("json_amend_order_quantity", "[json_amend_order]") {
   auto order = create_order();
   auto request_id = "2345"sv;
   auto previous_request_id = "1234"sv;
-  json::amend_order(buffer, modify_order, order, request_id, previous_request_id, json::Category::SPOT);
+  json::Encoder::amend_order(buffer, modify_order, order, request_id, previous_request_id, json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"
@@ -92,7 +92,7 @@ TEST_CASE("json_amend_order_both", "[json_amend_order]") {
   auto order = create_order();
   auto request_id = "2345"sv;
   auto previous_request_id = "1234"sv;
-  json::amend_order(buffer, modify_order, order, request_id, previous_request_id, json::Category::SPOT);
+  json::Encoder::amend_order(buffer, modify_order, order, request_id, previous_request_id, json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"

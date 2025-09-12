@@ -15,6 +15,7 @@
 
 #include "roq/server/oms/exceptions.hpp"
 
+#include "roq/bybit/json/encoder.hpp"
 #include "roq/bybit/json/map.hpp"
 #include "roq/bybit/json/utils.hpp"
 
@@ -790,7 +791,7 @@ void OrderEntry::place_order(Event<CreateOrder> const &event, server::oms::Order
     }
     auto &[message_info, create_order] = event;
     auto path = shared_.api.simple.order_create;
-    auto body = json::place_order(encode_buffer_, create_order, order, request_id, shared_.api.category);
+    auto body = json::Encoder::place_order(encode_buffer_, create_order, order, request_id, shared_.api.category);
     auto headers = account_.create_headers(path, {}, body);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
@@ -912,7 +913,7 @@ void OrderEntry::amend_order(
     }
     auto &[message_info, modify_order] = event;
     auto path = shared_.api.simple.order_amend;
-    auto body = json::amend_order(encode_buffer_, modify_order, order, request_id, previous_request_id, shared_.api.category);
+    auto body = json::Encoder::amend_order(encode_buffer_, modify_order, order, request_id, previous_request_id, shared_.api.category);
     auto headers = account_.create_headers(path, {}, body);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
@@ -1029,7 +1030,7 @@ void OrderEntry::cancel_order(
     }
     auto &[message_info, cancel_order] = event;
     auto path = shared_.api.simple.order_cancel;
-    auto body = json::cancel_order(encode_buffer_, cancel_order, order, request_id, previous_request_id, shared_.api.category);
+    auto body = json::Encoder::cancel_order(encode_buffer_, cancel_order, order, request_id, previous_request_id, shared_.api.category);
     auto headers = account_.create_headers(path, {}, body);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
@@ -1173,7 +1174,7 @@ void OrderEntry::cancel_all_orders(Event<CancelAllOrders> const &event, std::str
               if (!std::empty(cancel_all_orders.symbol) && symbol != cancel_all_orders.symbol) {
                 return;
               }
-              auto body = json::cancel_all_orders(encode_buffer_, cancel_all_orders, request_id, symbol, shared_.api.category);
+              auto body = json::Encoder::cancel_all_orders(encode_buffer_, cancel_all_orders, request_id, symbol, shared_.api.category);
               auto headers = account_.create_headers(path, {}, body);
               auto request = web::rest::Request{
                   .method = web::http::Method::POST,

@@ -3,18 +3,12 @@
 #pragma once
 
 #include <chrono>
-#include <string>
-#include <string_view>
 
-#include "roq/server/oms/order.hpp"
-
-#include "roq/utils/patterns.hpp"
+#include "roq/error.hpp"
 
 #include "roq/utils/charconv/from_chars.hpp"
 
 #include "roq/core/json/parser.hpp"
-
-#include "roq/bybit/json/category.hpp"
 
 namespace roq {
 namespace bybit {
@@ -82,27 +76,6 @@ inline void update(std::chrono::nanoseconds &result, core::json::Value const &va
       },
       value);
 }
-
-extern std::string_view place_order(std::string &buffer, roq::CreateOrder const &, server::oms::Order const &, std::string_view const &request_id, Category);
-
-extern std::string_view amend_order(
-    std::string &buffer,
-    roq::ModifyOrder const &,
-    server::oms::Order const &,
-    std::string_view const &request_id,
-    std::string_view const &previous_request_id,
-    Category);
-
-extern std::string_view cancel_order(
-    std::string &buffer,
-    roq::CancelOrder const &,
-    server::oms::Order const &,
-    std::string_view const &request_id,
-    std::string_view const &previous_request_id,
-    Category);
-
-extern std::string_view cancel_all_orders(
-    std::string &buffer, roq::CancelAllOrders const &, std::string_view const &request_id, std::string_view const &symbol, Category);
 
 extern Error map_error(int32_t ret_code);
 
