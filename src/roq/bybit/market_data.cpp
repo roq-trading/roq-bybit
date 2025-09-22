@@ -258,7 +258,7 @@ void MarketData::subscribe(std::span<Symbol const> const &symbols) {
   subscribe(mbp_topic_, symbols);
   subscribe("publicTrade"sv, symbols);
   subscribe("tickers"sv, symbols);
-  if (shared_.settings.download.time_series && shared_.settings.time_series.lookback.count()) {
+  if (shared_.settings.download.time_series_lookback.count()) {
     subscribe("kline"sv, symbols, 1min);
   }
 }

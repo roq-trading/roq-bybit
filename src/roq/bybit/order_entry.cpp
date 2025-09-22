@@ -47,6 +47,8 @@ auto get_supports(auto api) {
 }
 
 size_t const MAX_DECODE_BUFFER_DEPTH = 2;
+
+size_t const DOWNLOAD_TRADES_LIMIT = 100;
 }  // namespace
 
 // === CONSTANTS ===
@@ -663,8 +665,17 @@ void OrderEntry::get_execution(std::string_view const &symbol) {
     log::info<1>("Download trades: lookback={}"sv, lookback);
     auto end_time = clock::get_realtime() + 1min;  // note! make sure we don't miss anything
     auto start_time = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - lookback);
+    auto limit = shared_.settings.download.trades_limit ? shared_.settings.download.trades_limit : DOWNLOAD_TRADES_LIMIT;
     auto query = fmt::format(
-        "?category={}&symbol={}&startTime={}&execType=Trade&limit={}"sv, category, symbol, start_time.count(), shared_.settings.download.trades_limit);
+        "?category={}"
+        "&symbol={}"
+        "&startTime={}"
+        "&execType=Trade"
+        "&limit={}"sv,
+        category,
+        symbol,
+        start_time.count(),
+        limit);
     auto headers = account_.create_headers(path, query, {});
     auto request = web::rest::Request{
         .method = web::http::Method::GET,

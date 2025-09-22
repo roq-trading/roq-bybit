@@ -1,20 +1,17 @@
 !!! THIS FILE HAS BEEN AUTO-GENERATED !!!
 roq-bybit-flags
-download.rstinc
 flags.rstinc
 mbp.rstinc
 misc.rstinc
 request.rstinc
 rest.rstinc
 ws.rstinc
-download.hpp
 flags.hpp
 mbp.hpp
 misc.hpp
 request.hpp
 rest.hpp
 ws.hpp
-download.cpp
 flags.cpp
 mbp.cpp
 misc.cpp
