@@ -1293,7 +1293,7 @@ void OrderEntry::process_response(web::rest::Response const &response, auto erro
         break;
       case SERVER_ERROR: {
         auto text = fmt::format("{}"sv, status);
-        error_handler(Origin::EXCHANGE, RequestStatus::ERROR, Error::UNKNOWN, text);
+        error_handler(Origin::EXCHANGE, RequestStatus::REJECTED, Error::UNKNOWN, text);
         break;
       }
     }
