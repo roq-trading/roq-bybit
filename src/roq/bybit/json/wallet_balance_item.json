@@ -77,6 +77,10 @@
     {
       "name": "marginCollateral",
       "type": "std/bool"
+    },
+    {
+      "name": "spotBorrow",
+      "type": "std/double"
     }
   ]
 }

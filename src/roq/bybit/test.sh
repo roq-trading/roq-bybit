@@ -30,38 +30,31 @@ CONFIG="${CONFIG:-$NAME-testnet}"
 
 CONFIG_FILE="$ROQ_CONFIG_PATH/roq-bybit/$CONFIG.toml"
 
-URI="bybit.com"
-
-REST_URI="https://api-testnet.$URI"
-WS_PUBLIC_URI="wss://stream-testnet.$URI/v5/public"
-WS_PRIVATE_URI="wss://stream-testnet.$URI/v5/private"
+FLAGFILE="../../../share/flags/test/flags.cfg"
 
 
 $PREFIX ./roq-bybit \
   --name "$NAME" \
   --config_file "$CONFIG_FILE" \
+  --flagfile "$FLAGFILE" \
   --cache_dir "$HOME/var/lib/roq/cache" \
   --event_log_dir "$HOME/var/lib/roq/data" \
-  --event_log_symlink true \
   --client_listen_address "$HOME/run/$NAME.sock" \
   --service_listen_address "$HOME/run/metrics/${NAME}.sock" \
-  --rest_uri "$REST_URI" \
-  --ws_public_uri "$WS_PUBLIC_URI" \
-  --ws_private_uri "$WS_PRIVATE_URI" \
-  --download_trades_lookback=5m \
-  --oms_cache=true \
-  --oms_multicast_port 1234 \
-  --oms_multicast_address=224.1.1.1 \
-  --oms_local_interface="$LOCAL_INTERFACE" \
-  --oms_multicast_ttl 4 \
-  --oms_multicast_loop=true \
-  --oms_listen_port 9876 \
-  --cache_database_uri "$DATABASE_URI" \
-  --cache_database_name "roq" \
-  --enable_portfolio=true \
   $@
 
 #  --time_series_interval "60s" \
 #  --time_series_lookback "2h" \
 #  --time_series_realtime true \
 #  --download_time_series true \
+#  --download_trades_lookback=5m \
+#  --oms_cache=true \
+#  --oms_multicast_port 1234 \
+#  --oms_multicast_address=224.1.1.1 \
+#  --oms_local_interface="$LOCAL_INTERFACE" \
+#  --oms_multicast_ttl 4 \
+#  --oms_multicast_loop=true \
+#  --oms_listen_port 9876 \
+#  --cache_database_uri "$DATABASE_URI" \
+#  --cache_database_name "roq" \
+#  --enable_portfolio=true \

@@ -118,6 +118,10 @@
     {
       "name": "stTag",
       "type": "std/string_view"
+    },
+    {
+      "name": "symbolType",
+      "type": "std/string_view"
     }
   ]
 }
