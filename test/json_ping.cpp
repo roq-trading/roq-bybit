@@ -50,7 +50,7 @@ TEST_CASE("json_ping_parser", "[json_ping]") {
     bool found = false;
   } handler;
   core::json::BufferStack buffer{8192, 1};
-  auto res = json::Parser::dispatch(handler, MESSAGE, buffer, {});
+  auto res = json::Parser::dispatch(handler, MESSAGE, buffer, {}, false);
   CHECK(res == true);
   CHECK(handler.found == true);
 }

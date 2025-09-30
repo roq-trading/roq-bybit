@@ -197,7 +197,7 @@ TEST_CASE("json_order_book_parser", "[json_order_book]") {
     bool found = false;
   } handler;
   core::json::BufferStack buffer{8192, 1};
-  auto res = json::Parser::dispatch(handler, MESSAGE_1, buffer, {});
+  auto res = json::Parser::dispatch(handler, MESSAGE_1, buffer, {}, false);
   CHECK(res == true);
   CHECK(handler.found == true);
 }

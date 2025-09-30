@@ -90,7 +90,7 @@ TEST_CASE("json_order_parser", "[json_order]") {
     bool found = false;
   } handler;
   core::json::BufferStack buffer{8192, 1};
-  auto res = json::Parser::dispatch(handler, MESSAGE_SPOT, buffer, {});
+  auto res = json::Parser::dispatch(handler, MESSAGE_SPOT, buffer, {}, false);
   CHECK(res == true);
   CHECK(handler.found == true);
 }

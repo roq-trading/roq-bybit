@@ -170,7 +170,7 @@ TEST_CASE("json_execution_parser", "[json_execution]") {
     bool found = false;
   } handler;
   core::json::BufferStack buffer{8192, 1};
-  auto res = json::Parser::dispatch(handler, MESSAGE_LINEAR, buffer, {});
+  auto res = json::Parser::dispatch(handler, MESSAGE_LINEAR, buffer, {}, false);
   CHECK(res == true);
   CHECK(handler.found == true);
 }

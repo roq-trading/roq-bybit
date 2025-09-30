@@ -80,7 +80,7 @@ TEST_CASE("json_position_parser", "[json_position]") {
     bool found = false;
   } handler;
   core::json::BufferStack buffer{8192, 1};
-  auto res = json::Parser::dispatch(handler, MESSAGE_LINEAR, buffer, {});
+  auto res = json::Parser::dispatch(handler, MESSAGE_LINEAR, buffer, {}, false);
   CHECK(res == true);
   CHECK(handler.found == true);
 }

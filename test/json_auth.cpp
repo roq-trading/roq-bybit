@@ -50,7 +50,7 @@ TEST_CASE("json_auth_parser", "[json_auth]") {
     bool found = false;
   } handler;
   core::json::BufferStack buffer{8192, 1};
-  auto res = json::Parser::dispatch(handler, MESSAGE, buffer, {});
+  auto res = json::Parser::dispatch(handler, MESSAGE, buffer, {}, false);
   CHECK(res == true);
   CHECK(handler.found == true);
 }

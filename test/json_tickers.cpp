@@ -158,7 +158,7 @@ TEST_CASE("json_tickers_parser_spot", "[json_tickers]") {
     bool found = false;
   } handler;
   core::json::BufferStack buffer{8192, 1};
-  auto res = json::Parser::dispatch(handler, SPOT, buffer, {});
+  auto res = json::Parser::dispatch(handler, SPOT, buffer, {}, false);
   CHECK(res == true);
   CHECK(handler.found == true);
 }
@@ -191,7 +191,7 @@ TEST_CASE("json_tickers_parser_linear", "[json_tickers]") {
     bool found = false;
   } handler;
   core::json::BufferStack buffer{8192, 1};
-  auto res = json::Parser::dispatch(handler, LINEAR, buffer, {});
+  auto res = json::Parser::dispatch(handler, LINEAR, buffer, {}, false);
   CHECK(res == true);
   CHECK(handler.found == true);
 }
@@ -224,7 +224,7 @@ TEST_CASE("json_tickers_parser_inverse", "[json_tickers]") {
     bool found = false;
   } handler;
   core::json::BufferStack buffer{8192, 1};
-  auto res = json::Parser::dispatch(handler, INVERSE, buffer, {});
+  auto res = json::Parser::dispatch(handler, INVERSE, buffer, {}, false);
   CHECK(res == true);
   CHECK(handler.found == true);
 }
@@ -257,7 +257,7 @@ TEST_CASE("json_tickers_parser_option", "[json_tickers]") {
     bool found = false;
   } handler;
   core::json::BufferStack buffer{8192, 1};
-  auto res = json::Parser::dispatch(handler, OPTION, buffer, {});
+  auto res = json::Parser::dispatch(handler, OPTION, buffer, {}, false);
   CHECK(res == true);
   CHECK(handler.found == true);
 }
