@@ -1,3 +1,5 @@
+# config template for the roq-bybit gateway
+
 symbols = [
   "^BTCUSD[A-Z]?$",  # spot + linear + inverse
   "^BTC-.*-.*-[PC]$"  # options (e.g. "BTC-26SEP25-300000-P")

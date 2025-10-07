@@ -1,7 +1,18 @@
 .. _roq-bybit:
 .. _roq-bybit-v5:
 
-.. |checkmark| unicode:: U+2713
+.. |dagger| unicode:: U+2020
+.. |double-dagger| unicode:: U+2021
+.. |right-arrow| unicode:: U+2192
+.. |right-double-arrow| unicode:: U+21D2
+.. |left-right-double-arrow| unicode:: U+21D4
+.. |check-mark| unicode:: U+2705
+.. |cross-mark| unicode:: U+274C
+.. |negative-cross-mark| unicode:: U+274E
+.. |footnote-1| unicode:: U+2776
+.. |footnote-2| unicode:: U+2777
+.. |footnote-3| unicode:: U+2778
+
 
 roq-bybit
 =========
@@ -23,18 +34,8 @@ roq-bybit
            roq-bybit
 
 
-:code:`roq-bybit`
------------------
-
-
-Description
-~~~~~~~~~~~
-
-:code:`roq-bybit` is a gateway
-
-
 Supports
-~~~~~~~~
+--------
 
 .. grid::  2
   :gutter: 2
@@ -43,69 +44,114 @@ Supports
 
     .. list-table::
       :widths: auto
+      :align: left
 
-      * - Spot
-        - |checkmark|
-      * - Futures
-        - |checkmark|
-      * - Options
-        - |checkmark|
-      * - Combos
+      * - :cpp:enumerator:`Spot <roq::SecurityType::SPOT>`
+        - |check-mark|
+        -
+      * - :cpp:enumerator:`Futures <roq::SecurityType::FUTURES>`
+        - |check-mark|
+        -
+      * - :cpp:enumerator:`Swap <roq::SecurityType::SWAP>`
+        - |check-mark|
+        -
+      * - :cpp:enumerator:`Option <roq::SecurityType::OPTION>`
+        - |check-mark|
         -
 
   .. grid-item-card::  Market Data
 
     .. list-table::
       :widths: auto
+      :align: left
 
-      * - Reference Data
-        - |checkmark|
-      * - Market Status
-        - |checkmark|
-      * - Top of Book
-        - |checkmark|
-      * - Market by Price (L2)
-        - |checkmark|
-      * - Market by Order (L3)
+      * - :cpp:class:`ReferenceData <roq::ReferenceData>`
+        - |check-mark|
         -
-      * - Trade Summary
-        - |checkmark|
-      * - Statistics
-        - |checkmark|
-      * - Time Series
-        - |checkmark|
+      * - :cpp:class:`MarketStatus <roq::MarketStatus>`
+        - |check-mark|
+        -
+      * - :cpp:class:`TopOfBook <roq::TopOfBook>`
+        - |check-mark|
+        -
+      * - :cpp:class:`MarketByPrice <roq::MarketByPriceUpdate>`
+        - |check-mark|
+        -
+      * - :cpp:class:`MarketByOrder <roq::MarketByOrderUpdate>`
+        - |cross-mark|
+        -
+      * - :cpp:class:`TradeSummary <roq::TradeSummary>`
+        - |check-mark|
+        -
+      * - :cpp:class:`Statistics <roq::StatisticsUpdate>`
+        - |check-mark|
+        -
+      * - :cpp:class:`TimeSeries <roq::TimeSeriesUpdate>`
+        - |check-mark|
+        -
 
-  .. grid-item-card::  Order Management
+  .. grid-item-card::  Orders
 
     .. list-table::
       :widths: auto
+      :align: left
 
-      * - Create
-        - |checkmark|
-      * - Modify
-        - |checkmark|
-      * - Cancel
-        - |checkmark|
-      * - Cancel All
-        - |checkmark|
-      * - Auto-Cancel
+      * - :cpp:class:`CreateOrder <roq::CreateOrder>`
+        - |check-mark|
+        -
+      * - :cpp:class:`ModifyOrder <roq::ModifyOrder>`
+        - |check-mark|
+        -
+      * - :cpp:class:`CancelOrder <roq::CancelOrder>`
+        - |check-mark|
+        -
+      * - :cpp:class:`CancelAllOrders <roq::CancelAllOrders>`
+        - |check-mark|
+        -
+      * - :cpp:class:`MassQuote <roq::MassQuote>`
+        - |cross-mark|
+        -
+      * - :cpp:class:`CancelQuotes <roq::CancelQuotes>`
+        - |cross-mark|
         -
 
-  .. grid-item-card::  Account Management
+  .. grid-item-card::  Account
 
     .. list-table::
       :widths: auto
+      :align: left
 
-      * - Positions
-        - |checkmark|
-      * - Funds
-        - |checkmark|
+      * - :cpp:class:`Funds <roq::FundsUpdate>`
+        - |check-mark|
+        -
+      * - :cpp:class:`Position <roq::PositionUpdate>`
+        - |check-mark|
+        -
+
+
+.. note::
+
+   |check-mark| = Available.
+
+   |negative-cross-mark| = Not implemented.
+
+   |cross-mark| = Unavailable.
+
+   |footnote-1| = The exchange protocol does not support streaming updates for reference data and market status.
+
+
+Using
+-----
+
+.. code-block:: shell
+
+   $ roq-bybit [FLAGS]
 
 
 .. _roq-bybit-flags:
 
 Flags
-~~~~~
+-----
 
 .. code-block:: shell
 
@@ -141,7 +187,7 @@ Flags
 
 
 Environments
-~~~~~~~~~~~~
+------------
 
 .. tab:: Prod
 
@@ -163,7 +209,7 @@ Environments
 
 
 Configuration
-~~~~~~~~~~~~~
+-------------
 
 .. code-block:: shell
 
@@ -171,397 +217,265 @@ Configuration
 
 .. important::
 
-   The template will be replaced when the software is upgraded.
-   Make a copy and modify to your needs.
+   This template will be replaced when the software is upgraded.
+   Make a copy and modify to your own needs.
 
 .. include:: config.toml
    :code: toml
 
 
 Market Data
-~~~~~~~~~~~
-
-.. tab:: Live
-
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Event
-      - Stream
-      - Messages
-      - Comments
-
-    * - :cpp:class:`roq::ReferenceData`
-      -
-      -
-      -
-
-    * - :cpp:class:`roq::MarketStatus`
-      -
-      -
-      -
-
-    * - :cpp:class:`roq::TopOfBook`
-      - MarketData
-      - * orderbook.1.<symbol> (spot)
-        * tickers.<symbols> (other)
-      -
-
-    * - :cpp:class:`roq::MarketByPriceUpdate`
-      - MarketData
-      - orderbook.<ws_mbp_depth>.<symbol>
-      -
-
-    * - :cpp:class:`roq::MarketByOrderUpdate`
-      -
-      -
-      -
-
-    * - :cpp:class:`roq::TradeSummary`
-      - MarketData
-      - publicTrade.<symbol>
-      -
-
-    * - :cpp:class:`roq::StatisticsUpdate`
-      - MarketData
-      - tickers.<symbol>
-      -
-
-.. tab:: Download
-
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Event
-      - Stream
-      - Messages
-      - Comments
-
-    * - :cpp:class:`roq::ReferenceData`
-      - Rest
-      - /v5/market/instruments-info
-      -
-
-    * - :cpp:class:`roq::MarketStatus`
-      - Rest
-      - /v5/market/instruments-info
-      -
-
-    * - :cpp:class:`roq::TopOfBook`
-      -
-      -
-      -
-
-    * - :cpp:class:`roq::MarketByPriceUpdate`
-      -
-      -
-      -
-
-    * - :cpp:class:`roq::MarketByOrderUpdate`
-      -
-      -
-      -
-
-    * - :cpp:class:`roq::TradeSummary`
-      -
-      -
-      -
-
-    * - :cpp:class:`roq::StatisticsUpdate`
-      -
-      -
-      -
+-----------
 
 
-Statistics
-^^^^^^^^^^
+Inbound
+~~~~~~~
 
-.. list-table::
-  :header-rows: 1
-  :widths: auto
+.. tab:: TradingStatus
 
-  * - Type
-    - Comments
+   .. list-table::
+     :header-rows: 1
+     :widths: auto
+     :align: left
 
-  * - :cpp:class:`HIGHEST_TRADED_PRICE`
-    - (tickers) :code:`h`
+     * - Enum
+       -
+       -
 
-  * - :cpp:class:`LOWEST_TRADED_PRICE`
-    - (tickers) :code:`l`
+     * - :code:`PreLaunch`
+       - |right-double-arrow|
+       - :cpp:enumerator:`UNDEFINED <roq::TradingStatus::UNDEFINED>`
 
-  * - :cpp:class:`CLOSE_PRICE`
-    - (tickers) :code:`c`
+     * - :code:`Trading`
+       - |right-double-arrow|
+       - :cpp:enumerator:`OPEN <roq::TradingStatus::OPEN>`
 
-  * - :cpp:class:`TRADE_VOLUME`
-    - (tickers) :code:`v`
+     * - :code:`Settling`
+       - |right-double-arrow|
+       - :cpp:enumerator:`UNDEFINED <roq::TradingStatus::UNDEFINED>`
+
+     * - :code:`Delivering`
+       - |right-double-arrow|
+       - :cpp:enumerator:`UNDEFINED <roq::TradingStatus::UNDEFINED>`
+
+     * - :code:`Closed`
+       - |right-double-arrow|
+       - :cpp:enumerator:`CLOSE <roq::TradingStatus::CLOSE>`
+
+
+.. tab:: StatisticsType
+
+   .. list-table::
+     :header-rows: 1
+     :widths: auto
+     :align: left
+
+     * - Event
+       - Field
+       -
+       -
+
+     * - :code:`Tickers`
+       - :code:`highPrice24h`
+       - |right-double-arrow|
+       - :cpp:enumerator:`HIGHEST_TRADED_PRICE <roq::StatisticsType::HIGHEST_TRADED_PRICE>`
+
+     * - :code:`Tickers`
+       - :code:`lowPrice24h`
+       - |right-double-arrow|
+       - :cpp:enumerator:`LOWEST_TRADED_PRICE <roq::StatisticsType::LOWEST_TRADED_PRICE>`
+
+     * - :code:`Tickers`
+       - :code:`lastPrice`
+       - |right-double-arrow|
+       - :cpp:enumerator:`CLOSE_PRICE <roq::StatisticsType::CLOSE_PRICE>`
+
+     * - :code:`Tickers`
+       - :code:`volume24h`
+       - |right-double-arrow|
+       - :cpp:enumerator:`TRADE_VOLUME <roq::StatisticsType::TRADE_VOLUME>`
 
 
 Order Management
-~~~~~~~~~~~~~~~~
-
-.. tab:: Live
+----------------
 
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
 
-    * - Event
-      - Stream
-      - Messages
-      - Comments
+Inbound
+~~~~~~~
 
-    * - :cpp:class:`roq::OrderUpdate`
-      - DropCopy
-      - order
-      -
+.. tab:: OrderType
 
-    * - :cpp:class:`roq::TradeUpdate`
-      - DropCopy
-      - execution
-      -
+   .. list-table::
+     :header-rows: 1
+     :widths: auto
+     :align: left
 
-.. tab:: Download
+     * - :code:`orderType`
+       -
+       -
 
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
+     * - :code:`Market`
+       - |right-double-arrow|
+       - :cpp:enumerator:`MARKET <roq::OrderType::MARKET>`
 
-    * - Event
-      - Stream
-      - Messages
-      - Comments
+     * - :code:`Limit`
+       - |right-double-arrow|
+       - :cpp:enumerator:`LIMIT <roq::OrderType::LIMIT>`
 
-    * - :cpp:class:`roq::OrderUpdate`
-      - OrderEntry
-      - /v5/order/realtime
-      -
 
-    * - :cpp:class:`roq::TradeUpdate`
-      - OrderEntry
-      - /v5/execution/list
-      -
+.. tab:: TimeInForce
 
-.. tab:: Request
+   .. list-table::
+     :header-rows: 1
+     :widths: auto
+     :align: left
 
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
+     * - :code:`timeInForce`
+       -
+       -
 
-    * - Event
-      - Stream
-      - Messages
-      - Comments
+     * - :code:`GTC`
+       - |right-double-arrow|
+       - :cpp:enumerator:`GTC <roq::TimeInForce::GTC>`
 
-    * - :cpp:class:`roq::CreateOrder`
-      - OrderEntry
-      - /v5/order/create
-      -
+     * - :code:`FOK`
+       - |right-double-arrow|
+       - :cpp:enumerator:`FOK <roq::TimeInForce::FOK>`
 
-    * - :cpp:class:`roq::ModifyOrder`
-      - OrderEntry
-      - /v5/order/amend
-      -
+     * - :code:`IOC`
+       - |right-double-arrow|
+       - :cpp:enumerator:`IOC <roq::TimeInForce::IOC>`
 
-    * - :cpp:class:`roq::CancelOrder`
-      - OrderEntry
-      - /v5/order/cancel
-      -
+
+.. tab:: OrderStatus
+
+   .. list-table::
+     :header-rows: 1
+     :widths: auto
+     :align: left
+
+     * - :code:`orderStatus`
+       -
+       -
+
+     * - :code:`Created`
+       - |right-double-arrow|
+       - :cpp:enumerator:`WORKING <roq::OrderStatus::WORKING>`
 
-    * - :cpp:class:`roq::CancelAllOrders`
-      - OrderEntry
-      - /v5/order/cancel-all
-      -
+     * - :code:`New`
+       - |right-double-arrow|
+       - :cpp:enumerator:`WORKING <roq::OrderStatus::WORKING>`
 
-.. tab:: Response
+     * - :code:`Rejected`
+       - |right-double-arrow|
+       - :cpp:enumerator:`REJECTED <roq::OrderStatus::REJECTED>`
 
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
+     * - :code:`PartiallyFilled`
+       - |right-double-arrow|
+       - :cpp:enumerator:`WORKING <roq::OrderStatus::WORKING>`
 
-    * - Event
-      - Stream
-      - Messages
-      - Comments
+     * - :code:`PartiallyFilledCanceled`
+       - |right-double-arrow|
+       - :cpp:enumerator:`CANCELED <roq::OrderStatus::CANCELED>`
 
-    * - :cpp:class:`roq::OrderAck`
-      - OrderEntry
-      -
-      -
+     * - :code:`Filled`
+       - |right-double-arrow|
+       - :cpp:enumerator:`COMPLETED <roq::OrderStatus::COMPLETED>`
 
+     * - :code:`Cancelled`
+       - |right-double-arrow|
+       - :cpp:enumerator:`CANCELED <roq::OrderStatus::CANCELED>`
 
-Order Types
-^^^^^^^^^^^
+     * - :code:`Untriggered`
+       - |right-double-arrow|
+       - :cpp:enumerator:`UNDEFINED <roq::OrderStatus::UNDEFINED>`
 
-.. list-table::
-  :header-rows: 1
-  :widths: auto
+     * - :code:`Triggered`
+       - |right-double-arrow|
+       - :cpp:enumerator:`UNDEFINED <roq::OrderStatus::UNDEFINED>`
 
-  * - Type
-    - Comments
+     * - :code:`Deactivated`
+       - |right-double-arrow|
+       - :cpp:enumerator:`UNDEFINED <roq::OrderStatus::UNDEFINED>`
 
-  * - :cpp:class:`MARKET`
-    - Mapped to :code:`'MARKET'` (JSON)
+     * - :code:`Active`
+       - |right-double-arrow|
+       - :cpp:enumerator:`UNDEFINED <roq::OrderStatus::UNDEFINED>`
 
-  * - :cpp:class:`LIMIT`
-    - Mapped to :code:`'LIMIT'` or :code:`'LIMIT_MAKER'` (JSON)
 
+Outbound
+~~~~~~~~
 
-Time in Force
-^^^^^^^^^^^^^
+.. tab:: CreateOrder
 
-.. list-table::
-  :header-rows: 1
-  :widths: auto
+   .. list-table::
+     :header-rows: 1
+     :widths: auto
+     :align: left
 
-  * - Type
-    - Comments
+     * - :cpp:member:`order_type <roq::CreateOrder::order_type>`
+       - :cpp:member:`execution_instructions <roq::CreateOrder::execution_instructions>`
+       - :cpp:member:`price <roq::CreateOrder::price>`
+       - :cpp:member:`stop_price <roq::CreateOrder::stop_price>`
+       -
+       - :code:`orderType`
+       - :code:`price`
+       - :code:`reduceOnly`
 
-  * - :cpp:class:`GTC`
-    - Mapped to :code:`'GTC'` (JSON)
+     * - :cpp:enumerator:`MARKET <roq::OrderType::MARKET>`
+       -
+       - :code:`NaN`
+       - :code:`NaN`
+       - |right-double-arrow|
+       - :code:`Market`
+       -
+       - :code:`false`
 
-  * - :cpp:class:`FOK`
-    - Mapped to :code:`'FOK'` (JSON)
+     * - :cpp:enumerator:`MARKET <roq::OrderType::MARKET>`
+       - :cpp:enumerator:`DO_NOT_INCREASE <roq::ExecutionInstruction::DO_NOT_INCREASE>`
+       - :code:`NaN`
+       - :code:`NaN`
+       - |right-double-arrow|
+       - :code:`Market`
+       - |cross-mark|
+       - :code:`true`
 
-  * - :cpp:class:`IOC`
-    - Mapped to :code:`'IOC'` (JSON)
+     * - :cpp:enumerator:`LIMIT <roq::OrderType::LIMIT>`
+       -
+       - |check-mark|
+       - :code:`NaN`
+       - |right-double-arrow|
+       - :code:`Limit`
+       - |check-mark|
+       - :code:`false`
 
+     * - :cpp:enumerator:`LIMIT <roq::OrderType::LIMIT>`
+       - :cpp:enumerator:`DO_NOT_INCREASE <roq::ExecutionInstruction::DO_NOT_INCREASE>`
+       - |check-mark|
+       - :code:`NaN`
+       - |right-double-arrow|
+       - :code:`Limit`
+       - |check-mark|
+       - :code:`true`
 
-Position Effect
-^^^^^^^^^^^^^^^
 
-.. note::
+.. tab:: ModifyOrder
 
-  Not supported
+   TBD
 
 
-Execution Instructions
-^^^^^^^^^^^^^^^^^^^^^^
+.. tab:: CancelOrder
 
-.. list-table::
-  :header-rows: 1
-  :widths: auto
+   TBD
 
-  * - Type
-    - Comments
 
-  * - :cpp:class:`PARTICIPATE_DO_NOT_INITIATE`
-    - Mapped to :code:`'LIMIT_MAKER'` (JSON)
+.. tab:: CancelAllOrders
 
+   TBD
 
-Account Management
-~~~~~~~~~~~~~~~~~~
 
-.. tab:: Live
-
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Event
-      - Stream
-      - Messages
-      - Comments
-
-    * - :cpp:class:`roq::PositionUpdate`
-      - DropCopy
-      - position
-      -
-
-    * - :cpp:class:`roq::FundsUpdate`
-      - DropCopy
-      - wallet
-      -
-
-.. tab:: Download
-
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Event
-      - Stream
-      - Messages
-      - Comments
-
-    * - :cpp:class:`roq::PositionUpdate`
-      - OrderEntry
-      - /v5/position/list"
-      -
-
-    * - :cpp:class:`roq::FundsUpdate`
-      - OrderEntry
-      - /v5/account/wallet-balance
-      -
-
-
-Streams
--------
-
-.. tab:: Rest
-
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Type
-      - Comments
-
-    * - REST
-      - Primary purpose
-
-        * discover the full list of symbols
-
-.. tab:: MarketData
-
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Type
-      - Comments
-
-    * - WebSocket
-      - Primary purpose
-
-        * live market data
-
-        Each connection
-
-        * supports a slice of the symbols
-
-.. tab:: OrderEntry
-
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Type
-      - Comments
-
-    * - REST
-      - Primary purpose
-
-        * Order actions
-
-.. tab:: DropCopy
-
-  .. list-table::
-    :header-rows: 1
-    :widths: auto
-
-    * - Type
-      - Comments
-
-    * - WebSocket
-      - Primary purpose
-
-        * order updates
-
-
-Constraints
-~~~~~~~~~~~
+Comments
+--------
 
 * The gateway can not simultaneously support all product categories due to
   overlapping symbol names, e.g. BTCUSDT being both spot and linear.
@@ -575,10 +489,6 @@ Constraints
 
   .. note::
      The :code:`execution` channel will independently report the fills.
-
-
-Comments
-~~~~~~~~
 
 * :code:`TopOfBook` is based on :code:`orderbook.1` for spot and :code:`tickers`
   for all other categories.
@@ -595,8 +505,8 @@ Common
 * :ref:`Gateway Flags <gateway-flags>`
 * :ref:`Gateway Config <gateway-config>`
 
-Bybit
-~~~~~
+Exchange
+~~~~~~~~
 
-* `Website <https://www.bybit.com/en-US/>`__
+* `Website <https://www.bybit.com/>`__
 * `Documentation <https://bybit-exchange.github.io/docs/v5/intro>`__
