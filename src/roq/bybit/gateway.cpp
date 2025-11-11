@@ -65,7 +65,7 @@ Gateway::Gateway(server::Dispatcher &dispatcher, Settings const &settings, Confi
       rest_{*this, context_, ++stream_id_, shared_}, order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, accounts_, shared_)},
       drop_copy_{create_drop_copy<decltype(drop_copy_)>(*this, context_, stream_id_, accounts_, shared_)} {
   auto lookback = std::chrono::duration_cast<std::chrono::minutes>(settings.time_series.lookback);
-  if (lookback.count() > settings.download.time_series_limit) {
+  if (lookback.count() > static_cast<int64_t>(settings.download.time_series_limit)) {
     log::fatal("NOT IMPLEMENTED: lookback period too large ({} > {})"sv, lookback, settings.download.time_series_limit);
   }
 }
