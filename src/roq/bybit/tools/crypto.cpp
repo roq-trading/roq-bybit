@@ -19,7 +19,7 @@ namespace roq {
 namespace bybit {
 namespace tools {
 
-// === IMPLEMENTATION ===
+// === HELPERS ===
 
 namespace {
 auto create_hmac(auto const &secret) {
