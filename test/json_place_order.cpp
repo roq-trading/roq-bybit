@@ -46,6 +46,7 @@ TEST_CASE("json_place_order_simple", "[json_place_order]") {
       .quantity = 1.2345,
       .price = 23456.78,
       .stop_price = NaN,
+      .leverage = NaN,
       .routing_id = {},
       .strategy_id = {},
   };

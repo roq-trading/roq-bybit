@@ -32,6 +32,7 @@ auto const CREATE_ORDER = CreateOrder{
     .quantity = 0.001,
     .price = 17123.45,
     .stop_price = NaN,
+    .leverage = NaN,
     .routing_id = {},
     .strategy_id = {},
 };
