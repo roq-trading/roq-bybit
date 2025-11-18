@@ -122,6 +122,14 @@
     {
       "name": "symbolType",
       "type": "std/string_view"
+    },
+    {
+      "name": "displayName",
+      "type": "std/string_view"
+    },
+    {
+      "name": "forbidUplWithdrawal",
+      "type": "std/bool"
     }
   ]
 }

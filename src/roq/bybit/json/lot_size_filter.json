@@ -41,6 +41,18 @@
     {
       "name": "minNotionalValue",
       "type": "std/double"
+    },
+    {
+      "name": "maxLimitOrderQty",
+      "type": "std/double"
+    },
+    {
+      "name": "maxMarketOrderQty",
+      "type": "std/double"
+    },
+    {
+      "name": "postOnlyMaxLimitOrderSize",
+      "type": "std/double"
     }
   ]
 }

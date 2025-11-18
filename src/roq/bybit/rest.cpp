@@ -272,7 +272,7 @@ void Rest::operator()(Trace<json::InstrumentsInfo> const &event) {
         .stream_id = stream_id_,
         .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
-        .description = item.symbol,
+        .description = item.display_name,
         .security_type = map(item.contract_type, item.options_type),
         .cfi_code = {},
         .base_currency = item.base_coin,

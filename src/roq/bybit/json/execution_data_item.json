@@ -125,6 +125,13 @@
     {
       "name": "createType",
       "type": "std/string_view"
+    },
+    {
+      "name": "extraFees"
+    },
+    {
+      "name": "feeCurrency",
+      "type": "std/string_view"
     }
   ]
 }

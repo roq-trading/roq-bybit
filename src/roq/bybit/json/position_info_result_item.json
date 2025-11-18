@@ -133,6 +133,19 @@
     {
       "name": "sessionAvgPrice",
       "type": "std/double"
+    },
+    {
+      "name": "positionIMByMp",
+      "type": "std/string_view",
+      "comment": "number?"
+    },
+    {
+      "name": "positionMMByMp",
+      "type": "std/string_view",
+      "comment": "number?"
+    },
+    {
+      "name": "liqPriceByMp"
     }
   ]
 }

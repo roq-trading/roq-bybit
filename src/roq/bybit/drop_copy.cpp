@@ -511,7 +511,7 @@ void DropCopy::operator()(Trace<json::Execution2> const &event) {
           .price = item.exec_price,
           .liquidity = liquidity,
           .commission_amount = item.exec_fee,  // XXX ???
-          .commission_currency = {},
+          .commission_currency = item.fee_currency,
           .base_amount = NaN,
           .quote_amount = NaN,
           .profit_loss_amount = profit_loss_amount,

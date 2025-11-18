@@ -141,6 +141,16 @@
     {
       "name": "isReduceOnly",
       "type": "std/bool"
+    },
+    {
+      "name": "positionIMByMp",
+      "type": "std/string_view",
+      "comment": "number?"
+    },
+    {
+      "name": "positionMMByMp",
+      "type": "std/string_view",
+      "comment": "number?"
     }
   ]
 }

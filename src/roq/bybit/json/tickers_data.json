@@ -218,6 +218,18 @@
     {
       "name": "curPreListingPhase",
       "type": "std/string_view"
+    },
+    {
+      "name": "fundingIntervalHour",
+      "type": "std/int32"
+    },
+    {
+      "name": "fundingCap",
+      "type": "std/double"
+    },
+    {
+      "name": "basisRateYear",
+      "type": "std/double"
     }
   ]
 }
