@@ -1,0 +1,26 @@
+{
+  "name": "roq/bybit/json/Header2",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "X-Bapi-Limit",
+      "type": "std/int32"
+    },
+    {
+      "name": "X-Bapi-Limit-Status",
+      "type": "std/int32"
+    },
+    {
+      "name": "X-Bapi-Limit-Reset-Timestamp",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "Traceid",
+      "type": "std/string_view"
+    },
+    {
+      "name": "Timenow",
+      "type": "std/milliseconds"
+    }
+  ]
+}

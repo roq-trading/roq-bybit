@@ -23,9 +23,9 @@ struct Account final {
 
   Account(Account const &) = delete;
 
-  std::string_view get_key() const { return crypto_.get_key(); }
+  std::string_view get_key() const { return crypto_.key; }
 
-  std::string create_signature(std::chrono::milliseconds expires);
+  std::string create_signature(std::chrono::milliseconds expires_utc);
   std::string create_headers(std::string_view const &path, std::string_view const &query, std::string_view const &body);
 
   std::string const name;

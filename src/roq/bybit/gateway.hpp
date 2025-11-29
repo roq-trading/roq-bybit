@@ -81,8 +81,11 @@ struct Gateway final : public server::Handler, public Rest::Handler, public Orde
   template <typename... Args>
   static void dispatch_helper(auto &self, Args &&...);
 
-  OrderEntry &get_order_entry(std::string_view const &account);
   DropCopy &get_drop_copy(std::string_view const &account);
+
+  OrderEntry &get_order_entry_rest(std::string_view const &account);
+  OrderEntry &get_order_entry_ws(std::string_view const &account);
+  OrderEntry &get_order_entry(std::string_view const &account);
 
  private:
   server::Dispatcher &dispatcher_;
@@ -96,7 +99,8 @@ struct Gateway final : public server::Handler, public Rest::Handler, public Orde
   uint16_t stream_id_ = {};
   // streams
   Rest rest_;
-  utils::unordered_map<std::string, std::unique_ptr<OrderEntry>> order_entry_;
+  utils::unordered_map<std::string, std::unique_ptr<OrderEntry>> order_entry_rest_;
+  utils::unordered_map<std::string, std::unique_ptr<OrderEntry>> order_entry_ws_;
   utils::unordered_map<std::string, std::unique_ptr<DropCopy>> drop_copy_;
   std::vector<std::unique_ptr<MarketData>> market_data_;
   // cache

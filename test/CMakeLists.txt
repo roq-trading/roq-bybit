@@ -4,9 +4,12 @@ set(TARGET_NAME ${PROJECT_NAME}-test)
 
 set(SOURCES
     json_account_info.cpp
+    json_amend_order_2.cpp
     json_amend_order.cpp
+    json_auth_2.cpp
     json_auth.cpp
     json_cancel_all_orders.cpp
+    json_cancel_order_2.cpp
     json_cancel_order.cpp
     json_error.cpp
     json_execution.cpp

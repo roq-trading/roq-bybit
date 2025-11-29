@@ -38,12 +38,13 @@
 namespace roq {
 namespace bybit {
 
-struct OrderEntry final : public web::rest::Client::Handler {
+struct OrderEntry {
   struct Response final {
     std::string_view account;
     std::string_view topic;
     std::string_view symbol;
   };
+
   struct Handler {
     virtual void operator()(Trace<StreamStatus> const &) = 0;
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
@@ -54,117 +55,25 @@ struct OrderEntry final : public web::rest::Client::Handler {
     virtual void operator()(Trace<Response> const &) = 0;
   };
 
-  OrderEntry(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
+  OrderEntry() = default;
 
   OrderEntry(OrderEntry const &) = delete;
 
-  bool ready() const { return status_ == ConnectionStatus::READY; }
+  virtual ~OrderEntry() = default;
 
-  void operator()(Event<Start> const &);
-  void operator()(Event<Stop> const &);
-  void operator()(Event<Timer> const &);
+  virtual void operator()(Event<Start> const &) = 0;
+  virtual void operator()(Event<Stop> const &) = 0;
+  virtual void operator()(Event<Timer> const &) = 0;
 
-  void operator()(metrics::Writer &) const;
+  virtual void operator()(metrics::Writer &) const = 0;
 
-  uint16_t operator()(Event<CreateOrder> const &, server::oms::Order const &, std::string_view const &request_id);
-  uint16_t operator()(Event<ModifyOrder> const &, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id);
-  uint16_t operator()(Event<CancelOrder> const &, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id);
+  virtual uint16_t operator()(Event<CreateOrder> const &, server::oms::Order const &, std::string_view const &request_id) = 0;
+  virtual uint16_t operator()(
+      Event<ModifyOrder> const &, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id) = 0;
+  virtual uint16_t operator()(
+      Event<CancelOrder> const &, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id) = 0;
 
-  uint16_t operator()(Event<CancelAllOrders> const &, std::string_view const &request_id);
-
- protected:
-  void operator()(Trace<web::rest::Client::Connected> const &) override;
-  void operator()(Trace<web::rest::Client::Disconnected> const &) override;
-  void operator()(Trace<web::rest::Client::Latency> const &) override;
-
-  void operator()(ConnectionStatus);
-
-  uint32_t download(OrderEntryState state);
-
-  void check_request_queue(std::chrono::nanoseconds now);
-
-  void get_account_info();
-  void get_account_info_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::AccountInfo> const &);
-
-  void get_wallet_balance();
-  void get_wallet_balance_ack(Trace<web::rest::Response> const &);
-  void operator()(Trace<json::WalletAck> const &);
-
-  void get_position_info(std::string_view const &symbol);
-  void get_position_info_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
-  void operator()(Trace<json::PositionInfo> const &);
-
-  void get_open_orders(std::string_view const &symbol);
-  void get_open_orders_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
-  void operator()(Trace<json::OpenOrders> const &);
-
-  void get_execution(std::string_view const &symbol);
-  void get_execution_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
-  void operator()(Trace<json::Execution> const &);
-
-  void place_order(Event<CreateOrder> const &, server::oms::Order const &, std::string_view const &request_id);
-  void place_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
-  void operator()(Trace<json::PlaceOrder> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
-
-  void amend_order(Event<ModifyOrder> const &, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id);
-  void amend_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
-  void operator()(Trace<json::AmendOrder> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
-
-  void cancel_order(Event<CancelOrder> const &, server::oms::Order const &, std::string_view const &request_id, std::string_view const &previous_request_id);
-  void cancel_order_ack(Trace<web::rest::Response> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
-  void operator()(Trace<json::CancelOrder> const &, uint8_t user_id, uint64_t order_id, uint32_t version);
-
-  void cancel_all_orders(Event<CancelAllOrders> const &, std::string_view const &request_id);
-  void cancel_all_orders_ack(Trace<web::rest::Response> const &, std::string_view const &request_id);
-  void operator()(Trace<json::CancelAllOrders> const &);
-
-  void process_response(web::rest::Response const &, auto error_handler, auto success_handler);
-
-  template <typename... Args>
-  void operator()(Trace<server::oms::Response> const &, uint8_t user_id, uint64_t order_id, Args &&...);
-
-  void operator()(Trace<server::oms::OrderUpdate> const &, std::string_view const &client_order_id);
-
-  void waf_limit_violation();
-
- private:
-  Handler &handler_;
-  // config
-  uint16_t const stream_id_;
-  std::string const name_;
-  // connection
-  std::unique_ptr<web::rest::Client> const connection_;
-  // buffers
-  core::json::BufferStack decode_buffer_;
-  // metrics
-  struct {
-    utils::metrics::Counter disconnect;
-  } counter_;
-  struct {
-    utils::metrics::Profile account_info, account_info_ack,  //
-        wallet_balance, wallet_balance_ack,                  //
-        position_info, position_info_ack,                    //
-        open_orders, open_orders_ack,                        //
-        execution, execution_ack,                            //
-        place_order, place_order_ack,                        //
-        amend_order, amend_order_ack,                        //
-        cancel_order, cancel_order_ack,                      //
-        cancel_all_orders, cancel_all_orders_ack;
-  } profile_;
-  struct {
-    utils::metrics::Latency ping;
-  } latency_;
-  // account
-  Account &account_;
-  // cache
-  Shared &shared_;
-  // state
-  ConnectionStatus status_ = {};
-  core::Download<OrderEntryState> download_;
-  bool download_trades_is_first_ = true;
-  //
-  std::string encode_buffer_;
+  virtual uint16_t operator()(Event<CancelAllOrders> const &, std::string_view const &request_id) = 0;
 };
 
 }  // namespace bybit

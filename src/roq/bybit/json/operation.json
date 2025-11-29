@@ -13,6 +13,18 @@
     },
     {
       "name": "subscribe"
+    },
+    {
+      "raw": "order.create",
+      "name": "order_create"
+    },
+    {
+      "raw": "order.amend",
+      "name": "order_amend"
+    },
+    {
+      "raw": "order.cancel",
+      "name": "order_cancel"
     }
   ]
 }

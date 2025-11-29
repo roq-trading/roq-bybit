@@ -12,7 +12,7 @@ namespace json {
 
 // NOLINTBEGIN(readability-magic-numbers)
 
-Error map_error(int32_t ret_code) {
+roq::Error map_error(int32_t ret_code) {
   switch (ret_code) {
     case 0:
       return {};

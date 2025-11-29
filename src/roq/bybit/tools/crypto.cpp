@@ -30,11 +30,11 @@ auto create_hmac(auto const &secret) {
 // === IMPLEMENTATION ===
 
 Crypto::Crypto(std::string_view const &key, std::string_view const &secret, std::chrono::milliseconds recv_window)
-    : key_{key}, mac_{secret}, recv_window_{recv_window} {
+    : key{key}, mac_{secret}, recv_window_{recv_window} {
 }
 
-std::string Crypto::create_signature_v2(std::chrono::milliseconds expires) {
-  auto tmp = fmt::format("GET/realtime{}"sv, expires.count());
+std::string Crypto::create_signature_v2(std::chrono::milliseconds expires_utc) {
+  auto tmp = fmt::format("GET/realtime{}"sv, expires_utc.count());
   mac_.clear();
   mac_.update(tmp);
   auto digest = mac_.final(digest_);
@@ -44,7 +44,7 @@ std::string Crypto::create_signature_v2(std::chrono::milliseconds expires) {
 }
 
 std::string Crypto::create_headers_v2(
-    [[maybe_unused]] std::string_view const &path, std::string_view const &query, std::string_view const &body, std::chrono::milliseconds timestamp) {
+    [[maybe_unused]] std::string_view const &path, std::string_view const &query, std::string_view const &body, std::chrono::milliseconds now_utc) {
   assert(!std::empty(path));
   auto query_or_body = [&]() {
     if (std::empty(query)) {
@@ -54,7 +54,7 @@ std::string Crypto::create_headers_v2(
     assert(query[0] == '?');
     return query.substr(1);
   }();
-  auto tmp = fmt::format("{}{}{}{}"sv, timestamp.count(), key_, recv_window_.count(), query_or_body);
+  auto tmp = fmt::format("{}{}{}{}"sv, now_utc.count(), key, recv_window_.count(), query_or_body);
   mac_.clear();
   mac_.update(tmp);
   auto digest = mac_.final(digest_);
@@ -65,9 +65,9 @@ std::string Crypto::create_headers_v2(
       "X-BAPI-SIGN: {}\r\n"
       "X-BAPI-TIMESTAMP: {}\r\n"
       "X-BAPI-RECV-WINDOW: {}\r\n",
-      key_,
+      key,
       signature,
-      timestamp.count(),
+      now_utc.count(),
       recv_window_.count());
   return result;
 }

@@ -20,6 +20,7 @@ struct Settings final : public server::flags::Settings {
   explicit Settings(args::Parser const &);
 
   std::string_view exchange;
+  bool ws_api;
 
   flags::Misc misc;
   flags::REST rest;
@@ -43,6 +44,7 @@ struct fmt::formatter<roq::bybit::Settings> {
         context.out(),
         R"({{)"
         R"(exchange="{}", )"
+        R"(ws_api={}, )"
         R"(misc={}, )"
         R"(rest={}, )"
         R"(ws={}, )"
@@ -51,6 +53,7 @@ struct fmt::formatter<roq::bybit::Settings> {
         R"(server={})"
         R"(}})"sv,
         value.exchange,
+        value.ws_api,
         value.misc,
         value.rest,
         value.ws,

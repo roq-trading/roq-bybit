@@ -1,0 +1,37 @@
+{
+  "name": "roq/bybit/json/CancelOrder2",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "reqId",
+      "type": "std/string_view"
+    },
+    {
+      "name": "retCode",
+      "type": "std/int32"
+    },
+    {
+      "name": "retMsg",
+      "type": "std/string_view"
+    },
+    {
+      "name": "op",
+      "type": "roq/bybit/json/Operation"
+    },
+    {
+      "name": "data",
+      "type": "roq/bybit/json/CancelOrder2Data"
+    },
+    {
+      "name": "retExtInfo"
+    },
+    {
+      "name": "header",
+      "type": "roq/bybit/json/Header2"
+    },
+    {
+      "name": "connId",
+      "type": "std/string_view"
+    }
+  ]
+}

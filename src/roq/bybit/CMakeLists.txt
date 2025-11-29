@@ -10,7 +10,8 @@ set(SOURCES
     drop_copy.cpp
     gateway.cpp
     market_data.cpp
-    order_entry.cpp
+    order_entry_rest.cpp
+    order_entry_ws.cpp
     rest.cpp
     settings.cpp
     shared.cpp

@@ -43,13 +43,13 @@ Account::Account(Settings const &settings, Config const &config, std::string_vie
       request_queue{rate_limiter} {
 }
 
-std::string Account::create_signature(std::chrono::milliseconds expires) {
-  return crypto_.create_signature_v2(expires);
+std::string Account::create_signature(std::chrono::milliseconds expires_utc) {
+  return crypto_.create_signature_v2(expires_utc);
 }
 
 std::string Account::create_headers(std::string_view const &path, std::string_view const &query, std::string_view const &body) {
-  auto now = clock::get_realtime();
-  return crypto_.create_headers_v2(path, query, body, utils::safe_cast(now));
+  auto now_utc = clock::get_realtime<std::chrono::milliseconds>();
+  return crypto_.create_headers_v2(path, query, body, now_utc);
 }
 
 }  // namespace bybit

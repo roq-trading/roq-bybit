@@ -21,9 +21,6 @@ case "$KERNEL" in
     (>&2 echo -e "\033[1;31mERROR: Unknown architecture.\033[0m") && exit 1
 esac
 
-DATABASE_URI="http://192.168.188.70:8123"
-#DATABASE_URI="http://localhost:8123"
-
 NAME="bybit"
 
 CONFIG="${CONFIG:-$NAME-testnet}"
@@ -31,7 +28,6 @@ CONFIG="${CONFIG:-$NAME-testnet}"
 CONFIG_FILE="$ROQ_CONFIG_PATH/roq-bybit/$CONFIG.toml"
 
 FLAGFILE="../../../share/flags/test/flags.cfg"
-
 
 $PREFIX ./roq-bybit \
   --name "$NAME" \
@@ -41,20 +37,5 @@ $PREFIX ./roq-bybit \
   --event_log_dir "$HOME/var/lib/roq/data" \
   --client_listen_address "$HOME/run/$NAME.sock" \
   --service_listen_address "$HOME/run/metrics/${NAME}.sock" \
+  --cache_all_reference_data=true \
   $@
-
-#  --time_series_interval "60s" \
-#  --time_series_lookback "2h" \
-#  --time_series_realtime true \
-#  --download_time_series true \
-#  --download_trades_lookback=5m \
-#  --oms_cache=true \
-#  --oms_multicast_port 1234 \
-#  --oms_multicast_address=224.1.1.1 \
-#  --oms_local_interface="$LOCAL_INTERFACE" \
-#  --oms_multicast_ttl 4 \
-#  --oms_multicast_loop=true \
-#  --oms_listen_port 9876 \
-#  --cache_database_uri "$DATABASE_URI" \
-#  --cache_database_name "roq" \
-#  --enable_portfolio=true \

@@ -77,7 +77,7 @@ inline void update(std::chrono::nanoseconds &result, core::json::Value const &va
       value);
 }
 
-extern Error map_error(int32_t ret_code);
+extern roq::Error map_error(int32_t ret_code);
 
 }  // namespace json
 }  // namespace bybit

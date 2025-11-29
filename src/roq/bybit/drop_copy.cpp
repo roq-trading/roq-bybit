@@ -174,6 +174,8 @@ void DropCopy::operator()(Trace<OrderEntry::Response> const &event) {
   }
 }
 
+// web::socket::Client::Handler
+
 void DropCopy::operator()(web::socket::Client::Connected const &) {
   assert(logon_timeout_.count() == 0);
   auto now = clock::get_system();
@@ -189,19 +191,7 @@ void DropCopy::operator()(web::socket::Client::Disconnected const &) {
 }
 
 void DropCopy::operator()(web::socket::Client::Ready const &) {
-  auto now = clock::get_realtime();
-  auto expires = std::chrono::duration_cast<std::chrono::milliseconds>(now + AUTH_EXPIRES);
-  auto signature = account_.create_signature(expires);
-  auto message = fmt::format(
-      R"({{)"
-      R"("req_id":"auth",)"
-      R"("op": "auth",)"
-      R"("args":["{}",{},"{}"])"
-      R"(}})"sv,
-      account_.get_key(),
-      expires.count(),
-      signature);
-  (*connection_).send_text(message);
+  send_login();
   (*this)(ConnectionStatus::LOGIN_SENT);
 }
 
@@ -249,6 +239,22 @@ void DropCopy::operator()(ConnectionStatus status) {
   }
 }
 
+void DropCopy::send_login() {
+  auto now_utc = clock::get_realtime<std::chrono::milliseconds>();
+  auto expires_utc = now_utc + AUTH_EXPIRES;
+  auto signature = account_.create_signature(expires_utc);
+  auto message = fmt::format(
+      R"({{)"
+      R"("req_id":"auth",)"
+      R"("op": "auth",)"
+      R"("args":["{}",{},"{}"])"
+      R"(}})"sv,
+      account_.get_key(),
+      expires_utc.count(),
+      signature);
+  (*connection_).send_text(message);
+}
+
 void DropCopy::subscribe() {
   subscribe("wallet"sv);
   if (shared_.api.api != tools::API::SPOT) {
@@ -284,6 +290,8 @@ void DropCopy::parse(std::string_view const &message) {
     }
   });
 }
+
+// json::Parser::Handler
 
 void DropCopy::operator()(Trace<json::Ping> const &event) {
   auto &[trace_info, ping] = event;

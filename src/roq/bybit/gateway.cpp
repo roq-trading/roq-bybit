@@ -12,6 +12,9 @@
 
 #include "roq/server/oms/exceptions.hpp"
 
+#include "roq/bybit/order_entry_rest.hpp"
+#include "roq/bybit/order_entry_ws.hpp"
+
 #include "roq/bybit/json/utils.hpp"
 
 using namespace std::literals;
@@ -34,13 +37,27 @@ R create_accounts(auto &settings, auto &config) {
 }
 
 template <typename R>
-R create_order_entry(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
+R create_order_entry_rest(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
   using result_type = std::remove_cvref_t<R>;
   result_type result;
   for (auto &[_, item] : accounts) {
     auto &account = *item;
-    auto obj = std::make_unique<OrderEntry>(gateway, context, ++stream_id, account, shared);
+    auto obj = std::make_unique<OrderEntryREST>(gateway, context, ++stream_id, account, shared);
     result.try_emplace(static_cast<std::string_view>(account.name), std::move(obj));
+  }
+  return result;
+}
+
+template <typename R>
+R create_order_entry_ws(auto &gateway, auto &settings, auto &context, auto &stream_id, auto &accounts, auto &shared) {
+  using result_type = std::remove_cvref_t<R>;
+  result_type result;
+  if (settings.ws_api) {
+    for (auto &[_, item] : accounts) {
+      auto &account = *item;
+      auto obj = std::make_unique<OrderEntryWS>(gateway, context, ++stream_id, account, shared);
+      result.try_emplace(static_cast<std::string_view>(account.name), std::move(obj));
+    }
   }
   return result;
 }
@@ -62,7 +79,9 @@ R create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts
 
 Gateway::Gateway(server::Dispatcher &dispatcher, Settings const &settings, Config const &config, io::Context &context)
     : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(settings, config)}, context_{context}, shared_{dispatcher, settings},
-      rest_{*this, context_, ++stream_id_, shared_}, order_entry_{create_order_entry<decltype(order_entry_)>(*this, context_, stream_id_, accounts_, shared_)},
+      rest_{*this, context_, ++stream_id_, shared_},
+      order_entry_rest_{create_order_entry_rest<decltype(order_entry_rest_)>(*this, context_, stream_id_, accounts_, shared_)},
+      order_entry_ws_{create_order_entry_ws<decltype(order_entry_ws_)>(*this, settings, context_, stream_id_, accounts_, shared_)},
       drop_copy_{create_drop_copy<decltype(drop_copy_)>(*this, context_, stream_id_, accounts_, shared_)} {
   auto lookback = std::chrono::duration_cast<std::chrono::minutes>(settings.time_series.lookback);
   if (lookback.count() > static_cast<int64_t>(settings.download.time_series_limit)) {
@@ -204,7 +223,7 @@ uint16_t Gateway::operator()(
 
 uint16_t Gateway::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
   assert(!std::empty(event.value.account));
-  return get_order_entry(event.value.account)(event, request_id);
+  return get_order_entry_rest(event.value.account)(event, request_id);  // note! only available from REST
 }
 
 uint16_t Gateway::operator()(Event<MassQuote> const &) {
@@ -228,7 +247,10 @@ template <typename... Args>
 void Gateway::dispatch_helper(auto &self, Args &&...args) {
   auto helper = [&](auto &target) { target(std::forward<Args>(args)...); };
   helper(self.rest_);
-  for (auto &[_, item] : self.order_entry_) {
+  for (auto &[_, item] : self.order_entry_rest_) {
+    helper(*item);
+  }
+  for (auto &[_, item] : self.order_entry_ws_) {
     helper(*item);
   }
   for (auto &[_, item] : self.drop_copy_) {
@@ -239,20 +261,36 @@ void Gateway::dispatch_helper(auto &self, Args &&...args) {
   }
 }
 
-OrderEntry &Gateway::get_order_entry(std::string_view const &account) {
-  auto iter = order_entry_.find(account);
-  if (iter != std::end(order_entry_)) {
-    return *(*iter).second;
-  }
-  throw RuntimeError{R"(Unknown account="{}")"sv, account};
-}
-
 DropCopy &Gateway::get_drop_copy(std::string_view const &account) {
   auto iter = drop_copy_.find(account);
   if (iter != std::end(drop_copy_)) {
     return *(*iter).second;
   }
   log::fatal(R"(Unknown account="{}")"sv, account);
+}
+
+OrderEntry &Gateway::get_order_entry_rest(std::string_view const &account) {
+  auto iter = order_entry_rest_.find(account);
+  if (iter != std::end(order_entry_rest_)) {
+    return *(*iter).second;
+  }
+  throw RuntimeError{R"(Unknown account="{}")"sv, account};
+}
+
+OrderEntry &Gateway::get_order_entry_ws(std::string_view const &account) {
+  auto iter = order_entry_ws_.find(account);
+  if (iter != std::end(order_entry_ws_)) {
+    return *(*iter).second;
+  }
+  throw RuntimeError{R"(Unknown account="{}")"sv, account};
+}
+
+OrderEntry &Gateway::get_order_entry(std::string_view const &account) {
+  if (shared_.settings.ws_api) {
+    return get_order_entry_ws(account);
+  } else {
+    return get_order_entry_rest(account);
+  }
 }
 
 }  // namespace bybit

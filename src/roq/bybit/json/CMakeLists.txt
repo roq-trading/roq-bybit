@@ -1,6 +1,6 @@
 set(TARGET_NAME ${PROJECT_NAME}-json)
 
-set(SOURCES encoder.cpp map.cpp parser.cpp utils.cpp)
+set(SOURCES encoder.cpp map.cpp parser.cpp parser_2.cpp utils.cpp)
 
 include(RoqAutogen)
 
@@ -8,12 +8,17 @@ set(AUTOGEN_SCHEMAS
     account_info.json
     account_info_result.json
     account_type.json
+    amend_order2_data.json
+    amend_order2.json
     amend_order.json
     amend_order_result.json
+    auth2.json
     auth.json
     cancel_all_orders.json
     cancel_all_orders_result_item.json
     cancel_all_orders_result.json
+    cancel_order2_data.json
+    cancel_order2.json
     cancel_order.json
     cancel_order_result.json
     cancel_type.json
@@ -27,6 +32,7 @@ set(AUTOGEN_SCHEMAS
     execution.json
     execution_result_item.json
     execution_result.json
+    header2.json
     instruments_info.json
     instruments_info_result_item.json
     instruments_info_result.json
@@ -51,6 +57,8 @@ set(AUTOGEN_SCHEMAS
     order_status.json
     order_type.json
     ping.json
+    place_order2_data.json
+    place_order2.json
     place_order.json
     place_order_result.json
     position_data_item.json

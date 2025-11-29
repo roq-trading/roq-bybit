@@ -28,6 +28,18 @@
       "description": "Host (when URI is an IP address)"
     },
     {
+      "name": "trade_uri",
+      "type": "roq/io/web/URI",
+      "validator": "roq/core/flags/URI",
+      "default": "wss://stream-testnet.bybit.com/v5/trade",
+      "description": "Exchange end-point"
+    },
+    {
+      "name": "trade_host",
+      "type": "std/string",
+      "description": "Host (when URI is an IP address)"
+    },
+    {
       "name": "ping_freq",
       "type": "std/nanoseconds",
       "validator": "roq/flags/validators/TimePeriod",

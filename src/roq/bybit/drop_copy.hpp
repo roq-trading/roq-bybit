@@ -89,6 +89,8 @@ struct DropCopy final : public web::socket::Client::Handler, json::Parser::Handl
  private:
   void operator()(ConnectionStatus);
 
+  void send_login();
+
   void subscribe();
 
   void subscribe(std::string_view const &topic);

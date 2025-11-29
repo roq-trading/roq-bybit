@@ -1,0 +1,22 @@
+{
+  "name": "roq/bybit/json/Auth2",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "retCode",
+      "type": "std/int32"
+    },
+    {
+      "name": "retMsg",
+      "type": "std/string_view"
+    },
+    {
+      "name": "op",
+      "type": "roq/bybit/json/Operation"
+    },
+    {
+      "name": "connId",
+      "type": "std/string_view"
+    }
+  ]
+}

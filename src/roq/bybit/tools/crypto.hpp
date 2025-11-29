@@ -22,17 +22,16 @@ struct Crypto final {
   Crypto(Crypto &&) = delete;
   Crypto(Crypto const &) = delete;
 
-  auto const &get_key() const { return key_; }
+  std::string create_signature_v2(std::chrono::milliseconds expires_utc);
 
-  std::string create_signature_v2(std::chrono::milliseconds expires);
+  std::string create_headers_v2(std::string_view const &path, std::string_view const &query, std::string_view const &body, std::chrono::milliseconds now_utc);
 
-  std::string create_headers_v2(std::string_view const &path, std::string_view const &query, std::string_view const &body, std::chrono::milliseconds timestamp);
+  std::string const key;
 
  private:
   using MAC = utils::mac::HMAC<utils::hash::SHA256>;
   using Digest = std::array<std::byte, MAC::DIGEST_LENGTH>;
 
-  std::string const key_;
   MAC mac_;
   Digest digest_;
   std::string const passphrase_;
