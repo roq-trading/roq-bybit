@@ -193,7 +193,7 @@ Environments
 
    .. code-block:: shell
 
-      $ $CONDA_PREFIX/share/roq-bybit/flags/prod/flags.cfg
+      $ --flagfile $CONDA_PREFIX/share/roq-bybit/flags/prod/flags.cfg
 
    .. include:: flags/prod/flags.cfg
      :code: shell
@@ -202,7 +202,7 @@ Environments
 
    .. code-block:: shell
 
-      $ $CONDA_PREFIX/share/roq-bybit/flags/test/flags.cfg
+      $ --flagfile $CONDA_PREFIX/share/roq-bybit/flags/test/flags.cfg
 
    .. include:: flags/test/flags.cfg
      :code: shell
@@ -213,7 +213,7 @@ Configuration
 
 .. code-block:: shell
 
-   $ $CONDA_PREFIX/share/roq-bybit/config.toml
+   $ --flagfile $CONDA_PREFIX/share/roq-bybit/config.toml
 
 .. important::
 
