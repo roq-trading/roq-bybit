@@ -27,7 +27,7 @@ auto create_order() {
 }
 }  // namespace
 
-TEST_CASE("json_place_order_simple", "[json_place_order]") {
+TEST_CASE("simple", "[json_place_order]") {
   std::string buffer;
   auto create_order = CreateOrder{
       .account = "A1"sv,
@@ -67,20 +67,17 @@ TEST_CASE("json_place_order_simple", "[json_place_order]") {
   CHECK(buffer == expected);
 }
 
-namespace {
-auto const MESSAGE = R"({)"
-                     R"("retCode":0,)"
-                     R"("retMsg":"OK",)"
-                     R"("result":{"orderId":"1410305521329702656",)"
-                     R"("orderLinkId":"SQAC6QMAAQAASPS4YMFC")"
-                     R"(},)"
-                     R"("retExtInfo":{},)"
-                     R"("time":1682857519260)"
-                     R"(})";
-}  // namespace
-
-TEST_CASE("json_place_order_response", "[json_place_order]") {
-  core::json::BufferStack buffer{8192, 1};
-  json::PlaceOrder obj{MESSAGE, buffer};
+TEST_CASE("response", "[json_place_order]") {
+  auto message = R"({)"
+                 R"("retCode":0,)"
+                 R"("retMsg":"OK",)"
+                 R"("result":{"orderId":"1410305521329702656",)"
+                 R"("orderLinkId":"SQAC6QMAAQAASPS4YMFC")"
+                 R"(},)"
+                 R"("retExtInfo":{},)"
+                 R"("time":1682857519260)"
+                 R"(})";
+  core::json::BufferStack buffers{8192, 1};
+  json::PlaceOrder obj{message, buffers};
   CHECK(obj.ret_code == 0);
 }

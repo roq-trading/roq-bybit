@@ -13,85 +13,44 @@ using namespace std::literals;
 
 // note! from websocket
 
-namespace {
-auto const MESSAGE = R"({)"
-                     R"("id":"460579-2-c4815897-f283-4ccd-b4d7-dac6bde51502-1682339173119",)"
-                     R"("topic":"wallet",)"
-                     R"("creationTime":1682339173118,)"
-                     R"("data":[{)"
-                     R"("accountType":"SPOT",)"
-                     R"("accountIMRate":"",)"
-                     R"("accountMMRate":"",)"
-                     R"("accountLTV":"",)"
-                     R"("totalEquity":"",)"
-                     R"("totalWalletBalance":"",)"
-                     R"("totalMarginBalance":"",)"
-                     R"("totalAvailableBalance":"",)"
-                     R"("totalPerpUPL":"",)"
-                     R"("totalInitialMargin":"",)"
-                     R"("totalMaintenanceMargin":"",)"
-                     R"("coin":[{)"
-                     R"("coin":"USDT",)"
-                     R"("equity":"",)"
-                     R"("usdValue":"",)"
-                     R"("walletBalance":"48855.56",)"
-                     R"("free":"48855.56",)"
-                     R"("locked":"0",)"
-                     R"("availableToWithdraw":"",)"
-                     R"("availableToBorrow":"",)"
-                     R"("borrowAmount":"",)"
-                     R"("accruedInterest":"",)"
-                     R"("totalOrderIM":"",)"
-                     R"("totalPositionIM":"",)"
-                     R"("totalPositionMM":"",)"
-                     R"("unrealisedPnl":"",)"
-                     R"("cumRealisedPnl":"")"
-                     R"(})"
-                     R"(])"
-                     R"(})"
-                     R"(])"
-                     R"(})"sv;
-
-auto const MESSAGE_2 = R"({)"
-                       R"("id":"460579-3-a5da51e6-2a7e-4dc6-9546-d85721fb0d1b-1682341631264",)"
-                       R"("topic":"wallet",)"
-                       R"("creationTime":1682341631264,)"
-                       R"("data":[{)"
-                       R"("accountType":"SPOT",)"
-                       R"("accountIMRate":"",)"
-                       R"("accountMMRate":"",)"
-                       R"("accountLTV":"",)"
-                       R"("totalEquity":"",)"
-                       R"("totalWalletBalance":"",)"
-                       R"("totalMarginBalance":"",)"
-                       R"("totalAvailableBalance":"",)"
-                       R"("totalPerpUPL":"",)"
-                       R"("totalInitialMargin":"",)"
-                       R"("totalMaintenanceMargin":"",)"
-                       R"("coin":[{)"
-                       R"("coin":"USDT",)"
-                       R"("equity":"",)"
-                       R"("usdValue":"",)"
-                       R"("walletBalance":"48855.56",)"
-                       R"("free":"48828.5061",)"
-                       R"("locked":"27.0539",)"
-                       R"("availableToWithdraw":"",)"
-                       R"("availableToBorrow":"",)"
-                       R"("borrowAmount":"",)"
-                       R"("accruedInterest":"",)"
-                       R"("totalOrderIM":"",)"
-                       R"("totalPositionIM":"",)"
-                       R"("totalPositionMM":"",)"
-                       R"("unrealisedPnl":"",)"
-                       R"("cumRealisedPnl":"")"
-                       R"(})"
-                       R"(])"
-                       R"(})"
-                       R"(])"
-                       R"(})";
-}  // namespace
-
-TEST_CASE("json_wallet_parser", "[json_wallet]") {
+TEST_CASE("parser", "[json_wallet]") {
+  auto message = R"({)"
+                 R"("id":"460579-2-c4815897-f283-4ccd-b4d7-dac6bde51502-1682339173119",)"
+                 R"("topic":"wallet",)"
+                 R"("creationTime":1682339173118,)"
+                 R"("data":[{)"
+                 R"("accountType":"SPOT",)"
+                 R"("accountIMRate":"",)"
+                 R"("accountMMRate":"",)"
+                 R"("accountLTV":"",)"
+                 R"("totalEquity":"",)"
+                 R"("totalWalletBalance":"",)"
+                 R"("totalMarginBalance":"",)"
+                 R"("totalAvailableBalance":"",)"
+                 R"("totalPerpUPL":"",)"
+                 R"("totalInitialMargin":"",)"
+                 R"("totalMaintenanceMargin":"",)"
+                 R"("coin":[{)"
+                 R"("coin":"USDT",)"
+                 R"("equity":"",)"
+                 R"("usdValue":"",)"
+                 R"("walletBalance":"48855.56",)"
+                 R"("free":"48855.56",)"
+                 R"("locked":"0",)"
+                 R"("availableToWithdraw":"",)"
+                 R"("availableToBorrow":"",)"
+                 R"("borrowAmount":"",)"
+                 R"("accruedInterest":"",)"
+                 R"("totalOrderIM":"",)"
+                 R"("totalPositionIM":"",)"
+                 R"("totalPositionMM":"",)"
+                 R"("unrealisedPnl":"",)"
+                 R"("cumRealisedPnl":"")"
+                 R"(})"
+                 R"(])"
+                 R"(})"
+                 R"(])"
+                 R"(})"sv;
   struct Handler final : public json::Parser::Handler {
     void operator()(Trace<json::Error> const &) override { FAIL(); }
     void operator()(Trace<json::Ping> const &) override { FAIL(); }
@@ -117,13 +76,50 @@ TEST_CASE("json_wallet_parser", "[json_wallet]") {
 
     bool found = false;
   } handler;
-  core::json::BufferStack buffer{8192, 1};
-  auto res = json::Parser::dispatch(handler, MESSAGE, buffer, {}, false);
+  core::json::BufferStack buffers{8192, 1};
+  auto res = json::Parser::dispatch(handler, message, buffers, {}, false);
   CHECK(res == true);
   CHECK(handler.found == true);
 }
 
-TEST_CASE("json_wallet_parser_2", "[json_wallet]") {
+TEST_CASE("parser_2", "[json_wallet]") {
+  auto message = R"({)"
+                 R"("id":"460579-3-a5da51e6-2a7e-4dc6-9546-d85721fb0d1b-1682341631264",)"
+                 R"("topic":"wallet",)"
+                 R"("creationTime":1682341631264,)"
+                 R"("data":[{)"
+                 R"("accountType":"SPOT",)"
+                 R"("accountIMRate":"",)"
+                 R"("accountMMRate":"",)"
+                 R"("accountLTV":"",)"
+                 R"("totalEquity":"",)"
+                 R"("totalWalletBalance":"",)"
+                 R"("totalMarginBalance":"",)"
+                 R"("totalAvailableBalance":"",)"
+                 R"("totalPerpUPL":"",)"
+                 R"("totalInitialMargin":"",)"
+                 R"("totalMaintenanceMargin":"",)"
+                 R"("coin":[{)"
+                 R"("coin":"USDT",)"
+                 R"("equity":"",)"
+                 R"("usdValue":"",)"
+                 R"("walletBalance":"48855.56",)"
+                 R"("free":"48828.5061",)"
+                 R"("locked":"27.0539",)"
+                 R"("availableToWithdraw":"",)"
+                 R"("availableToBorrow":"",)"
+                 R"("borrowAmount":"",)"
+                 R"("accruedInterest":"",)"
+                 R"("totalOrderIM":"",)"
+                 R"("totalPositionIM":"",)"
+                 R"("totalPositionMM":"",)"
+                 R"("unrealisedPnl":"",)"
+                 R"("cumRealisedPnl":"")"
+                 R"(})"
+                 R"(])"
+                 R"(})"
+                 R"(])"
+                 R"(})";
   struct Handler final : public json::Parser::Handler {
     void operator()(Trace<json::Error> const &) override { FAIL(); }
     void operator()(Trace<json::Ping> const &) override { FAIL(); }
@@ -149,8 +145,8 @@ TEST_CASE("json_wallet_parser_2", "[json_wallet]") {
 
     bool found = false;
   } handler;
-  core::json::BufferStack buffer{8192, 1};
-  auto res = json::Parser::dispatch(handler, MESSAGE_2, buffer, {}, false);
+  core::json::BufferStack buffers{8192, 1};
+  auto res = json::Parser::dispatch(handler, message, buffers, {}, false);
   CHECK(res == true);
   CHECK(handler.found == true);
 }

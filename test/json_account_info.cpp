@@ -12,23 +12,20 @@ using namespace roq::bybit;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-namespace {
-auto const MESSAGE = R"({)"
-                     R"("retCode":0,)"
-                     R"("retMsg":"OK",)"
-                     R"("result":{)"
-                     R"("marginMode":"REGULAR_MARGIN",)"
-                     R"("updatedTime":"1644843230000",)"
-                     R"("unifiedMarginStatus":1,)"
-                     R"("dcpStatus":"OFF",)"
-                     R"("timeWindow":10,)"
-                     R"("smpGroup":0)"
-                     R"(})"
-                     R"(})"sv;
-}  // namespace
-
-TEST_CASE("json_account_info_spot", "[json_account_info]") {
-  core::json::BufferStack buffer{8192, 1};
-  json::AccountInfo obj{MESSAGE, buffer};
+TEST_CASE("simple", "[json_account_info]") {
+  auto message = R"({)"
+                 R"("retCode":0,)"
+                 R"("retMsg":"OK",)"
+                 R"("result":{)"
+                 R"("marginMode":"REGULAR_MARGIN",)"
+                 R"("updatedTime":"1644843230000",)"
+                 R"("unifiedMarginStatus":1,)"
+                 R"("dcpStatus":"OFF",)"
+                 R"("timeWindow":10,)"
+                 R"("smpGroup":0)"
+                 R"(})"
+                 R"(})"sv;
+  core::json::BufferStack buffers{8192, 1};
+  json::AccountInfo obj{message, buffers};
   CHECK(obj.ret_code == 0);
 }

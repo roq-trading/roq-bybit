@@ -4,7 +4,7 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/bybit/json/amend_order2.hpp"
+#include "roq/bybit/json/parser_2.hpp"
 
 using namespace roq;
 using namespace roq::bybit;
@@ -32,8 +32,28 @@ TEST_CASE("success", "[json_amend_order_2]") {
                  R"(},)"
                  R"("connId":"d4al82f88smcpctamlf0-b9ry")"
                  R"(})"sv;
-  core::json::BufferStack buffer{8192, 1};
-  json::AmendOrder2 obj{message, buffer};
+  core::json::BufferStack buffers{8192, 1};
+  // simple
+  json::AmendOrder2 obj{message, buffers};
+  CHECK(obj.ret_code == 0);
+  // parser
+  struct Handler final : public json::Parser2::Handler {
+    void operator()(Trace<json::Ping> const &) override { FAIL(); }
+    void operator()(Trace<json::Auth2> const &) override { FAIL(); }
+    void operator()(Trace<json::Error> const &) override { FAIL(); }
+    void operator()(Trace<json::PlaceOrder2> const &) override { FAIL(); }
+    void operator()(Trace<json::AmendOrder2> const &event) override {
+      found = true;
+      auto &[trace_info, amend_order] = event;
+      CHECK(amend_order.ret_code == 0);
+    }
+    void operator()(Trace<json::CancelOrder2> const &) override { FAIL(); }
+
+    bool found = false;
+  } handler;
+  auto res = json::Parser2::dispatch(handler, message, buffers, {}, false);
+  CHECK(res == true);
+  CHECK(handler.found == true);
 }
 
 TEST_CASE("failure", "[json_amend_order_2]") {
@@ -53,6 +73,26 @@ TEST_CASE("failure", "[json_amend_order_2]") {
                  R"(},)"
                  R"("connId":"d4al7m6c0hv96a0jimg0-b9wz")"
                  R"(})"sv;
-  core::json::BufferStack buffer{8192, 1};
-  json::AmendOrder2 obj{message, buffer};
+  core::json::BufferStack buffers{8192, 1};
+  // simple
+  json::AmendOrder2 obj{message, buffers};
+  CHECK(obj.ret_code == 110001);
+  // parser
+  struct Handler final : public json::Parser2::Handler {
+    void operator()(Trace<json::Ping> const &) override { FAIL(); }
+    void operator()(Trace<json::Auth2> const &) override { FAIL(); }
+    void operator()(Trace<json::Error> const &) override { FAIL(); }
+    void operator()(Trace<json::PlaceOrder2> const &) override { FAIL(); }
+    void operator()(Trace<json::AmendOrder2> const &event) override {
+      found = true;
+      auto &[trace_info, amend_order] = event;
+      CHECK(amend_order.ret_code == 110001);
+    }
+    void operator()(Trace<json::CancelOrder2> const &) override { FAIL(); }
+
+    bool found = false;
+  } handler;
+  auto res = json::Parser2::dispatch(handler, message, buffers, {}, false);
+  CHECK(res == true);
+  CHECK(handler.found == true);
 }

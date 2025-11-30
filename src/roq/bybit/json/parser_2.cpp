@@ -15,10 +15,17 @@ namespace json {
 // === HELPERS ===
 
 namespace {
+constexpr auto const KEY_OP = "op"sv;
+}
+
+// === HELPERS ===
+
+namespace {
 template <typename T, typename... Args>
-void dispatch_helper(auto &handler, auto &message, auto &buffer_stack, auto &trace_info, Args &&...args) {
+auto dispatch_helper(auto &handler, auto &message, auto &buffer_stack, auto &trace_info, Args &&...args) {
   T obj{message, buffer_stack};
   create_trace_and_dispatch(handler, trace_info, obj, std::forward<Args>(args)...);
+  return true;
 }
 }  // namespace
 
@@ -26,55 +33,44 @@ void dispatch_helper(auto &handler, auto &message, auto &buffer_stack, auto &tra
 
 bool Parser2::dispatch(
     Handler &handler, std::string_view const &message, core::json::BufferStack &buffer_stack, TraceInfo const &trace_info, bool allow_unknown_event_types) {
-  auto stop = false;
   auto result = false;
   auto helper = [&](auto &key, auto &value) {
-    auto k = utils::hash::FNV::compute(key);
-    switch (k) {
-      case utils::hash::FNV::compute("op"sv): {
-        Operation op{std::get<std::string_view>(value)};
+    auto key_2 = utils::hash::FNV::compute(key);
+    switch (key_2) {
+      case utils::hash::FNV::compute(KEY_OP): {
+        Operation op{value};
         switch (op) {
           using enum Operation::type_t;
           case UNDEFINED_INTERNAL:
-            break;  // XXX stop?
+            log::fatal("Unexpected"sv);
           case UNKNOWN_INTERNAL:
-            if (allow_unknown_event_types) {
-              stop = true;
-            }
             break;
           case AUTH:
-            result = true;
-            dispatch_helper<Auth2>(handler, message, buffer_stack, trace_info);
+            result = dispatch_helper<Auth2>(handler, message, buffer_stack, trace_info);
             break;
           case PING:
-            stop = true;
             break;
           case PONG:
-            stop = true;
             break;
           case SUBSCRIBE:
-            stop = true;
             break;
           case ORDER_CREATE:
-            result = true;
-            dispatch_helper<PlaceOrder2>(handler, message, buffer_stack, trace_info);
+            result = dispatch_helper<PlaceOrder2>(handler, message, buffer_stack, trace_info);
             break;
           case ORDER_AMEND:
-            result = true;
-            dispatch_helper<AmendOrder2>(handler, message, buffer_stack, trace_info);
+            result = dispatch_helper<AmendOrder2>(handler, message, buffer_stack, trace_info);
             break;
           case ORDER_CANCEL:
-            result = true;
-            dispatch_helper<CancelOrder2>(handler, message, buffer_stack, trace_info);
+            result = dispatch_helper<CancelOrder2>(handler, message, buffer_stack, trace_info);
             break;
         }
-      } break;
+        return true;
+      }
     }
+    return result;
   };
-  core::json::Parser parser{message};
-  auto value = parser.root();
-  std::get<core::json::Object>(value).dispatch(helper);
-  if (result || stop) {
+  core::json::Parser::dispatch<core::json::Object>(helper, message);
+  if (result || allow_unknown_event_types) {
     return result;
   }
   log::fatal(R"(Unexpected: message="{}")"sv, message);

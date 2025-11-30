@@ -21,7 +21,7 @@ namespace json {
 // === constants ===
 
 namespace {
-auto const FIELD_DATA = "data"sv;
+auto const KEY_DATA = "data"sv;
 }
 
 // === HELPERS ===
@@ -37,7 +37,7 @@ bool dispatch_helper_flatten_wallet(auto &handler, auto &buffer_stack, auto &tra
   core::json::Parser parser{message};
   auto root = parser.root();
   for (auto [key, value] : std::get<core::json::Object>(root)) {
-    if (key == FIELD_DATA) {
+    if (key == KEY_DATA) {
       for (auto item : std::get<core::json::Array>(value)) {
         Wallet wallet{item, buffer_stack};
         create_trace_and_dispatch(handler, trace_info, wallet);

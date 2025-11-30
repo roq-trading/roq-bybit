@@ -22,7 +22,7 @@ auto create_order() {
 }
 }  // namespace
 
-TEST_CASE("json_cancel_order_simple", "[json_cancel_order]") {
+TEST_CASE("simple", "[json_cancel_order]") {
   std::string buffer;
   auto cancel_order = CancelOrder{
       .account = "A1"sv,

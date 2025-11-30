@@ -5,7 +5,6 @@
 #include "roq/core/json/buffer_stack.hpp"
 
 #include "roq/bybit/json/cancel_all_orders.hpp"
-#include "roq/bybit/json/utils.hpp"
 
 using namespace roq;
 using namespace roq::bybit;
@@ -26,8 +25,8 @@ auto create_order() {
 }
 }  // namespace
 
-TEST_CASE("json_cancel_order_simple", "[json_cancel_order]") {
-  std::string buffer;
+TEST_CASE("simple", "[json_cancel_order]") {
+  std::string buffers;
   auto cancel_order = CancelOrder{
       .account = "A1"sv,
       .order_id = 1000,
@@ -39,13 +38,13 @@ TEST_CASE("json_cancel_order_simple", "[json_cancel_order]") {
   auto order = create_order();
   auto request_id = "2345"sv;
   auto previous_request_id = "1234"sv;
-  json::cancel_order(buffer, cancel_order, order, request_id, previous_request_id, json::Category::SPOT);
+  json::cancel_order(buffers, cancel_order, order, request_id, previous_request_id, json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"
                   R"("orderLinkId":"1234")"
                   R"(})";
-  CHECK(buffer == expected);
+  CHECK(buffers == expected);
 }
 */
 
@@ -61,8 +60,8 @@ auto const MESSAGE = R"({)"
                      R"(})";
 }  // namespace
 
-TEST_CASE("json_cancel_all_orders_response", "[json_cancel_all_orders]") {
-  core::json::BufferStack buffer{8192, 1};
-  json::CancelAllOrders obj{MESSAGE, buffer};
+TEST_CASE("response", "[json_cancel_all_orders]") {
+  core::json::BufferStack buffers{8192, 1};
+  json::CancelAllOrders obj{MESSAGE, buffers};
   CHECK(obj.ret_code == 0);
 }

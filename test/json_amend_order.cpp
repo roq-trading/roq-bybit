@@ -27,7 +27,7 @@ auto create_order() {
 }
 }  // namespace
 
-TEST_CASE("json_amend_order_price", "[json_amend_order]") {
+TEST_CASE("price", "[json_amend_order]") {
   std::string buffer;
   auto modify_order = ModifyOrder{
       .account = "A1"sv,
@@ -52,7 +52,7 @@ TEST_CASE("json_amend_order_price", "[json_amend_order]") {
   CHECK(buffer == expected);
 }
 
-TEST_CASE("json_amend_order_quantity", "[json_amend_order]") {
+TEST_CASE("quantity", "[json_amend_order]") {
   std::string buffer;
   auto modify_order = ModifyOrder{
       .account = "A1"sv,
@@ -77,7 +77,7 @@ TEST_CASE("json_amend_order_quantity", "[json_amend_order]") {
   CHECK(buffer == expected);
 }
 
-TEST_CASE("json_amend_order_both", "[json_amend_order]") {
+TEST_CASE("both", "[json_amend_order]") {
   std::string buffer;
   auto modify_order = ModifyOrder{
       .account = "A1"sv,
@@ -113,7 +113,7 @@ auto const ERROR = R"({)"
                    R"(})";
 }
 
-TEST_CASE("json_amend_order_error", "[json_amend_order]") {
+TEST_CASE("error", "[json_amend_order]") {
   core::json::BufferStack buffer{8192, 1};
   json::AmendOrder obj{ERROR, buffer};
   CHECK(obj.ret_code == 10001);
