@@ -1,0 +1,34 @@
+{
+  "name": "roq/bybit/json/KlineAckResultListItem",
+  "type": "by_index",
+  "values": [
+    {
+      "name": "start_time",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "open_price",
+      "type": "std/double"
+    },
+    {
+      "name": "high_price",
+      "type": "std/double"
+    },
+    {
+      "name": "low_price",
+      "type": "std/double"
+    },
+    {
+      "name": "close_price",
+      "type": "std/double"
+    },
+    {
+      "name": "volume",
+      "type": "std/double"
+    },
+    {
+      "name": "turnover",
+      "type": "std/double"
+    }
+  ]
+}

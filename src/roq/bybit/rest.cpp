@@ -239,13 +239,13 @@ void Rest::get_instruments_info_ack(Trace<web::rest::Response> const &event, uin
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        json::InstrumentsInfo instruments_info{body, decode_buffer_};
-        if (instruments_info.ret_code == 0) {
-          Trace event_2{event, instruments_info};
+        json::InstrumentsInfoAck instruments_info_ack{body, decode_buffer_};
+        if (instruments_info_ack.ret_code == 0) {
+          Trace event_2{event, instruments_info_ack};
           (*this)(event_2);
           download_.check(STATE);
         } else {
-          handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(instruments_info.ret_code), instruments_info.ret_msg);
+          handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(instruments_info_ack.ret_code), instruments_info_ack.ret_msg);
         }
       }
     };
@@ -253,13 +253,13 @@ void Rest::get_instruments_info_ack(Trace<web::rest::Response> const &event, uin
   });
 }
 
-void Rest::operator()(Trace<json::InstrumentsInfo> const &event) {
-  auto &[trace_info, instruments_info] = event;
-  log::info<4>("instruments_info={}"sv, instruments_info);
+void Rest::operator()(Trace<json::InstrumentsInfoAck> const &event) {
+  auto &[trace_info, instruments_info_ack] = event;
+  log::info<4>("instruments_info_ack={}"sv, instruments_info_ack);
   std::vector<Symbol> symbols;
-  symbols.reserve(std::size(instruments_info.result.list));  // alloc
+  symbols.reserve(std::size(instruments_info_ack.result.list));  // alloc
   size_t counter = 0;
-  for (auto &item : instruments_info.result.list) {
+  for (auto &item : instruments_info_ack.result.list) {
     log::info<2>("item={}"sv, item);
     auto discard = shared_.discard_symbol(item.symbol);
     auto trade_vol_step_size = [&]() {
@@ -298,7 +298,7 @@ void Rest::operator()(Trace<json::InstrumentsInfo> const &event) {
         .expiry_datetime_utc = utils::safe_cast{item.delivery_time},
         .exchange_time_utc = {},
         .exchange_sequence = {},
-        .sending_time_utc = instruments_info.time,
+        .sending_time_utc = instruments_info_ack.time,
         .discard = discard,
     };
     create_trace_and_dispatch(handler_, trace_info, reference_data, true);
@@ -317,7 +317,7 @@ void Rest::operator()(Trace<json::InstrumentsInfo> const &event) {
         .trading_status = map(item.status),
         .exchange_time_utc = {},
         .exchange_sequence = {},
-        .sending_time_utc = instruments_info.time,
+        .sending_time_utc = instruments_info_ack.time,
     };
     create_trace_and_dispatch(handler_, trace_info, market_status, true);
   }
@@ -328,7 +328,7 @@ void Rest::operator()(Trace<json::InstrumentsInfo> const &event) {
     handler_(symbols_update);
   }
   if (counter > 0) {
-    log::info("Symbols {} / {}"sv, counter, std::size(instruments_info.result.list));
+    log::info("Symbols {} / {}"sv, counter, std::size(instruments_info_ack.result.list));
   }
 }
 
@@ -375,20 +375,20 @@ void Rest::get_kline_ack(Trace<web::rest::Response> const &event, std::string_vi
       // XXX FIXME TODO retry ???
     };
     auto handle_success = [&](auto &body) {
-      json::KlineResponse kline{body, decode_buffer_};
-      if (kline.ret_code == 0) {
-        assert(kline.result.symbol == symbol);
-        Trace event_2{event, kline};
+      json::KlineAck kline_ack{body, decode_buffer_};
+      if (kline_ack.ret_code == 0) {
+        assert(kline_ack.result.symbol == symbol);
+        Trace event_2{event, kline_ack};
         (*this)(event_2);
       } else {
-        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(kline.ret_code), kline.ret_msg);
+        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(kline_ack.ret_code), kline_ack.ret_msg);
       }
     };
     process_response(event, handle_error, handle_success);
   });
 }
 
-void Rest::operator()(Trace<json::KlineResponse> const &event) {
+void Rest::operator()(Trace<json::KlineAck> const &event) {
   auto &[trace_info, kline_response] = event;
   auto &bars = shared_.bars;
   bars.clear();

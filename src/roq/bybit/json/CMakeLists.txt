@@ -5,48 +5,45 @@ set(SOURCES encoder.cpp map.cpp parser.cpp parser_2.cpp utils.cpp)
 include(RoqAutogen)
 
 set(AUTOGEN_SCHEMAS
-    account_info.json
-    account_info_result.json
+    account_info_ack.json
+    account_info_ack_result.json
     account_type.json
     amend_order2_data.json
     amend_order2.json
-    amend_order.json
-    amend_order_result.json
+    amend_order_ack.json
+    amend_order_ack_result.json
     auth2.json
     auth.json
-    cancel_all_orders.json
-    cancel_all_orders_result_item.json
-    cancel_all_orders_result.json
+    cancel_all_orders_ack.json
+    cancel_all_orders_ack_result.json
+    cancel_all_orders_ack_result_list_item.json
     cancel_order2_data.json
     cancel_order2.json
-    cancel_order.json
-    cancel_order_result.json
+    cancel_order_ack.json
+    cancel_order_ack_result.json
     cancel_type.json
     category.json
     contract_type.json
     error.json
     event_type.json
     exec_type.json
-    execution_2.json
-    execution_data_item.json
     execution.json
-    execution_result_item.json
-    execution_result.json
+    execution_data_item.json
+    executions_ack.json
+    executions_ack_result.json
+    executions_ack_result_list_item.json
     header2.json
-    instruments_info.json
-    instruments_info_result_item.json
-    instruments_info_result.json
+    instruments_info_ack.json
+    instruments_info_ack_result.json
+    instruments_info_ack_result_list_item.json
+    kline_ack.json
+    kline_ack_result.json
+    kline_ack_result_list_item.json
     kline_item.json
     kline.json
-    kline_response.json
-    kline_response_result_item.json
-    kline_response_result.json
     leverage_filter.json
     lot_size_filter.json
     message.json
-    open_orders.json
-    open_orders_result_item.json
-    open_orders_result.json
     operation.json
     options_type.json
     order_book_data.json
@@ -54,18 +51,21 @@ set(AUTOGEN_SCHEMAS
     order_book_level.json
     order_data_item.json
     order.json
+    orders_ack.json
+    orders_ack_result.json
+    orders_ack_result_list_item.json
     order_status.json
     order_type.json
     ping.json
     place_order2_data.json
     place_order2.json
-    place_order.json
-    place_order_result.json
+    place_order_ack.json
+    place_order_ack_result.json
     position_data_item.json
-    position_info.json
-    position_info_result_item.json
-    position_info_result.json
     position.json
+    positions_ack.json
+    positions_ack_result.json
+    positions_ack_result_list_item.json
     position_status.json
     price_filter.json
     public_trade_data.json
@@ -83,12 +83,12 @@ set(AUTOGEN_SCHEMAS
     topic.json
     tp_sl_mode.json
     trigger_by.json
-    wallet_ack.json
-    wallet_ack_result.json
-    wallet_balance_item.json
-    wallet_balance.json
-    wallet_balance_result_item.json
-    wallet_balance_result.json
+    wallet_balance_ack.json
+    wallet_balance_ack_result.json
+    wallet_balance_ack_result_list_item_coin_item.json
+    wallet_balance_ack_result_list_item.json
+    wallet_data_item_coin_item.json
+    wallet_data_item.json
     wallet.json)
 
 roq_autogen_hpp(

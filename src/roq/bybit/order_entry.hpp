@@ -2,38 +2,11 @@
 
 #pragma once
 
-#include <string>
 #include <string_view>
-#include <vector>
 
-#include "roq/core/download.hpp"
-
-#include "roq/utils/metrics/counter.hpp"
-#include "roq/utils/metrics/latency.hpp"
-#include "roq/utils/metrics/profile.hpp"
-
-#include "roq/io/context.hpp"
-
-#include "roq/web/rest/client.hpp"
-
-#include "roq/core/json/buffer_stack.hpp"
+#include "roq/api.hpp"
 
 #include "roq/server.hpp"
-
-#include "roq/bybit/account.hpp"
-#include "roq/bybit/order_entry_state.hpp"
-#include "roq/bybit/shared.hpp"
-
-#include "roq/bybit/json/account_info.hpp"
-#include "roq/bybit/json/execution.hpp"
-#include "roq/bybit/json/open_orders.hpp"
-#include "roq/bybit/json/position_info.hpp"
-#include "roq/bybit/json/wallet_ack.hpp"
-
-#include "roq/bybit/json/amend_order.hpp"
-#include "roq/bybit/json/cancel_all_orders.hpp"
-#include "roq/bybit/json/cancel_order.hpp"
-#include "roq/bybit/json/place_order.hpp"
 
 namespace roq {
 namespace bybit {

@@ -20,7 +20,7 @@
 
 // private
 #include "roq/bybit/json/auth.hpp"
-#include "roq/bybit/json/execution_2.hpp"
+#include "roq/bybit/json/execution.hpp"
 #include "roq/bybit/json/order.hpp"
 #include "roq/bybit/json/position.hpp"
 #include "roq/bybit/json/wallet.hpp"
@@ -45,7 +45,7 @@ struct Parser final {
     virtual void operator()(Trace<json::Wallet> const &) = 0;
     virtual void operator()(Trace<json::Position> const &) = 0;
     virtual void operator()(Trace<json::Order> const &) = 0;
-    virtual void operator()(Trace<json::Execution2> const &) = 0;
+    virtual void operator()(Trace<json::Execution> const &) = 0;
   };
 
   static bool dispatch(Handler &, std::string_view const &message, core::json::BufferStack &, TraceInfo const &, bool allow_unknown_event_types);

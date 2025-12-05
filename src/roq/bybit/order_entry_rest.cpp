@@ -280,11 +280,11 @@ void OrderEntryREST::check_request_queue(std::chrono::nanoseconds now) {
     if (topic == "wallet"sv) {
       get_wallet_balance();
     } else if (topic == "position"sv) {
-      get_position_info(symbol);
+      get_positions(symbol);
     } else if (topic == "order"sv) {
-      get_open_orders(symbol);
+      get_orders(symbol);
     } else if (topic == "execution"sv) {
-      get_execution(symbol);
+      get_executions(symbol);
     }
   };
   if (account_.request_queue.dispatch(now, request)) {
@@ -292,7 +292,7 @@ void OrderEntryREST::check_request_queue(std::chrono::nanoseconds now) {
   }
 }
 
-// account
+// account-info
 
 void OrderEntryREST::get_account_info() {
   profile_.account_info([&]() {
@@ -327,26 +327,26 @@ void OrderEntryREST::get_account_info_ack(Trace<web::rest::Response> const &even
       }
     };
     auto handle_success = [&](auto &body) {
-      json::AccountInfo account_info{body, decode_buffer_};
-      if (account_info.ret_code == 0) {
-        Trace event_2{event, account_info};
+      json::AccountInfoAck account_info_ack{body, decode_buffer_};
+      if (account_info_ack.ret_code == 0) {
+        Trace event_2{event, account_info_ack};
         (*this)(event_2);
         download_.check_relaxed(STATE);
       } else {
-        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(account_info.ret_code), account_info.ret_msg);
+        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(account_info_ack.ret_code), account_info_ack.ret_msg);
       }
     };
     process_response(event, handle_error, handle_success);
   });
 }
 
-void OrderEntryREST::operator()(Trace<json::AccountInfo> const &event) {
-  auto &[trace_info, account_info] = event;
-  log::info<2>("account_info={}"sv, account_info);
+void OrderEntryREST::operator()(Trace<json::AccountInfoAck> const &event) {
+  auto &[trace_info, account_info_ack] = event;
+  log::info<2>("account_info_ack={}"sv, account_info_ack);
   // XXX HANS maybe do something with unified account ???
 }
 
-// wallet
+// wallet-balance
 
 void OrderEntryREST::get_wallet_balance() {
   profile_.wallet_balance([&]() {
@@ -397,12 +397,12 @@ void OrderEntryREST::get_wallet_balance_ack(Trace<web::rest::Response> const &ev
       log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
     };
     auto handle_success = [&](auto &body) {
-      json::WalletAck wallet_ack{body, decode_buffer_};
-      if (wallet_ack.ret_code == 0) {
-        Trace event_2{event, wallet_ack};
+      json::WalletBalanceAck wallet_balance_ack{body, decode_buffer_};
+      if (wallet_balance_ack.ret_code == 0) {
+        Trace event_2{event, wallet_balance_ack};
         (*this)(event_2);
       } else {
-        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(wallet_ack.ret_code), wallet_ack.ret_msg);
+        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(wallet_balance_ack.ret_code), wallet_balance_ack.ret_msg);
       }
     };
     process_response(event, handle_error, handle_success);
@@ -415,10 +415,10 @@ void OrderEntryREST::get_wallet_balance_ack(Trace<web::rest::Response> const &ev
   });
 }
 
-void OrderEntryREST::operator()(Trace<json::WalletAck> const &event) {
-  auto &[trace_info, wallet_ack] = event;
-  log::info<2>("wallet_ack={}"sv, wallet_ack);
-  for (auto &item : wallet_ack.result.list) {
+void OrderEntryREST::operator()(Trace<json::WalletBalanceAck> const &event) {
+  auto &[trace_info, wallet_balance_ack] = event;
+  log::info<2>("wallet_balance_ack={}"sv, wallet_balance_ack);
+  for (auto &item : wallet_balance_ack.result.list) {
     log::info<2>("item={}"sv, item);
     for (auto &item_2 : item.coin) {
       // XXX maybe margin mode is from account_type?
@@ -440,9 +440,9 @@ void OrderEntryREST::operator()(Trace<json::WalletAck> const &event) {
   }
 }
 
-// position
+// positions
 
-void OrderEntryREST::get_position_info(std::string_view const &symbol) {
+void OrderEntryREST::get_positions(std::string_view const &symbol) {
   profile_.position_info([&]() {
     assert(shared_.api.api != tools::API::SPOT);
     auto path = shared_.api.simple.position_list;
@@ -477,24 +477,24 @@ void OrderEntryREST::get_position_info(std::string_view const &symbol) {
     auto callback = [this, symbol = std::string{symbol}]([[maybe_unused]] auto &request_id, auto &response) {
       TraceInfo trace_info;
       Trace event{trace_info, response};
-      get_position_info_ack(event, symbol);
+      get_positions_ack(event, symbol);
     };
     (*connection_)("position"sv, request, callback);
   });
 }
 
-void OrderEntryREST::get_position_info_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
+void OrderEntryREST::get_positions_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.position_info_ack([&]() {
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
     };
     auto handle_success = [&](auto &body) {
-      json::PositionInfo position_info{body, decode_buffer_};
-      if (position_info.ret_code == 0) {
-        Trace event_2{event, position_info};
+      json::PositionsAck positions_ack{body, decode_buffer_};
+      if (positions_ack.ret_code == 0) {
+        Trace event_2{event, positions_ack};
         (*this)(event_2);
       } else {
-        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(position_info.ret_code), position_info.ret_msg);
+        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(positions_ack.ret_code), positions_ack.ret_msg);
       }
     };
     process_response(event, handle_error, handle_success);
@@ -507,10 +507,10 @@ void OrderEntryREST::get_position_info_ack(Trace<web::rest::Response> const &eve
   });
 }
 
-void OrderEntryREST::operator()(Trace<json::PositionInfo> const &event) {
-  auto &[trace_info, position_info] = event;
-  log::info<2>("position_info={}"sv, position_info);
-  for (auto &item : position_info.result.list) {
+void OrderEntryREST::operator()(Trace<json::PositionsAck> const &event) {
+  auto &[trace_info, positions_ack] = event;
+  log::info<2>("positions_ack={}"sv, positions_ack);
+  for (auto &item : positions_ack.result.list) {
     log::info<2>("item={}"sv, item);
     if (shared_.discard_symbol(item.symbol)) {
       continue;
@@ -531,15 +531,15 @@ void OrderEntryREST::operator()(Trace<json::PositionInfo> const &event) {
         .short_quantity = short_quantity,
         .update_type = UpdateType::SNAPSHOT,
         .exchange_time_utc = item.updated_time,  // XXX created_time ???
-        .sending_time_utc = position_info.time,
+        .sending_time_utc = positions_ack.time,
     };
     create_trace_and_dispatch(handler_, trace_info, position_update, true);
   }
 }
 
-// orders
+// open-orders
 
-void OrderEntryREST::get_open_orders(std::string_view const &symbol) {
+void OrderEntryREST::get_orders(std::string_view const &symbol) {
   profile_.open_orders([&]() {
     auto path = shared_.api.simple.order_realtime;
     auto category = [&]() -> std::string_view {
@@ -573,24 +573,24 @@ void OrderEntryREST::get_open_orders(std::string_view const &symbol) {
     auto callback = [this, symbol = std::string{symbol}]([[maybe_unused]] auto &request_id, auto &response) {
       TraceInfo trace_info;
       Trace event{trace_info, response};
-      get_open_orders_ack(event, symbol);
+      get_orders_ack(event, symbol);
     };
     (*connection_)("orders"sv, request, callback);
   });
 }
 
-void OrderEntryREST::get_open_orders_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
+void OrderEntryREST::get_orders_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.open_orders_ack([&]() {
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
     };
     auto handle_success = [&](auto &body) {
-      json::OpenOrders open_orders{body, decode_buffer_};
-      if (open_orders.ret_code == 0) {
-        Trace event_2{event, open_orders};
+      json::OrdersAck orders_ack{body, decode_buffer_};
+      if (orders_ack.ret_code == 0) {
+        Trace event_2{event, orders_ack};
         (*this)(event_2);
       } else {
-        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(open_orders.ret_code), open_orders.ret_msg);
+        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(orders_ack.ret_code), orders_ack.ret_msg);
       }
     };
     process_response(event, handle_error, handle_success);
@@ -603,10 +603,10 @@ void OrderEntryREST::get_open_orders_ack(Trace<web::rest::Response> const &event
   });
 }
 
-void OrderEntryREST::operator()(Trace<json::OpenOrders> const &event) {
-  auto &[trace_info, open_orders] = event;
-  log::info<2>("open_orders={}"sv, open_orders);
-  for (auto &item : open_orders.result.list) {
+void OrderEntryREST::operator()(Trace<json::OrdersAck> const &event) {
+  auto &[trace_info, orders_ack] = event;
+  log::info<2>("orders_ack={}"sv, orders_ack);
+  for (auto &item : orders_ack.result.list) {
     log::info<2>("item={}"sv, item);
     auto order_update = server::oms::OrderUpdate{
         .account = account_.name,
@@ -640,16 +640,16 @@ void OrderEntryREST::operator()(Trace<json::OpenOrders> const &event) {
         .max_response_version = {},
         .max_accepted_version = {},
         .update_type = UpdateType::SNAPSHOT,
-        .sending_time_utc = open_orders.time,
+        .sending_time_utc = orders_ack.time,
     };
     Trace event_2{trace_info, order_update};
     (*this)(event_2, item.order_link_id);
   }
 }
 
-// fills
+// execution
 
-void OrderEntryREST::get_execution(std::string_view const &symbol) {
+void OrderEntryREST::get_executions(std::string_view const &symbol) {
   profile_.execution([&]() {
     auto path = shared_.api.simple.execution_list;
     auto category = [&]() -> std::string_view {
@@ -697,24 +697,24 @@ void OrderEntryREST::get_execution(std::string_view const &symbol) {
     auto callback = [this, symbol = std::string{symbol}]([[maybe_unused]] auto &request_id, auto &response) {
       TraceInfo trace_info;
       Trace event{trace_info, response};
-      get_execution_ack(event, symbol);
+      get_executions_ack(event, symbol);
     };
     (*connection_)("execution"sv, request, callback);
   });
 }
 
-void OrderEntryREST::get_execution_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
+void OrderEntryREST::get_executions_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.execution_ack([&]() {
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
     };
     auto handle_success = [&](auto &body) {
-      json::Execution execution{body, decode_buffer_};
-      if (execution.ret_code == 0) {
-        Trace event_2{event, execution};
+      json::ExecutionsAck executions_ack{body, decode_buffer_};
+      if (executions_ack.ret_code == 0) {
+        Trace event_2{event, executions_ack};
         (*this)(event_2);
       } else {
-        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(execution.ret_code), execution.ret_msg);
+        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(executions_ack.ret_code), executions_ack.ret_msg);
       }
       download_trades_is_first_ = false;
     };
@@ -728,10 +728,9 @@ void OrderEntryREST::get_execution_ack(Trace<web::rest::Response> const &event, 
   });
 }
 
-void OrderEntryREST::operator()(Trace<json::Execution> const &event) {
-  auto &trace_info = event.trace_info;
-  auto &execution = event.value;
-  log::info<2>("execution={}"sv, execution);
+void OrderEntryREST::operator()(Trace<json::ExecutionsAck> const &event) {
+  auto &[trace_info, executions_ack] = event;
+  log::info<2>("executions_ack={}"sv, executions_ack);
   std::string_view order_id, order_link_id, symbol;
   Side side = {};
   std::chrono::nanoseconds exec_time = {};
@@ -758,14 +757,14 @@ void OrderEntryREST::operator()(Trace<json::Execution> const &event) {
         .fills = shared_.fills,
         .routing_id = {},
         .update_type = UpdateType::SNAPSHOT,
-        .sending_time_utc = execution.time,
+        .sending_time_utc = executions_ack.time,
         .user = {},
         .strategy_id = {},
     };
     create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE, order_link_id);
     shared_.fills.clear();
   };
-  for (auto &item : execution.result.list) {
+  for (auto &item : executions_ack.result.list) {
     log::info<2>("item={}"sv, item);
     /* XXX doesn't work with spot
     if (item.exec_type != json::ExecType::TRADE)  // note!
@@ -800,7 +799,7 @@ void OrderEntryREST::operator()(Trace<json::Execution> const &event) {
   dispatch();
 }
 
-// place order
+// place-order
 
 void OrderEntryREST::place_order(Event<CreateOrder> const &event, server::oms::Order const &order, std::string_view const &request_id) {
   profile_.place_order([&]() {
@@ -850,22 +849,22 @@ void OrderEntryREST::place_order_ack(Trace<web::rest::Response> const &event, ui
       (*this)(event_2, user_id, order_id);
     };
     auto handle_success = [&](auto &body) {
-      json::PlaceOrder place_order{body, decode_buffer_};
+      json::PlaceOrderAck place_order_ack{body, decode_buffer_};
       // note! ret_code checked below
-      Trace event_2{event, place_order};
+      Trace event_2{event, place_order_ack};
       (*this)(event_2, user_id, order_id, version);
     };
     process_response(event, handle_error, handle_success);
   });
 }
 
-void OrderEntryREST::operator()(Trace<json::PlaceOrder> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
-  auto &[trace_info, place_order] = event;
-  log::info<2>("place_order={}"sv, place_order);
-  auto request_status = place_order.ret_code == 0 ? RequestStatus::ACCEPTED : RequestStatus::REJECTED;
-  auto error = json::map_error(place_order.ret_code);
-  auto text = place_order.ret_msg;
-  auto &result = place_order.result;
+void OrderEntryREST::operator()(Trace<json::PlaceOrderAck> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
+  auto &[trace_info, place_order_ack] = event;
+  log::info<2>("place_order_ack={}"sv, place_order_ack);
+  auto request_status = place_order_ack.ret_code == 0 ? RequestStatus::ACCEPTED : RequestStatus::REJECTED;
+  auto error = json::map_error(place_order_ack.ret_code);
+  auto text = place_order_ack.ret_msg;
+  auto &result = place_order_ack.result;
   auto response = server::oms::Response{
       .request_type = RequestType::CREATE_ORDER,
       .origin = Origin::EXCHANGE,
@@ -879,7 +878,7 @@ void OrderEntryREST::operator()(Trace<json::PlaceOrder> const &event, uint8_t us
   };
   /*
   // note! ACCEPTED not managed by fix-bridge
-  auto order_status = place_order.ret_code == 0 ? OrderStatus::ACCEPTED : OrderStatus::REJECTED;
+  auto order_status = place_order_ack.ret_code == 0 ? OrderStatus::ACCEPTED : OrderStatus::REJECTED;
   auto order_update = server::oms::OrderUpdate{
       .account = account_.name,
       .exchange = shared_.settings.exchange,
@@ -892,7 +891,7 @@ void OrderEntryREST::operator()(Trace<json::PlaceOrder> const &event, uint8_t us
       .time_in_force = {},
       .execution_instructions = {},
       .create_time_utc = {},
-      .update_time_utc = place_order.time,
+      .update_time_utc = place_order_ack.time,
       .external_account = {},
       .external_order_id = result.order_id,
       .client_order_id = {},
@@ -912,14 +911,14 @@ void OrderEntryREST::operator()(Trace<json::PlaceOrder> const &event, uint8_t us
       .max_response_version = {},
       .max_accepted_version = {},
       .update_type = UpdateType::INCREMENTAL,
-      .sending_time_utc = place_order.time,
+      .sending_time_utc = place_order_ack.time,
   };
   */
   Trace event_2{trace_info, response};
   (*this)(event_2, user_id, order_id);
 }
 
-// amend order
+// amend-order
 
 void OrderEntryREST::amend_order(
     Event<ModifyOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
@@ -973,9 +972,9 @@ void OrderEntryREST::amend_order_ack(Trace<web::rest::Response> const &event, ui
       (*this)(event_2, user_id, order_id);
     };
     auto handle_success = [&](auto &body) {
-      json::AmendOrder amend_order{body, decode_buffer_};
+      json::AmendOrderAck amend_order_ack{body, decode_buffer_};
       // note! ret_code checked below
-      Trace event_2{event, amend_order};
+      Trace event_2{event, amend_order_ack};
       (*this)(event_2, user_id, order_id, version);
     };
     process_response(event, handle_error, handle_success);
@@ -983,12 +982,12 @@ void OrderEntryREST::amend_order_ack(Trace<web::rest::Response> const &event, ui
 }
 
 // XXX this is a little weird -- the response tells us the last known (?) status of the order
-void OrderEntryREST::operator()(Trace<json::AmendOrder> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
-  auto &[trace_info, amend_order] = event;
-  log::info<2>("amend_order={}"sv, amend_order);
-  auto status = amend_order.ret_code == 0 ? RequestStatus::ACCEPTED : RequestStatus::REJECTED;
-  auto error = json::map_error(amend_order.ret_code);
-  auto text = amend_order.ret_msg;
+void OrderEntryREST::operator()(Trace<json::AmendOrderAck> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
+  auto &[trace_info, amend_order_ack] = event;
+  log::info<2>("amend_order_ack={}"sv, amend_order_ack);
+  auto status = amend_order_ack.ret_code == 0 ? RequestStatus::ACCEPTED : RequestStatus::REJECTED;
+  auto error = json::map_error(amend_order_ack.ret_code);
+  auto text = amend_order_ack.ret_msg;
   auto response = server::oms::Response{
       .request_type = RequestType::MODIFY_ORDER,
       .origin = Origin::EXCHANGE,
@@ -1000,7 +999,7 @@ void OrderEntryREST::operator()(Trace<json::AmendOrder> const &event, uint8_t us
       .quantity = NaN,
       .price = NaN,
   };
-  auto &result = amend_order.result;
+  auto &result = amend_order_ack.result;
   auto remaining_quantity = result.order_qty - result.exec_qty;
   auto order_update = server::oms::OrderUpdate{
       .account = account_.name,
@@ -1034,13 +1033,13 @@ void OrderEntryREST::operator()(Trace<json::AmendOrder> const &event, uint8_t us
       .max_response_version = {},
       .max_accepted_version = {},
       .update_type = UpdateType::INCREMENTAL,
-      .sending_time_utc = amend_order.time,
+      .sending_time_utc = amend_order_ack.time,
   };
   Trace event_2{trace_info, response};
   (*this)(event_2, user_id, order_id, order_update);
 }
 
-// cancel order
+// cancel-order
 
 void OrderEntryREST::cancel_order(
     Event<CancelOrder> const &event, server::oms::Order const &order, std::string_view const &request_id, std::string_view const &previous_request_id) {
@@ -1091,9 +1090,9 @@ void OrderEntryREST::cancel_order_ack(Trace<web::rest::Response> const &event, u
       (*this)(event_2, user_id, order_id);
     };
     auto handle_success = [&](auto &body) {
-      json::CancelOrder cancel_order{body, decode_buffer_};
+      json::CancelOrderAck cancel_order_ack{body, decode_buffer_};
       // note! ret_code checked below
-      Trace event_2{event, cancel_order};
+      Trace event_2{event, cancel_order_ack};
       (*this)(event_2, user_id, order_id, version);
     };
     process_response(event, handle_error, handle_success);
@@ -1101,12 +1100,12 @@ void OrderEntryREST::cancel_order_ack(Trace<web::rest::Response> const &event, u
 }
 
 // XXX this is a little weird -- the response tells us the last known (?) status of the order
-void OrderEntryREST::operator()(Trace<json::CancelOrder> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
-  auto &[trace_info, cancel_order] = event;
-  log::info<2>("cancel_order={}"sv, cancel_order);
-  auto status = cancel_order.ret_code == 0 ? RequestStatus::ACCEPTED : RequestStatus::REJECTED;
-  auto error = json::map_error(cancel_order.ret_code);
-  auto text = cancel_order.ret_msg;
+void OrderEntryREST::operator()(Trace<json::CancelOrderAck> const &event, uint8_t user_id, uint64_t order_id, uint32_t version) {
+  auto &[trace_info, cancel_order_ack] = event;
+  log::info<2>("cancel_order_ack={}"sv, cancel_order_ack);
+  auto status = cancel_order_ack.ret_code == 0 ? RequestStatus::ACCEPTED : RequestStatus::REJECTED;
+  auto error = json::map_error(cancel_order_ack.ret_code);
+  auto text = cancel_order_ack.ret_msg;
   auto response = server::oms::Response{
       .request_type = RequestType::CANCEL_ORDER,
       .origin = Origin::EXCHANGE,
@@ -1118,7 +1117,7 @@ void OrderEntryREST::operator()(Trace<json::CancelOrder> const &event, uint8_t u
       .quantity = NaN,
       .price = NaN,
   };
-  auto &result = cancel_order.result;
+  auto &result = cancel_order_ack.result;
   auto remaining_quantity = result.order_qty - result.exec_qty;
   auto order_update = server::oms::OrderUpdate{
       .account = account_.name,
@@ -1152,13 +1151,13 @@ void OrderEntryREST::operator()(Trace<json::CancelOrder> const &event, uint8_t u
       .max_response_version = {},
       .max_accepted_version = {},
       .update_type = UpdateType::INCREMENTAL,
-      .sending_time_utc = cancel_order.time,
+      .sending_time_utc = cancel_order_ack.time,
   };
   Trace event_2{trace_info, response};
   (*this)(event_2, user_id, order_id, order_update);
 }
 
-// cancel all orders
+// cancel-all-orders
 
 void OrderEntryREST::cancel_all_orders(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
   profile_.cancel_all_orders([&]() {
@@ -1251,9 +1250,9 @@ void OrderEntryREST::cancel_all_orders_ack(Trace<web::rest::Response> const &eve
       send_ack(origin, RequestStatus::REJECTED, error, text);
     };
     auto handle_success = [&](auto &body) {
-      json::CancelAllOrders cancel_all_orders{body, decode_buffer_};
+      json::CancelAllOrdersAck cancel_all_orders_ack{body, decode_buffer_};
       // XXX FIXME TODO ret_code ???
-      Trace event_2{event, cancel_all_orders};
+      Trace event_2{event, cancel_all_orders_ack};
       (*this)(event_2);
       send_ack(Origin::EXCHANGE, RequestStatus::ACCEPTED, {}, {});
     };
@@ -1261,9 +1260,9 @@ void OrderEntryREST::cancel_all_orders_ack(Trace<web::rest::Response> const &eve
   });
 }
 
-void OrderEntryREST::operator()(Trace<json::CancelAllOrders> const &event) {
-  auto &[trace_info, cancel_all_orders] = event;
-  log::info<2>("cancel_all_orders={}"sv, cancel_all_orders);
+void OrderEntryREST::operator()(Trace<json::CancelAllOrdersAck> const &event) {
+  auto &[trace_info, cancel_all_orders_ack] = event;
+  log::info<2>("cancel_all_orders_ack={}"sv, cancel_all_orders_ack);
 }
 
 // helpers

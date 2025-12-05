@@ -327,7 +327,7 @@ void MarketData::parse(std::string_view const &message) {
 
 void MarketData::operator()(Trace<json::Ping> const &event) {
   auto &[trace_info, ping] = event;
-  log::info<4>("event={{ping={}, trace_info={}}}"sv, ping, trace_info);
+  log::info<4>("ping={}"sv, ping);
 }
 
 void MarketData::operator()(Trace<json::Auth> const &) {
@@ -336,19 +336,19 @@ void MarketData::operator()(Trace<json::Auth> const &) {
 
 void MarketData::operator()(Trace<json::Subscribe> const &event) {
   auto &[trace_info, subscribe] = event;
-  log::info<4>("event={{subscribe={}, trace_info={}}}"sv, subscribe, trace_info);
+  log::info<4>("subscribe={}"sv, subscribe);
 }
 
 void MarketData::operator()(Trace<json::Error> const &event) {
   auto &[trace_info, error] = event;
-  log::info<4>("event={{error={}, trace_info={}}}"sv, error, trace_info);
+  log::info<4>("error={}"sv, error);
   log::fatal("error={}"sv, error);
 }
 
 void MarketData::operator()(Trace<json::OrderBook> const &event, size_t depth) {
   profile_.order_book([&]() {
     auto &[trace_info, order_book] = event;
-    log::info<3>("event={{order_book={}, trace_info={}}}"sv, order_book, trace_info);
+    log::info<3>("order_book={}"sv, order_book);
     (*connection_).touch(trace_info.source_receive_time);
     auto &data = order_book.data;
     if (depth == 1) {
@@ -429,7 +429,7 @@ void MarketData::operator()(Trace<json::OrderBook> const &event, size_t depth) {
 void MarketData::operator()(Trace<json::PublicTrade> const &event) {
   profile_.trade([&]() {
     auto &[trace_info, public_trade] = event;
-    log::info<3>("event={{public_trade={}, trace_info={}}}"sv, public_trade, trace_info);
+    log::info<3>("public_trade={}"sv, public_trade);
     (*connection_).touch(trace_info.source_receive_time);
     auto &trades = shared_.trades;
     trades.clear();
@@ -478,7 +478,7 @@ void MarketData::operator()(Trace<json::PublicTrade> const &event) {
 void MarketData::operator()(Trace<json::Tickers> const &event) {
   profile_.tickers([&]() {
     auto &[trace_info, tickers] = event;
-    log::info<3>("event={{tickers={}, trace_info={}}}"sv, tickers, trace_info);
+    log::info<3>("tickers={}"sv, tickers);
     (*connection_).touch(trace_info.source_receive_time);
     auto &data = tickers.data;
     switch (shared_.api.api) {
@@ -571,7 +571,7 @@ void MarketData::operator()(Trace<json::Tickers> const &event) {
 void MarketData::operator()(Trace<json::Kline> const &event) {
   profile_.kline([&]() {
     auto &[trace_info, kline] = event;
-    log::info<3>("event={{kline={}, trace_info={}}}"sv, kline, trace_info);
+    log::info<3>("kline={}"sv, kline);
     (*connection_).touch(trace_info.source_receive_time);
     auto &bars = shared_.bars;
     bars.clear();
@@ -623,7 +623,7 @@ void MarketData::operator()(Trace<json::Order> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void MarketData::operator()(Trace<json::Execution2> const &) {
+void MarketData::operator()(Trace<json::Execution> const &) {
   log::fatal("Unexpected"sv);
 }
 

@@ -25,8 +25,8 @@
 #include "roq/bybit/rest_state.hpp"
 #include "roq/bybit/shared.hpp"
 
-#include "roq/bybit/json/instruments_info.hpp"
-#include "roq/bybit/json/kline_response.hpp"
+#include "roq/bybit/json/instruments_info_ack.hpp"
+#include "roq/bybit/json/kline_ack.hpp"
 
 namespace roq {
 namespace bybit {
@@ -59,6 +59,8 @@ struct Rest final : public web::rest::Client::Handler {
   void operator()(metrics::Writer &) const;
 
  protected:
+  // web::rest::Client::Handler
+
   void operator()(Trace<web::rest::Client::Connected> const &) override;
   void operator()(Trace<web::rest::Client::Disconnected> const &) override;
   void operator()(Trace<web::rest::Client::Latency> const &) override;
@@ -67,13 +69,19 @@ struct Rest final : public web::rest::Client::Handler {
 
   uint32_t download(RestState);
 
+  // instruments-info
+
   void get_instruments_info();
   void get_instruments_info_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::InstrumentsInfo> const &);
+  void operator()(Trace<json::InstrumentsInfoAck> const &);
+
+  // kline
 
   void get_kline(std::string_view const &symbol);
   void get_kline_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
-  void operator()(Trace<json::KlineResponse> const &);
+  void operator()(Trace<json::KlineAck> const &);
+
+  // helpers
 
   void check_request_queue(std::chrono::nanoseconds now);
 

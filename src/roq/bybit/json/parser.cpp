@@ -99,7 +99,8 @@ bool Parser::dispatch(
       dispatch_helper<Kline>(handler, message, buffer_stack, trace_info);
       return true;
     case WALLET:
-      return dispatch_helper_flatten_wallet(handler, buffer_stack, trace_info, message);
+      dispatch_helper<Wallet>(handler, message, buffer_stack, trace_info);
+      return true;
     case POSITION:
       dispatch_helper<Position>(handler, message, buffer_stack, trace_info);
       return true;
@@ -107,7 +108,7 @@ bool Parser::dispatch(
       dispatch_helper<Order>(handler, message, buffer_stack, trace_info);
       return true;
     case EXECUTION:
-      dispatch_helper<Execution2>(handler, message, buffer_stack, trace_info);
+      dispatch_helper<Execution>(handler, message, buffer_stack, trace_info);
       return true;
   }
   switch (message_2.op) {

@@ -3,23 +3,21 @@
   "type": "dictionary",
   "values": [
     {
-      "name": "retCode",
-      "type": "std/int32"
-    },
-    {
-      "name": "retMsg",
+      "name": "id",
       "type": "std/string_view"
     },
     {
-      "name": "result",
-      "type": "roq/bybit/json/ExecutionResult"
+      "name": "topic",
+      "type": "std/string_view"
     },
     {
-      "name": "retExtInfo"
-    },
-    {
-      "name": "time",
+      "name": "creationTime",
       "type": "std/milliseconds"
+    },
+    {
+      "name": "data",
+      "type": "roq/bybit/json/ExecutionDataItem",
+      "array": "std/span"
     }
   ]
 }

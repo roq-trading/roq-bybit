@@ -33,7 +33,7 @@ auto const NAME = "ex"sv;
 
 auto const AUTH_EXPIRES = 1s;
 
-size_t const MAX_DECODE_BUFFER_DEPTH = 1;
+size_t const MAX_DECODE_BUFFER_DEPTH = 2;
 }  // namespace
 
 // === HELPERS ===
@@ -295,13 +295,13 @@ void DropCopy::parse(std::string_view const &message) {
 
 void DropCopy::operator()(Trace<json::Ping> const &event) {
   auto &[trace_info, ping] = event;
-  log::info<4>("event={{ping={}, trace_info={}}}"sv, ping, trace_info);
+  log::info<4>("ping={}"sv, ping);
 }
 
 void DropCopy::operator()(Trace<json::Auth> const &event) {
   profile_.auth([&]() {
     auto &[trace_info, auth] = event;
-    log::info<4>("event={{auth={}, trace_info={}}}"sv, auth, trace_info);
+    log::info<4>("auth={}"sv, auth);
     if (auth.success) {
       (*this)(ConnectionStatus::READY);
       subscribe();
@@ -313,7 +313,7 @@ void DropCopy::operator()(Trace<json::Auth> const &event) {
 
 void DropCopy::operator()(Trace<json::Subscribe> const &event) {
   auto &[trace_info, subscribe] = event;
-  log::info<4>("event={{subscribe={}, trace_info={}}}"sv, subscribe, trace_info);
+  log::info<4>("subscribe={}"sv, subscribe);
   auto &req_id = subscribe.req_id;
   if (req_id == "wallet"sv) {
     account_.request_queue.emplace_back(req_id, std::string{});
@@ -328,7 +328,7 @@ void DropCopy::operator()(Trace<json::Subscribe> const &event) {
 
 void DropCopy::operator()(Trace<json::Error> const &event) {
   auto &[trace_info, error] = event;
-  log::info<4>("event={{error={}, trace_info={}}}"sv, error, trace_info);
+  log::info<4>("error={}"sv, error);
   log::fatal("error={}"sv, error);
 }
 
@@ -351,24 +351,26 @@ void DropCopy::operator()(Trace<json::Kline> const &) {
 void DropCopy::operator()(Trace<json::Wallet> const &event) {
   profile_.wallet([&]() {
     auto &[trace_info, wallet] = event;
-    log::info<4>("event={{wallet={}, trace_info={}}}"sv, wallet, trace_info);
+    log::info<4>("wallet={}"sv, wallet);
     // XXX probably we need to filter and match --api
-    for (auto &item : wallet.coin) {
-      // XXX maybe margin mode is from account_type?
-      auto funds_update = FundsUpdate{
-          .stream_id = stream_id_,
-          .account = account_.name,
-          .currency = item.coin,
-          .margin_mode = {},
-          .balance = item.wallet_balance,  // XXX item.free ???
-          .hold = item.locked,
-          .borrowed = NaN,
-          .external_account = {},
-          .update_type = UpdateType::INCREMENTAL,
-          .exchange_time_utc = {},
-          .sending_time_utc = {},  // XXX lost when flattened
-      };
-      create_trace_and_dispatch(handler_, trace_info, funds_update, true);
+    for (auto &item : wallet.data) {
+      for (auto &item_2 : item.coin) {
+        // XXX maybe margin mode is from account_type?
+        auto funds_update = FundsUpdate{
+            .stream_id = stream_id_,
+            .account = account_.name,
+            .currency = item_2.coin,
+            .margin_mode = {},
+            .balance = item_2.wallet_balance,  // XXX item.free ???
+            .hold = item_2.locked,
+            .borrowed = NaN,
+            .external_account = {},
+            .update_type = UpdateType::INCREMENTAL,
+            .exchange_time_utc = {},
+            .sending_time_utc = {},  // XXX lost when flattened
+        };
+        create_trace_and_dispatch(handler_, trace_info, funds_update, true);
+      }
     }
   });
 }
@@ -376,7 +378,7 @@ void DropCopy::operator()(Trace<json::Wallet> const &event) {
 void DropCopy::operator()(Trace<json::Position> const &event) {
   profile_.position([&]() {
     auto &[trace_info, position] = event;
-    log::info<4>("event={{position={}, trace_info={}}}"sv, position, trace_info);
+    log::info<4>("position={}"sv, position);
     for (auto &item : position.data) {
       log::info<2>("item={}"sv, item);
       if (shared_.discard_symbol(item.symbol)) {
@@ -408,7 +410,7 @@ void DropCopy::operator()(Trace<json::Position> const &event) {
 void DropCopy::operator()(Trace<json::Order> const &event) {
   profile_.order([&]() {
     auto &[trace_info, order] = event;
-    log::info<4>("event={{order={}, trace_info={}}}"sv, order, trace_info);
+    log::info<4>("order={}"sv, order);
     for (auto &item : order.data) {
       log::info<2>("item={}"sv, item);
       auto order_update = server::oms::OrderUpdate{
@@ -455,11 +457,10 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::Execution2> const &event) {
+void DropCopy::operator()(Trace<json::Execution> const &event) {
   profile_.execution([&]() {
-    auto &trace_info = event.trace_info;
-    auto &execution = event.value;
-    log::info<4>("event={{execution={}, trace_info={}}}"sv, execution, trace_info);
+    auto &[trace_info, execution] = event;
+    log::info<4>("execution={}"sv, execution);
     std::string_view order_id;
     std::string_view order_link_id;
     std::string_view symbol;

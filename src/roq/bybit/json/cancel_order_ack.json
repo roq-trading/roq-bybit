@@ -1,0 +1,25 @@
+{
+  "name": "roq/bybit/json/CancelOrderAck",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "retCode",
+      "type": "std/int32"
+    },
+    {
+      "name": "retMsg",
+      "type": "std/string_view"
+    },
+    {
+      "name": "result",
+      "type": "roq/bybit/json/CancelOrderAckResult"
+    },
+    {
+      "name": "retExtInfo"
+    },
+    {
+      "name": "time",
+      "type": "std/milliseconds"
+    }
+  ]
+}

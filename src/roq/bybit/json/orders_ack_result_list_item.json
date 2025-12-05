@@ -1,0 +1,197 @@
+{
+  "name": "roq/bybit/json/OrdersAckResultListItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "orderId",
+      "type": "std/string_view"
+    },
+    {
+      "name": "orderLinkId",
+      "type": "std/string_view"
+    },
+    {
+      "name": "blockTradeId",
+      "type": "std/string_view"
+    },
+    {
+      "name": "symbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "price",
+      "type": "std/double"
+    },
+    {
+      "name": "qty",
+      "type": "std/double"
+    },
+    {
+      "name": "side",
+      "type": "roq/bybit/json/Side"
+    },
+    {
+      "name": "isLeverage",
+      "type": "std/int32"
+    },
+    {
+      "name": "positionIdx",
+      "type": "std/int32"
+    },
+    {
+      "name": "orderStatus",
+      "type": "roq/bybit/json/OrderStatus"
+    },
+    {
+      "name": "cancelType",
+      "type": "roq/bybit/json/CancelType"
+    },
+    {
+      "name": "rejectReason",
+      "type": "std/string_view"
+    },
+    {
+      "name": "avgPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "leavesQty",
+      "type": "std/double"
+    },
+    {
+      "name": "leavesValue",
+      "type": "std/double"
+    },
+    {
+      "name": "cumExecQty",
+      "type": "std/double"
+    },
+    {
+      "name": "cumExecValue",
+      "type": "std/double"
+    },
+    {
+      "name": "cumExecFee",
+      "type": "std/double"
+    },
+    {
+      "name": "timeInForce",
+      "type": "roq/bybit/json/TimeInForce"
+    },
+    {
+      "name": "orderType",
+      "type": "roq/bybit/json/OrderType"
+    },
+    {
+      "name": "stopOrderType",
+      "type": "roq/bybit/json/StopOrderType"
+    },
+    {
+      "name": "orderIv",
+      "type": "std/double"
+    },
+    {
+      "name": "triggerPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "takeProfit",
+      "type": "std/double"
+    },
+    {
+      "name": "stopLoss",
+      "type": "std/double"
+    },
+    {
+      "name": "tpTriggerBy",
+      "type": "roq/bybit/json/TriggerBy"
+    },
+    {
+      "name": "slTriggerBy",
+      "type": "roq/bybit/json/TriggerBy"
+    },
+    {
+      "name": "triggerDirection",
+      "type": "std/int32"
+    },
+    {
+      "name": "triggerBy",
+      "type": "roq/bybit/json/TriggerBy"
+    },
+    {
+      "name": "lastPriceOnCreated",
+      "type": "std/double"
+    },
+    {
+      "name": "reduceOnly",
+      "type": "std/bool"
+    },
+    {
+      "name": "closeOnTrigger",
+      "type": "std/bool"
+    },
+    {
+      "name": "placeType",
+      "type": "std/string_view"
+    },
+    {
+      "name": "smpType",
+      "type": "std/string_view"
+    },
+    {
+      "name": "smpGroup",
+      "type": "std/int32"
+    },
+    {
+      "name": "smpOrderId",
+      "type": "std/string_view"
+    },
+    {
+      "name": "createdTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "updatedTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "slLimitPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "createType",
+      "type": "std/string_view"
+    },
+    {
+      "name": "tpslMode",
+      "type": "std/string_view"
+    },
+    {
+      "name": "tpLimitPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "marketUnit",
+      "type": "std/string_view"
+    },
+    {
+      "name": "trailingPercentage",
+      "type": "std/double"
+    },
+    {
+      "name": "trailingValue",
+      "type": "std/double"
+    },
+    {
+      "name": "basePrice",
+      "type": "std/double"
+    },
+    {
+      "name": "activationPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "cumFeeDetail"
+    }
+  ]
+}

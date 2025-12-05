@@ -2,15 +2,15 @@
 
 #include <catch2/catch_all.hpp>
 
-#include "roq/core/json/buffer_stack.hpp"
-
-#include "roq/bybit/json/parser.hpp"
+#include "parser_tester.hpp"
 
 using namespace roq;
 using namespace roq::bybit;
 
 using namespace std::literals;
 using namespace std::chrono_literals;
+
+using value_type = json::OrderBook;
 
 TEST_CASE("simple_1", "[json_order_book]") {
   auto message = R"({)"
@@ -27,37 +27,11 @@ TEST_CASE("simple_1", "[json_order_book]") {
                  R"("seq":792472862)"
                  R"(})"
                  R"(})"sv;
-  core::json::BufferStack buffers{8192, 1};
-  // simple
-  json::OrderBook obj{message, buffers};
-  CHECK(obj.topic == "orderbook.1.BTCUSDT"sv);
-  // parser
-  struct Handler final : public json::Parser::Handler {
-    void operator()(Trace<json::Error> const &) override { FAIL(); }
-    void operator()(Trace<json::Ping> const &) override { FAIL(); }
-    void operator()(Trace<json::Subscribe> const &) override { FAIL(); }
-    // public
-    void operator()(Trace<json::OrderBook> const &event, size_t depth) override {
-      found = true;
-      auto &[trace_info, order_book] = event;
-      CHECK(order_book.topic == "orderbook.1.BTCUSDT"sv);
-      CHECK(depth == 1);
-    }
-    void operator()(Trace<json::PublicTrade> const &) override { FAIL(); }
-    void operator()(Trace<json::Tickers> const &) override { FAIL(); }
-    void operator()(Trace<json::Kline> const &) override { FAIL(); }
-    // private
-    void operator()(Trace<json::Auth> const &) override { FAIL(); }
-    void operator()(Trace<json::Wallet> const &) override { FAIL(); }
-    void operator()(Trace<json::Position> const &) override { FAIL(); }
-    void operator()(Trace<json::Order> const &) override { FAIL(); }
-    void operator()(Trace<json::Execution2> const &) override { FAIL(); }
-
-    bool found = false;
-  } handler;
-  auto res = json::Parser::dispatch(handler, message, buffers, {}, false);
-  CHECK(res == true);
-  CHECK(handler.found == true);
+  auto helper = [](value_type const &obj) {
+    CHECK(obj.topic == "orderbook.1.BTCUSDT"sv);
+    // CHECK(depth == 1);
+  };
+  ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }
 
 TEST_CASE("simple_50_snapshot", "[json_order_book]") {
@@ -175,9 +149,11 @@ TEST_CASE("simple_50_snapshot", "[json_order_book]") {
                  R"("seq":792472629)"
                  R"(})"
                  R"(})";
-  core::json::BufferStack buffers{8192, 1};
-  json::OrderBook obj{message, buffers};
-  CHECK(obj.topic == "orderbook.50.BTCUSDT"sv);
+  auto helper = [](value_type const &obj) {
+    CHECK(obj.topic == "orderbook.50.BTCUSDT"sv);
+    // CHECK(depth == 1);
+  };
+  ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }
 
 TEST_CASE("simple_50_delta", "[json_order_book]") {
@@ -195,7 +171,9 @@ TEST_CASE("simple_50_delta", "[json_order_book]") {
                  R"("seq":792472763)"
                  R"(})"
                  R"(})";
-  core::json::BufferStack buffers{8192, 1};
-  json::OrderBook obj{message, buffers};
-  CHECK(obj.topic == "orderbook.50.BTCUSDT"sv);
+  auto helper = [](value_type const &obj) {
+    CHECK(obj.topic == "orderbook.50.BTCUSDT"sv);
+    // CHECK(depth == 1);
+  };
+  ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }

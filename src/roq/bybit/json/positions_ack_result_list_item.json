@@ -1,0 +1,151 @@
+{
+  "name": "roq/bybit/json/PositionsAckResultListItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "positionIdx",
+      "type": "std/int32"
+    },
+    {
+      "name": "riskId",
+      "type": "std/int32"
+    },
+    {
+      "name": "riskLimitValue",
+      "type": "std/double"
+    },
+    {
+      "name": "symbol",
+      "type": "std/string_view"
+    },
+    {
+      "name": "side",
+      "type": "roq/bybit/json/Side"
+    },
+    {
+      "name": "size",
+      "type": "std/double"
+    },
+    {
+      "name": "avgPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "positionValue",
+      "type": "std/double"
+    },
+    {
+      "name": "tradeMode",
+      "type": "std/int32"
+    },
+    {
+      "name": "autoAddMargin",
+      "type": "std/int32"
+    },
+    {
+      "name": "positionStatus",
+      "type": "roq/bybit/json/PositionStatus"
+    },
+    {
+      "name": "leverage",
+      "type": "std/double"
+    },
+    {
+      "name": "markPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "liqPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "bustPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "positionIM",
+      "type": "std/double"
+    },
+    {
+      "name": "positionMM",
+      "type": "std/double"
+    },
+    {
+      "name": "tpslMode",
+      "type": "roq/bybit/json/TpSlMode"
+    },
+    {
+      "name": "takeProfit",
+      "type": "std/double"
+    },
+    {
+      "name": "stopLoss",
+      "type": "std/double"
+    },
+    {
+      "name": "trailingStop",
+      "type": "std/double"
+    },
+    {
+      "name": "unrealisedPnl",
+      "type": "std/double"
+    },
+    {
+      "name": "cumRealisedPnl",
+      "type": "std/double"
+    },
+    {
+      "name": "adlRankIndicator",
+      "type": "std/int32"
+    },
+    {
+      "name": "createdTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "updatedTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "isReduceOnly",
+      "type": "std/double"
+    },
+    {
+      "name": "seq",
+      "type": "std/uint64"
+    },
+    {
+      "name": "positionBalance",
+      "type": "std/double"
+    },
+    {
+      "name": "leverageSysUpdatedTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "curRealisedPnl",
+      "type": "std/double"
+    },
+    {
+      "name": "mmrSysUpdatedTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "sessionAvgPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "positionIMByMp",
+      "type": "std/string_view",
+      "comment": "number?"
+    },
+    {
+      "name": "positionMMByMp",
+      "type": "std/string_view",
+      "comment": "number?"
+    },
+    {
+      "name": "liqPriceByMp"
+    }
+  ]
+}

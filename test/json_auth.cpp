@@ -2,15 +2,15 @@
 
 #include <catch2/catch_all.hpp>
 
-#include "roq/core/json/buffer_stack.hpp"
-
-#include "roq/bybit/json/parser.hpp"
+#include "parser_tester.hpp"
 
 using namespace roq;
 using namespace roq::bybit;
 
 using namespace std::literals;
 using namespace std::chrono_literals;
+
+using value_type = json::Auth;
 
 TEST_CASE("success", "[json_auth]") {
   auto message = R"({)"
@@ -20,34 +20,9 @@ TEST_CASE("success", "[json_auth]") {
                  R"("req_id":"1",)"
                  R"("op":"auth")"
                  R"(})"sv;
-  core::json::BufferStack buffers{8192, 1};
-  // simple
-  json::Auth obj{message, buffers};
-  CHECK(obj.success == true);
-  // parser
-  struct Handler final : public json::Parser::Handler {
-    void operator()(Trace<json::Error> const &) override { FAIL(); }
-    void operator()(Trace<json::Ping> const &) override { FAIL(); }
-    void operator()(Trace<json::Subscribe> const &) override { FAIL(); }
-    // public
-    void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
-    void operator()(Trace<json::PublicTrade> const &) override { FAIL(); }
-    void operator()(Trace<json::Tickers> const &) override { FAIL(); }
-    void operator()(Trace<json::Kline> const &) override { FAIL(); }
-    // private
-    void operator()(Trace<json::Auth> const &event) override {
-      found = true;
-      auto &[trace_info, auth] = event;
-      CHECK(auth.success == true);
-    }
-    void operator()(Trace<json::Wallet> const &) override { FAIL(); }
-    void operator()(Trace<json::Position> const &) override { FAIL(); }
-    void operator()(Trace<json::Order> const &) override { FAIL(); }
-    void operator()(Trace<json::Execution2> const &) override { FAIL(); }
-
-    bool found = false;
-  } handler;
-  auto res = json::Parser::dispatch(handler, message, buffers, {}, false);
-  CHECK(res == true);
-  CHECK(handler.found == true);
+  auto helper = [](value_type const &obj) {
+    CHECK(obj.success == true);
+    CHECK(obj.ret_msg == ""sv);
+  };
+  ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }

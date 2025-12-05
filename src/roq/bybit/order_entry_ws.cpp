@@ -275,7 +275,6 @@ void OrderEntryWS::send_login() {
 }
 
 void OrderEntryWS::parse(std::string_view const &message) {
-  log::warn("DEBUG {}"sv, message);
   profile_.parse([&]() {
     auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
     try {

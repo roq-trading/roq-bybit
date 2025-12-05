@@ -2,15 +2,15 @@
 
 #include <catch2/catch_all.hpp>
 
-#include "roq/core/json/buffer_stack.hpp"
-
-#include "roq/bybit/json/parser_2.hpp"
+#include "parser_2_tester.hpp"
 
 using namespace roq;
 using namespace roq::bybit;
 
 using namespace std::literals;
 using namespace std::chrono_literals;
+
+using value_type = json::CancelOrder2;
 
 TEST_CASE("success", "[json_cancel_order_2]") {
   auto message = R"({)"
@@ -32,28 +32,12 @@ TEST_CASE("success", "[json_cancel_order_2]") {
                  R"(},)"
                  R"("connId":"d4al7m6c0hv96a0jimg0-b9pw")"
                  R"(})"sv;
-  core::json::BufferStack buffers{8192, 1};
-  // simple
-  json::CancelOrder2 obj{message, buffers};
-  CHECK(obj.ret_code == 0);
-  // parser
-  struct Handler final : public json::Parser2::Handler {
-    void operator()(Trace<json::Ping> const &) override { FAIL(); }
-    void operator()(Trace<json::Auth2> const &) override { FAIL(); }
-    void operator()(Trace<json::Error> const &) override { FAIL(); }
-    void operator()(Trace<json::PlaceOrder2> const &) override { FAIL(); }
-    void operator()(Trace<json::AmendOrder2> const &) override { FAIL(); }
-    void operator()(Trace<json::CancelOrder2> const &event) override {
-      found = true;
-      auto &[trace_info, cancel_order] = event;
-      CHECK(cancel_order.ret_code == 0);
-    }
-
-    bool found = false;
-  } handler;
-  auto res = json::Parser2::dispatch(handler, message, buffers, {}, false);
-  CHECK(res == true);
-  CHECK(handler.found == true);
+  auto helper = [](value_type const &obj) {
+    CHECK(obj.req_id == "gwAC7yKS2UIAAgAAAAAA"sv);
+    CHECK(obj.ret_code == 0);
+    CHECK(obj.ret_msg == "OK"sv);
+  };
+  Parser2Tester<value_type>::dispatch(helper, message, 8192, 1);
 }
 
 TEST_CASE("failure", "[json_cancel_order_2]") {
@@ -73,26 +57,10 @@ TEST_CASE("failure", "[json_cancel_order_2]") {
                  R"(},)"
                  R"("connId":"d4al7m6c0hv96a0jimg0-b9wz")"
                  R"(})"sv;
-  core::json::BufferStack buffers{8192, 1};
-  // simple
-  json::CancelOrder2 obj{message, buffers};
-  CHECK(obj.ret_code == 110001);
-  // parser
-  struct Handler final : public json::Parser2::Handler {
-    void operator()(Trace<json::Ping> const &) override { FAIL(); }
-    void operator()(Trace<json::Auth2> const &) override { FAIL(); }
-    void operator()(Trace<json::Error> const &) override { FAIL(); }
-    void operator()(Trace<json::PlaceOrder2> const &) override { FAIL(); }
-    void operator()(Trace<json::AmendOrder2> const &) override { FAIL(); }
-    void operator()(Trace<json::CancelOrder2> const &event) override {
-      found = true;
-      auto &[trace_info, cancel_order] = event;
-      CHECK(cancel_order.ret_code == 110001);
-    }
-
-    bool found = false;
-  } handler;
-  auto res = json::Parser2::dispatch(handler, message, buffers, {}, false);
-  CHECK(res == true);
-  CHECK(handler.found == true);
+  auto helper = [](value_type const &obj) {
+    CHECK(obj.req_id == "RAACPVr82kIAAgAAAAAA"sv);
+    CHECK(obj.ret_code == 110001);
+    CHECK(obj.ret_msg == "order not exists or too late to cancel"sv);
+  };
+  Parser2Tester<value_type>::dispatch(helper, message, 8192, 1);
 }

@@ -2,16 +2,14 @@
 
 #include <catch2/catch_all.hpp>
 
-#include "roq/core/json/buffer_stack.hpp"
-
-#include "roq/bybit/json/parser.hpp"
+#include "parser_tester.hpp"
 
 using namespace roq;
 using namespace roq::bybit;
 
 using namespace std::literals;
 
-// note! from websocket
+using value_type = json::Wallet;
 
 TEST_CASE("parser", "[json_wallet]") {
   auto message = R"({)"
@@ -51,35 +49,16 @@ TEST_CASE("parser", "[json_wallet]") {
                  R"(})"
                  R"(])"
                  R"(})"sv;
-  struct Handler final : public json::Parser::Handler {
-    void operator()(Trace<json::Error> const &) override { FAIL(); }
-    void operator()(Trace<json::Ping> const &) override { FAIL(); }
-    void operator()(Trace<json::Subscribe> const &) override { FAIL(); }
-    // public
-    void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
-    void operator()(Trace<json::PublicTrade> const &) override { FAIL(); }
-    void operator()(Trace<json::Tickers> const &) override { FAIL(); }
-    void operator()(Trace<json::Kline> const &) override { FAIL(); }
-    // private
-    void operator()(Trace<json::Auth> const &) override { FAIL(); }
-    void operator()(Trace<json::Wallet> const &event) override {
-      found = true;
-      auto &[trace_info, wallet_balance] = event;
-      CHECK(wallet_balance.account_type == json::AccountType::SPOT);
-      REQUIRE(std::size(wallet_balance.coin) == 1);
-      auto &coin_0 = wallet_balance.coin[0];
-      CHECK(coin_0.coin == "USDT"sv);
-    }
-    void operator()(Trace<json::Position> const &) override { FAIL(); }
-    void operator()(Trace<json::Order> const &) override { FAIL(); }
-    void operator()(Trace<json::Execution2> const &) override { FAIL(); }
-
-    bool found = false;
-  } handler;
-  core::json::BufferStack buffers{8192, 1};
-  auto res = json::Parser::dispatch(handler, message, buffers, {}, false);
-  CHECK(res == true);
-  CHECK(handler.found == true);
+  auto helper = [](value_type const &obj) {
+    CHECK(obj.id == "460579-2-c4815897-f283-4ccd-b4d7-dac6bde51502-1682339173119"sv);
+    CHECK(obj.topic == "wallet"sv);
+    CHECK(obj.creation_time == 1682339173118ms);
+    REQUIRE(std::size(obj.data) == 1);
+    CHECK(obj.data[0].account_type == json::AccountType::SPOT);
+    REQUIRE(std::size(obj.data[0].coin) == 1);
+    CHECK(obj.data[0].coin[0].coin == "USDT"sv);
+  };
+  ParserTester<value_type>::dispatch(helper, message, 8192, 2);
 }
 
 TEST_CASE("parser_2", "[json_wallet]") {
@@ -120,33 +99,14 @@ TEST_CASE("parser_2", "[json_wallet]") {
                  R"(})"
                  R"(])"
                  R"(})";
-  struct Handler final : public json::Parser::Handler {
-    void operator()(Trace<json::Error> const &) override { FAIL(); }
-    void operator()(Trace<json::Ping> const &) override { FAIL(); }
-    void operator()(Trace<json::Subscribe> const &) override { FAIL(); }
-    // public
-    void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
-    void operator()(Trace<json::PublicTrade> const &) override { FAIL(); }
-    void operator()(Trace<json::Tickers> const &) override { FAIL(); }
-    void operator()(Trace<json::Kline> const &) override { FAIL(); }
-    // private
-    void operator()(Trace<json::Auth> const &) override { FAIL(); }
-    void operator()(Trace<json::Wallet> const &event) override {
-      found = true;
-      auto &[trace_info, wallet_balance] = event;
-      CHECK(wallet_balance.account_type == json::AccountType::SPOT);
-      REQUIRE(std::size(wallet_balance.coin) == 1);
-      auto &coin_0 = wallet_balance.coin[0];
-      CHECK(coin_0.coin == "USDT"sv);
-    }
-    void operator()(Trace<json::Position> const &) override { FAIL(); }
-    void operator()(Trace<json::Order> const &) override { FAIL(); }
-    void operator()(Trace<json::Execution2> const &) override { FAIL(); }
-
-    bool found = false;
-  } handler;
-  core::json::BufferStack buffers{8192, 1};
-  auto res = json::Parser::dispatch(handler, message, buffers, {}, false);
-  CHECK(res == true);
-  CHECK(handler.found == true);
+  auto helper = [](value_type const &obj) {
+    CHECK(obj.id == "460579-3-a5da51e6-2a7e-4dc6-9546-d85721fb0d1b-1682341631264"sv);
+    CHECK(obj.topic == "wallet"sv);
+    CHECK(obj.creation_time == 1682341631264ms);
+    REQUIRE(std::size(obj.data) == 1);
+    CHECK(obj.data[0].account_type == json::AccountType::SPOT);
+    REQUIRE(std::size(obj.data[0].coin) == 1);
+    CHECK(obj.data[0].coin[0].coin == "USDT"sv);
+  };
+  ParserTester<value_type>::dispatch(helper, message, 8192, 2);
 }

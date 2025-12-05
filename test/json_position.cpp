@@ -2,15 +2,15 @@
 
 #include <catch2/catch_all.hpp>
 
-#include "roq/core/json/buffer_stack.hpp"
-
-#include "roq/bybit/json/parser.hpp"
+#include "parser_tester.hpp"
 
 using namespace roq;
 using namespace roq::bybit;
 
 using namespace std::literals;
 using namespace std::chrono_literals;
+
+using value_type = json::Position;
 
 // note! from websocket
 
@@ -51,36 +51,11 @@ TEST_CASE("linear", "[json_position]") {
                  R"(})"
                  R"(])"
                  R"(})"sv;
-  core::json::BufferStack buffers{8192, 1};
-  // simple
-  json::Position obj{message, buffers};
-  CHECK(obj.topic == "position"sv);
-  // parser
-  struct Handler final : public json::Parser::Handler {
-    void operator()(Trace<json::Error> const &) override { FAIL(); }
-    void operator()(Trace<json::Ping> const &) override { FAIL(); }
-    void operator()(Trace<json::Subscribe> const &) override { FAIL(); }
-    // public
-    void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
-    void operator()(Trace<json::PublicTrade> const &) override { FAIL(); }
-    void operator()(Trace<json::Tickers> const &) override { FAIL(); }
-    void operator()(Trace<json::Kline> const &) override { FAIL(); }
-    // private
-    void operator()(Trace<json::Auth> const &) override { FAIL(); }
-    void operator()(Trace<json::Wallet> const &) override { FAIL(); }
-    void operator()(Trace<json::Position> const &event) override {
-      found = true;
-      auto &[trace_info, position] = event;
-      CHECK(position.topic == "position"sv);
-    }
-    void operator()(Trace<json::Order> const &) override { FAIL(); }
-    void operator()(Trace<json::Execution2> const &) override { FAIL(); }
-
-    bool found = false;
-  } handler;
-  auto res = json::Parser::dispatch(handler, message, buffers, {}, false);
-  CHECK(res == true);
-  CHECK(handler.found == true);
+  auto helper = [](value_type const &obj) {
+    CHECK(obj.topic == "position"sv);
+    CHECK(obj.id == "5fa7fca971e8f4c432d9a35e8e30ac54:6f1e96ddc1d9062d:0:01"sv);
+  };
+  ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }
 
 TEST_CASE("none", "[json_position]") {
@@ -120,33 +95,9 @@ TEST_CASE("none", "[json_position]") {
                  R"(})"
                  R"(])"
                  R"(})"sv;
-  core::json::BufferStack buffers{8192, 1};
-  json::Position obj{message, buffers};
-  CHECK(obj.topic == "position"sv);
-  // parser
-  struct Handler final : public json::Parser::Handler {
-    void operator()(Trace<json::Error> const &) override { FAIL(); }
-    void operator()(Trace<json::Ping> const &) override { FAIL(); }
-    void operator()(Trace<json::Subscribe> const &) override { FAIL(); }
-    // public
-    void operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) override { FAIL(); }
-    void operator()(Trace<json::PublicTrade> const &) override { FAIL(); }
-    void operator()(Trace<json::Tickers> const &) override { FAIL(); }
-    void operator()(Trace<json::Kline> const &) override { FAIL(); }
-    // private
-    void operator()(Trace<json::Auth> const &) override { FAIL(); }
-    void operator()(Trace<json::Wallet> const &) override { FAIL(); }
-    void operator()(Trace<json::Position> const &event) override {
-      found = true;
-      auto &[trace_info, position] = event;
-      CHECK(position.topic == "position"sv);
-    }
-    void operator()(Trace<json::Order> const &) override { FAIL(); }
-    void operator()(Trace<json::Execution2> const &) override { FAIL(); }
-
-    bool found = false;
-  } handler;
-  auto res = json::Parser::dispatch(handler, message, buffers, {}, false);
-  CHECK(res == true);
-  CHECK(handler.found == true);
+  auto helper = [](value_type const &obj) {
+    CHECK(obj.topic == "position"sv);
+    CHECK(obj.id == "f127201edb617010e1ab3e10b12db776:404381ec7fcd40ee:0:01"sv);
+  };
+  ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }
