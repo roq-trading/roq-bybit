@@ -4,6 +4,8 @@ All notable changes will be documented in this file.
 
 ## Head
 
+## 1.1.1 &ndash; 20251214
+
 ### Added
 
 * Add WS execution support (#533)
