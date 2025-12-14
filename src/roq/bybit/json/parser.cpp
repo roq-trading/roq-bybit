@@ -33,31 +33,8 @@ void dispatch_helper(auto &handler, auto &message, auto &buffer_stack, auto &tra
   create_trace_and_dispatch(handler, trace_info, obj, std::forward<Args>(args)...);
 }
 
-bool dispatch_helper_flatten_wallet(auto &handler, auto &buffer_stack, auto &trace_info, auto &message) {
-  core::json::Parser parser{message};
-  auto root = parser.root();
-  for (auto [key, value] : std::get<core::json::Object>(root)) {
-    if (key == KEY_DATA) {
-      for (auto item : std::get<core::json::Array>(value)) {
-        Wallet wallet{item, buffer_stack};
-        create_trace_and_dispatch(handler, trace_info, wallet);
-      }
-      return true;
-    }
-  }
-  return false;
-}
-
 auto parse_topic(auto const &value) {
   return Topic{value.substr(0, value.find_first_of('.'))};
-}
-
-auto parse_kline_symbol(auto const &value) -> std::string_view {
-  auto pos = value.find_last_of('.');
-  if (pos == value.npos) {
-    return {};
-  }
-  return value.substr(pos + 1);
 }
 
 constexpr auto parse_mbp_depth(auto const &value) {
