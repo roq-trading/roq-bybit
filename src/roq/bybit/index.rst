@@ -213,7 +213,7 @@ Configuration
 
 .. code-block:: shell
 
-   $ --flagfile $CONDA_PREFIX/share/roq-bybit/config.toml
+   $ --config_file $CONDA_PREFIX/share/roq-bybit/config.toml
 
 .. important::
 
