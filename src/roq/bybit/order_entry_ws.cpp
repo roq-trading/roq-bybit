@@ -326,6 +326,7 @@ void OrderEntryWS::operator()(Trace<json::PlaceOrder2> const &event) {
         .text = place_order.ret_msg,
         .version = {},
         .request_id = place_order.req_id,
+        .external_order_id = {},
         .quantity = NaN,
         .price = NaN,
     };
@@ -348,6 +349,7 @@ void OrderEntryWS::operator()(Trace<json::AmendOrder2> const &event) {
         .text = amend_order.ret_msg,
         .version = {},
         .request_id = amend_order.req_id,
+        .external_order_id = {},
         .quantity = NaN,
         .price = NaN,
     };
@@ -370,6 +372,7 @@ void OrderEntryWS::operator()(Trace<json::CancelOrder2> const &event) {
         .text = cancel_order.ret_msg,
         .version = {},
         .request_id = cancel_order.req_id,
+        .external_order_id = {},
         .quantity = NaN,
         .price = NaN,
     };
