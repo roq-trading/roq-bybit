@@ -368,7 +368,7 @@ void Rest::get_kline(std::string_view const &symbol) {
   });
 }
 
-void Rest::get_kline_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
+void Rest::get_kline_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] std::string_view const &symbol) {
   profile_.instruments_info_ack([&]() {
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
