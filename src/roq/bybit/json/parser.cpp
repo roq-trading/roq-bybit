@@ -18,12 +18,6 @@ namespace roq {
 namespace bybit {
 namespace json {
 
-// === constants ===
-
-namespace {
-auto const KEY_DATA = "data"sv;
-}
-
 // === HELPERS ===
 
 namespace {
