@@ -61,6 +61,7 @@ struct Shared final {
   core::limit::RateLimiter rate_limiter;
 
   core::Symbols symbols;
+  utils::unordered_set<std::string> all_symbols;
 
   core::TimerQueue<std::string> time_series_request_queue;
 };

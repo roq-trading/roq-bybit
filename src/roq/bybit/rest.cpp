@@ -306,7 +306,7 @@ void Rest::operator()(Trace<json::InstrumentsInfoAck> const &event) {
       log::info<1>(R"(Drop symbol="{}")"sv, item.symbol);
       continue;
     }
-    if (symbols_.emplace(item.symbol).second) {  // only include new
+    if (shared_.all_symbols.emplace(item.symbol).second) {  // only include new
       symbols.emplace_back(item.symbol);
     }
     ++counter;
