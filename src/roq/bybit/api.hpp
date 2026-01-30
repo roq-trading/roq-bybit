@@ -36,6 +36,8 @@ struct API final {
 
   // factory
   static API create(Settings const &);
+
+  static tools::API parse_api(std::string_view const &api);
 };
 
 }  // namespace bybit

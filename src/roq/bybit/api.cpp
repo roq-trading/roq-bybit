@@ -14,16 +14,6 @@ namespace bybit {
 // === HELPERS ===
 
 namespace {
-auto create_api(auto &settings) {
-  std::string value{settings.app.api};
-  std::ranges::transform(value, std::begin(value), ::toupper);
-  auto result = magic_enum::enum_cast<tools::API>(value);
-  if (!result.has_value()) {
-    log::fatal(R"(Unexpected: api="{}")"sv, value);
-  }
-  return *result;
-}
-
 auto create_category(auto api) -> json::Category {
   switch (api) {
     using enum tools::API;
@@ -45,7 +35,7 @@ auto create_category(auto api) -> json::Category {
 // === IMPLEMENTATION ===
 
 API API::create(Settings const &settings) {
-  auto api = create_api(settings);
+  auto api = parse_api(settings.app.api);
   auto category = create_category(api);
   return {
       .market_data{
@@ -66,6 +56,16 @@ API API::create(Settings const &settings) {
       .api = api,
       .category = category,
   };
+}
+
+tools::API API::parse_api(std::string_view const &api) {
+  std::string value{api};
+  std::ranges::transform(value, std::begin(value), ::toupper);
+  auto result = magic_enum::enum_cast<tools::API>(value);
+  if (!result.has_value()) {
+    log::fatal(R"(Unexpected: api="{}")"sv, value);
+  }
+  return *result;
 }
 
 }  // namespace bybit

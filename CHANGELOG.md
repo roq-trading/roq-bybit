@@ -4,6 +4,10 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Fixed
+
+* Gateway instance number derived derived from `--api` (#550)
+
 ## 1.1.1 &ndash; 20251214
 
 ### Added
