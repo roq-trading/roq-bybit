@@ -146,6 +146,10 @@
     },
     {
       "name": "liqPriceByMp"
+    },
+    {
+      "name": "breakEvenPrice",
+      "type": "std/double"
     }
   ]
 }

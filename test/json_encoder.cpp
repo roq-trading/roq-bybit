@@ -20,11 +20,22 @@ auto SYMBOL = "BTCUSDT"sv;
 
 namespace {
 auto create_order_helper() {
-  auto order = server::oms::Order{};
+  server::oms::Order order;
   order.symbol = SYMBOL;
-  order.price_precision.precision = Precision::_2;
-  order.quantity_precision.precision = Precision::_4;
   return order;
+}
+auto create_ref_data() {
+  auto ref_data = server::oms::RefData{
+      .security_type = {},
+      .external_security_id = {},
+      .multiplier = NaN,
+      .quantity = {},
+      .price = {},
+      .has_tick_size_steps = false,
+  };
+  ref_data.price.precision = Precision::_2;
+  ref_data.quantity.precision = Precision::_4;
+  return ref_data;
 }
 }  // namespace
 
@@ -54,8 +65,9 @@ TEST_CASE("create_order", "[json_encoder]") {
       .strategy_id = {},
   };
   auto order = create_order_helper();
+  auto ref_data = create_ref_data();
   auto request_id = "1234"sv;
-  json::Encoder::place_order(buffer, create_order, order, request_id, json::Category::SPOT);
+  json::Encoder::place_order(buffer, create_order, order, ref_data, request_id, json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"
@@ -85,9 +97,10 @@ TEST_CASE("modify_order_price", "[json_encoder]") {
       .conditional_on_version = {},
   };
   auto order = create_order_helper();
+  auto ref_data = create_ref_data();
   auto request_id = "2345"sv;
   auto previous_request_id = "1234"sv;
-  json::Encoder::amend_order(buffer, modify_order, order, request_id, previous_request_id, json::Category::SPOT);
+  json::Encoder::amend_order(buffer, modify_order, order, ref_data, request_id, previous_request_id, json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"
@@ -110,9 +123,10 @@ TEST_CASE("modify_order_quantity", "[json_encoder]") {
       .conditional_on_version = {},
   };
   auto order = create_order_helper();
+  auto ref_data = create_ref_data();
   auto request_id = "2345"sv;
   auto previous_request_id = "1234"sv;
-  json::Encoder::amend_order(buffer, modify_order, order, request_id, previous_request_id, json::Category::SPOT);
+  json::Encoder::amend_order(buffer, modify_order, order, ref_data, request_id, previous_request_id, json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"
@@ -135,9 +149,10 @@ TEST_CASE("modify_order_both", "[json_encoder]") {
       .conditional_on_version = {},
   };
   auto order = create_order_helper();
+  auto ref_data = create_ref_data();
   auto request_id = "2345"sv;
   auto previous_request_id = "1234"sv;
-  json::Encoder::amend_order(buffer, modify_order, order, request_id, previous_request_id, json::Category::SPOT);
+  json::Encoder::amend_order(buffer, modify_order, order, ref_data, request_id, previous_request_id, json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"
@@ -161,9 +176,10 @@ TEST_CASE("cancel_order", "[json_encoder]") {
       .conditional_on_version = {},
   };
   auto order = create_order_helper();
+  auto ref_data = create_ref_data();
   auto request_id = "2345"sv;
   auto previous_request_id = "1234"sv;
-  json::Encoder::cancel_order(buffer, cancel_order, order, request_id, previous_request_id, json::Category::SPOT);
+  json::Encoder::cancel_order(buffer, cancel_order, order, ref_data, request_id, previous_request_id, json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"

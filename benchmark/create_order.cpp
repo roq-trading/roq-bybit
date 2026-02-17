@@ -38,13 +38,24 @@ auto const CREATE_ORDER = CreateOrder{
 };
 auto const ORDER = []() {
   server::oms::Order result;
-  result.price_precision.precision = Precision::_2;
-  result.quantity_precision.precision = Precision::_5;
   return result;
 }();
 auto const REQUEST_ID = "rQAC6wMAAQAA9tJBrf43"sv;
 auto const LOGIN = "iAj2shx6x6iIb6f0up"sv;
 auto const SECRET = "3qFD9aBSKCX6IqgBy4WIAFn0uvE2j3XuI6GP"sv;
+auto create_ref_data() {
+  auto ref_data = server::oms::RefData{
+      .security_type = {},
+      .external_security_id = {},
+      .multiplier = NaN,
+      .quantity = {},
+      .price = {},
+      .has_tick_size_steps = false,
+  };
+  ref_data.price.precision = Precision::_2;
+  ref_data.quantity.precision = Precision::_4;
+  return ref_data;
+}
 }  // namespace
 
 // === IMPLEMENTATION ===
@@ -52,8 +63,9 @@ auto const SECRET = "3qFD9aBSKCX6IqgBy4WIAFn0uvE2j3XuI6GP"sv;
 void BM_create_order(benchmark::State &state) {
   std::string buffer;
   server::oms::Order order;
+  auto ref_data = create_ref_data();
   for (auto _ : state) {
-    json::Encoder::place_order(buffer, CREATE_ORDER, order, REQUEST_ID, json::Category::SPOT);
+    json::Encoder::place_order(buffer, CREATE_ORDER, order, ref_data, REQUEST_ID, json::Category::SPOT);
   }
 }
 
@@ -62,8 +74,9 @@ BENCHMARK(BM_create_order);
 void BM_create_order_and_sign(benchmark::State &state) {
   std::string buffer;
   tools::Crypto crypto{LOGIN, SECRET, 1s};
+  auto ref_data = create_ref_data();
   for (auto _ : state) {
-    auto body = json::Encoder::place_order(buffer, CREATE_ORDER, ORDER, REQUEST_ID, json::Category::SPOT);
+    auto body = json::Encoder::place_order(buffer, CREATE_ORDER, ORDER, ref_data, REQUEST_ID, json::Category::SPOT);
     crypto.create_headers_v2(PATH, {}, body, 1671026168138ms);
   }
 }
