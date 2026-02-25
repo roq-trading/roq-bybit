@@ -48,7 +48,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
 
   uint16_t stream_id() const { return stream_id_; }
 
-  bool ready() const { return status_ == ConnectionStatus::READY; }
+  bool ready() const { return connection_status_ == ConnectionStatus::READY; }
 
   void operator()(Event<Start> const &);
   void operator()(Event<Stop> const &);
@@ -70,7 +70,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   void operator()(web::socket::Client::Binary const &) override;
 
  private:
-  void operator()(ConnectionStatus);
+  void operator()(ConnectionStatus, std::string_view const &reason = {});
 
   void subscribe(std::span<Symbol const> const &symbols);
   void subscribe(std::string_view const &topic, std::span<Symbol const> const &symbols);
@@ -126,7 +126,7 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   // cache
   Shared &shared_;
   // state
-  ConnectionStatus status_ = {};
+  ConnectionStatus connection_status_ = {};
   // ping
   std::chrono::nanoseconds next_ping_ = {};
 };

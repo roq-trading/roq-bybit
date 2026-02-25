@@ -74,9 +74,9 @@ struct OrderEntryREST final : public OrderEntry, public web::rest::Client::Handl
   void operator()(Trace<web::rest::Client::Latency> const &) override;
 
  private:
-  bool ready() const { return status_ == ConnectionStatus::READY; }
+  bool ready() const { return connection_status_ == ConnectionStatus::READY; }
 
-  void operator()(ConnectionStatus);
+  void operator()(ConnectionStatus, std::string_view const &reason = {});
 
   uint32_t download(OrderEntryState state);
 
@@ -191,7 +191,7 @@ struct OrderEntryREST final : public OrderEntry, public web::rest::Client::Handl
   // cache
   Shared &shared_;
   // state
-  ConnectionStatus status_ = {};
+  ConnectionStatus connection_status_ = {};
   core::Download<OrderEntryState> download_;
   bool download_trades_is_first_ = true;
   //

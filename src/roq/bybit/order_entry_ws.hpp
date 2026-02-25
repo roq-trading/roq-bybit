@@ -81,7 +81,7 @@ struct OrderEntryWS final : public OrderEntry, public web::socket::Client::Handl
  private:
   bool ready() const;
 
-  void operator()(ConnectionStatus);
+  void operator()(ConnectionStatus, std::string_view const &reason = {});
 
   void send_login();
 
@@ -112,7 +112,7 @@ struct OrderEntryWS final : public OrderEntry, public web::socket::Client::Handl
   // cache
   Shared &shared_;
   // state
-  ConnectionStatus status_ = {};
+  ConnectionStatus connection_status_ = {};
   std::chrono::nanoseconds logon_timeout_ = {};
   // ...
   std::string encode_buffer_;
