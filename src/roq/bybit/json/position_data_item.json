@@ -151,6 +151,10 @@
       "name": "positionMMByMp",
       "type": "std/string_view",
       "comment": "number?"
+    },
+    {
+      "name": "breakEvenPrice",
+      "type": "std/double"
     }
   ]
 }
