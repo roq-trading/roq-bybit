@@ -63,6 +63,7 @@ TEST_CASE("create_order", "[json_encoder]") {
       .leverage = NaN,
       .routing_id = {},
       .strategy_id = {},
+      .release_time_utc = {},
   };
   auto order = create_order_helper();
   auto ref_data = create_ref_data();
@@ -95,6 +96,7 @@ TEST_CASE("modify_order_price", "[json_encoder]") {
       .routing_id = {},
       .version = {},
       .conditional_on_version = {},
+      .release_time_utc = {},
   };
   auto order = create_order_helper();
   auto ref_data = create_ref_data();
@@ -121,6 +123,7 @@ TEST_CASE("modify_order_quantity", "[json_encoder]") {
       .routing_id = {},
       .version = {},
       .conditional_on_version = {},
+      .release_time_utc = {},
   };
   auto order = create_order_helper();
   auto ref_data = create_ref_data();
@@ -147,6 +150,7 @@ TEST_CASE("modify_order_both", "[json_encoder]") {
       .routing_id = {},
       .version = {},
       .conditional_on_version = {},
+      .release_time_utc = {},
   };
   auto order = create_order_helper();
   auto ref_data = create_ref_data();
@@ -174,6 +178,7 @@ TEST_CASE("cancel_order", "[json_encoder]") {
       .routing_id = {},
       .version = {},
       .conditional_on_version = {},
+      .release_time_utc = {},
   };
   auto order = create_order_helper();
   auto ref_data = create_ref_data();

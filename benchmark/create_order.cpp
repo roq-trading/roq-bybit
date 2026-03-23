@@ -35,6 +35,7 @@ auto const CREATE_ORDER = CreateOrder{
     .leverage = NaN,
     .routing_id = {},
     .strategy_id = {},
+    .release_time_utc = {},
 };
 auto const ORDER = []() {
   server::oms::Order result;
