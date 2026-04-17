@@ -130,6 +130,10 @@
     {
       "name": "forbidUplWithdrawal",
       "type": "std/bool"
+    },
+    {
+      "name": "xstockMultiplier",
+      "type": "std/double"
     }
   ]
 }
