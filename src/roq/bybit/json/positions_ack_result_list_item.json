@@ -150,6 +150,10 @@
     {
       "name": "breakEvenPrice",
       "type": "std/double"
+    },
+    {
+      "name": "openTime",
+      "type": "std/milliseconds"
     }
   ]
 }

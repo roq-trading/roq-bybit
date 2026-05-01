@@ -134,6 +134,10 @@
     {
       "name": "xstockMultiplier",
       "type": "std/double"
+    },
+    {
+      "name": "symbolId",
+      "type": "std/int32"
     }
   ]
 }
