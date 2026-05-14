@@ -22,7 +22,6 @@
 
 #include "roq/core/limit/rate_limiter.hpp"
 
-#include "roq/bybit/rest_state.hpp"
 #include "roq/bybit/shared.hpp"
 
 #include "roq/bybit/json/instruments_info_ack.hpp"
@@ -67,7 +66,13 @@ struct Rest final : public web::rest::Client::Handler {
 
   void operator()(ConnectionStatus, std::string_view const &reason = {});
 
-  uint32_t download(RestState);
+  enum class State {
+    UNDEFINED = 0,
+    GET_INSTRUMENTS_INFO,
+    DONE,
+  };
+
+  uint32_t download(State);
 
   // instruments-info
 
@@ -110,7 +115,7 @@ struct Rest final : public web::rest::Client::Handler {
   Shared &shared_;
   // state
   ConnectionStatus connection_status_ = {};
-  core::Download<RestState> download_;
+  core::Download<State> download_;
   // ...
   core::limit::RateLimiter rate_limiter;
 };

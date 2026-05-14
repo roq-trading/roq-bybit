@@ -22,7 +22,6 @@
 
 #include "roq/bybit/account.hpp"
 #include "roq/bybit/order_entry.hpp"
-#include "roq/bybit/order_entry_state.hpp"
 #include "roq/bybit/shared.hpp"
 
 #include "roq/bybit/json/account_info_ack.hpp"
@@ -78,7 +77,13 @@ struct OrderEntryREST final : public OrderEntry, public web::rest::Client::Handl
 
   void operator()(ConnectionStatus, std::string_view const &reason = {});
 
-  uint32_t download(OrderEntryState state);
+  enum class State {
+    UNDEFINED = 0,
+    ACCOUNT_INFO,
+    DONE,
+  };
+
+  uint32_t download(State);
 
   void check_request_queue(std::chrono::nanoseconds now);
 
@@ -192,7 +197,7 @@ struct OrderEntryREST final : public OrderEntry, public web::rest::Client::Handl
   Shared &shared_;
   // state
   ConnectionStatus connection_status_ = {};
-  core::Download<OrderEntryState> download_;
+  core::Download<State> download_;
   bool download_trades_is_first_ = true;
   //
   std::string encode_buffer_;

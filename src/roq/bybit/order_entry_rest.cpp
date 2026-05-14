@@ -265,9 +265,9 @@ void OrderEntryREST::operator()(ConnectionStatus connection_status, std::string_
   create_trace_and_dispatch(handler_, trace_info, stream_status);
 }
 
-uint32_t OrderEntryREST::download(OrderEntryState state) {
+uint32_t OrderEntryREST::download(State state) {
   switch (state) {
-    using enum OrderEntryState;
+    using enum State;
     case UNDEFINED:
       assert(false);
       break;
@@ -327,7 +327,7 @@ void OrderEntryREST::get_account_info() {
 }
 
 void OrderEntryREST::get_account_info_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
-  auto const STATE = OrderEntryState::ACCOUNT_INFO;
+  auto const STATE = State::ACCOUNT_INFO;
   profile_.account_info_ack([&]() {
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
