@@ -15,12 +15,13 @@
 
 #include "roq/bybit/account.hpp"
 #include "roq/bybit/config.hpp"
+#include "roq/bybit/settings.hpp"
+#include "roq/bybit/shared.hpp"
+
 #include "roq/bybit/drop_copy.hpp"
 #include "roq/bybit/market_data.hpp"
 #include "roq/bybit/order_entry.hpp"
 #include "roq/bybit/rest.hpp"
-#include "roq/bybit/settings.hpp"
-#include "roq/bybit/shared.hpp"
 
 namespace roq {
 namespace bybit {
