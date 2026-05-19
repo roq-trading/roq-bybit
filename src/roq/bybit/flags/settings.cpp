@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bybit/settings.hpp"
+#include "roq/bybit/flags/settings.hpp"
 
 #include "roq/logging.hpp"
 
@@ -8,6 +8,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace bybit {
+namespace flags {
 
 Settings::Settings(args::Parser const &args) : Settings{args, flags::Flags::create()} {
 }
@@ -18,5 +19,6 @@ Settings::Settings(args::Parser const &args, flags::Flags const &flags)
   log::info("settings={}"sv, *this);
 }
 
+}  // namespace flags
 }  // namespace bybit
 }  // namespace roq

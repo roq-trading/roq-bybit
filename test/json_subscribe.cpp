@@ -77,3 +77,19 @@ TEST_CASE("option", "[json_subscribe]") {
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }
+/*
+TEST_CASE("failure_with_unicode", "[json_subscribe]") {
+  auto message = R"({)"
+                 R"("success":false,)"
+                 R"("ret_msg":"args size \u003e10",)"
+                 R"("conn_id":"d7u3lt5c9enav1at3iug-1yimq",)"
+                 R"("req_id":"2000001",)"
+                 R"("op":"subscribe")"
+                 R"(})"sv;
+  auto helper = [](value_type const &obj) {
+    CHECK(obj.success == false);
+    CHECK(obj.ret_msg == R"("args size \u003e10)"sv);
+  };
+  ParserTester<value_type>::dispatch(helper, message, 8192, 1);
+}
+*/
