@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bybit/order_entry_rest.hpp"
+#include "roq/bybit/gateway/order_entry_rest.hpp"
 
 #include <algorithm>
 #include <utility>
@@ -23,6 +23,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
 // === CONSTANTS ===
 
@@ -1376,5 +1377,6 @@ void OrderEntryREST::waf_limit_violation() {
   }
 }
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

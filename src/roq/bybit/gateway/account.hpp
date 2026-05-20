@@ -10,13 +10,14 @@
 #include "roq/core/limit/queue.hpp"
 #include "roq/core/limit/rate_limiter.hpp"
 
-#include "roq/bybit/config.hpp"
-#include "roq/bybit/settings.hpp"
+#include "roq/bybit/gateway/config.hpp"
+#include "roq/bybit/gateway/settings.hpp"
 
 #include "roq/bybit/tools/crypto.hpp"
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
 struct Account final {
   Account(Settings const &, Config const &, std::string_view const &name);
@@ -38,5 +39,6 @@ struct Account final {
   core::limit::Queue<std::pair<std::string, std::string>> request_queue;
 };
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

@@ -1,11 +1,12 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bybit/shared.hpp"
+#include "roq/bybit/gateway/shared.hpp"
 
 using namespace std::literals;
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
 // === IMPLEMENTATION ===
 
@@ -14,5 +15,6 @@ Shared::Shared(server::Dispatcher &dispatcher, Settings const &settings)
       symbols{settings.ws.max_subscriptions_per_stream} {
 }
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

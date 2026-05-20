@@ -2,10 +2,11 @@
 
 #include "roq/bybit/application.hpp"
 
-#include "roq/bybit/api.hpp"
-#include "roq/bybit/config.hpp"
-#include "roq/bybit/gateway.hpp"
-#include "roq/bybit/settings.hpp"
+#include "roq/bybit/flags/settings.hpp"
+
+#include "roq/bybit/gateway/api.hpp"
+#include "roq/bybit/gateway/config.hpp"
+#include "roq/bybit/gateway/controller.hpp"
 
 using namespace std::literals;
 
@@ -25,7 +26,7 @@ uint8_t const API_OPTION = 0x3;
 
 namespace {
 auto parse_api(auto &settings) {
-  auto api = API::parse_api(settings.app.api);
+  auto api = gateway::API::parse_api(settings.app.api);
   switch (api) {
     using enum tools::API;
     case UNDEFINED:
@@ -46,11 +47,11 @@ auto parse_api(auto &settings) {
 // === IMPLEMENTATION ===
 
 int Application::main(args::Parser const &args) {
-  Settings settings{args};
+  flags::Settings settings{args};
   auto api = parse_api(settings);
-  Config config{settings};
+  gateway::Config config{settings};
   auto context = server::create_io_context(settings);
-  server::Trading<Gateway>{settings, config, *context, api}.dispatch();
+  server::Trading<gateway::Controller>{settings, config, *context, api}.dispatch();
   return EXIT_SUCCESS;
 }
 

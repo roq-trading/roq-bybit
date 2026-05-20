@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bybit/drop_copy.hpp"
+#include "roq/bybit/gateway/drop_copy.hpp"
 
 #include <algorithm>
 #include <utility>
@@ -25,6 +25,7 @@ using namespace std::chrono_literals;
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
 // === CONSTANTS ===
 
@@ -533,5 +534,6 @@ void DropCopy::operator()(Trace<json::Execution> const &event) {
   });
 }
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

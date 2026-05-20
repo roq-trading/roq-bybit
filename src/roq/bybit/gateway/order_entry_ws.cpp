@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bybit/order_entry_ws.hpp"
+#include "roq/bybit/gateway/order_entry_ws.hpp"
 
 #include <algorithm>
 #include <utility>
@@ -26,6 +26,7 @@ using namespace std::chrono_literals;
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
 // === CONSTANTS ===
 
@@ -391,5 +392,6 @@ void OrderEntryWS::operator()(Trace<json::CancelOrder2> const &event) {
   }
 }
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bybit/account.hpp"
+#include "roq/bybit/gateway/account.hpp"
 
 #include "roq/logging.hpp"
 
@@ -13,6 +13,7 @@ using namespace std::chrono_literals;
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
 // === HELPERS ===
 
@@ -52,5 +53,6 @@ std::string Account::create_headers(std::string_view const &path, std::string_vi
   return crypto_.create_headers_v2(path, query, body, now_utc);
 }
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

@@ -4,7 +4,7 @@
 
 #include <string_view>
 
-#include "roq/bybit/settings.hpp"
+#include "roq/bybit/gateway/settings.hpp"
 
 #include "roq/bybit/tools/api.hpp"
 
@@ -12,6 +12,7 @@
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
 struct API final {
   struct {
@@ -40,5 +41,6 @@ struct API final {
   static tools::API parse_api(std::string_view const &api);
 };
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

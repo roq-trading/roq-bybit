@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bybit/rest.hpp"
+#include "roq/bybit/gateway/rest.hpp"
 
 #include <algorithm>
 #include <utility>
@@ -19,6 +19,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
 // === TODO ===
 // => use rate limiter / request queue
@@ -465,5 +466,6 @@ void Rest::process_response(web::rest::Response const &response, auto error_hand
   }
 }
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

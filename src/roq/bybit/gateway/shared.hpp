@@ -15,11 +15,12 @@
 
 #include "roq/core/limit/rate_limiter.hpp"
 
-#include "roq/bybit/api.hpp"
-#include "roq/bybit/settings.hpp"
+#include "roq/bybit/gateway/api.hpp"
+#include "roq/bybit/gateway/settings.hpp"
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
 struct Shared final {
   Shared(server::Dispatcher &, Settings const &);
@@ -66,5 +67,6 @@ struct Shared final {
   core::TimerQueue<std::string> time_series_request_queue;
 };
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

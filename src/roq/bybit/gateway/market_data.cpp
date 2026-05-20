@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bybit/market_data.hpp"
+#include "roq/bybit/gateway/market_data.hpp"
 
 #include <algorithm>
 #include <utility>
@@ -25,6 +25,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
 // === CONSTANTS ===
 
@@ -626,5 +627,6 @@ void MarketData::operator()(Trace<json::Execution> const &) {
   log::fatal("Unexpected"sv);
 }
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

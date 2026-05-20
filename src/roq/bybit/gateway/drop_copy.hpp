@@ -2,11 +2,10 @@
 
 #pragma once
 
-#include <deque>
 #include <string>
 #include <string_view>
-#include <utility>
-#include <vector>
+
+#include "roq/utils/container.hpp"
 
 #include "roq/utils/metrics/counter.hpp"
 #include "roq/utils/metrics/latency.hpp"
@@ -14,41 +13,40 @@
 
 #include "roq/io/context.hpp"
 
-#include "roq/io/web/uri.hpp"
-
 #include "roq/web/socket/client.hpp"
+
+#include "roq/core/download.hpp"
 
 #include "roq/core/json/buffer_stack.hpp"
 
 #include "roq/server.hpp"
 
-#include "roq/bybit/shared.hpp"
+#include "roq/bybit/gateway/account.hpp"
+#include "roq/bybit/gateway/shared.hpp"
 
-#include "roq/bybit/json/category.hpp"
+#include "roq/bybit/gateway/order_entry.hpp"  // response
+#include "roq/bybit/gateway/rest.hpp"         // symbols
+
 #include "roq/bybit/json/parser.hpp"
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
-struct MarketData final : public web::socket::Client::Handler, public json::Parser::Handler {
+struct DropCopy final : public web::socket::Client::Handler, json::Parser::Handler {
   struct Handler {
     virtual void operator()(Trace<StreamStatus> const &) = 0;
     virtual void operator()(Trace<ExternalLatency> const &) = 0;
-    virtual void operator()(Trace<MarketStatus> const &, bool is_last) = 0;
-    virtual void operator()(Trace<TopOfBook> const &, bool is_last) = 0;
-    virtual void operator()(Trace<MarketByPriceUpdate> const &, bool is_last) = 0;
-    virtual void operator()(Trace<TradeSummary> const &, bool is_last) = 0;
-    virtual void operator()(Trace<StatisticsUpdate> const &, bool is_last) = 0;
-    virtual void operator()(Trace<TimeSeriesUpdate> const &, bool is_last) = 0;
+    virtual void operator()(Trace<TradeUpdate> const &, bool is_last, uint8_t user_id, std::string_view const &request_id) = 0;
+    virtual void operator()(Trace<PositionUpdate> const &, bool is_last) = 0;
+    virtual void operator()(Trace<FundsUpdate> const &, bool is_last) = 0;
   };
 
-  MarketData(Handler &, io::Context &, uint16_t stream_id, Shared &, size_t index);
+  DropCopy(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
 
-  MarketData(MarketData const &) = delete;
+  DropCopy(DropCopy const &) = delete;
 
-  uint16_t stream_id() const { return stream_id_; }
-
-  bool ready() const { return connection_status_ == ConnectionStatus::READY; }
+  bool ready() const;
 
   void operator()(Event<Start> const &);
   void operator()(Event<Stop> const &);
@@ -56,7 +54,9 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
 
   void operator()(metrics::Writer &) const;
 
-  void subscribe(size_t start_from = 0);
+  void operator()(Rest::SymbolsUpdate &);
+
+  void operator()(Trace<OrderEntry::Response> const &);
 
  protected:
   // web::socket::Client::Handler
@@ -68,17 +68,6 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   void operator()(web::socket::Client::Latency const &) override;
   void operator()(web::socket::Client::Text const &) override;
   void operator()(web::socket::Client::Binary const &) override;
-
- private:
-  void operator()(ConnectionStatus, std::string_view const &reason = {});
-
-  void subscribe(std::span<Symbol const> const &symbols);
-  void subscribe(std::string_view const &topic, std::span<Symbol const> const &symbols);
-  void subscribe(std::string_view const &topic, std::span<Symbol const> const &symbols, std::chrono::minutes interval);
-
-  void send_ping(std::chrono::nanoseconds now);
-
-  void parse(std::string_view const &message);
 
   // json::Parser::Handler
 
@@ -98,38 +87,47 @@ struct MarketData final : public web::socket::Client::Handler, public json::Pars
   void operator()(Trace<json::Order> const &) override;
   void operator()(Trace<json::Execution> const &) override;
 
+ private:
+  void operator()(ConnectionStatus, std::string_view const &reason = {});
+
+  void send_login();
+
+  void subscribe();
+
+  void subscribe(std::string_view const &topic);
+
+  void parse(std::string_view const &message);
+
   Handler &handler_;
   // config
   uint16_t const stream_id_;
   std::string const name_;
-  size_t const index_;
-  std::chrono::nanoseconds const ping_frequency_;
-  bool const spot_;
-  size_t const mbp_depth_;
-  std::string const mbp_topic_;
   // web socket
   std::unique_ptr<web::socket::Client> const connection_;
   // buffers
   core::json::BufferStack decode_buffer_;
-  // session
-  uint64_t request_id_ = {};
   // metrics
   struct {
     utils::metrics::Counter disconnect;
   } counter_;
   struct {
-    utils::metrics::Profile parse, order_book, trade, tickers, kline;
+    utils::metrics::Profile parse, auth, wallet, order, execution, position;
   } profile_;
   struct {
     utils::metrics::Latency ping, heartbeat;
   } latency_;
+  // account
+  Account &account_;
   // cache
   Shared &shared_;
   // state
   ConnectionStatus connection_status_ = {};
-  // ping
+  std::chrono::nanoseconds logon_timeout_ = {};
   std::chrono::nanoseconds next_ping_ = {};
+  // ...
+  utils::unordered_set<std::string> symbols_;
 };
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

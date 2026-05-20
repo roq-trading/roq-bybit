@@ -6,8 +6,10 @@
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
 using Settings = flags::Settings;
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

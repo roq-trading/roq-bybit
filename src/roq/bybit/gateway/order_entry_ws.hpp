@@ -21,15 +21,16 @@
 
 #include "roq/server.hpp"
 
-#include "roq/bybit/account.hpp"
-#include "roq/bybit/shared.hpp"
+#include "roq/bybit/gateway/account.hpp"
+#include "roq/bybit/gateway/shared.hpp"
 
-#include "roq/bybit/order_entry.hpp"
+#include "roq/bybit/gateway/order_entry.hpp"
 
 #include "roq/bybit/json/parser_2.hpp"
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
 struct OrderEntryWS final : public OrderEntry, public web::socket::Client::Handler, json::Parser2::Handler {
   OrderEntryWS(OrderEntry::Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
@@ -118,5 +119,6 @@ struct OrderEntryWS final : public OrderEntry, public web::socket::Client::Handl
   std::string encode_buffer_;
 };
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

@@ -10,6 +10,7 @@
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
 struct OrderEntry {
   struct Response final {
@@ -57,5 +58,6 @@ struct OrderEntry {
   virtual uint16_t operator()(Event<CancelAllOrders> const &, std::string_view const &request_id) = 0;
 };
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

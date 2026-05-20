@@ -20,9 +20,9 @@
 
 #include "roq/server.hpp"
 
-#include "roq/bybit/account.hpp"
-#include "roq/bybit/order_entry.hpp"
-#include "roq/bybit/shared.hpp"
+#include "roq/bybit/gateway/account.hpp"
+#include "roq/bybit/gateway/order_entry.hpp"
+#include "roq/bybit/gateway/shared.hpp"
 
 #include "roq/bybit/json/account_info_ack.hpp"
 #include "roq/bybit/json/executions_ack.hpp"
@@ -37,6 +37,7 @@
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
 struct OrderEntryREST final : public OrderEntry, public web::rest::Client::Handler {
   OrderEntryREST(OrderEntry::Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
@@ -203,5 +204,6 @@ struct OrderEntryREST final : public OrderEntry, public web::rest::Client::Handl
   std::string encode_buffer_;
 };
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

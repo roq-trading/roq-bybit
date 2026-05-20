@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "roq/compat.hpp"
+
 #include <memory>
 #include <string>
 #include <utility>
@@ -13,23 +15,28 @@
 
 #include "roq/io/context.hpp"
 
-#include "roq/bybit/account.hpp"
-#include "roq/bybit/config.hpp"
-#include "roq/bybit/settings.hpp"
-#include "roq/bybit/shared.hpp"
+#include "roq/bybit/gateway/account.hpp"
+#include "roq/bybit/gateway/config.hpp"
+#include "roq/bybit/gateway/settings.hpp"
+#include "roq/bybit/gateway/shared.hpp"
 
-#include "roq/bybit/drop_copy.hpp"
-#include "roq/bybit/market_data.hpp"
-#include "roq/bybit/order_entry.hpp"
-#include "roq/bybit/rest.hpp"
+#include "roq/bybit/gateway/drop_copy.hpp"
+#include "roq/bybit/gateway/market_data.hpp"
+#include "roq/bybit/gateway/order_entry.hpp"
+#include "roq/bybit/gateway/rest.hpp"
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
-struct Gateway final : public server::Handler, public Rest::Handler, public OrderEntry::Handler, public DropCopy::Handler, public MarketData::Handler {
-  Gateway(server::Dispatcher &, Settings const &, Config const &, io::Context &);
+struct Controller final : public server::Handler, public Rest::Handler, public OrderEntry::Handler, public DropCopy::Handler, public MarketData::Handler {
+  ROQ_PUBLIC static std::unique_ptr<server::Handler> create(server::Dispatcher &, Settings const &, Config const &, io::Context &);
 
-  Gateway(Gateway const &) = delete;
+  Controller(server::Dispatcher &, Settings const &, Config const &, io::Context &);
+
+  Controller(Controller const &) = delete;
+
+  virtual ~Controller() = default;
 
  protected:
   // server::Handler
@@ -120,5 +127,6 @@ struct Gateway final : public server::Handler, public Rest::Handler, public Orde
   std::vector<MBPUpdate> bids_, asks_;
 };
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

@@ -1,6 +1,6 @@
 /* Copyright (c) 2017-2026, Hans Erik Thrane */
 
-#include "roq/bybit/api.hpp"
+#include "roq/bybit/gateway/api.hpp"
 
 #include "roq/exceptions.hpp"
 
@@ -10,6 +10,7 @@ using namespace std::literals;
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
 // === HELPERS ===
 
@@ -68,5 +69,6 @@ tools::API API::parse_api(std::string_view const &api) {
   return *result;
 }
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

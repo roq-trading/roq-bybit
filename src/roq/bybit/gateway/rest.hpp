@@ -22,13 +22,14 @@
 
 #include "roq/core/limit/rate_limiter.hpp"
 
-#include "roq/bybit/shared.hpp"
+#include "roq/bybit/gateway/shared.hpp"
 
 #include "roq/bybit/json/instruments_info_ack.hpp"
 #include "roq/bybit/json/kline_ack.hpp"
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
 struct Rest final : public web::rest::Client::Handler {
   struct SymbolsUpdate final {
@@ -120,5 +121,6 @@ struct Rest final : public web::rest::Client::Handler {
   core::limit::RateLimiter rate_limiter;
 };
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq

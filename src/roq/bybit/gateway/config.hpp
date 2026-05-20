@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "roq/compat.hpp"
+
 #include <fmt/ranges.h>
 
 #include <string>
@@ -14,12 +16,13 @@
 #include "roq/server/config/dispatcher.hpp"
 #include "roq/server/config/reader.hpp"
 
-#include "roq/bybit/settings.hpp"
+#include "roq/bybit/gateway/settings.hpp"
 
 namespace roq {
 namespace bybit {
+namespace gateway {
 
-struct Config final : public server::config::Dispatcher, public server::config::Reader::Handler {
+struct ROQ_PUBLIC Config final : public server::config::Dispatcher, public server::config::Reader::Handler {
   explicit Config(Settings const &);
 
   Config(Config const &) = delete;
@@ -56,13 +59,14 @@ struct Config final : public server::config::Dispatcher, public server::config::
   server::config::RateLimits rate_limits;
 };
 
+}  // namespace gateway
 }  // namespace bybit
 }  // namespace roq
 
 template <>
-struct fmt::formatter<roq::bybit::Config> {
+struct fmt::formatter<roq::bybit::gateway::Config> {
   constexpr auto parse(format_parse_context &context) { return std::begin(context); }
-  auto format(roq::bybit::Config const &value, format_context &context) const {
+  auto format(roq::bybit::gateway::Config const &value, format_context &context) const {
     using namespace std::literals;
     return fmt::format_to(
         context.out(),
