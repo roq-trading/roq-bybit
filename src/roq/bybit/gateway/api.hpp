@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "roq/compat.hpp"
+
 #include <string_view>
 
 #include "roq/bybit/gateway/settings.hpp"
@@ -14,7 +16,7 @@ namespace roq {
 namespace bybit {
 namespace gateway {
 
-struct API final {
+struct ROQ_PUBLIC API final {
   struct {
     std::string_view instruments_info;
     std::string_view kline;
