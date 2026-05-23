@@ -4,6 +4,10 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Fixed
+
+* JSON parser failed to process escaped unicode characters (#594)
+
 ## 1.1.4 &ndash; 2026-04-20
 
 ## 1.1.3 &ndash; 2026-03-12
