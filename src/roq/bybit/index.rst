@@ -14,8 +14,8 @@
 .. |footnote-3| unicode:: U+2778
 
 
-roq-bybit
-=========
+`roq-bybit <https://github.com/roq-trading/roq-bybit/>`__
+=========================================================
 
 .. tab:: Unstable
 
@@ -504,6 +504,13 @@ Common
 * :ref:`Using Flags <abseil-cpp>`
 * :ref:`Gateway Flags <gateway-flags>`
 * :ref:`Gateway Config <gateway-config>`
+
+
+GitHub
+~~~~~~
+
+* `roq-bybit <https://github.com/roq-trading/roq-bybit/>`__
+
 
 Exchange
 ~~~~~~~~
