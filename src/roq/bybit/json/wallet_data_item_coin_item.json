@@ -81,6 +81,10 @@
     {
       "name": "spotBorrow",
       "type": "std/double"
+    },
+    {
+      "name": "colRes",
+      "type": "std/int32"
     }
   ]
 }
