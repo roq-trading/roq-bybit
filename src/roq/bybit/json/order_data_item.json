@@ -204,6 +204,14 @@
     {
       "name": "parentOrderLinkId",
       "type": "std/string_view"
+    },
+    {
+      "name": "rpiMatchedQty",
+      "type": "std/double"
+    },
+    {
+      "name": "rpiTakerAccess",
+      "type": "std/bool"
     }
   ]
 }
