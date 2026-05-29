@@ -22,6 +22,9 @@
     },
     {
       "name": "BlockTrade"
+    },
+    {
+      "name": "MovePosition"
     }
   ]
 }

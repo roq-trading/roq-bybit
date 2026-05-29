@@ -149,6 +149,8 @@ constexpr Helper<bybit::json::OrderType>::operator std::optional<roq::OrderType>
       return roq::OrderType::MARKET;
     case LIMIT:
       return roq::OrderType::LIMIT;
+    case BLOCK_TRADE_LIMIT:
+      return roq::OrderType::LIMIT;
   }
   return {};
 }
