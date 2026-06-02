@@ -230,6 +230,14 @@
     {
       "name": "basisRateYear",
       "type": "std/double"
+    },
+    {
+      "name": "singleOpenInterest",
+      "type": "std/double"
+    },
+    {
+      "name": "singleOpenInterestValue",
+      "type": "std/double"
     }
   ]
 }

@@ -9,6 +9,10 @@
     {
       "name": "orderLinkId",
       "type": "std/string_view"
+    },
+    {
+      "name": "config",
+      "comment": "obj"
     }
   ]
 }
