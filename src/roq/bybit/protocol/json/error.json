@@ -1,0 +1,24 @@
+{
+  "name": "roq/bybit/protocol/json/Error",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "retCode",
+      "type": "std/int32"
+    },
+    {
+      "name": "retMsg",
+      "type": "std/string_view"
+    },
+    {
+      "name": "result"
+    },
+    {
+      "name": "retExtInfo"
+    },
+    {
+      "name": "time",
+      "type": "std/milliseconds"
+    }
+  ]
+}

@@ -4,7 +4,7 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/bybit/json/orders_ack.hpp"
+#include "roq/bybit/protocol/json/orders_ack.hpp"
 
 using namespace roq;
 using namespace roq::bybit;
@@ -12,7 +12,7 @@ using namespace roq::bybit;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-using value_type = json::OrdersAck;
+using value_type = protocol::json::OrdersAck;
 
 TEST_CASE("empty", "[json_orders_ack]") {
   auto message = R"({)"

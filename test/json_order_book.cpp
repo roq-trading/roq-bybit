@@ -10,7 +10,7 @@ using namespace roq::bybit;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-using value_type = json::OrderBook;
+using value_type = protocol::json::OrderBook;
 
 TEST_CASE("simple_1", "[json_order_book]") {
   auto message = R"({)"

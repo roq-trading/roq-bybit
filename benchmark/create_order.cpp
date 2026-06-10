@@ -2,7 +2,7 @@
 
 #include <benchmark/benchmark.h>
 
-#include "roq/bybit/json/encoder.hpp"
+#include "roq/bybit/protocol/json/encoder.hpp"
 
 #include "roq/bybit/tools/crypto.hpp"
 
@@ -66,7 +66,7 @@ void BM_create_order(benchmark::State &state) {
   server::oms::Order order;
   auto ref_data = create_ref_data();
   for (auto _ : state) {
-    json::Encoder::place_order(buffer, CREATE_ORDER, order, ref_data, REQUEST_ID, json::Category::SPOT);
+    protocol::json::Encoder::place_order(buffer, CREATE_ORDER, order, ref_data, REQUEST_ID, protocol::json::Category::SPOT);
   }
 }
 
@@ -77,7 +77,7 @@ void BM_create_order_and_sign(benchmark::State &state) {
   tools::Crypto crypto{LOGIN, SECRET, 1s};
   auto ref_data = create_ref_data();
   for (auto _ : state) {
-    auto body = json::Encoder::place_order(buffer, CREATE_ORDER, ORDER, ref_data, REQUEST_ID, json::Category::SPOT);
+    auto body = protocol::json::Encoder::place_order(buffer, CREATE_ORDER, ORDER, ref_data, REQUEST_ID, protocol::json::Category::SPOT);
     crypto.create_headers_v2(PATH, {}, body, 1671026168138ms);
   }
 }

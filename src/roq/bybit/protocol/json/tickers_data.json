@@ -1,0 +1,243 @@
+{
+  "name": "roq/bybit/protocol/json/TickersData",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "symbol",
+      "type": "std/string_view",
+      "comment": "SLIO"
+    },
+    {
+      "name": "tickDirection",
+      "type": "roq/bybit/protocol/json/TickDirection",
+      "comment": ".LI."
+    },
+    {
+      "name": "lastPrice",
+      "type": "std/double",
+      "comment": "SLIO"
+    },
+    {
+      "name": "highPrice24h",
+      "type": "std/double",
+      "comment": "SLIO"
+    },
+    {
+      "name": "lowPrice24h",
+      "type": "std/double",
+      "comment": "SLIO"
+    },
+    {
+      "name": "prevPrice24h",
+      "type": "std/double",
+      "comment": "SLI."
+    },
+    {
+      "name": "volume24h",
+      "type": "std/double",
+      "comment": "SLI."
+    },
+    {
+      "name": "turnover24h",
+      "type": "std/double",
+      "comment": "SLIO"
+    },
+    {
+      "name": "price24hPcnt",
+      "type": "std/double",
+      "comment": "SLI."
+    },
+    {
+      "name": "usdIndexPrice",
+      "type": "std/double",
+      "comment": "S..."
+    },
+    {
+      "name": "prevPrice1h",
+      "type": "std/double",
+      "comment": ".LI."
+    },
+    {
+      "name": "markPrice",
+      "type": "std/double",
+      "comment": ".LIO"
+    },
+    {
+      "name": "markPriceIv",
+      "type": "std/double",
+      "comment": "...O"
+    },
+    {
+      "name": "indexPrice",
+      "type": "std/double",
+      "comment": ".LIO"
+    },
+    {
+      "name": "underlyingPrice",
+      "type": "std/double",
+      "comment": "...O"
+    },
+    {
+      "name": "openInterest",
+      "type": "std/double",
+      "comment": ".LIO"
+    },
+    {
+      "name": "openInterestValue",
+      "type": "std/double",
+      "comment": ".LI."
+    },
+    {
+      "name": "nextFundingTime",
+      "type": "std/milliseconds",
+      "comment": ".LI."
+    },
+    {
+      "name": "fundingRate",
+      "type": "std/double",
+      "comment": ".LI."
+    },
+    {
+      "name": "bid1Price",
+      "type": "std/double",
+      "comment": ".LI."
+    },
+    {
+      "name": "bid1Size",
+      "type": "std/double",
+      "comment": ".LI."
+    },
+    {
+      "name": "ask1Price",
+      "type": "std/double",
+      "comment": ".LI."
+    },
+    {
+      "name": "ask1Size",
+      "type": "std/double",
+      "comment": ".LI."
+    },
+    {
+      "name": "deliveryTime",
+      "type": "std/string_view",
+      "comment": "..I."
+    },
+    {
+      "name": "basisRate",
+      "type": "std/double",
+      "comment": "..I."
+    },
+    {
+      "name": "deliveryFeeRate",
+      "type": "std/double",
+      "comment": "..I."
+    },
+    {
+      "name": "predictedDeliveryPrice",
+      "type": "std/double",
+      "comment": "..IO"
+    },
+    {
+      "name": "basis",
+      "type": "std/double",
+      "comment": "..I."
+    },
+    {
+      "name": "bidPrice",
+      "type": "std/double",
+      "comment": "...O"
+    },
+    {
+      "name": "bidSize",
+      "type": "std/double",
+      "comment": "...O"
+    },
+    {
+      "name": "bidIv",
+      "type": "std/double",
+      "comment": "...O"
+    },
+    {
+      "name": "askPrice",
+      "type": "std/double",
+      "comment": "...O"
+    },
+    {
+      "name": "askSize",
+      "type": "std/double",
+      "comment": "...O"
+    },
+    {
+      "name": "askIv",
+      "type": "std/double",
+      "comment": "...O"
+    },
+    {
+      "name": "totalVolume",
+      "type": "std/double",
+      "comment": "...O"
+    },
+    {
+      "name": "totalTurnover",
+      "type": "std/double",
+      "comment": "...O"
+    },
+    {
+      "name": "delta",
+      "type": "std/double",
+      "comment": "...O"
+    },
+    {
+      "name": "gamma",
+      "type": "std/double",
+      "comment": "...O"
+    },
+    {
+      "name": "vega",
+      "type": "std/double",
+      "comment": "...O"
+    },
+    {
+      "name": "theta",
+      "type": "std/double",
+      "comment": "...O"
+    },
+    {
+      "name": "change24h",
+      "type": "std/double",
+      "comment": "...O"
+    },
+    {
+      "name": "preOpenPrice",
+      "type": "std/double"
+    },
+    {
+      "name": "preQty",
+      "type": "std/double"
+    },
+    {
+      "name": "curPreListingPhase",
+      "type": "std/string_view"
+    },
+    {
+      "name": "fundingIntervalHour",
+      "type": "std/int32"
+    },
+    {
+      "name": "fundingCap",
+      "type": "std/double"
+    },
+    {
+      "name": "basisRateYear",
+      "type": "std/double"
+    },
+    {
+      "name": "singleOpenInterest",
+      "type": "std/double"
+    },
+    {
+      "name": "singleOpenInterestValue",
+      "type": "std/double"
+    }
+  ]
+}

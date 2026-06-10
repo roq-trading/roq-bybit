@@ -1,0 +1,33 @@
+{
+  "name": "roq/bybit/protocol/json/Tickers",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "topic",
+      "type": "std/string_view"
+    },
+    {
+      "name": "type",
+      "type": "roq/bybit/protocol/json/EventType"
+    },
+    {
+      "raw": "cs",
+      "name": "cross_sequence",
+      "type": "std/uint64"
+    },
+    {
+      "raw": "ts",
+      "name": "timestamp",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "data",
+      "type": "roq/bybit/protocol/json/TickersData"
+    },
+    {
+      "name": "id",
+      "type": "std/string_view",
+      "comment": "...O"
+    }
+  ]
+}

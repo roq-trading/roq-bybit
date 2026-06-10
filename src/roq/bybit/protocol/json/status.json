@@ -1,0 +1,21 @@
+{
+  "name": "roq/bybit/protocol/json/Status",
+  "type": "enum",
+  "values": [
+    {
+      "name": "PreLaunch"
+    },
+    {
+      "name": "Trading"
+    },
+    {
+      "name": "Settling"
+    },
+    {
+      "name": "Delivering"
+    },
+    {
+      "name": "Closed"
+    }
+  ]
+}

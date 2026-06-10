@@ -10,7 +10,7 @@ using namespace roq::bybit;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-using value_type = json::Auth;
+using value_type = protocol::json::Auth;
 
 TEST_CASE("success", "[json_auth]") {
   auto message = R"({)"

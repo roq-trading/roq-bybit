@@ -1,0 +1,33 @@
+{
+  "name": "roq/bybit/protocol/json/OrderBookData",
+  "type": "dictionary",
+  "values": [
+    {
+      "raw": "s",
+      "name": "symbol",
+      "type": "std/string_view"
+    },
+    {
+      "raw": "b",
+      "name": "bids",
+      "type": "roq/bybit/protocol/json/OrderBookLevel",
+      "array": "std/span"
+    },
+    {
+      "raw": "a",
+      "name": "asks",
+      "type": "roq/bybit/protocol/json/OrderBookLevel",
+      "array": "std/span"
+    },
+    {
+      "raw": "u",
+      "name": "update_id",
+      "type": "std/uint64"
+    },
+    {
+      "raw": "seq",
+      "name": "cross_sequence",
+      "type": "std/uint64"
+    }
+  ]
+}

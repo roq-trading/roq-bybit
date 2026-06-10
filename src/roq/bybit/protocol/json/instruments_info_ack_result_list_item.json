@@ -1,0 +1,143 @@
+{
+  "name": "roq/bybit/protocol/json/InstrumentsInfoAckResultListItem",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "symbol",
+      "type": "std/string_view",
+      "comment": "SLIO"
+    },
+    {
+      "name": "optionsType",
+      "type": "roq/bybit/protocol/json/OptionsType",
+      "comment": "...O"
+    },
+    {
+      "name": "contractType",
+      "type": "roq/bybit/protocol/json/ContractType",
+      "comment": ".LI."
+    },
+    {
+      "name": "baseCoin",
+      "type": "std/string_view",
+      "comment": "SLIO"
+    },
+    {
+      "name": "quoteCoin",
+      "type": "std/string_view",
+      "comment": "SLIO"
+    },
+    {
+      "name": "launchTime",
+      "type": "std/milliseconds",
+      "comment": ".LIO"
+    },
+    {
+      "name": "deliveryTime",
+      "type": "std/milliseconds",
+      "comment": ".LIO"
+    },
+    {
+      "name": "deliveryFeeRate",
+      "type": "std/double",
+      "comment": ".LIO"
+    },
+    {
+      "name": "priceScale",
+      "type": "std/double",
+      "comment": ".LI."
+    },
+    {
+      "name": "innovation",
+      "type": "std/string_view",
+      "comment": "S..."
+    },
+    {
+      "name": "status",
+      "type": "roq/bybit/protocol/json/Status",
+      "comment": "SLIO"
+    },
+    {
+      "name": "leverageFilter",
+      "type": "roq/bybit/protocol/json/LeverageFilter",
+      "comment": ".LI."
+    },
+    {
+      "name": "lotSizeFilter",
+      "type": "roq/bybit/protocol/json/LotSizeFilter",
+      "comment": "SLIO"
+    },
+    {
+      "name": "priceFilter",
+      "type": "roq/bybit/protocol/json/PriceFilter",
+      "comment": "SLIO"
+    },
+    {
+      "name": "unifiedMarginTrade",
+      "type": "std/bool",
+      "comment": ".LI."
+    },
+    {
+      "name": "fundingInterval",
+      "type": "std/int32",
+      "comment": ".LI. minutes"
+    },
+    {
+      "name": "settleCoin",
+      "type": "std/string_view",
+      "comment": ".LIO"
+    },
+    {
+      "name": "marginTrading",
+      "type": "std/string_view",
+      "comment": "????"
+    },
+    {
+      "name": "riskParameters",
+      "comment": "????"
+    },
+    {
+      "name": "copyTrading",
+      "type": "std/string_view"
+    },
+    {
+      "name": "upperFundingRate",
+      "type": "std/string_view"
+    },
+    {
+      "name": "lowerFundingRate",
+      "type": "std/string_view"
+    },
+    {
+      "name": "isPreListing",
+      "type": "std/bool"
+    },
+    {
+      "name": "preListingInfo"
+    },
+    {
+      "name": "stTag",
+      "type": "std/string_view"
+    },
+    {
+      "name": "symbolType",
+      "type": "std/string_view"
+    },
+    {
+      "name": "displayName",
+      "type": "std/string_view"
+    },
+    {
+      "name": "forbidUplWithdrawal",
+      "type": "std/bool"
+    },
+    {
+      "name": "xstockMultiplier",
+      "type": "std/double"
+    },
+    {
+      "name": "symbolId",
+      "type": "std/int32"
+    }
+  ]
+}

@@ -4,7 +4,7 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/bybit/json/cancel_all_orders_ack.hpp"
+#include "roq/bybit/protocol/json/cancel_all_orders_ack.hpp"
 
 using namespace roq;
 using namespace roq::bybit;
@@ -12,7 +12,7 @@ using namespace roq::bybit;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-using value_type = json::CancelAllOrdersAck;
+using value_type = protocol::json::CancelAllOrdersAck;
 
 TEST_CASE("response", "[json_cancel_all_orders_ack]") {
   auto message = R"({)"

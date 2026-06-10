@@ -4,7 +4,7 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/bybit/json/place_order_ack.hpp"
+#include "roq/bybit/protocol/json/place_order_ack.hpp"
 
 using namespace roq;
 using namespace roq::bybit;
@@ -12,7 +12,7 @@ using namespace roq::bybit;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-using value_type = json::PlaceOrderAck;
+using value_type = protocol::json::PlaceOrderAck;
 
 TEST_CASE("response", "[json_place_order_ack]") {
   auto message = R"({)"

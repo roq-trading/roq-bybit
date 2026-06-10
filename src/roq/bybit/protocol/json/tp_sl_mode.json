@@ -1,0 +1,12 @@
+{
+  "name": "roq/bybit/protocol/json/TpSlMode",
+  "type": "enum",
+  "values": [
+    {
+      "name": "UNKNOWN"
+    },
+    {
+      "name": "Full"
+    }
+  ]
+}

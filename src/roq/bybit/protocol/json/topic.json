@@ -1,0 +1,30 @@
+{
+  "name": "roq/bybit/protocol/json/Topic",
+  "type": "enum",
+  "values": [
+    {
+      "name": "orderbook"
+    },
+    {
+      "name": "publicTrade"
+    },
+    {
+      "name": "tickers"
+    },
+    {
+      "name": "kline"
+    },
+    {
+      "name": "wallet"
+    },
+    {
+      "name": "order"
+    },
+    {
+      "name": "position"
+    },
+    {
+      "name": "execution"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "roq/bybit/protocol/json/CancelAllOrdersAckResult",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "success",
+      "type": "std/int32",
+      "comment": "S..."
+    },
+    {
+      "name": "list",
+      "type": "roq/bybit/protocol/json/CancelAllOrdersAckResultListItem",
+      "array": "std/span",
+      "comment": ".LIO"
+    }
+  ]
+}

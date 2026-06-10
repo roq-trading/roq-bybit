@@ -24,8 +24,8 @@
 
 #include "roq/bybit/gateway/shared.hpp"
 
-#include "roq/bybit/json/instruments_info_ack.hpp"
-#include "roq/bybit/json/kline_ack.hpp"
+#include "roq/bybit/protocol/json/instruments_info_ack.hpp"
+#include "roq/bybit/protocol/json/kline_ack.hpp"
 
 namespace roq {
 namespace bybit {
@@ -79,13 +79,13 @@ struct Rest final : public web::rest::Client::Handler {
 
   void get_instruments_info();
   void get_instruments_info_ack(Trace<web::rest::Response> const &, uint32_t sequence);
-  void operator()(Trace<json::InstrumentsInfoAck> const &);
+  void operator()(Trace<protocol::json::InstrumentsInfoAck> const &);
 
   // kline
 
   void get_kline(std::string_view const &symbol);
   void get_kline_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
-  void operator()(Trace<json::KlineAck> const &);
+  void operator()(Trace<protocol::json::KlineAck> const &);
 
   // helpers
 

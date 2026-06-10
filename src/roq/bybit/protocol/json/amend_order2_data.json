@@ -1,0 +1,14 @@
+{
+  "name": "roq/bybit/protocol/json/AmendOrder2Data",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "orderId",
+      "type": "std/string_view"
+    },
+    {
+      "name": "orderLinkId",
+      "type": "std/string_view"
+    }
+  ]
+}

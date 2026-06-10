@@ -10,7 +10,7 @@ using namespace roq::bybit;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-using value_type = json::PublicTrade;
+using value_type = protocol::json::PublicTrade;
 
 TEST_CASE("simple", "[json_public_trade]") {
   auto message = R"({)"

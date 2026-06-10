@@ -18,8 +18,8 @@
 
 #include "roq/server/oms/exceptions.hpp"
 
-#include "roq/bybit/json/encoder.hpp"
-#include "roq/bybit/json/utils.hpp"
+#include "roq/bybit/protocol/json/encoder.hpp"
+#include "roq/bybit/protocol/json/utils.hpp"
 
 using namespace std::literals;
 using namespace std::chrono_literals;
@@ -144,7 +144,7 @@ uint16_t OrderEntryWS::operator()(
     }
     auto &[message_info, create_order] = event;
     auto now_utc = clock::get_realtime<std::chrono::milliseconds>();
-    auto message = json::Encoder::place_order_ws(
+    auto message = protocol::json::Encoder::place_order_ws(
         encode_buffer_, create_order, order, ref_data, request_id, shared_.api.category, now_utc, shared_.settings.rest.recv_window);
     log::debug("{}"sv, message);
     (*connection_).send_text(message);
@@ -164,7 +164,7 @@ uint16_t OrderEntryWS::operator()(
     }
     auto &[message_info, modify_order] = event;
     auto now_utc = clock::get_realtime<std::chrono::milliseconds>();
-    auto message = json::Encoder::amend_order_ws(
+    auto message = protocol::json::Encoder::amend_order_ws(
         encode_buffer_, modify_order, order, ref_data, request_id, previous_request_id, shared_.api.category, now_utc, shared_.settings.rest.recv_window);
     log::debug("{}"sv, message);
     (*connection_).send_text(message);
@@ -184,7 +184,7 @@ uint16_t OrderEntryWS::operator()(
     }
     auto &[message_info, cancel_order] = event;
     auto now_utc = clock::get_realtime<std::chrono::milliseconds>();
-    auto message = json::Encoder::cancel_order_ws(
+    auto message = protocol::json::Encoder::cancel_order_ws(
         encode_buffer_, cancel_order, order, ref_data, request_id, previous_request_id, shared_.api.category, now_utc, shared_.settings.rest.recv_window);
     log::debug("{}"sv, message);
     (*connection_).send_text(message);
@@ -288,7 +288,7 @@ void OrderEntryWS::parse(std::string_view const &message) {
     auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
     try {
       TraceInfo trace_info;
-      if (!json::Parser2::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
+      if (!protocol::json::Parser2::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
         log_message();
       }
     } catch (...) {
@@ -298,14 +298,14 @@ void OrderEntryWS::parse(std::string_view const &message) {
   });
 }
 
-// json::Parser2::Handler
+// protocol::json::Parser2::Handler
 
-void OrderEntryWS::operator()(Trace<json::Ping> const &event) {
+void OrderEntryWS::operator()(Trace<protocol::json::Ping> const &event) {
   auto &[trace_info, ping] = event;
   log::info<4>("event={{ping={}, trace_info={}}}"sv, ping, trace_info);
 }
 
-void OrderEntryWS::operator()(Trace<json::Auth2> const &event) {
+void OrderEntryWS::operator()(Trace<protocol::json::Auth2> const &event) {
   profile_.auth([&]() {
     auto &[trace_info, auth] = event;
     log::info<4>("event={{auth={}, trace_info={}}}"sv, auth, trace_info);
@@ -317,16 +317,16 @@ void OrderEntryWS::operator()(Trace<json::Auth2> const &event) {
   });
 }
 
-void OrderEntryWS::operator()(Trace<json::Error> const &event) {
+void OrderEntryWS::operator()(Trace<protocol::json::Error> const &event) {
   auto &[trace_info, error] = event;
   log::info<4>("event={{error={}, trace_info={}}}"sv, error, trace_info);
   log::fatal("error={}"sv, error);
 }
 
-void OrderEntryWS::operator()(Trace<json::PlaceOrder2> const &event) {
+void OrderEntryWS::operator()(Trace<protocol::json::PlaceOrder2> const &event) {
   auto &[trace_info, place_order] = event;
   if (place_order.ret_code != 0) {
-    auto error = json::map_error(place_order.ret_code);
+    auto error = protocol::json::map_error(place_order.ret_code);
     auto response = server::oms::Response{
         .request_type = RequestType::CREATE_ORDER,
         .origin = Origin::EXCHANGE,
@@ -346,10 +346,10 @@ void OrderEntryWS::operator()(Trace<json::PlaceOrder2> const &event) {
   }
 }
 
-void OrderEntryWS::operator()(Trace<json::AmendOrder2> const &event) {
+void OrderEntryWS::operator()(Trace<protocol::json::AmendOrder2> const &event) {
   auto &[trace_info, amend_order] = event;
   if (amend_order.ret_code != 0) {
-    auto error = json::map_error(amend_order.ret_code);
+    auto error = protocol::json::map_error(amend_order.ret_code);
     auto response = server::oms::Response{
         .request_type = RequestType::MODIFY_ORDER,
         .origin = Origin::EXCHANGE,
@@ -369,10 +369,10 @@ void OrderEntryWS::operator()(Trace<json::AmendOrder2> const &event) {
   }
 }
 
-void OrderEntryWS::operator()(Trace<json::CancelOrder2> const &event) {
+void OrderEntryWS::operator()(Trace<protocol::json::CancelOrder2> const &event) {
   auto &[trace_info, cancel_order] = event;
   if (cancel_order.ret_code != 0) {
-    auto error = json::map_error(cancel_order.ret_code);
+    auto error = protocol::json::map_error(cancel_order.ret_code);
     auto response = server::oms::Response{
         .request_type = RequestType::CANCEL_ORDER,
         .origin = Origin::EXCHANGE,

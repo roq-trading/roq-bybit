@@ -4,14 +4,14 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/bybit/json/wallet_balance_ack.hpp"
+#include "roq/bybit/protocol/json/wallet_balance_ack.hpp"
 
 using namespace roq;
 using namespace roq::bybit;
 
 using namespace std::literals;
 
-using value_type = json::WalletBalanceAck;
+using value_type = protocol::json::WalletBalanceAck;
 
 TEST_CASE("simple", "[json_wallet_balance_ack]") {
   auto message = R"({)"

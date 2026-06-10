@@ -1,0 +1,19 @@
+{
+  "name": "roq/bybit/protocol/json/ExecutionsAckResult",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "list",
+      "type": "roq/bybit/protocol/json/ExecutionsAckResultListItem",
+      "array": "std/span"
+    },
+    {
+      "name": "nextPageCursor",
+      "type": "std/string_view"
+    },
+    {
+      "name": "category",
+      "type": "roq/bybit/protocol/json/Category"
+    }
+  ]
+}

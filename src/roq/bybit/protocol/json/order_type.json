@@ -1,0 +1,19 @@
+{
+  "name": "roq/bybit/protocol/json/OrderType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "UNKNOWN"
+    },
+    {
+      "name": "Market"
+    },
+    {
+      "name": "Limit"
+    },
+    {
+      "raw": "Block trade-Limit",
+      "name": "BLOCK_TRADE_LIMIT"
+    }
+  ]
+}

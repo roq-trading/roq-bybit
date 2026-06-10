@@ -9,7 +9,7 @@ using namespace roq::bybit;
 
 using namespace std::literals;
 
-using value_type = json::Wallet;
+using value_type = protocol::json::Wallet;
 
 TEST_CASE("parser", "[json_wallet]") {
   auto message = R"({)"
@@ -54,7 +54,7 @@ TEST_CASE("parser", "[json_wallet]") {
     CHECK(obj.topic == "wallet"sv);
     CHECK(obj.creation_time == 1682339173118ms);
     REQUIRE(std::size(obj.data) == 1);
-    CHECK(obj.data[0].account_type == json::AccountType::SPOT);
+    CHECK(obj.data[0].account_type == protocol::json::AccountType::SPOT);
     REQUIRE(std::size(obj.data[0].coin) == 1);
     CHECK(obj.data[0].coin[0].coin == "USDT"sv);
   };
@@ -104,7 +104,7 @@ TEST_CASE("parser_2", "[json_wallet]") {
     CHECK(obj.topic == "wallet"sv);
     CHECK(obj.creation_time == 1682341631264ms);
     REQUIRE(std::size(obj.data) == 1);
-    CHECK(obj.data[0].account_type == json::AccountType::SPOT);
+    CHECK(obj.data[0].account_type == protocol::json::AccountType::SPOT);
     REQUIRE(std::size(obj.data[0].coin) == 1);
     CHECK(obj.data[0].coin[0].coin == "USDT"sv);
   };

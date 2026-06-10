@@ -1,0 +1,15 @@
+{
+  "name": "roq/bybit/protocol/json/Side",
+  "type": "enum",
+  "values": [
+    {
+      "name": "None"
+    },
+    {
+      "name": "Buy"
+    },
+    {
+      "name": "Sell"
+    }
+  ]
+}

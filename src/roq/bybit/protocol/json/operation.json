@@ -1,0 +1,30 @@
+{
+  "name": "roq/bybit/protocol/json/Operation",
+  "type": "enum",
+  "values": [
+    {
+      "name": "auth"
+    },
+    {
+      "name": "ping"
+    },
+    {
+      "name": "pong"
+    },
+    {
+      "name": "subscribe"
+    },
+    {
+      "raw": "order.create",
+      "name": "order_create"
+    },
+    {
+      "raw": "order.amend",
+      "name": "order_amend"
+    },
+    {
+      "raw": "order.cancel",
+      "name": "order_cancel"
+    }
+  ]
+}

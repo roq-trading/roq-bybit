@@ -10,7 +10,7 @@ using namespace roq::bybit;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-using value_type = json::Ping;
+using value_type = protocol::json::Ping;
 
 TEST_CASE("simple", "[json_ping]") {
   auto message = R"({)"

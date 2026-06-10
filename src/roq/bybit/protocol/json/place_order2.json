@@ -1,0 +1,37 @@
+{
+  "name": "roq/bybit/protocol/json/PlaceOrder2",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "reqId",
+      "type": "std/string_view"
+    },
+    {
+      "name": "retCode",
+      "type": "std/int32"
+    },
+    {
+      "name": "retMsg",
+      "type": "std/string_view"
+    },
+    {
+      "name": "op",
+      "type": "roq/bybit/protocol/json/Operation"
+    },
+    {
+      "name": "data",
+      "type": "roq/bybit/protocol/json/PlaceOrder2Data"
+    },
+    {
+      "name": "retExtInfo"
+    },
+    {
+      "name": "header",
+      "type": "roq/bybit/protocol/json/Header2"
+    },
+    {
+      "name": "connId",
+      "type": "std/string_view"
+    }
+  ]
+}

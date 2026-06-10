@@ -1,0 +1,24 @@
+{
+  "name": "roq/bybit/protocol/json/AccountType",
+  "type": "enum",
+  "values": [
+    {
+      "name": "CONTRACT"
+    },
+    {
+      "name": "SPOT"
+    },
+    {
+      "name": "INVESTMENT"
+    },
+    {
+      "name": "OPTION"
+    },
+    {
+      "name": "UNIFIED"
+    },
+    {
+      "name": "FUND"
+    }
+  ]
+}

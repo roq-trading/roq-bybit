@@ -1,0 +1,39 @@
+{
+  "name": "roq/bybit/protocol/json/OrderStatus",
+  "type": "enum",
+  "values": [
+    {
+      "name": "Created"
+    },
+    {
+      "name": "New"
+    },
+    {
+      "name": "Rejected"
+    },
+    {
+      "name": "PartiallyFilled"
+    },
+    {
+      "name": "PartiallyFilledCanceled"
+    },
+    {
+      "name": "Filled"
+    },
+    {
+      "name": "Cancelled"
+    },
+    {
+      "name": "Untriggered"
+    },
+    {
+      "name": "Triggered"
+    },
+    {
+      "name": "Deactivated"
+    },
+    {
+      "name": "Active"
+    }
+  ]
+}

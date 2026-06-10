@@ -26,13 +26,13 @@
 
 #include "roq/bybit/gateway/order_entry.hpp"
 
-#include "roq/bybit/json/parser_2.hpp"
+#include "roq/bybit/protocol/json/parser_2.hpp"
 
 namespace roq {
 namespace bybit {
 namespace gateway {
 
-struct OrderEntryWS final : public OrderEntry, public web::socket::Client::Handler, json::Parser2::Handler {
+struct OrderEntryWS final : public OrderEntry, public web::socket::Client::Handler, protocol::json::Parser2::Handler {
   OrderEntryWS(OrderEntry::Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
 
  protected:
@@ -70,14 +70,14 @@ struct OrderEntryWS final : public OrderEntry, public web::socket::Client::Handl
   void operator()(web::socket::Client::Text const &) override;
   void operator()(web::socket::Client::Binary const &) override;
 
-  // json::Parser2::Handler
+  // protocol::json::Parser2::Handler
 
-  void operator()(Trace<json::Ping> const &) override;
-  void operator()(Trace<json::Auth2> const &) override;
-  void operator()(Trace<json::Error> const &) override;
-  void operator()(Trace<json::PlaceOrder2> const &) override;
-  void operator()(Trace<json::AmendOrder2> const &) override;
-  void operator()(Trace<json::CancelOrder2> const &) override;
+  void operator()(Trace<protocol::json::Ping> const &) override;
+  void operator()(Trace<protocol::json::Auth2> const &) override;
+  void operator()(Trace<protocol::json::Error> const &) override;
+  void operator()(Trace<protocol::json::PlaceOrder2> const &) override;
+  void operator()(Trace<protocol::json::AmendOrder2> const &) override;
+  void operator()(Trace<protocol::json::CancelOrder2> const &) override;
 
  private:
   bool ready() const;

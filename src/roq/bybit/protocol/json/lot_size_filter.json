@@ -1,0 +1,58 @@
+{
+  "name": "roq/bybit/protocol/json/LotSizeFilter",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "basePrecision",
+      "type": "std/double"
+    },
+    {
+      "name": "quotePrecision",
+      "type": "std/double"
+    },
+    {
+      "name": "minOrderQty",
+      "type": "std/double"
+    },
+    {
+      "name": "maxOrderQty",
+      "type": "std/double"
+    },
+    {
+      "name": "minOrderAmt",
+      "type": "std/double"
+    },
+    {
+      "name": "maxOrderAmt",
+      "type": "std/double"
+    },
+    {
+      "name": "qtyStep",
+      "type": "std/double"
+    },
+    {
+      "name": "postOnlyMaxOrderQty",
+      "type": "std/double"
+    },
+    {
+      "name": "maxMktOrderQty",
+      "type": "std/double"
+    },
+    {
+      "name": "minNotionalValue",
+      "type": "std/double"
+    },
+    {
+      "name": "maxLimitOrderQty",
+      "type": "std/double"
+    },
+    {
+      "name": "maxMarketOrderQty",
+      "type": "std/double"
+    },
+    {
+      "name": "postOnlyMaxLimitOrderSize",
+      "type": "std/double"
+    }
+  ]
+}

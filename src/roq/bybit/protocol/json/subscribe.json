@@ -1,0 +1,34 @@
+{
+  "name": "roq/bybit/protocol/json/Subscribe",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "op",
+      "type": "roq/bybit/protocol/json/Operation"
+    },
+    {
+      "name": "success",
+      "type": "std/bool"
+    },
+    {
+      "name": "ret_msg",
+      "type": "std/string_view"
+    },
+    {
+      "name": "conn_id",
+      "type": "std/string_view"
+    },
+    {
+      "name": "req_id",
+      "type": "std/string_view"
+    },
+    {
+      "name": "data",
+      "type": "roq/bybit/protocol/json/SubscribeData"
+    },
+    {
+      "name": "type",
+      "type": "roq/bybit/protocol/json/EventType"
+    }
+  ]
+}

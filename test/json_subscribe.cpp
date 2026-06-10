@@ -10,7 +10,7 @@ using namespace roq::bybit;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-using value_type = json::Subscribe;
+using value_type = protocol::json::Subscribe;
 
 TEST_CASE("spot", "[json_subscribe]") {
   auto message = R"({)"

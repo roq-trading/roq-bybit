@@ -2,7 +2,7 @@
 
 #include <catch2/catch_all.hpp>
 
-#include "roq/bybit/json/encoder.hpp"
+#include "roq/bybit/protocol/json/encoder.hpp"
 
 using namespace roq;
 using namespace roq::bybit;
@@ -68,7 +68,7 @@ TEST_CASE("create_order", "[json_encoder]") {
   auto order = create_order_helper();
   auto ref_data = create_ref_data();
   auto request_id = "1234"sv;
-  json::Encoder::place_order(buffer, create_order, order, ref_data, request_id, json::Category::SPOT);
+  protocol::json::Encoder::place_order(buffer, create_order, order, ref_data, request_id, protocol::json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"
@@ -102,7 +102,7 @@ TEST_CASE("modify_order_price", "[json_encoder]") {
   auto ref_data = create_ref_data();
   auto request_id = "2345"sv;
   auto previous_request_id = "1234"sv;
-  json::Encoder::amend_order(buffer, modify_order, order, ref_data, request_id, previous_request_id, json::Category::SPOT);
+  protocol::json::Encoder::amend_order(buffer, modify_order, order, ref_data, request_id, previous_request_id, protocol::json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"
@@ -129,7 +129,7 @@ TEST_CASE("modify_order_quantity", "[json_encoder]") {
   auto ref_data = create_ref_data();
   auto request_id = "2345"sv;
   auto previous_request_id = "1234"sv;
-  json::Encoder::amend_order(buffer, modify_order, order, ref_data, request_id, previous_request_id, json::Category::SPOT);
+  protocol::json::Encoder::amend_order(buffer, modify_order, order, ref_data, request_id, previous_request_id, protocol::json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"
@@ -156,7 +156,7 @@ TEST_CASE("modify_order_both", "[json_encoder]") {
   auto ref_data = create_ref_data();
   auto request_id = "2345"sv;
   auto previous_request_id = "1234"sv;
-  json::Encoder::amend_order(buffer, modify_order, order, ref_data, request_id, previous_request_id, json::Category::SPOT);
+  protocol::json::Encoder::amend_order(buffer, modify_order, order, ref_data, request_id, previous_request_id, protocol::json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"
@@ -184,7 +184,7 @@ TEST_CASE("cancel_order", "[json_encoder]") {
   auto ref_data = create_ref_data();
   auto request_id = "2345"sv;
   auto previous_request_id = "1234"sv;
-  json::Encoder::cancel_order(buffer, cancel_order, order, ref_data, request_id, previous_request_id, json::Category::SPOT);
+  protocol::json::Encoder::cancel_order(buffer, cancel_order, order, ref_data, request_id, previous_request_id, protocol::json::Category::SPOT);
   auto expected = R"({)"
                   R"("category":"spot",)"
                   R"("symbol":"BTCUSDT",)"

@@ -15,19 +15,19 @@ namespace gateway {
 // === HELPERS ===
 
 namespace {
-auto create_category(auto api) -> json::Category {
+auto create_category(auto api) -> protocol::json::Category {
   switch (api) {
     using enum tools::API;
     case UNDEFINED:
       break;
     case SPOT:
-      return json::Category::SPOT;
+      return protocol::json::Category::SPOT;
     case LINEAR:
-      return json::Category::LINEAR;
+      return protocol::json::Category::LINEAR;
     case INVERSE:
-      return json::Category::INVERSE;
+      return protocol::json::Category::INVERSE;
     case OPTION:
-      return json::Category::OPTION;
+      return protocol::json::Category::OPTION;
   }
   log::fatal("Unexpected"sv);
 }

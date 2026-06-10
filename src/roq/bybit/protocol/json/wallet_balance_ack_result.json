@@ -1,0 +1,11 @@
+{
+  "name": "roq/bybit/protocol/json/WalletBalanceAckResult",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "list",
+      "type": "roq/bybit/protocol/json/WalletBalanceAckResultListItem",
+      "array": "std/span"
+    }
+  ]
+}

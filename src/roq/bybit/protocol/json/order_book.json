@@ -1,0 +1,33 @@
+{
+  "name": "roq/bybit/protocol/json/OrderBook",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "id",
+      "type": "std/string_view",
+      "comment": "...O"
+    },
+    {
+      "name": "topic",
+      "type": "std/string_view"
+    },
+    {
+      "name": "type",
+      "type": "roq/bybit/protocol/json/EventType"
+    },
+    {
+      "raw": "ts",
+      "name": "timestamp",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "data",
+      "type": "roq/bybit/protocol/json/OrderBookData"
+    },
+    {
+      "raw": "cts",
+      "name": "cts",
+      "type": "std/milliseconds"
+    }
+  ]
+}

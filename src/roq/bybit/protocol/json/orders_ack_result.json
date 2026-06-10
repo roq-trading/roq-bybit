@@ -1,0 +1,19 @@
+{
+  "name": "roq/bybit/protocol/json/OrdersAckResult",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "list",
+      "type": "roq/bybit/protocol/json/OrdersAckResultListItem",
+      "array": "std/span"
+    },
+    {
+      "name": "nextPageCursor",
+      "type": "std/string_view"
+    },
+    {
+      "name": "category",
+      "type": "roq/bybit/protocol/json/Category"
+    }
+  ]
+}

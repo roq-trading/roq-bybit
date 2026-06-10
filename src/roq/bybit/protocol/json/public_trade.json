@@ -1,0 +1,24 @@
+{
+  "name": "roq/bybit/protocol/json/PublicTrade",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "topic",
+      "type": "std/string_view"
+    },
+    {
+      "name": "type",
+      "type": "roq/bybit/protocol/json/EventType"
+    },
+    {
+      "raw": "ts",
+      "name": "timestamp",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "data",
+      "type": "roq/bybit/protocol/json/PublicTradeData",
+      "array": "std/span"
+    }
+  ]
+}

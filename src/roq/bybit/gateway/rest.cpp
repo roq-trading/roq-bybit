@@ -12,8 +12,8 @@
 
 #include "roq/utils/metrics/factory.hpp"
 
-#include "roq/bybit/json/map.hpp"
-#include "roq/bybit/json/utils.hpp"
+#include "roq/bybit/protocol/json/map.hpp"
+#include "roq/bybit/protocol/json/utils.hpp"
 
 using namespace std::literals;
 
@@ -240,13 +240,13 @@ void Rest::get_instruments_info_ack(Trace<web::rest::Response> const &event, uin
       if (download_.skip(sequence, STATE)) {
         log::info("Download state={} has already been processed"sv, STATE);
       } else {
-        json::InstrumentsInfoAck instruments_info_ack{body, decode_buffer_};
+        protocol::json::InstrumentsInfoAck instruments_info_ack{body, decode_buffer_};
         if (instruments_info_ack.ret_code == 0) {
           Trace event_2{event, instruments_info_ack};
           (*this)(event_2);
           download_.check(STATE);
         } else {
-          handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(instruments_info_ack.ret_code), instruments_info_ack.ret_msg);
+          handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, protocol::json::map_error(instruments_info_ack.ret_code), instruments_info_ack.ret_msg);
         }
       }
     };
@@ -254,7 +254,7 @@ void Rest::get_instruments_info_ack(Trace<web::rest::Response> const &event, uin
   });
 }
 
-void Rest::operator()(Trace<json::InstrumentsInfoAck> const &event) {
+void Rest::operator()(Trace<protocol::json::InstrumentsInfoAck> const &event) {
   auto &[trace_info, instruments_info_ack] = event;
   log::info<4>("instruments_info_ack={}"sv, instruments_info_ack);
   std::vector<Symbol> symbols;
@@ -264,7 +264,7 @@ void Rest::operator()(Trace<json::InstrumentsInfoAck> const &event) {
     log::info<2>("item={}"sv, item);
     auto discard = shared_.discard_symbol(item.symbol);
     auto trade_vol_step_size = [&]() {
-      if (shared_.api.category == json::Category::type_t::SPOT) {
+      if (shared_.api.category == protocol::json::Category::type_t::SPOT) {
         return item.lot_size_filter.base_precision;
       }
       return item.lot_size_filter.qty_step;
@@ -377,20 +377,20 @@ void Rest::get_kline_ack(Trace<web::rest::Response> const &event, [[maybe_unused
       // XXX FIXME TODO retry ???
     };
     auto handle_success = [&](auto &body) {
-      json::KlineAck kline_ack{body, decode_buffer_};
+      protocol::json::KlineAck kline_ack{body, decode_buffer_};
       if (kline_ack.ret_code == 0) {
         assert(kline_ack.result.symbol == symbol);
         Trace event_2{event, kline_ack};
         (*this)(event_2);
       } else {
-        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, json::map_error(kline_ack.ret_code), kline_ack.ret_msg);
+        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, protocol::json::map_error(kline_ack.ret_code), kline_ack.ret_msg);
       }
     };
     process_response(event, handle_error, handle_success);
   });
 }
 
-void Rest::operator()(Trace<json::KlineAck> const &event) {
+void Rest::operator()(Trace<protocol::json::KlineAck> const &event) {
   auto &[trace_info, kline_response] = event;
   auto &bars = shared_.bars;
   bars.clear();

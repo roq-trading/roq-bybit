@@ -10,7 +10,7 @@ using namespace roq::bybit;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-using value_type = json::CancelOrder2;
+using value_type = protocol::json::CancelOrder2;
 
 TEST_CASE("success", "[json_cancel_order_2]") {
   auto message = R"({)"

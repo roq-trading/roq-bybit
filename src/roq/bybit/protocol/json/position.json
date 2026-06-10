@@ -1,0 +1,23 @@
+{
+  "name": "roq/bybit/protocol/json/Position",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "id",
+      "type": "std/string_view"
+    },
+    {
+      "name": "topic",
+      "type": "std/string_view"
+    },
+    {
+      "name": "creationTime",
+      "type": "std/milliseconds"
+    },
+    {
+      "name": "data",
+      "type": "roq/bybit/protocol/json/PositionDataItem",
+      "array": "std/span"
+    }
+  ]
+}

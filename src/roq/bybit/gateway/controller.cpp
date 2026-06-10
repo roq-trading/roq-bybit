@@ -15,7 +15,7 @@
 #include "roq/bybit/gateway/order_entry_rest.hpp"
 #include "roq/bybit/gateway/order_entry_ws.hpp"
 
-#include "roq/bybit/json/utils.hpp"
+#include "roq/bybit/protocol/json/utils.hpp"
 
 using namespace std::literals;
 

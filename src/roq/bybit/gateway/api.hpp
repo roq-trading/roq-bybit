@@ -10,7 +10,7 @@
 
 #include "roq/bybit/tools/api.hpp"
 
-#include "roq/bybit/json/category.hpp"
+#include "roq/bybit/protocol/json/category.hpp"
 
 namespace roq {
 namespace bybit {
@@ -35,7 +35,7 @@ struct ROQ_PUBLIC API final {
   } simple;
 
   tools::API api;
-  json::Category category;
+  protocol::json::Category category;
 
   // factory
   static API create(Settings const &);

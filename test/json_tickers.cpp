@@ -10,7 +10,7 @@ using namespace roq::bybit;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-using value_type = json::Tickers;
+using value_type = protocol::json::Tickers;
 
 TEST_CASE("spot", "[json_tickers]") {
   auto message = R"({)"
@@ -68,7 +68,7 @@ TEST_CASE("linear", "[json_tickers]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.topic == "tickers.BTCUSDT"sv);
-    CHECK(obj.type == json::EventType::SNAPSHOT);
+    CHECK(obj.type == protocol::json::EventType::SNAPSHOT);
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }
@@ -109,7 +109,7 @@ TEST_CASE("inverse", "[json_tickers]") {
                  R"(})"sv;
   auto helper = [](value_type const &obj) {
     CHECK(obj.topic == "tickers.BTCUSDM23"sv);
-    CHECK(obj.type == json::EventType::SNAPSHOT);
+    CHECK(obj.type == protocol::json::EventType::SNAPSHOT);
   };
   ParserTester<value_type>::dispatch(helper, message, 8192, 1);
 }

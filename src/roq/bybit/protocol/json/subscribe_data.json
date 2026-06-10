@@ -1,0 +1,16 @@
+{
+  "name": "roq/bybit/protocol/json/SubscribeData",
+  "type": "dictionary",
+  "values": [
+    {
+      "name": "failTopics",
+      "type": "std/string_view",
+      "array": "std/span"
+    },
+    {
+      "name": "successTopics",
+      "type": "std/string_view",
+      "array": "std/span"
+    }
+  ]
+}

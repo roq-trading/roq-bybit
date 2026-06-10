@@ -10,7 +10,7 @@ using namespace roq::bybit;
 using namespace std::literals;
 using namespace std::chrono_literals;
 
-using value_type = json::Order;
+using value_type = protocol::json::Order;
 
 // note! from websocket
 

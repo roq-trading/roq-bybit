@@ -17,8 +17,8 @@
 
 #include "roq/web/socket/client.hpp"
 
-#include "roq/bybit/json/map.hpp"
-#include "roq/bybit/json/utils.hpp"
+#include "roq/bybit/protocol/json/map.hpp"
+#include "roq/bybit/protocol/json/utils.hpp"
 
 using namespace std::literals;
 using namespace std::chrono_literals;
@@ -281,7 +281,7 @@ void DropCopy::parse(std::string_view const &message) {
     auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
     try {
       TraceInfo trace_info;
-      if (!json::Parser::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
+      if (!protocol::json::Parser::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
         log_message();
       }
     } catch (...) {
@@ -291,14 +291,14 @@ void DropCopy::parse(std::string_view const &message) {
   });
 }
 
-// json::Parser::Handler
+// protocol::json::Parser::Handler
 
-void DropCopy::operator()(Trace<json::Ping> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Ping> const &event) {
   auto &[trace_info, ping] = event;
   log::info<4>("ping={}"sv, ping);
 }
 
-void DropCopy::operator()(Trace<json::Auth> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Auth> const &event) {
   profile_.auth([&]() {
     auto &[trace_info, auth] = event;
     log::info<4>("auth={}"sv, auth);
@@ -311,7 +311,7 @@ void DropCopy::operator()(Trace<json::Auth> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::Subscribe> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Subscribe> const &event) {
   auto &[trace_info, subscribe] = event;
   log::info<4>("subscribe={}"sv, subscribe);
   auto &req_id = subscribe.req_id;
@@ -326,29 +326,29 @@ void DropCopy::operator()(Trace<json::Subscribe> const &event) {
   }
 }
 
-void DropCopy::operator()(Trace<json::Error> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Error> const &event) {
   auto &[trace_info, error] = event;
   log::info<4>("error={}"sv, error);
   log::fatal("error={}"sv, error);
 }
 
-void DropCopy::operator()(Trace<json::OrderBook> const &, [[maybe_unused]] size_t depth) {
+void DropCopy::operator()(Trace<protocol::json::OrderBook> const &, [[maybe_unused]] size_t depth) {
   log::fatal("Unexpected"sv);
 }
 
-void DropCopy::operator()(Trace<json::PublicTrade> const &) {
+void DropCopy::operator()(Trace<protocol::json::PublicTrade> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void DropCopy::operator()(Trace<json::Tickers> const &) {
+void DropCopy::operator()(Trace<protocol::json::Tickers> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void DropCopy::operator()(Trace<json::Kline> const &) {
+void DropCopy::operator()(Trace<protocol::json::Kline> const &) {
   log::fatal("Unexpected"sv);
 }
 
-void DropCopy::operator()(Trace<json::Wallet> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Wallet> const &event) {
   profile_.wallet([&]() {
     auto &[trace_info, wallet] = event;
     log::info<4>("wallet={}"sv, wallet);
@@ -376,7 +376,7 @@ void DropCopy::operator()(Trace<json::Wallet> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::Position> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Position> const &event) {
   profile_.position([&]() {
     auto &[trace_info, position] = event;
     log::info<4>("position={}"sv, position);
@@ -408,7 +408,7 @@ void DropCopy::operator()(Trace<json::Position> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::Order> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Order> const &event) {
   profile_.order([&]() {
     auto &[trace_info, order] = event;
     log::info<4>("order={}"sv, order);
@@ -460,7 +460,7 @@ void DropCopy::operator()(Trace<json::Order> const &event) {
   });
 }
 
-void DropCopy::operator()(Trace<json::Execution> const &event) {
+void DropCopy::operator()(Trace<protocol::json::Execution> const &event) {
   profile_.execution([&]() {
     auto &[trace_info, execution] = event;
     log::info<4>("execution={}"sv, execution);
@@ -502,7 +502,7 @@ void DropCopy::operator()(Trace<json::Execution> const &event) {
     for (auto &item : execution.data) {
       log::info<2>("item={}"sv, item);
       /* XXX doesn't work with spot
-      if (item.exec_type != json::ExecType::TRADE)  // note!
+      if (item.exec_type != protocol::json::ExecType::TRADE)  // note!
         continue;
       */
       if (item.order_id != order_id) {
