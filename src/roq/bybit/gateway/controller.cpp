@@ -12,6 +12,8 @@
 
 #include "roq/server/oms/exceptions.hpp"
 
+#include "roq/bybit/gateway/api.hpp"
+
 #include "roq/bybit/gateway/order_entry_rest.hpp"
 #include "roq/bybit/gateway/order_entry_ws.hpp"
 
@@ -22,6 +24,15 @@ using namespace std::literals;
 namespace roq {
 namespace bybit {
 namespace gateway {
+
+// === CONSTANTS ===
+
+namespace {
+uint8_t const API_SPOT = 0x0;
+uint8_t const API_LINEAR = 0x1;
+uint8_t const API_INVERSE = 0x2;
+uint8_t const API_OPTION = 0x3;
+}  // namespace
 
 // === HELPERS ===
 
@@ -80,6 +91,24 @@ R create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts
 
 std::unique_ptr<server::Handler> Controller::create(server::Dispatcher &dispatcher, Settings const &settings, Config const &config, io::Context &context) {
   return std::make_unique<Controller>(dispatcher, settings, config, context);
+}
+
+uint8_t Controller::parse_api(Settings const &settings) {
+  auto api = API::parse_api(settings.app.api);
+  switch (api) {
+    using enum tools::API;
+    case UNDEFINED:
+      break;
+    case SPOT:
+      return API_SPOT;
+    case LINEAR:
+      return API_LINEAR;
+    case INVERSE:
+      return API_INVERSE;
+    case OPTION:
+      return API_OPTION;
+  }
+  log::fatal(R"(Unexpected: api="{}")"sv, settings.app.api);
 }
 
 Controller::Controller(server::Dispatcher &dispatcher, Settings const &settings, Config const &config, io::Context &context)
