@@ -28,10 +28,10 @@ namespace gateway {
 // === CONSTANTS ===
 
 namespace {
-uint8_t const API_SPOT = 0x0;
-uint8_t const API_LINEAR = 0x1;
-uint8_t const API_INVERSE = 0x2;
-uint8_t const API_OPTION = 0x3;
+uint8_t const API_SPOT = 0x1;
+uint8_t const API_LINEAR = 0x2;
+uint8_t const API_INVERSE = 0x3;
+uint8_t const API_OPTION = 0x4;
 }  // namespace
 
 // === HELPERS ===
