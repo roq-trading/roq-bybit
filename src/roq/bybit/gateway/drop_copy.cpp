@@ -429,7 +429,7 @@ void DropCopy::operator()(Trace<protocol::json::Order> const &event) {
           .update_time_utc = item.updated_time,
           .external_account = {},
           .external_order_id = item.order_id,
-          .client_order_id = {},
+          .client_order_id = item.order_link_id,
           .order_status = map(item.order_status),
           .error = {},
           .text = {},
@@ -450,7 +450,7 @@ void DropCopy::operator()(Trace<protocol::json::Order> const &event) {
           .update_type = UpdateType::INCREMENTAL,
           .sending_time_utc = order.creation_time,
       };
-      if (shared_.update_order(item.order_link_id, stream_id_, trace_info, order_update, [&]([[maybe_unused]] auto &order) {
+      if (shared_.update_order(stream_id_, trace_info, order_update, [&]([[maybe_unused]] auto &order) {
             // no fills here
           })) {
       } else {
@@ -488,7 +488,7 @@ void DropCopy::operator()(Trace<protocol::json::Execution> const &event) {
           .update_time_utc = utils::safe_cast(exec_time),
           .external_account = {},
           .external_order_id = order_id,
-          .client_order_id = {},
+          .client_order_id = order_link_id,
           .fills = shared_.fills,
           .routing_id = {},
           .update_type = UpdateType::INCREMENTAL,
@@ -496,7 +496,7 @@ void DropCopy::operator()(Trace<protocol::json::Execution> const &event) {
           .user = {},
           .strategy_id = {},
       };
-      create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE, order_link_id);
+      create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE);
       shared_.fills.clear();
     };
     for (auto &item : execution.data) {

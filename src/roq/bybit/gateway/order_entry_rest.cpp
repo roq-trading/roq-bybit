@@ -634,7 +634,7 @@ void OrderEntryREST::operator()(Trace<protocol::json::OrdersAck> const &event) {
         .update_time_utc = item.updated_time,
         .external_account = {},
         .external_order_id = item.order_id,
-        .client_order_id = {},
+        .client_order_id = item.order_link_id,
         .order_status = map(item.order_status),
         .error = {},
         .text = {},
@@ -656,7 +656,7 @@ void OrderEntryREST::operator()(Trace<protocol::json::OrdersAck> const &event) {
         .sending_time_utc = orders_ack.time,
     };
     Trace event_2{trace_info, order_update};
-    (*this)(event_2, item.order_link_id);
+    (*this)(event_2);
   }
 }
 
@@ -766,7 +766,7 @@ void OrderEntryREST::operator()(Trace<protocol::json::ExecutionsAck> const &even
         .update_time_utc = utils::safe_cast(exec_time),
         .external_account = {},
         .external_order_id = order_id,
-        .client_order_id = {},
+        .client_order_id = order_link_id,
         .fills = shared_.fills,
         .routing_id = {},
         .update_type = UpdateType::SNAPSHOT,
@@ -774,7 +774,7 @@ void OrderEntryREST::operator()(Trace<protocol::json::ExecutionsAck> const &even
         .user = {},
         .strategy_id = {},
     };
-    create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE, order_link_id);
+    create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE);
     shared_.fills.clear();
   };
   for (auto &item : executions_ack.result.list) {
@@ -889,8 +889,8 @@ void OrderEntryREST::operator()(Trace<protocol::json::PlaceOrderAck> const &even
       .text = text,
       .version = version,
       .request_id = result.order_link_id,
-      .external_order_id = {},
-      .client_order_id = {},
+      .external_order_id = result.order_id,
+      .client_order_id = result.order_link_id,
       .quantity = NaN,
       .price = NaN,
   };
@@ -1013,6 +1013,7 @@ void OrderEntryREST::operator()(Trace<protocol::json::AmendOrderAck> const &even
   auto status = amend_order_ack.ret_code == 0 ? RequestStatus::ACCEPTED : RequestStatus::REJECTED;
   auto error = protocol::json::map_error(amend_order_ack.ret_code);
   auto text = amend_order_ack.ret_msg;
+  auto &result = amend_order_ack.result;
   auto response = server::oms::Response{
       .request_type = RequestType::MODIFY_ORDER,
       .origin = Origin::EXCHANGE,
@@ -1021,12 +1022,11 @@ void OrderEntryREST::operator()(Trace<protocol::json::AmendOrderAck> const &even
       .text = text,
       .version = version,
       .request_id = {},
-      .external_order_id = {},
+      .external_order_id = result.order_id,
       .client_order_id = {},
       .quantity = NaN,
       .price = NaN,
   };
-  auto &result = amend_order_ack.result;
   auto remaining_quantity = result.order_qty - result.exec_qty;
   auto order_update = server::oms::OrderUpdate{
       .account = account_.name,
@@ -1141,6 +1141,7 @@ void OrderEntryREST::operator()(Trace<protocol::json::CancelOrderAck> const &eve
   auto status = cancel_order_ack.ret_code == 0 ? RequestStatus::ACCEPTED : RequestStatus::REJECTED;
   auto error = protocol::json::map_error(cancel_order_ack.ret_code);
   auto text = cancel_order_ack.ret_msg;
+  auto &result = cancel_order_ack.result;
   auto response = server::oms::Response{
       .request_type = RequestType::CANCEL_ORDER,
       .origin = Origin::EXCHANGE,
@@ -1149,12 +1150,11 @@ void OrderEntryREST::operator()(Trace<protocol::json::CancelOrderAck> const &eve
       .text = text,
       .version = version,
       .request_id = {},
-      .external_order_id = {},
+      .external_order_id = result.order_id,
       .client_order_id = {},
       .quantity = NaN,
       .price = NaN,
   };
-  auto &result = cancel_order_ack.result;
   auto remaining_quantity = result.order_qty - result.exec_qty;
   auto order_update = server::oms::OrderUpdate{
       .account = account_.name,
@@ -1366,9 +1366,9 @@ void OrderEntryREST::operator()(Trace<server::oms::Response> const &event, uint8
   }
 }
 
-void OrderEntryREST::operator()(Trace<server::oms::OrderUpdate> const &event, std::string_view const &client_order_id) {
+void OrderEntryREST::operator()(Trace<server::oms::OrderUpdate> const &event) {
   auto &[trace_info, order_update] = event;
-  if (shared_.update_order(client_order_id, stream_id_, trace_info, order_update, [&]([[maybe_unused]] auto &order) {})) {
+  if (shared_.update_order(stream_id_, trace_info, order_update, [&]([[maybe_unused]] auto &order) {})) {
   } else {
     log::warn("*** EXTERNAL ORDER ***"sv);
   }

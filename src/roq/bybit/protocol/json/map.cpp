@@ -252,6 +252,8 @@ constexpr Helper<bybit::protocol::json::TimeInForce>::operator std::optional<roq
       return roq::TimeInForce::FOK;
     case IOC:
       return roq::TimeInForce::IOC;
+    case POST_ONLY:
+      return roq::TimeInForce::UNDEFINED;
   }
   return {};
 }
@@ -260,6 +262,7 @@ static_assert(Helper{bybit::protocol::json::TimeInForce{bybit::protocol::json::T
 static_assert(Helper{bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::GTC}} == roq::TimeInForce::GTC);
 static_assert(Helper{bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::FOK}} == roq::TimeInForce::FOK);
 static_assert(Helper{bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::IOC}} == roq::TimeInForce::IOC);
+static_assert(Helper{bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::POST_ONLY}} == roq::TimeInForce::UNDEFINED);
 
 template <>
 template <>

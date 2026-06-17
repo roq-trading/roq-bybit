@@ -336,11 +336,11 @@ void OrderEntryWS::operator()(Trace<protocol::json::PlaceOrder2> const &event) {
         .version = {},
         .request_id = place_order.req_id,
         .external_order_id = {},
-        .client_order_id = {},
+        .client_order_id = place_order.req_id,
         .quantity = NaN,
         .price = NaN,
     };
-    if (shared_.update_order(response.request_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
+    if (shared_.update_order(stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
     } else {
       log::warn(R"(Did not find order: request_id="{}")"sv, response.request_id);
     }
@@ -364,7 +364,7 @@ void OrderEntryWS::operator()(Trace<protocol::json::AmendOrder2> const &event) {
         .quantity = NaN,
         .price = NaN,
     };
-    if (shared_.update_order(response.request_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
+    if (shared_.update_order(stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
     } else {
       log::warn(R"(Did not find order: request_id="{}")"sv, response.request_id);
     }
@@ -388,7 +388,7 @@ void OrderEntryWS::operator()(Trace<protocol::json::CancelOrder2> const &event) 
         .quantity = NaN,
         .price = NaN,
     };
-    if (shared_.update_order(response.request_id, stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
+    if (shared_.update_order(stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
     } else {
       log::warn(R"(Did not find order: request_id="{}")"sv, response.request_id);
     }
