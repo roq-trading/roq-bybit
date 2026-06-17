@@ -340,10 +340,7 @@ void OrderEntryWS::operator()(Trace<protocol::json::PlaceOrder2> const &event) {
         .quantity = NaN,
         .price = NaN,
     };
-    if (shared_.update_order(stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
-    } else {
-      log::warn(R"(Did not find order: request_id="{}")"sv, response.request_id);
-    }
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id_);
   }
 }
 
@@ -364,10 +361,7 @@ void OrderEntryWS::operator()(Trace<protocol::json::AmendOrder2> const &event) {
         .quantity = NaN,
         .price = NaN,
     };
-    if (shared_.update_order(stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
-    } else {
-      log::warn(R"(Did not find order: request_id="{}")"sv, response.request_id);
-    }
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id_);
   }
 }
 
@@ -388,10 +382,7 @@ void OrderEntryWS::operator()(Trace<protocol::json::CancelOrder2> const &event) 
         .quantity = NaN,
         .price = NaN,
     };
-    if (shared_.update_order(stream_id_, trace_info, response, []([[maybe_unused]] auto &order) {})) {
-    } else {
-      log::warn(R"(Did not find order: request_id="{}")"sv, response.request_id);
-    }
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id_);
   }
 }
 
