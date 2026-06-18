@@ -2,12 +2,11 @@
 
 #pragma once
 
-#include <chrono>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "roq/api.hpp"
+
 #include "roq/server.hpp"
 
 #include "roq/core/symbols.hpp"
@@ -40,21 +39,21 @@ struct Shared final {
   }
 
  public:
-  std::vector<MBPUpdate> bids, asks;
-  std::vector<Trade> trades;
-  std::vector<Bar> bars;
-  std::vector<Fill> fills;
-
   server::Dispatcher &dispatcher;
-
   Settings const &settings;
   API const api;
+
   core::limit::RateLimiter rate_limiter;
 
   core::Symbols symbols;
   utils::unordered_set<std::string> all_symbols;
 
   core::TimerQueue<std::string> time_series_request_queue;
+
+  std::vector<MBPUpdate> bids, asks, bids_2, asks_2;
+  std::vector<Trade> trades;
+  std::vector<Bar> bars;
+  std::vector<Fill> fills;
 };
 
 }  // namespace gateway

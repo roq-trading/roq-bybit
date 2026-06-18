@@ -238,7 +238,7 @@ void OrderEntryREST::operator()(Trace<web::rest::Client::Latency> const &event) 
       .account = account_.name,
       .latency = latency.sample,
   };
-  create_trace_and_dispatch(handler_, trace_info, external_latency);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, external_latency);
   latency_.ping.update(latency.sample);
 }
 
@@ -263,7 +263,7 @@ void OrderEntryREST::operator()(ConnectionStatus connection_status, std::string_
       .proxy = (*connection_).get_proxy(),
   };
   log::info("stream_status={}"sv, stream_status);
-  create_trace_and_dispatch(handler_, trace_info, stream_status);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
 }
 
 uint32_t OrderEntryREST::download(State state) {
@@ -446,7 +446,7 @@ void OrderEntryREST::operator()(Trace<protocol::json::WalletBalanceAck> const &e
           .exchange_time_utc = {},
           .sending_time_utc = {},  // XXX lost when flattened
       };
-      create_trace_and_dispatch(handler_, trace_info, funds_update, true);
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, funds_update, true);
     }
   }
 }
@@ -544,7 +544,7 @@ void OrderEntryREST::operator()(Trace<protocol::json::PositionsAck> const &event
         .exchange_time_utc = item.updated_time,  // XXX created_time ???
         .sending_time_utc = positions_ack.time,
     };
-    create_trace_and_dispatch(handler_, trace_info, position_update, true);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, position_update, true);
   }
 }
 
@@ -773,7 +773,7 @@ void OrderEntryREST::operator()(Trace<protocol::json::ExecutionsAck> const &even
         .user = {},
         .strategy_id = {},
     };
-    create_trace_and_dispatch(handler_, trace_info, trade_update, true, SOURCE_NONE);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, trade_update, true, SOURCE_NONE);
     shared_.fills.clear();
   };
   for (auto &item : executions_ack.result.list) {

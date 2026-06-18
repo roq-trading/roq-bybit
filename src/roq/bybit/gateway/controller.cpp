@@ -169,7 +169,7 @@ void Controller::operator()(Event<Subscribe> const &event) {
     if (shared_.all_symbols.emplace(item).second) {
       symbols.emplace_back(item);
     } else {
-      log::warn(R"(*** DUPLICATE SUBSCRIPTION *** (symbol="{}")"sv, item);
+      log::warn(R"(*** DUPLICATE SUBSCRIPTION *** symbol="{}")"sv, item);
     }
   }
   auto symbols_update = Rest::SymbolsUpdate{
@@ -224,55 +224,6 @@ void Controller::operator()(metrics::Writer &writer) const {
 }
 
 // streams
-
-void Controller::operator()(Trace<StreamStatus> const &event) {
-  dispatcher_(event);
-}
-
-void Controller::operator()(Trace<ExternalLatency> const &event) {
-  dispatcher_(event);
-}
-
-void Controller::operator()(Trace<ReferenceData> const &event, bool is_last) {
-  dispatcher_(event, is_last);
-}
-
-void Controller::operator()(Trace<MarketStatus> const &event, bool is_last) {
-  dispatcher_(event, is_last);
-}
-
-void Controller::operator()(Trace<TopOfBook> const &event, bool is_last) {
-  dispatcher_(event, is_last);
-}
-
-void Controller::operator()(Trace<MarketByPriceUpdate> const &event, bool is_last) {
-  auto callback = []([[maybe_unused]] auto &market_by_price) {};
-  dispatcher_(event, is_last, bids_, asks_, callback);
-}
-
-void Controller::operator()(Trace<TradeSummary> const &event, bool is_last) {
-  dispatcher_(event, is_last);
-}
-
-void Controller::operator()(Trace<StatisticsUpdate> const &event, bool is_last) {
-  dispatcher_(event, is_last);
-}
-
-void Controller::operator()(Trace<TimeSeriesUpdate> const &event, bool is_last) {
-  dispatcher_(event, is_last);
-}
-
-void Controller::operator()(Trace<TradeUpdate> const &event, bool is_last, uint8_t user_id) {
-  dispatcher_(event, is_last, user_id);
-}
-
-void Controller::operator()(Trace<PositionUpdate> const &event, bool is_last) {
-  dispatcher_(event, is_last);
-}
-
-void Controller::operator()(Trace<FundsUpdate> const &event, bool is_last) {
-  dispatcher_(event, is_last);
-}
 
 void Controller::operator()(Rest::SymbolsUpdate &symbols_update) {
   auto [size, start_from] = shared_.symbols(symbols_update.symbols);

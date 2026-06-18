@@ -153,7 +153,7 @@ void Rest::operator()(ConnectionStatus connection_status, std::string_view const
       .proxy = (*connection_).get_proxy(),
   };
   log::info("stream_status={}"sv, stream_status);
-  create_trace_and_dispatch(handler_, trace_info, stream_status);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
 }
 
 void Rest::operator()(Trace<web::rest::Client::Connected> const &) {
@@ -179,7 +179,7 @@ void Rest::operator()(Trace<web::rest::Client::Latency> const &event) {
       .account = {},
       .latency = latency.sample,
   };
-  create_trace_and_dispatch(handler_, trace_info, external_latency);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, external_latency);
   latency_.ping.update(latency.sample);
 }
 
@@ -303,7 +303,7 @@ void Rest::operator()(Trace<protocol::json::InstrumentsInfoAck> const &event) {
         .sending_time_utc = instruments_info_ack.time,
         .discard = discard,
     };
-    create_trace_and_dispatch(handler_, trace_info, reference_data, true);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, reference_data, true);
     if (discard) {
       log::info<1>(R"(Drop symbol="{}")"sv, item.symbol);
       continue;
@@ -321,7 +321,7 @@ void Rest::operator()(Trace<protocol::json::InstrumentsInfoAck> const &event) {
         .exchange_sequence = {},
         .sending_time_utc = instruments_info_ack.time,
     };
-    create_trace_and_dispatch(handler_, trace_info, market_status, true);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, market_status, true);
   }
   if (!std::empty(symbols)) {
     auto symbols_update = SymbolsUpdate{
@@ -421,7 +421,7 @@ void Rest::operator()(Trace<protocol::json::KlineAck> const &event) {
       .update_type = UpdateType::SNAPSHOT,
       .exchange_time_utc = kline_response.time,
   };
-  create_trace_and_dispatch(handler_, trace_info, time_series_update, true);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, time_series_update, true);
 }
 
 // helpers
