@@ -26,20 +26,8 @@ struct Shared final {
 
   Shared(Shared const &) = delete;
 
-  auto discard_symbol(std::string_view const &name) const { return dispatcher.discard_symbol(name); }
-
-  template <typename... Args>
-  auto operator()(Args &&...args) {
-    return dispatcher(std::forward<Args>(args)...);
-  }
-
-  template <typename... Args>
-  auto get_ref_data(Args &&...args) {
-    return dispatcher.get_ref_data(std::forward<Args>(args)...);
-  }
-
- public:
   server::Dispatcher &dispatcher;
+
   Settings const &settings;
   API const api;
 
@@ -50,7 +38,7 @@ struct Shared final {
 
   core::TimerQueue<std::string> time_series_request_queue;
 
-  std::vector<MBPUpdate> bids, asks, bids_2, asks_2;
+  std::vector<MBPUpdate> bids, asks, final_bids, final_asks;
   std::vector<Trade> trades;
   std::vector<Bar> bars;
   std::vector<Fill> fills;

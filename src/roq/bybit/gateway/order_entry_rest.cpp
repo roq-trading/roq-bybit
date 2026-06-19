@@ -523,7 +523,7 @@ void OrderEntryREST::operator()(Trace<protocol::json::PositionsAck> const &event
   log::info<2>("positions_ack={}"sv, positions_ack);
   for (auto &item : positions_ack.result.list) {
     log::info<2>("item={}"sv, item);
-    if (shared_.discard_symbol(item.symbol)) {
+    if (shared_.dispatcher.discard_symbol(item.symbol)) {
       continue;
     }
     auto margin_mode = item.trade_mode == 0 ? MarginMode::CROSS : MarginMode::ISOLATED;
@@ -789,7 +789,7 @@ void OrderEntryREST::operator()(Trace<protocol::json::ExecutionsAck> const &even
       symbol = item.symbol;
       side = map(item.side);
       exec_time = item.exec_time;
-      auto ref_data = shared_.get_ref_data(shared_.settings.exchange, symbol);
+      auto ref_data = shared_.dispatcher.get_ref_data(shared_.settings.exchange, symbol);
       multiplier = ref_data.multiplier;
     }
     auto liquidity = item.is_maker ? Liquidity::MAKER : Liquidity::TAKER;
@@ -1221,7 +1221,7 @@ void OrderEntryREST::cancel_all_orders(Event<CancelAllOrders> const &event, std:
       };
       TraceInfo trace_info{event};
       Trace event_2{trace_info, cancel_all_orders_ack};
-      shared_(event_2);
+      shared_.dispatcher(event_2);
     };
     auto path = shared_.api.simple.order_cancel_all;
     if (shared_.dispatcher.get_all_order_symbols(
@@ -1278,7 +1278,7 @@ void OrderEntryREST::cancel_all_orders_ack(Trace<web::rest::Response> const &eve
           .strategy_id = {},
       };
       Trace event_2{event, cancel_all_orders_ack};
-      shared_(event_2);
+      shared_.dispatcher(event_2);
     };
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::debug(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);

@@ -262,7 +262,7 @@ void Rest::operator()(Trace<protocol::json::InstrumentsInfoAck> const &event) {
   size_t counter = 0;
   for (auto &item : instruments_info_ack.result.list) {
     log::info<2>("item={}"sv, item);
-    auto discard = shared_.discard_symbol(item.symbol);
+    auto discard = shared_.dispatcher.discard_symbol(item.symbol);
     auto trade_vol_step_size = [&]() {
       if (shared_.api.category == protocol::json::Category::type_t::SPOT) {
         return item.lot_size_filter.base_precision;

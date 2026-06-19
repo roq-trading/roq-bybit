@@ -382,7 +382,7 @@ void DropCopy::operator()(Trace<protocol::json::Position> const &event) {
     log::info<4>("position={}"sv, position);
     for (auto &item : position.data) {
       log::info<2>("item={}"sv, item);
-      if (shared_.discard_symbol(item.symbol)) {
+      if (shared_.dispatcher.discard_symbol(item.symbol)) {
         continue;
       }
       auto margin_mode = item.trade_mode == 0 ? MarginMode::CROSS : MarginMode::ISOLATED;
@@ -507,7 +507,7 @@ void DropCopy::operator()(Trace<protocol::json::Execution> const &event) {
         symbol = item.symbol;
         side = map(item.side);
         exec_time = item.exec_time;
-        auto ref_data = shared_.get_ref_data(shared_.settings.exchange, symbol);
+        auto ref_data = shared_.dispatcher.get_ref_data(shared_.settings.exchange, symbol);
         multiplier = ref_data.multiplier;
       }
       auto liquidity = item.is_maker ? Liquidity::MAKER : Liquidity::TAKER;

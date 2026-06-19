@@ -418,7 +418,7 @@ void MarketData::operator()(Trace<protocol::json::OrderBook> const &event, size_
           .checksum = {},
       };
       try {
-        create_trace_and_dispatch(shared_.dispatcher, trace_info, market_by_price_update, true, shared_.bids_2, shared_.asks_2);
+        create_trace_and_dispatch(shared_.dispatcher, trace_info, market_by_price_update, true, shared_.final_bids, shared_.final_asks);
       } catch (BadState &) {
         // resubscribe(symbol);
       }
