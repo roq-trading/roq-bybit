@@ -2,9 +2,6 @@
 
 #include "roq/bybit/gateway/market_data.hpp"
 
-#include <algorithm>
-#include <utility>
-
 #include "roq/logging.hpp"
 
 #include "roq/mask.hpp"
@@ -16,10 +13,7 @@
 
 #include "roq/utils/metrics/factory.hpp"
 
-#include "roq/web/socket/client.hpp"
-
 #include "roq/bybit/protocol/json/map.hpp"
-#include "roq/bybit/protocol/json/utils.hpp"
 
 using namespace std::literals;
 
@@ -468,7 +462,7 @@ void MarketData::operator()(Trace<protocol::json::PublicTrade> const &event) {
           .taker_order_id = {},
           .maker_order_id = {},
       };
-      trades.emplace_back(trade_2);  // XXX FIXME TODO std::move ?
+      trades.emplace_back(std::move(trade_2));
       utils::update_max(timestamp, item.timestamp);
     }
     dispatch(previous);

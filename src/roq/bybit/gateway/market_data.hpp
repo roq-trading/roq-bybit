@@ -2,11 +2,7 @@
 
 #pragma once
 
-#include <deque>
 #include <string>
-#include <string_view>
-#include <utility>
-#include <vector>
 
 #include "roq/utils/metrics/counter.hpp"
 #include "roq/utils/metrics/latency.hpp"
@@ -20,11 +16,8 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/server.hpp"
-
 #include "roq/bybit/gateway/shared.hpp"
 
-#include "roq/bybit/protocol/json/category.hpp"
 #include "roq/bybit/protocol/json/parser.hpp"
 
 namespace roq {
@@ -61,7 +54,8 @@ struct MarketData final : public web::socket::Client::Handler, public protocol::
   void operator()(web::socket::Client::Text const &) override;
   void operator()(web::socket::Client::Binary const &) override;
 
- private:
+  // helpers
+
   void operator()(ConnectionStatus, std::string_view const &reason = {});
 
   void subscribe(std::span<Symbol const> const &symbols);
@@ -90,6 +84,7 @@ struct MarketData final : public web::socket::Client::Handler, public protocol::
   void operator()(Trace<protocol::json::Order> const &) override;
   void operator()(Trace<protocol::json::Execution> const &) override;
 
+ private:
   Handler &handler_;
   // config
   uint16_t const stream_id_;

@@ -2,23 +2,16 @@
 
 #include "roq/bybit/gateway/drop_copy.hpp"
 
-#include <algorithm>
-#include <utility>
-
 #include "roq/mask.hpp"
 
 #include "roq/utils/common.hpp"
 #include "roq/utils/safe_cast.hpp"
-#include "roq/utils/update.hpp"
 
 #include "roq/utils/exceptions/unhandled.hpp"
 
 #include "roq/utils/metrics/factory.hpp"
 
-#include "roq/web/socket/client.hpp"
-
 #include "roq/bybit/protocol/json/map.hpp"
-#include "roq/bybit/protocol/json/utils.hpp"
 
 using namespace std::literals;
 using namespace std::chrono_literals;

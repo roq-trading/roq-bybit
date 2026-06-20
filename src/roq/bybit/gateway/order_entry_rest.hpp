@@ -3,8 +3,6 @@
 #pragma once
 
 #include <string>
-#include <string_view>
-#include <vector>
 
 #include "roq/core/download.hpp"
 
@@ -21,8 +19,9 @@
 #include "roq/server.hpp"
 
 #include "roq/bybit/gateway/account.hpp"
-#include "roq/bybit/gateway/order_entry.hpp"
 #include "roq/bybit/gateway/shared.hpp"
+
+#include "roq/bybit/gateway/order_entry.hpp"
 
 #include "roq/bybit/protocol/json/account_info_ack.hpp"
 #include "roq/bybit/protocol/json/executions_ack.hpp"
@@ -73,7 +72,8 @@ struct OrderEntryREST final : public OrderEntry, public web::rest::Client::Handl
   void operator()(Trace<web::rest::Client::Disconnected> const &) override;
   void operator()(Trace<web::rest::Client::Latency> const &) override;
 
- private:
+  // helpers
+
   bool ready() const { return connection_status_ == ConnectionStatus::READY; }
 
   void operator()(ConnectionStatus, std::string_view const &reason = {});

@@ -2,14 +2,10 @@
 
 #include "roq/bybit/gateway/order_entry_rest.hpp"
 
-#include <algorithm>
-#include <utility>
-
 #include "roq/mask.hpp"
 
 #include "roq/utils/common.hpp"
 #include "roq/utils/safe_cast.hpp"
-#include "roq/utils/update.hpp"
 
 #include "roq/utils/metrics/factory.hpp"
 

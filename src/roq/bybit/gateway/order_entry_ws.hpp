@@ -3,9 +3,6 @@
 #pragma once
 
 #include <string>
-#include <string_view>
-
-#include "roq/utils/container.hpp"
 
 #include "roq/utils/metrics/counter.hpp"
 #include "roq/utils/metrics/latency.hpp"
@@ -14,8 +11,6 @@
 #include "roq/io/context.hpp"
 
 #include "roq/web/socket/client.hpp"
-
-#include "roq/core/download.hpp"
 
 #include "roq/core/json/buffer_stack.hpp"
 
@@ -79,7 +74,8 @@ struct OrderEntryWS final : public OrderEntry, public web::socket::Client::Handl
   void operator()(Trace<protocol::json::AmendOrder2> const &) override;
   void operator()(Trace<protocol::json::CancelOrder2> const &) override;
 
- private:
+  // helpers
+
   bool ready() const;
 
   void operator()(ConnectionStatus, std::string_view const &reason = {});
@@ -88,6 +84,7 @@ struct OrderEntryWS final : public OrderEntry, public web::socket::Client::Handl
 
   void parse(std::string_view const &message);
 
+ private:
   OrderEntry::Handler &handler_;
   // config
   uint16_t const stream_id_;

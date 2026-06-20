@@ -6,7 +6,6 @@
 
 #include <memory>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "roq/server.hpp"
@@ -80,7 +79,7 @@ struct Controller final : public server::Handler, public Rest::Handler, public O
 
   void operator()(Trace<OrderEntry::Response> const &) override;
 
-  // utilities
+  // helpers
 
   void ensure_symbol_slices(size_t size);
 
@@ -112,8 +111,6 @@ struct Controller final : public server::Handler, public Rest::Handler, public O
   utils::unordered_map<std::string, std::unique_ptr<OrderEntry>> order_entry_ws_;
   utils::unordered_map<std::string, std::unique_ptr<DropCopy>> drop_copy_;
   std::vector<std::unique_ptr<MarketData>> market_data_;
-  // cache
-  std::vector<MBPUpdate> bids_, asks_;
 };
 
 }  // namespace gateway

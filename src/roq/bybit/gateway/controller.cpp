@@ -2,13 +2,7 @@
 
 #include "roq/bybit/gateway/controller.hpp"
 
-#include <algorithm>
-#include <cctype>
-#include <limits>
-
 #include "roq/logging.hpp"
-
-#include "roq/clock.hpp"
 
 #include "roq/server/oms/exceptions.hpp"
 
@@ -16,8 +10,6 @@
 
 #include "roq/bybit/gateway/order_entry_rest.hpp"
 #include "roq/bybit/gateway/order_entry_ws.hpp"
-
-#include "roq/bybit/protocol/json/utils.hpp"
 
 using namespace std::literals;
 

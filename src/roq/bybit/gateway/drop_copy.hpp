@@ -3,7 +3,6 @@
 #pragma once
 
 #include <string>
-#include <string_view>
 
 #include "roq/utils/container.hpp"
 
@@ -15,11 +14,7 @@
 
 #include "roq/web/socket/client.hpp"
 
-#include "roq/core/download.hpp"
-
 #include "roq/core/json/buffer_stack.hpp"
-
-#include "roq/server.hpp"
 
 #include "roq/bybit/gateway/account.hpp"
 #include "roq/bybit/gateway/shared.hpp"
@@ -47,6 +42,8 @@ struct DropCopy final : public web::socket::Client::Handler, protocol::json::Par
   void operator()(Event<Timer> const &);
 
   void operator()(metrics::Writer &) const;
+
+  // cross-communication
 
   void operator()(Rest::SymbolsUpdate &);
 
@@ -81,7 +78,8 @@ struct DropCopy final : public web::socket::Client::Handler, protocol::json::Par
   void operator()(Trace<protocol::json::Order> const &) override;
   void operator()(Trace<protocol::json::Execution> const &) override;
 
- private:
+  // helpers
+
   void operator()(ConnectionStatus, std::string_view const &reason = {});
 
   void send_login();
@@ -92,6 +90,7 @@ struct DropCopy final : public web::socket::Client::Handler, protocol::json::Par
 
   void parse(std::string_view const &message);
 
+ private:
   Handler &handler_;
   // config
   uint16_t const stream_id_;
