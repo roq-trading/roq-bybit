@@ -159,7 +159,7 @@ struct OrderEntryREST final : public OrderEntry, public web::rest::Client::Handl
   void waf_limit_violation();
 
  private:
-  OrderEntry::Handler &handler_;
+  [[maybe_unused]] OrderEntry::Handler &handler_;
   // config
   uint16_t const stream_id_;
   std::string const name_;
