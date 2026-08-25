@@ -299,7 +299,13 @@ void DropCopy::operator()(Trace<protocol::json::Auth> const &event) {
       (*this)(ConnectionStatus::READY);
       subscribe();
     } else {
-      log::fatal("Unexpected: auth={}"sv, auth);
+      if (shared_.settings.experimental.retry_logon) {
+        log::error("auth={}"sv, auth);
+        log::warn("Disconnecting..."sv);
+        (*connection_).close();
+      } else {
+        log::fatal("auth={}"sv, auth);
+      }
     }
   });
 }
