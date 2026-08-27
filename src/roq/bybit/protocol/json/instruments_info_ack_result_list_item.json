@@ -138,6 +138,18 @@
     {
       "name": "symbolId",
       "type": "std/int32"
+    },
+    {
+      "name": "fullName",
+      "type": "std/string_view"
+    },
+    {
+      "name": "marketRegion",
+      "type": "std/string_view"
+    },
+    {
+      "name": "underlyingTicker",
+      "type": "std/string_view"
     }
   ]
 }
