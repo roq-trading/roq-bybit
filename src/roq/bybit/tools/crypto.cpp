@@ -19,14 +19,6 @@ namespace roq {
 namespace bybit {
 namespace tools {
 
-// === HELPERS ===
-
-namespace {
-auto create_hmac(auto const &secret) {
-  return utils::mac::HMAC<utils::hash::SHA256>{secret};
-}
-}  // namespace
-
 // === IMPLEMENTATION ===
 
 Crypto::Crypto(std::string_view const &key, std::string_view const &secret, std::chrono::milliseconds recv_window)
