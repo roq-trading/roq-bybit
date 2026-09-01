@@ -159,6 +159,10 @@
     {
       "name": "openTime",
       "type": "std/milliseconds"
+    },
+    {
+      "name": "netDeltaRatio",
+      "type": "std/double"
     }
   ]
 }
