@@ -35,6 +35,8 @@ roq::Error map_error(int32_t ret_code) {
       break;
     case 10005:  // Permission denied
       break;
+    case 110001:  //  Order does not exist
+      return Error::TOO_LATE_TO_MODIFY_OR_CANCEL;
     case 33004:  // api_key expire
       break;
     case 12940:  // Connection reset
