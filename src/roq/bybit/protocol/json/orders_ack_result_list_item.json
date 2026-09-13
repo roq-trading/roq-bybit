@@ -192,6 +192,10 @@
     },
     {
       "name": "cumFeeDetail"
+    },
+    {
+      "name": "parentOrderLinkId",
+      "type": "std/string_view"
     }
   ]
 }
