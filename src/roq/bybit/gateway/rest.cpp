@@ -272,6 +272,7 @@ void Rest::operator()(Trace<protocol::json::InstrumentsInfoAck> const &event) {
         .description = item.display_name,
         .security_type = map(item.contract_type, item.options_type),
         .external_security_id = {},
+        .market_segment = {},
         .cfi_code = {},
         .base_currency = item.base_coin,
         .quote_currency = item.quote_coin,
