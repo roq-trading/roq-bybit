@@ -56,6 +56,7 @@ TEST_CASE("create_order", "[json_encoder]") {
       .order_type = OrderType::LIMIT,
       .time_in_force = TimeInForce::GTC,
       .execution_instructions = {},
+      .execution_destination = {},
       .request_template = {},
       .quantity = 1.2345,
       .price = 23456.78,

@@ -28,6 +28,7 @@ auto const CREATE_ORDER = CreateOrder{
     .order_type = OrderType::LIMIT,
     .time_in_force = TimeInForce::GTC,
     .execution_instructions = {},
+    .execution_destination = {},
     .request_template = {},
     .quantity = 0.001,
     .price = 17123.45,
