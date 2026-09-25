@@ -111,9 +111,10 @@ void Rest::operator()(Event<Stop> const &) {
 
 void Rest::operator()(Event<Timer> const &event) {
   auto &[message_info, timer] = event;
-  (*connection_).refresh(timer.now);
-  if (ready()) {
-    check_request_queue(timer.now);
+  if ((*connection_).refresh(timer.now, shared_.rate_limit)) {
+    if (ready()) {
+      check_request_queue(timer.now);
+    }
   }
 }
 
@@ -177,6 +178,10 @@ void Rest::operator()(Trace<web::rest::Client::Latency> const &event) {
   };
   create_trace_and_dispatch(shared_.dispatcher, trace_info, external_latency);
   latency_.ping.update(latency.sample);
+}
+
+void Rest::operator()(Trace<web::rest::Client::Header> const &event) {
+  shared_.rate_limit(event);
 }
 
 uint32_t Rest::download(State state) {
@@ -429,7 +434,9 @@ void Rest::check_request_queue(std::chrono::nanoseconds now) {
   shared_.time_series_request_queue.dispatch(can_request, request, now);
 }
 
-void Rest::process_response(web::rest::Response const &response, auto error_handler, auto success_handler) {
+void Rest::process_response(Trace<web::rest::Response> const &event, auto error_handler, auto success_handler) {
+  auto &[trace_info, response] = event;
+  shared_.rate_limit(event);
   try {
     auto [status, category, body] = response.result();
     switch (category) {

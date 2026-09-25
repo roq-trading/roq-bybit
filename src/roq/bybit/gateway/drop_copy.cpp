@@ -115,7 +115,8 @@ void DropCopy::operator()(Event<Stop> const &) {
 }
 
 void DropCopy::operator()(Event<Timer> const &event) {
-  (*connection_).refresh(event.value.now);
+  auto &[message_info, timer] = event;
+  (*connection_).refresh(timer.now, shared_.rate_limit);
 }
 
 void DropCopy::operator()(metrics::Writer &writer) const {

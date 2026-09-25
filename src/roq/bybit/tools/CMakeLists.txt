@@ -1,6 +1,6 @@
 set(TARGET_NAME ${PROJECT_NAME}-tools)
 
-set(SOURCES crypto.cpp)
+set(SOURCES crypto.cpp rate_limit.cpp)
 
 add_library(${TARGET_NAME} OBJECT ${SOURCES})
 

@@ -157,10 +157,11 @@ void MarketData::operator()(Event<Stop> const &) {
 }
 
 void MarketData::operator()(Event<Timer> const &event) {
-  auto now = event.value.now;
-  (*connection_).refresh(now);
-  if (ready() && next_ping_ < now) {
-    send_ping(now);
+  auto &[message_info, timer] = event;
+  if ((*connection_).refresh(timer.now, shared_.rate_limit)) {
+    if (ready() && next_ping_ < timer.now) {
+      send_ping(timer.now);
+    }
   }
 }
 

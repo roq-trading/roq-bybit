@@ -144,10 +144,11 @@ void OrderEntryREST::operator()(Event<Stop> const &) {
 }
 
 void OrderEntryREST::operator()(Event<Timer> const &event) {
-  auto now = event.value.now;
-  (*connection_).refresh(now);
-  if (ready()) {
-    check_request_queue(now);
+  auto &[message_info, timer] = event;
+  if ((*connection_).refresh(timer.now, shared_.rate_limit)) {
+    if (ready()) {
+      check_request_queue(timer.now);
+    }
   }
 }
 
@@ -236,6 +237,10 @@ void OrderEntryREST::operator()(Trace<web::rest::Client::Latency> const &event) 
   };
   create_trace_and_dispatch(shared_.dispatcher, trace_info, external_latency);
   latency_.ping.update(latency.sample);
+}
+
+void OrderEntryREST::operator()(Trace<web::rest::Client::Header> const &event) {
+  shared_.rate_limit(event);
 }
 
 // helpers
@@ -1302,7 +1307,9 @@ void OrderEntryREST::operator()(Trace<protocol::json::CancelAllOrdersAck> const 
 
 // helpers
 
-void OrderEntryREST::process_response(web::rest::Response const &response, auto error_handler, auto success_handler) {
+void OrderEntryREST::process_response(Trace<web::rest::Response> const &event, auto error_handler, auto success_handler) {
+  auto &[trace_info, response] = event;
+  shared_.rate_limit(event);
   try {
     auto [status, category, body] = response.result();
     switch (category) {
@@ -1322,7 +1329,6 @@ void OrderEntryREST::process_response(web::rest::Response const &response, auto 
           case FORBIDDEN:           // 403
             waf_limit_violation();  // note! this is *very* serious
             [[fallthrough]];
-          case I_AM_A_TEAPOT:        // 418
           case TOO_MANY_REQUESTS: {  // 429
             auto text = fmt::format("{}"sv, status);
             error_handler(Origin::EXCHANGE, RequestStatus::REJECTED, Error::REQUEST_RATE_LIMIT_REACHED, text);
@@ -1358,7 +1364,6 @@ void OrderEntryREST::waf_limit_violation() {
     log::fatal("WAF limit violation"sv);
   } else {
     log::warn("WAF limit violation"sv);
-    (*connection_).suspend_for(shared_.settings.rest.back_off_delay);
   }
 }
 

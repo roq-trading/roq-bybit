@@ -54,6 +54,7 @@ struct Rest final : public web::rest::Client::Handler {
   void operator()(Trace<web::rest::Client::Connected> const &) override;
   void operator()(Trace<web::rest::Client::Disconnected> const &) override;
   void operator()(Trace<web::rest::Client::Latency> const &) override;
+  void operator()(Trace<web::rest::Client::Header> const &) override;
 
   void operator()(ConnectionStatus, std::string_view const &reason = {});
 
@@ -81,7 +82,7 @@ struct Rest final : public web::rest::Client::Handler {
 
   void check_request_queue(std::chrono::nanoseconds now);
 
-  void process_response(web::rest::Response const &, auto error_handler, auto success_handler);
+  void process_response(Trace<web::rest::Response> const &, auto error_handler, auto success_handler);
 
  private:
   Handler &handler_;

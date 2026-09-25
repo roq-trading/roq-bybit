@@ -71,6 +71,7 @@ struct OrderEntryREST final : public OrderEntry, public web::rest::Client::Handl
   void operator()(Trace<web::rest::Client::Connected> const &) override;
   void operator()(Trace<web::rest::Client::Disconnected> const &) override;
   void operator()(Trace<web::rest::Client::Latency> const &) override;
+  void operator()(Trace<web::rest::Client::Header> const &) override;
 
   // helpers
 
@@ -154,7 +155,7 @@ struct OrderEntryREST final : public OrderEntry, public web::rest::Client::Handl
 
   // helpers
 
-  void process_response(web::rest::Response const &, auto error_handler, auto success_handler);
+  void process_response(Trace<web::rest::Response> const &, auto error_handler, auto success_handler);
 
   void waf_limit_violation();
 

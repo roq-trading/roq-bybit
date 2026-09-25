@@ -150,6 +150,10 @@
     {
       "name": "underlyingTicker",
       "type": "std/string_view"
+    },
+    {
+      "name": "tags",
+      "type": "std/string_view"
     }
   ]
 }
