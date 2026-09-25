@@ -1358,7 +1358,7 @@ void OrderEntryREST::waf_limit_violation() {
     log::fatal("WAF limit violation"sv);
   } else {
     log::warn("WAF limit violation"sv);
-    (*connection_).suspend(shared_.settings.rest.back_off_delay);
+    (*connection_).suspend_for(shared_.settings.rest.back_off_delay);
   }
 }
 
