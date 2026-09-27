@@ -68,10 +68,9 @@ struct OrderEntryREST final : public OrderEntry, public web::rest::Client::Handl
 
   // web::rest::Client::Handler
 
-  void operator()(Trace<web::rest::Client::Connected> const &) override;
-  void operator()(Trace<web::rest::Client::Disconnected> const &) override;
-  void operator()(Trace<web::rest::Client::Latency> const &) override;
-  void operator()(Trace<web::rest::Client::Header> const &) override;
+  void operator()(Trace<web::rest::Connected> const &) override;
+  void operator()(Trace<web::rest::Disconnected> const &) override;
+  void operator()(Trace<web::rest::Latency> const &) override;
 
   // helpers
 

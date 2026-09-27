@@ -2,8 +2,6 @@
 
 #include "roq/bybit/tools/rate_limit.hpp"
 
-#include "roq/logging.hpp"
-
 #include "roq/utils/compare.hpp"
 #include "roq/utils/update.hpp"
 
@@ -62,7 +60,15 @@ static_assert(parse_header("X-Bapi-Limit-Reset-Timestamp"sv) == Header::X_BAPI_L
 
 // === IMPLEMENTATION ===
 
-void RateLimit::operator()(Trace<web::rest::Client::Header> const &event) {
+RateLimit::RateLimit(flags::Settings const &settings) : suspend_on_rate_limit_{settings.experimental.suspend_on_rate_limit} {
+}
+
+// web::rest::Interceptor
+
+void RateLimit::operator()(Trace<web::rest::MessageBegin> const &) {
+}
+
+void RateLimit::operator()(Trace<web::rest::MessageHeader> const &event) {
   auto &[trace_info, header] = event;
   auto update_value = [&](auto &result) {
     using value_type = std::remove_cvref_t<decltype(result)>;
@@ -70,12 +76,15 @@ void RateLimit::operator()(Trace<web::rest::Client::Header> const &event) {
     return utils::update(result, value);
   };
   auto update_suspend_until = [&]() {
-    if (limit_status_ > 0 || limit_reset_timestamp_ == 0) {
+    if (!suspend_on_rate_limit_) {
+      return;
+    }
+    if (params_.limit_status > 0 || params_.limit_reset_timestamp == 0) {
       suspend_until_ = {};
     } else {
       auto now = clock::get_system();
       auto now_utc = clock::get_realtime();
-      auto timestamp = std::chrono::milliseconds{limit_reset_timestamp_};
+      auto timestamp = std::chrono::milliseconds{params_.limit_reset_timestamp};
       if (now_utc < timestamp) {
         auto period = timestamp - now_utc;
         suspend_until_ = std::max(suspend_until_, now + period);
@@ -90,24 +99,27 @@ void RateLimit::operator()(Trace<web::rest::Client::Header> const &event) {
     [[likely]] case UNKNOWN:
       return;
     case X_BAPI_LIMIT:
-      update_value(limit_);
+      update_value(params_.limit);
       break;
     case X_BAPI_LIMIT_STATUS:
-      if (update_value(limit_status_)) {
+      if (update_value(params_.limit_status)) {
         update_suspend_until();
       }
       break;
     case X_BAPI_LIMIT_RESET_TIMESTAMP:
-      if (update_value(limit_reset_timestamp_)) {
+      if (update_value(params_.limit_reset_timestamp)) {
         update_suspend_until();
       }
       break;
   }
 }
 
-void RateLimit::operator()(Trace<web::rest::Response> const &event) {
-  auto &[trace_info, response] = event;
-  switch (response.status()) {
+void RateLimit::operator()(Trace<web::rest::MessageEnd> const &event) {
+  auto &[trace_info, message_end] = event;
+  if (!suspend_on_rate_limit_) {
+    return;
+  }
+  switch (message_end.status) {
     using enum web::http::Status;
     [[unlikely]] case FORBIDDEN: {  // 403
       auto now = clock::get_system();
@@ -125,6 +137,8 @@ void RateLimit::operator()(Trace<web::rest::Response> const &event) {
       break;
   }
 }
+
+// web::socket::Interceptor
 
 }  // namespace tools
 }  // namespace bybit

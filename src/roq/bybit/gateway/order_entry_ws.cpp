@@ -51,7 +51,7 @@ auto create_name(auto stream_id) {
   return fmt::format("{}:{}"sv, stream_id, NAME);
 }
 
-auto create_connection(auto &handler, auto &settings, auto &context) {
+auto create_connection(auto &handler, auto &settings, auto &context, auto &shared) {
   auto uri = settings.ws.trade_uri;
   auto config = web::socket::Client::Config{
       // connection
@@ -73,7 +73,7 @@ auto create_connection(auto &handler, auto &settings, auto &context) {
       .decode_buffer_size = settings.misc.decode_buffer_size,
       .encode_buffer_size = settings.misc.encode_buffer_size,
   };
-  return web::socket::Client::create(handler, context, config, []() { return std::string(); });
+  return web::socket::Client::create(handler, context, config, shared.rate_limit, []() { return std::string(); });
 }
 
 struct create_metrics final : public utils::metrics::Factory {
@@ -84,7 +84,7 @@ struct create_metrics final : public utils::metrics::Factory {
 // === IMPLEMENTATION ===
 
 OrderEntryWS::OrderEntryWS(OrderEntry::Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, connection_{create_connection(*this, shared.settings, context)},
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, connection_{create_connection(*this, shared.settings, context, shared)},
       decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
@@ -114,7 +114,7 @@ void OrderEntryWS::operator()(Event<Stop> const &) {
 
 void OrderEntryWS::operator()(Event<Timer> const &event) {
   auto &[message_info, timer] = event;
-  (*connection_).refresh(timer.now, shared_.rate_limit);
+  (*connection_).refresh(timer.now);
 }
 
 void OrderEntryWS::operator()(metrics::Writer &writer) const {
@@ -206,14 +206,6 @@ void OrderEntryWS::operator()(web::socket::Client::Disconnected const &) {
   account_.request_queue.clear();
 }
 
-void OrderEntryWS::operator()(web::socket::Client::Ready const &) {
-  send_login();
-  (*this)(ConnectionStatus::LOGIN_SENT);
-}
-
-void OrderEntryWS::operator()(web::socket::Client::Close const &) {
-}
-
 void OrderEntryWS::operator()(web::socket::Client::Latency const &latency) {
   TraceInfo trace_info;
   auto external_latency = ExternalLatency{
@@ -223,6 +215,14 @@ void OrderEntryWS::operator()(web::socket::Client::Latency const &latency) {
   };
   create_trace_and_dispatch(shared_.dispatcher, trace_info, external_latency);
   latency_.ping.update(latency.sample);
+}
+
+void OrderEntryWS::operator()(web::socket::Client::Ready const &) {
+  send_login();
+  (*this)(ConnectionStatus::LOGIN_SENT);
+}
+
+void OrderEntryWS::operator()(web::socket::Client::Close const &) {
 }
 
 void OrderEntryWS::operator()(web::socket::Client::Text const &text) {

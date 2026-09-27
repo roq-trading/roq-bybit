@@ -4,30 +4,44 @@
 
 #include <chrono>
 
-#include "roq/web/rest/client.hpp"
-#include "roq/web/rest/response.hpp"
+#include <fmt/format.h>
+
+#include "roq/web/rest/interceptor.hpp"
+
+#include "roq/web/socket/interceptor.hpp"
+
+#include "roq/bybit/flags/settings.hpp"
 
 namespace roq {
 namespace bybit {
 namespace tools {
 
-struct RateLimit final {
-  RateLimit() = default;
+struct RateLimit final : public web::rest::Interceptor, public web::socket::Interceptor {
+  explicit RateLimit(flags::Settings const &);
 
-  RateLimit(RateLimit &&) = default;
-  RateLimit(RateLimit const &) = delete;
+  struct Params {
+    int32_t limit = {};
+    int32_t limit_status = {};
+    int64_t limit_reset_timestamp = {};  // msec
+  };
 
-  operator std::chrono::nanoseconds() const { return suspend_until_; }
+ protected:
+  // web::Interceptor
 
-  void operator()(Trace<web::rest::Client::Header> const &);
-  void operator()(Trace<web::rest::Response> const &);
+  operator std::chrono::nanoseconds() const override { return suspend_until_; }
 
-  void suspend();
+  // web::rest::Interceptor
+
+  void operator()(Trace<web::rest::MessageBegin> const &) override;
+  void operator()(Trace<web::rest::MessageHeader> const &) override;
+  void operator()(Trace<web::rest::MessageEnd> const &) override;
+
+  // web::socket::Interceptor
 
  private:
-  int32_t limit_ = {};
-  int32_t limit_status_ = {};
-  int64_t limit_reset_timestamp_ = {};  // msec
+  bool const suspend_on_rate_limit_;
+
+  Params params_;
 
   std::chrono::nanoseconds suspend_until_ = {};
 };
@@ -35,3 +49,21 @@ struct RateLimit final {
 }  // namespace tools
 }  // namespace bybit
 }  // namespace roq
+
+template <>
+struct fmt::formatter<roq::bybit::tools::RateLimit::Params> {
+  constexpr auto parse(format_parse_context &context) { return std::begin(context); }
+  auto format(roq::bybit::tools::RateLimit::Params const &value, format_context &context) const {
+    using namespace std::literals;
+    return fmt::format_to(
+        context.out(),
+        R"({{)"
+        R"(limit={}, )"
+        R"(limit_status={}, )"
+        R"(limit_reset_timestamp={})"
+        R"(}})"sv,
+        value.limit,
+        value.limit_status,
+        value.limit_reset_timestamp);
+  }
+};
