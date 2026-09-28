@@ -17,7 +17,7 @@
 #include "roq/bybit/gateway/api.hpp"
 #include "roq/bybit/gateway/settings.hpp"
 
-#include "roq/bybit/tools/rate_limit.hpp"
+#include "roq/bybit/tools/throttle.hpp"
 
 namespace roq {
 namespace bybit {
@@ -33,7 +33,7 @@ struct Shared final {
   Settings const &settings;
   API const api;
 
-  tools::RateLimit rate_limit;
+  tools::Throttle throttle;
 
   core::limit::RateLimiter rate_limiter;
 
