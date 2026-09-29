@@ -27,7 +27,7 @@ std::string_view Encoder::place_order(
   buffer.clear();
   auto side = map(create_order.side).template get<Side>();
   auto order_type = map(create_order.order_type).template get<OrderType>();
-  auto time_in_force = map(create_order.time_in_force).template get<TimeInForce>();
+  auto time_in_force = map(create_order.time_in_force, create_order.execution_instructions).template get<TimeInForce>();
   auto reduce_only = create_order.execution_instructions.has(ExecutionInstruction::DO_NOT_INCREASE);
   fmt::format_to(
       std::back_inserter(buffer),
@@ -155,7 +155,7 @@ std::string_view Encoder::place_order_ws(
   buffer.clear();
   auto side = map(create_order.side).template get<Side>();
   auto order_type = map(create_order.order_type).template get<OrderType>();
-  auto time_in_force = map(create_order.time_in_force).template get<TimeInForce>();
+  auto time_in_force = map(create_order.time_in_force, create_order.execution_instructions).template get<TimeInForce>();
   auto reduce_only = create_order.execution_instructions.has(ExecutionInstruction::DO_NOT_INCREASE);
   fmt::format_to(
       std::back_inserter(buffer),

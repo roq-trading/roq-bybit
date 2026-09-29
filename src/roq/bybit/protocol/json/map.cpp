@@ -253,7 +253,7 @@ constexpr Helper<bybit::protocol::json::TimeInForce>::operator std::optional<roq
     case IOC:
       return roq::TimeInForce::IOC;
     case POST_ONLY:
-      return roq::TimeInForce::UNDEFINED;
+      return roq::TimeInForce::GTC;
   }
   return {};
 }
@@ -262,7 +262,7 @@ static_assert(Helper{bybit::protocol::json::TimeInForce{bybit::protocol::json::T
 static_assert(Helper{bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::GTC}} == roq::TimeInForce::GTC);
 static_assert(Helper{bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::FOK}} == roq::TimeInForce::FOK);
 static_assert(Helper{bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::IOC}} == roq::TimeInForce::IOC);
-static_assert(Helper{bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::POST_ONLY}} == roq::TimeInForce::UNDEFINED);
+static_assert(Helper{bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::POST_ONLY}} == roq::TimeInForce::GTC);
 
 template <>
 template <>
@@ -390,19 +390,25 @@ std::optional<bybit::protocol::json::Side> Map<roq::Side>::helper() const {
   return Helper{args_};
 }
 
-// roq::TimeInForce ==> bybit::protocol::json::TimeInForce
+// {roq::TimeInForce, Mask<ExecutionInstruction>} ==> bybit::protocol::json::TimeInForce
 
 template <>
 template <>
-constexpr Helper<roq::TimeInForce>::operator std::optional<bybit::protocol::json::TimeInForce>() const {
-  switch (std::get<0>(args_)) {
+constexpr Helper<roq::TimeInForce, Mask<ExecutionInstruction>>::operator std::optional<bybit::protocol::json::TimeInForce>() const {
+  auto &[time_in_force, execution_instructions] = args_;
+  auto participate_do_not_initiate = execution_instructions.has(ExecutionInstruction::PARTICIPATE_DO_NOT_INITIATE);
+  switch (time_in_force) {
     using enum roq::TimeInForce;
     case UNDEFINED:
       return bybit::protocol::json::TimeInForce::UNDEFINED_INTERNAL;
     case GFD:
       return bybit::protocol::json::TimeInForce::UNDEFINED_INTERNAL;
     case GTC:
-      return bybit::protocol::json::TimeInForce::GTC;
+      if (participate_do_not_initiate) {
+        return bybit::protocol::json::TimeInForce::POST_ONLY;
+      } else {
+        return bybit::protocol::json::TimeInForce::GTC;
+      }
     case OPG:
       return bybit::protocol::json::TimeInForce::UNDEFINED_INTERNAL;
     case IOC:
@@ -429,14 +435,19 @@ constexpr Helper<roq::TimeInForce>::operator std::optional<bybit::protocol::json
   return {};
 }
 
-static_assert(Helper{roq::TimeInForce::UNDEFINED} == bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::UNDEFINED_INTERNAL});
-static_assert(Helper{roq::TimeInForce::GTC} == bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::GTC});
-static_assert(Helper{roq::TimeInForce::IOC} == bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::IOC});
-static_assert(Helper{roq::TimeInForce::FOK} == bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::FOK});
+static_assert(
+    Helper{roq::TimeInForce::UNDEFINED, Mask<ExecutionInstruction>{}} ==
+    bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::UNDEFINED_INTERNAL});
+static_assert(Helper{roq::TimeInForce::GTC, Mask<ExecutionInstruction>{}} == bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::GTC});
+static_assert(Helper{roq::TimeInForce::IOC, Mask<ExecutionInstruction>{}} == bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::IOC});
+static_assert(Helper{roq::TimeInForce::FOK, Mask<ExecutionInstruction>{}} == bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::FOK});
+static_assert(
+    Helper{roq::TimeInForce::GTC, Mask{ExecutionInstruction::PARTICIPATE_DO_NOT_INITIATE}} ==
+    bybit::protocol::json::TimeInForce{bybit::protocol::json::TimeInForce::POST_ONLY});
 
 template <>
 template <>
-std::optional<bybit::protocol::json::TimeInForce> Map<roq::TimeInForce>::helper() const {
+std::optional<bybit::protocol::json::TimeInForce> Map<roq::TimeInForce, Mask<ExecutionInstruction>>::helper() const {
   return Helper{args_};
 }
 

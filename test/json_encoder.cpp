@@ -84,6 +84,49 @@ TEST_CASE("create_order", "[json_encoder]") {
   CHECK(buffer == expected);
 }
 
+TEST_CASE("create_order_post_only", "[json_encoder]") {
+  std::string buffer;
+  auto create_order = CreateOrder{
+      .account = "A1"sv,
+      .order_id = 1000,
+      .exchange = "bybit",
+      .symbol = SYMBOL,
+      .side = Side::BUY,
+      .position_effect = {},
+      .margin_mode = {},
+      .quantity_type = {},
+      .max_show_quantity = NaN,
+      .order_type = OrderType::LIMIT,
+      .time_in_force = TimeInForce::GTC,
+      .execution_instructions = {ExecutionInstruction::PARTICIPATE_DO_NOT_INITIATE},
+      .execution_destination = {},
+      .request_template = {},
+      .quantity = 1.2345,
+      .price = 23456.78,
+      .stop_price = NaN,
+      .leverage = NaN,
+      .routing_id = {},
+      .strategy_id = {},
+      .release_time_utc = {},
+  };
+  auto order = create_order_helper();
+  auto ref_data = create_ref_data();
+  auto request_id = "1234"sv;
+  protocol::json::Encoder::place_order(buffer, create_order, order, ref_data, request_id, protocol::json::Category::SPOT);
+  auto expected = R"({)"
+                  R"("category":"spot",)"
+                  R"("symbol":"BTCUSDT",)"
+                  R"("side":"Buy",)"
+                  R"("orderType":"Limit",)"
+                  R"("qty":"1.2345",)"
+                  R"("timeInForce":"PostOnly",)"
+                  R"("reduceOnly":false,)"
+                  R"("price":"23456.78",)"
+                  R"("orderLinkId":"1234")"
+                  R"(})";
+  CHECK(buffer == expected);
+}
+
 // modify-order
 
 TEST_CASE("modify_order_price", "[json_encoder]") {

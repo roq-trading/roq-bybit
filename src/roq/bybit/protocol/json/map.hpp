@@ -70,6 +70,6 @@ std::optional<bybit::protocol::json::Side> Map<Side>::helper() const;
 
 template <>
 template <>
-std::optional<bybit::protocol::json::TimeInForce> Map<TimeInForce>::helper() const;
+std::optional<bybit::protocol::json::TimeInForce> Map<TimeInForce, Mask<ExecutionInstruction>>::helper() const;
 
 }  // namespace roq
