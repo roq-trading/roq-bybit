@@ -457,6 +457,8 @@ void MarketData::operator()(Trace<protocol::json::PublicTrade> const &event) {
         previous = item.symbol;
       }
       auto trade_2 = Trade{
+          .trade_conditions = {},
+          .trade_type = {},
           .side = map(item.side),
           .price = item.price,
           .quantity = item.quantity,
