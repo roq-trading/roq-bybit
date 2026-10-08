@@ -16,6 +16,10 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
+#include "roq/server.hpp"
+
+#include "roq/server/stream.hpp"
+
 #include "roq/bybit/gateway/shared.hpp"
 
 #include "roq/bybit/protocol/json/parser.hpp"
@@ -24,22 +28,32 @@ namespace roq {
 namespace bybit {
 namespace gateway {
 
-struct MarketData final : public web::socket::Client::Handler, public protocol::json::Parser::Handler {
+struct MarketData final : public Base<MarketData>,
+                          public server::MarketDataStream,
+                          public web::socket::Client::Handler,
+                          public protocol::json::Parser::Handler {
   struct Handler {};
 
   MarketData(Handler &, io::Context &, uint16_t stream_id, Shared &, size_t index);
 
-  MarketData(MarketData const &) = delete;
+  // protected:
+  friend base_type;
 
-  uint16_t stream_id() const { return stream_id_; }
+  // server::Stream
 
-  bool ready() const { return connection_status_ == ConnectionStatus::READY; }
+  uint16_t stream_id() const override { return stream_id_; }
 
-  void operator()(Event<Start> const &);
-  void operator()(Event<Stop> const &);
-  void operator()(Event<Timer> const &);
+  bool ready() const override { return connection_status_ == ConnectionStatus::READY; }
 
-  void operator()(metrics::Writer &) const;
+  void operator()(Event<Start> const &) override;
+  void operator()(Event<Stop> const &) override;
+  void operator()(Event<Timer> const &) override;
+
+  void operator()(metrics::Writer &) const override;
+
+  void operator()(Trace<ConnectionStatus> const &, std::string_view const &reason = {}) override;
+
+  // server::MarketDataStream
 
   void subscribe(size_t start_from = 0);
 
@@ -55,8 +69,6 @@ struct MarketData final : public web::socket::Client::Handler, public protocol::
   void operator()(Trace<web::socket::Binary> const &) override;
 
   // helpers
-
-  void operator()(ConnectionStatus, std::string_view const &reason = {});
 
   void subscribe(std::span<Symbol const> const &symbols);
   void subscribe(std::string_view const &topic, std::span<Symbol const> const &symbols);

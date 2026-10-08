@@ -102,6 +102,57 @@ DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, A
       account_{account}, shared_{shared} {
 }
 
+void DropCopy::operator()(Rest::SymbolsUpdate &symbols_update) {
+  for (auto &symbol : symbols_update.symbols) {
+    if (!shared_.dispatcher.can_account_trade_symbol(account_.name, shared_.settings.exchange, symbol)) {
+      continue;
+    }
+    [[maybe_unused]] auto res = symbols_.emplace(static_cast<std::string_view>(symbol));
+    assert(res.second);
+    if ((*connection_).ready()) {
+      if (shared_.api.api != tools::API::SPOT) {
+        account_.request_queue.emplace_back("position"sv, symbol);
+      }
+      account_.request_queue.emplace_back("order"sv, symbol);
+      account_.request_queue.emplace_back("execution"sv, symbol);
+    }
+  }
+}
+
+void DropCopy::operator()(Trace<OrderEntryREST::Response> const &event) {
+  auto &[trace_info, response] = event;
+  if (response.topic == "wallet"sv) {
+    log::debug("WALLET"sv);
+  } else if (response.topic == "position"sv) {
+    log::debug("POSITION"sv);
+  } else if (response.topic == "order"sv) {
+    log::debug("ORDER"sv);
+  } else if (response.topic == "execution"sv) {
+    log::debug("EXECUTION"sv);
+  } else {
+    log::fatal("Unexpected"sv);
+    // log::fatal("Unexpected: response={}"sv, response);
+  }
+}
+
+void DropCopy::operator()(Trace<OrderEntryWS::Response> const &event) {
+  auto &[trace_info, response] = event;
+  if (response.topic == "wallet"sv) {
+    log::debug("WALLET"sv);
+  } else if (response.topic == "position"sv) {
+    log::debug("POSITION"sv);
+  } else if (response.topic == "order"sv) {
+    log::debug("ORDER"sv);
+  } else if (response.topic == "execution"sv) {
+    log::debug("EXECUTION"sv);
+  } else {
+    log::fatal("Unexpected"sv);
+    // log::fatal("Unexpected: response={}"sv, response);
+  }
+}
+
+// server::Stream
+
 bool DropCopy::ready() const {
   return (*connection_).ready();
 }
@@ -135,86 +186,9 @@ void DropCopy::operator()(metrics::Writer &writer) const {
       .write(latency_.heartbeat, metrics::Type::LATENCY);
 }
 
-void DropCopy::operator()(Rest::SymbolsUpdate &symbols_update) {
-  for (auto &symbol : symbols_update.symbols) {
-    if (!shared_.dispatcher.can_account_trade_symbol(account_.name, shared_.settings.exchange, symbol)) {
-      continue;
-    }
-    [[maybe_unused]] auto res = symbols_.emplace(static_cast<std::string_view>(symbol));
-    assert(res.second);
-    if ((*connection_).ready()) {
-      if (shared_.api.api != tools::API::SPOT) {
-        account_.request_queue.emplace_back("position"sv, symbol);
-      }
-      account_.request_queue.emplace_back("order"sv, symbol);
-      account_.request_queue.emplace_back("execution"sv, symbol);
-    }
-  }
-}
-
-void DropCopy::operator()(Trace<OrderEntry::Response> const &event) {
-  auto &[trace_info, response] = event;
-  if (response.topic == "wallet"sv) {
-    log::debug("WALLET"sv);
-  } else if (response.topic == "position"sv) {
-    log::debug("POSITION"sv);
-  } else if (response.topic == "order"sv) {
-    log::debug("ORDER"sv);
-  } else if (response.topic == "execution"sv) {
-    log::debug("EXECUTION"sv);
-  } else {
-    log::fatal("Unexpected"sv);
-    // log::fatal("Unexpected: response={}"sv, response);
-  }
-}
-
-// web::socket::Client::Handler
-
-void DropCopy::operator()(Trace<web::socket::Connected> const &) {
-  assert(logon_timeout_.count() == 0);
-  auto now = clock::get_system();
-  logon_timeout_ = now + shared_.settings.ws.request_timeout;
-}
-
-void DropCopy::operator()(Trace<web::socket::Disconnected> const &) {
-  ++counter_.disconnect;
-  (*this)(ConnectionStatus::DISCONNECTED);
-  logon_timeout_ = {};
-  next_ping_ = {};
-  account_.request_queue.clear();
-}
-
-void DropCopy::operator()(Trace<web::socket::Latency> const &event) {
-  auto &[trace_info, latency] = event;
-  auto external_latency = ExternalLatency{
-      .stream_id = stream_id_,
-      .account = account_.name,
-      .latency = latency.sample,
-  };
-  create_trace_and_dispatch(shared_.dispatcher, trace_info, external_latency);
-  latency_.ping.update(latency.sample);
-}
-
-void DropCopy::operator()(Trace<web::socket::Ready> const &) {
-  send_login();
-  (*this)(ConnectionStatus::LOGIN_SENT);
-}
-
-void DropCopy::operator()(Trace<web::socket::Close> const &) {
-}
-
-void DropCopy::operator()(Trace<web::socket::Text> const &event) {
-  auto &[trace_info, text] = event;
-  parse(text.payload);
-}
-
-void DropCopy::operator()(Trace<web::socket::Binary> const &) {
-  log::fatal("Unexpected"sv);
-}
-
-void DropCopy::operator()(ConnectionStatus connection_status, std::string_view const &reason) {
+void DropCopy::operator()(Trace<ConnectionStatus> const &event, std::string_view const &reason) {
+  auto &[trace_info, connection_status] = event;
   connection_status_ = connection_status;
-  TraceInfo trace_info;
   auto stream_status = StreamStatus{
       .stream_id = stream_id_,
       .account = account_.name,
@@ -234,56 +208,53 @@ void DropCopy::operator()(ConnectionStatus connection_status, std::string_view c
   create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
 }
 
-void DropCopy::send_login() {
-  auto now_utc = clock::get_realtime<std::chrono::milliseconds>();
-  auto expires_utc = now_utc + AUTH_EXPIRES;
-  auto signature = account_.create_signature(expires_utc);
-  auto message = fmt::format(
-      R"({{)"
-      R"("req_id":"auth",)"
-      R"("op": "auth",)"
-      R"("args":["{}",{},"{}"])"
-      R"(}})"sv,
-      account_.get_key(),
-      expires_utc.count(),
-      signature);
-  (*connection_).send_text(message);
+// web::socket::Client::Handler
+
+void DropCopy::operator()(Trace<web::socket::Connected> const &event) {
+  auto &[trace_info, connected] = event;
+  assert(logon_timeout_.count() == 0);
+  auto now = clock::get_system();
+  logon_timeout_ = now + shared_.settings.ws.request_timeout;
 }
 
-void DropCopy::subscribe() {
-  subscribe("wallet"sv);
-  if (shared_.api.api != tools::API::SPOT) {
-    subscribe("position"sv);
-  }
-  subscribe("order"sv);
-  subscribe("execution"sv);
+void DropCopy::operator()(Trace<web::socket::Disconnected> const &event) {
+  auto &[trace_info, disconnected] = event;
+  ++counter_.disconnect;
+  create_trace_and_dispatch_2(trace_info, ConnectionStatus::DISCONNECTED);
+  logon_timeout_ = {};
+  next_ping_ = {};
+  account_.request_queue.clear();
 }
 
-void DropCopy::subscribe(std::string_view const &topic) {
-  auto message = fmt::format(
-      R"({{)"
-      R"("req_id":"{}",)"
-      R"("op":"subscribe",)"
-      R"("args":["{}"])"
-      R"(}})"sv,
-      topic,
-      topic);
-  (*connection_).send_text(message);
+void DropCopy::operator()(Trace<web::socket::Latency> const &event) {
+  auto &[trace_info, latency] = event;
+  auto external_latency = ExternalLatency{
+      .stream_id = stream_id_,
+      .account = account_.name,
+      .latency = latency.sample,
+  };
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, external_latency);
+  latency_.ping.update(latency.sample);
 }
 
-void DropCopy::parse(std::string_view const &message) {
-  profile_.parse([&]() {
-    auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
-    try {
-      TraceInfo trace_info;
-      if (!protocol::json::Parser::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
-        log_message();
-      }
-    } catch (...) {
-      log_message();
-      utils::exceptions::Unhandled::terminate();
-    }
-  });
+void DropCopy::operator()(Trace<web::socket::Ready> const &event) {
+  auto &[trace_info, ready] = event;
+  send_login();
+  create_trace_and_dispatch_2(trace_info, ConnectionStatus::LOGIN_SENT);
+}
+
+void DropCopy::operator()(Trace<web::socket::Close> const &event) {
+  auto &[trace_info, close] = event;
+  log::warn("close={}"sv, close);
+}
+
+void DropCopy::operator()(Trace<web::socket::Text> const &event) {
+  auto &[trace_info, text] = event;
+  parse(text.payload);
+}
+
+void DropCopy::operator()(Trace<web::socket::Binary> const &) {
+  log::fatal("Unexpected"sv);
 }
 
 // protocol::json::Parser::Handler
@@ -298,7 +269,7 @@ void DropCopy::operator()(Trace<protocol::json::Auth> const &event) {
     auto &[trace_info, auth] = event;
     log::info<4>("auth={}"sv, auth);
     if (auth.success) {
-      (*this)(ConnectionStatus::READY);
+      create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
       subscribe();
     } else {
       if (shared_.settings.experimental.retry_logon) {
@@ -528,6 +499,60 @@ void DropCopy::operator()(Trace<protocol::json::Execution> const &event) {
       shared_.fills.emplace_back(std::move(fill));
     }
     dispatch();
+  });
+}
+
+// helpers
+
+void DropCopy::send_login() {
+  auto now_utc = clock::get_realtime<std::chrono::milliseconds>();
+  auto expires_utc = now_utc + AUTH_EXPIRES;
+  auto signature = account_.create_signature(expires_utc);
+  auto message = fmt::format(
+      R"({{)"
+      R"("req_id":"auth",)"
+      R"("op": "auth",)"
+      R"("args":["{}",{},"{}"])"
+      R"(}})"sv,
+      account_.get_key(),
+      expires_utc.count(),
+      signature);
+  (*connection_).send_text(message);
+}
+
+void DropCopy::subscribe() {
+  subscribe("wallet"sv);
+  if (shared_.api.api != tools::API::SPOT) {
+    subscribe("position"sv);
+  }
+  subscribe("order"sv);
+  subscribe("execution"sv);
+}
+
+void DropCopy::subscribe(std::string_view const &topic) {
+  auto message = fmt::format(
+      R"({{)"
+      R"("req_id":"{}",)"
+      R"("op":"subscribe",)"
+      R"("args":["{}"])"
+      R"(}})"sv,
+      topic,
+      topic);
+  (*connection_).send_text(message);
+}
+
+void DropCopy::parse(std::string_view const &message) {
+  profile_.parse([&]() {
+    auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
+    try {
+      TraceInfo trace_info;
+      if (!protocol::json::Parser::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
+        log_message();
+      }
+    } catch (...) {
+      log_message();
+      utils::exceptions::Unhandled::terminate();
+    }
   });
 }
 

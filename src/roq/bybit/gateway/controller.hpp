@@ -21,14 +21,20 @@
 
 #include "roq/bybit/gateway/drop_copy.hpp"
 #include "roq/bybit/gateway/market_data.hpp"
-#include "roq/bybit/gateway/order_entry.hpp"
+#include "roq/bybit/gateway/order_entry_rest.hpp"
+#include "roq/bybit/gateway/order_entry_ws.hpp"
 #include "roq/bybit/gateway/rest.hpp"
 
 namespace roq {
 namespace bybit {
 namespace gateway {
 
-struct Controller final : public server::Handler, public Rest::Handler, public OrderEntry::Handler, public DropCopy::Handler, public MarketData::Handler {
+struct Controller final : public server::Handler,
+                          public Rest::Handler,
+                          public OrderEntryREST::Handler,
+                          public OrderEntryWS::Handler,
+                          public DropCopy::Handler,
+                          public MarketData::Handler {
   ROQ_PUBLIC static std::unique_ptr<server::Handler> create(server::Dispatcher &, Settings const &, Config const &, io::Context &);
 
   ROQ_PUBLIC static uint8_t parse_api(Settings const &);
@@ -75,9 +81,13 @@ struct Controller final : public server::Handler, public Rest::Handler, public O
 
   void operator()(Rest::SymbolsUpdate &) override;
 
-  // OrderEntry::Handler
+  // OrderEntryREST::Handler
 
-  void operator()(Trace<OrderEntry::Response> const &) override;
+  void operator()(Trace<OrderEntryREST::Response> const &) override;
+
+  // OrderEntryWS::Handler
+
+  void operator()(Trace<OrderEntryWS::Response> const &) override;
 
   // helpers
 
@@ -91,9 +101,9 @@ struct Controller final : public server::Handler, public Rest::Handler, public O
 
   DropCopy &get_drop_copy(std::string_view const &account);
 
-  OrderEntry &get_order_entry_rest(std::string_view const &account);
-  OrderEntry &get_order_entry_ws(std::string_view const &account);
-  OrderEntry &get_order_entry(std::string_view const &account);
+  server::OrderActionStream &get_order_entry_rest(std::string_view const &account);
+  server::OrderActionStream &get_order_entry_ws(std::string_view const &account);
+  server::OrderActionStream &get_order_entry(std::string_view const &account);
 
  private:
   server::Dispatcher &dispatcher_;
@@ -107,8 +117,8 @@ struct Controller final : public server::Handler, public Rest::Handler, public O
   uint16_t stream_id_ = {};
   // streams
   Rest rest_;
-  utils::unordered_map<std::string, std::unique_ptr<OrderEntry>> order_entry_rest_;
-  utils::unordered_map<std::string, std::unique_ptr<OrderEntry>> order_entry_ws_;
+  utils::unordered_map<std::string, std::unique_ptr<server::OrderActionStream>> order_entry_rest_;
+  utils::unordered_map<std::string, std::unique_ptr<server::OrderActionStream>> order_entry_ws_;
   utils::unordered_map<std::string, std::unique_ptr<DropCopy>> drop_copy_;
   std::vector<std::unique_ptr<MarketData>> market_data_;
 };

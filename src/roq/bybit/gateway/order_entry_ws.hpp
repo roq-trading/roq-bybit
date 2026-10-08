@@ -16,10 +16,10 @@
 
 #include "roq/server.hpp"
 
+#include "roq/server/stream.hpp"
+
 #include "roq/bybit/gateway/account.hpp"
 #include "roq/bybit/gateway/shared.hpp"
-
-#include "roq/bybit/gateway/order_entry.hpp"
 
 #include "roq/bybit/protocol/json/parser_2.hpp"
 
@@ -27,17 +27,37 @@ namespace roq {
 namespace bybit {
 namespace gateway {
 
-struct OrderEntryWS final : public OrderEntry, public web::socket::Client::Handler, protocol::json::Parser2::Handler {
-  OrderEntryWS(OrderEntry::Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
+struct OrderEntryWS final : public Base<OrderEntryWS>, public server::OrderActionStream, public web::socket::Client::Handler, protocol::json::Parser2::Handler {
+  struct Response final {
+    std::string_view account;
+    std::string_view topic;
+    std::string_view symbol;
+  };
 
- protected:
-  // OrderEntry
+  struct Handler {
+    virtual void operator()(Trace<Response> const &) = 0;
+  };
+
+  OrderEntryWS(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
+
+  // protected:
+  friend base_type;
+
+  // server::Stream
+
+  uint16_t stream_id() const override { return stream_id_; }
+
+  bool ready() const override;
 
   void operator()(Event<Start> const &) override;
   void operator()(Event<Stop> const &) override;
   void operator()(Event<Timer> const &) override;
 
   void operator()(metrics::Writer &) const override;
+
+  void operator()(Trace<ConnectionStatus> const &, std::string_view const &reason = {}) override;
+
+  // server::OrderActionStream
 
   uint16_t operator()(Event<CreateOrder> const &, server::oms::Order const &, server::oms::RefData const &, std::string_view const &request_id) override;
   uint16_t operator()(
@@ -76,16 +96,12 @@ struct OrderEntryWS final : public OrderEntry, public web::socket::Client::Handl
 
   // helpers
 
-  bool ready() const;
-
-  void operator()(ConnectionStatus, std::string_view const &reason = {});
-
   void send_login();
 
   void parse(std::string_view const &message);
 
  private:
-  [[maybe_unused]] OrderEntry::Handler &handler_;
+  [[maybe_unused]] Handler &handler_;
   // config
   uint16_t const stream_id_;
   std::string const name_;

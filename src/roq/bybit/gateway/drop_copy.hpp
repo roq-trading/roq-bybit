@@ -16,11 +16,16 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
+#include "roq/server.hpp"
+
+#include "roq/server/stream.hpp"
+
 #include "roq/bybit/gateway/account.hpp"
 #include "roq/bybit/gateway/shared.hpp"
 
-#include "roq/bybit/gateway/order_entry.hpp"  // response
-#include "roq/bybit/gateway/rest.hpp"         // symbols
+#include "roq/bybit/gateway/order_entry_rest.hpp"  // response
+#include "roq/bybit/gateway/order_entry_ws.hpp"    // response
+#include "roq/bybit/gateway/rest.hpp"              // symbols
 
 #include "roq/bybit/protocol/json/parser.hpp"
 
@@ -28,26 +33,32 @@ namespace roq {
 namespace bybit {
 namespace gateway {
 
-struct DropCopy final : public web::socket::Client::Handler, protocol::json::Parser::Handler {
+struct DropCopy final : public Base<DropCopy>, public server::Stream, public web::socket::Client::Handler, protocol::json::Parser::Handler {
   struct Handler {};
 
   DropCopy(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
 
-  DropCopy(DropCopy const &) = delete;
-
-  bool ready() const;
-
-  void operator()(Event<Start> const &);
-  void operator()(Event<Stop> const &);
-  void operator()(Event<Timer> const &);
-
-  void operator()(metrics::Writer &) const;
-
-  // cross-communication
-
   void operator()(Rest::SymbolsUpdate &);
 
-  void operator()(Trace<OrderEntry::Response> const &);
+  void operator()(Trace<OrderEntryREST::Response> const &);
+  void operator()(Trace<OrderEntryWS::Response> const &);
+
+  // protected:
+  friend base_type;
+
+  // server::Stream
+
+  uint16_t stream_id() const override { return stream_id_; }
+
+  bool ready() const override;
+
+  void operator()(Event<Start> const &) override;
+  void operator()(Event<Stop> const &) override;
+  void operator()(Event<Timer> const &) override;
+
+  void operator()(metrics::Writer &) const override;
+
+  void operator()(Trace<ConnectionStatus> const &, std::string_view const &reason = {}) override;
 
  protected:
   // web::socket::Client::Handler
@@ -79,8 +90,6 @@ struct DropCopy final : public web::socket::Client::Handler, protocol::json::Par
   void operator()(Trace<protocol::json::Execution> const &) override;
 
   // helpers
-
-  void operator()(ConnectionStatus, std::string_view const &reason = {});
 
   void send_login();
 

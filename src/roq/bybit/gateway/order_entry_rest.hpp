@@ -4,7 +4,7 @@
 
 #include <string>
 
-#include "roq/core/download.hpp"
+#include "roq/core/download_2.hpp"
 
 #include "roq/utils/metrics/counter.hpp"
 #include "roq/utils/metrics/latency.hpp"
@@ -18,10 +18,10 @@
 
 #include "roq/server.hpp"
 
+#include "roq/server/stream.hpp"
+
 #include "roq/bybit/gateway/account.hpp"
 #include "roq/bybit/gateway/shared.hpp"
-
-#include "roq/bybit/gateway/order_entry.hpp"
 
 #include "roq/bybit/protocol/json/account_info_ack.hpp"
 #include "roq/bybit/protocol/json/executions_ack.hpp"
@@ -38,17 +38,37 @@ namespace roq {
 namespace bybit {
 namespace gateway {
 
-struct OrderEntryREST final : public OrderEntry, public web::rest::Client::Handler {
-  OrderEntryREST(OrderEntry::Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
+struct OrderEntryREST final : public Base<OrderEntryREST>, public server::OrderActionStream, public web::rest::Client::Handler {
+  struct Response final {
+    std::string_view account;
+    std::string_view topic;
+    std::string_view symbol;
+  };
 
- protected:
-  // OrderEntry
+  struct Handler {
+    virtual void operator()(Trace<Response> const &) = 0;
+  };
+
+  OrderEntryREST(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
+
+  // protected:
+  friend base_type;
+
+  // server::Stream
+
+  uint16_t stream_id() const override { return stream_id_; }
+
+  bool ready() const override { return connection_status_ == ConnectionStatus::READY; }
 
   void operator()(Event<Start> const &) override;
   void operator()(Event<Stop> const &) override;
   void operator()(Event<Timer> const &) override;
 
   void operator()(metrics::Writer &) const override;
+
+  void operator()(Trace<ConnectionStatus> const &, std::string_view const &reason = {}) override;
+
+  // server::OrderActionStream
 
   uint16_t operator()(Event<CreateOrder> const &, server::oms::Order const &, server::oms::RefData const &, std::string_view const &request_id) override;
   uint16_t operator()(
@@ -72,11 +92,7 @@ struct OrderEntryREST final : public OrderEntry, public web::rest::Client::Handl
   void operator()(Trace<web::rest::Disconnected> const &) override;
   void operator()(Trace<web::rest::Latency> const &) override;
 
-  // helpers
-
-  bool ready() const { return connection_status_ == ConnectionStatus::READY; }
-
-  void operator()(ConnectionStatus, std::string_view const &reason = {});
+  // core::Download
 
   enum class State {
     UNDEFINED = 0,
@@ -84,9 +100,7 @@ struct OrderEntryREST final : public OrderEntry, public web::rest::Client::Handl
     DONE,
   };
 
-  uint32_t download(State);
-
-  void check_request_queue(std::chrono::nanoseconds now);
+  int32_t download(Trace<State> const &);
 
   // account-info
 
@@ -154,12 +168,14 @@ struct OrderEntryREST final : public OrderEntry, public web::rest::Client::Handl
 
   // helpers
 
+  void check_request_queue(std::chrono::nanoseconds now);
+
   void process_response(Trace<web::rest::Response> const &, auto error_handler, auto success_handler);
 
   void waf_limit_violation();
 
  private:
-  [[maybe_unused]] OrderEntry::Handler &handler_;
+  [[maybe_unused]] Handler &handler_;
   // config
   uint16_t const stream_id_;
   std::string const name_;
@@ -193,7 +209,7 @@ struct OrderEntryREST final : public OrderEntry, public web::rest::Client::Handl
   Shared &shared_;
   // state
   ConnectionStatus connection_status_ = {};
-  core::Download<State> download_;
+  core::Download2<State> download_;
   bool download_trades_is_first_ = true;
   //
   std::string encode_buffer_;

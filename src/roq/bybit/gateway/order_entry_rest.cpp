@@ -101,7 +101,7 @@ auto get_download_trades_lookback(auto &settings, auto download_trades_is_first)
 
 // === IMPLEMENTATION ===
 
-OrderEntryREST::OrderEntryREST(OrderEntry::Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
+OrderEntryREST::OrderEntryREST(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.name)},
       connection_{create_connection(*this, shared.settings, context, shared)}, decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH},
       counter_{
@@ -130,10 +130,10 @@ OrderEntryREST::OrderEntryREST(OrderEntry::Handler &handler, io::Context &contex
       latency_{
           .ping = create_metrics(shared.settings, name_, "ping"sv),
       },
-      account_{account}, shared_{shared}, download_{shared.settings.rest.request_timeout, [this](auto state) { return download(state); }} {
+      account_{account}, shared_{shared}, download_{shared.settings.rest.request_timeout, [this](auto &event) { return download(event); }} {
 }
 
-// OrderEntry
+// server::Stream
 
 void OrderEntryREST::operator()(Event<Start> const &) {
   (*connection_).start();
@@ -179,6 +179,30 @@ void OrderEntryREST::operator()(metrics::Writer &writer) const {
       .write(latency_.ping, metrics::Type::LATENCY);
 }
 
+void OrderEntryREST::operator()(Trace<ConnectionStatus> const &event, std::string_view const &reason) {
+  auto &[trace_info, connection_status] = event;
+  connection_status_ = connection_status;
+  auto stream_status = StreamStatus{
+      .stream_id = stream_id_,
+      .account = account_.name,
+      .supports = get_supports(shared_.api.api),
+      .transport = Transport::TCP,
+      .protocol = Protocol::HTTP,
+      .encoding = {Encoding::JSON},
+      .priority = Priority::PRIMARY,
+      .connection_status = connection_status_,
+      .reason = reason,
+      .interface = (*connection_).get_interface(),
+      .authority = (*connection_).get_current_authority(),
+      .path = (*connection_).get_current_path(),
+      .proxy = (*connection_).get_proxy(),
+  };
+  log::info("stream_status={}"sv, stream_status);
+  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
+}
+
+// server::OrderActionStream
+
 uint16_t OrderEntryREST::operator()(
     Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
   place_order(event, order, ref_data, request_id);
@@ -212,17 +236,19 @@ uint16_t OrderEntryREST::operator()(Event<CancelAllOrders> const &event, std::st
 
 // web::rest::Client::Handler
 
-void OrderEntryREST::operator()(Trace<web::rest::Connected> const &) {
+void OrderEntryREST::operator()(Trace<web::rest::Connected> const &event) {
+  auto &[trace_info, connected] = event;
   if (download_.downloading()) {
-    download_.bump();
+    download_.bump(trace_info);
   } else {
-    download_.begin();
+    download_.begin(trace_info);
   }
 }
 
-void OrderEntryREST::operator()(Trace<web::rest::Disconnected> const &) {
+void OrderEntryREST::operator()(Trace<web::rest::Disconnected> const &event) {
+  auto &[trace_info, disconnected] = event;
   ++counter_.disconnect;
-  (*this)(ConnectionStatus::DISCONNECTED);
+  create_trace_and_dispatch_2(trace_info, ConnectionStatus::DISCONNECTED);
   if (!download_.downloading()) {
     download_.reset();
   }
@@ -239,64 +265,25 @@ void OrderEntryREST::operator()(Trace<web::rest::Latency> const &event) {
   latency_.ping.update(latency.sample);
 }
 
-// helpers
+// core::Download
 
-void OrderEntryREST::operator()(ConnectionStatus connection_status, std::string_view const &reason) {
-  connection_status_ = connection_status;
-  TraceInfo trace_info;
-  auto stream_status = StreamStatus{
-      .stream_id = stream_id_,
-      .account = account_.name,
-      .supports = get_supports(shared_.api.api),
-      .transport = Transport::TCP,
-      .protocol = Protocol::HTTP,
-      .encoding = {Encoding::JSON},
-      .priority = Priority::PRIMARY,
-      .connection_status = connection_status_,
-      .reason = reason,
-      .interface = (*connection_).get_interface(),
-      .authority = (*connection_).get_current_authority(),
-      .path = (*connection_).get_current_path(),
-      .proxy = (*connection_).get_proxy(),
-  };
-  log::info("stream_status={}"sv, stream_status);
-  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
-}
-
-uint32_t OrderEntryREST::download(State state) {
+int32_t OrderEntryREST::download(Trace<State> const &event) {
+  auto &[trace_info, state] = event;
   switch (state) {
     using enum State;
     case UNDEFINED:
       assert(false);
       break;
     case ACCOUNT_INFO:
-      (*this)(ConnectionStatus::DOWNLOADING, "account-info"sv);
+      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "account-info"sv);
       get_account_info();
       return 1;
     case DONE:
-      (*this)(ConnectionStatus::READY);
+      create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
       return 0;
   }
   assert(false);
   return 0;
-}
-
-void OrderEntryREST::check_request_queue(std::chrono::nanoseconds now) {
-  auto request = [&](auto &message) {
-    auto &[topic, symbol] = message;
-    if (topic == "wallet"sv) {
-      get_wallet_balance();
-    } else if (topic == "position"sv) {
-      get_positions(symbol);
-    } else if (topic == "order"sv) {
-      get_orders(symbol);
-    } else if (topic == "execution"sv) {
-      get_executions(symbol);
-    }
-  };
-  if (account_.request_queue.dispatch(now, request)) {
-    log::debug("HERE size={}"sv, std::size(account_.request_queue));
-  }
 }
 
 // account-info
@@ -327,6 +314,7 @@ void OrderEntryREST::get_account_info() {
 void OrderEntryREST::get_account_info_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
   auto const STATE = State::ACCOUNT_INFO;
   profile_.account_info_ack([&]() {
+    auto &[trace_info, response] = event;
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
       if (download_.downloading()) {
@@ -336,9 +324,8 @@ void OrderEntryREST::get_account_info_ack(Trace<web::rest::Response> const &even
     auto handle_success = [&](auto &body) {
       protocol::json::AccountInfoAck account_info_ack{body, decode_buffer_};
       if (account_info_ack.ret_code == 0) {
-        Trace event_2{event, account_info_ack};
-        (*this)(event_2);
-        download_.check_relaxed(STATE);
+        create_trace_and_dispatch_2(trace_info, account_info_ack);
+        download_.check_relaxed(trace_info, STATE);
       } else {
         handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, protocol::json::map_error(account_info_ack.ret_code), account_info_ack.ret_msg);
       }
@@ -397,6 +384,7 @@ void OrderEntryREST::get_wallet_balance() {
 
 void OrderEntryREST::get_wallet_balance_ack(Trace<web::rest::Response> const &event) {
   profile_.wallet_balance_ack([&]() {
+    auto &[trace_info, response] = event;
     if (event.value.status() == web::http::Status::NOT_FOUND) {
       return;
     }
@@ -406,19 +394,18 @@ void OrderEntryREST::get_wallet_balance_ack(Trace<web::rest::Response> const &ev
     auto handle_success = [&](auto &body) {
       protocol::json::WalletBalanceAck wallet_balance_ack{body, decode_buffer_};
       if (wallet_balance_ack.ret_code == 0) {
-        Trace event_2{event, wallet_balance_ack};
-        (*this)(event_2);
+        create_trace_and_dispatch_2(trace_info, wallet_balance_ack);
       } else {
         handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, protocol::json::map_error(wallet_balance_ack.ret_code), wallet_balance_ack.ret_msg);
       }
     };
     process_response(event, handle_error, handle_success);
-    auto response = Response{
+    auto response_2 = Response{
         .account = account_.name,
         .topic = "wallet"sv,
         .symbol = {},
     };
-    create_trace_and_dispatch(handler_, event, response);
+    create_trace_and_dispatch(handler_, event, response_2);
   });
 }
 
@@ -493,25 +480,25 @@ void OrderEntryREST::get_positions(std::string_view const &symbol) {
 
 void OrderEntryREST::get_positions_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.position_info_ack([&]() {
+    auto &[trace_info, response] = event;
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
     };
     auto handle_success = [&](auto &body) {
       protocol::json::PositionsAck positions_ack{body, decode_buffer_};
       if (positions_ack.ret_code == 0) {
-        Trace event_2{event, positions_ack};
-        (*this)(event_2);
+        create_trace_and_dispatch_2(trace_info, positions_ack);
       } else {
         handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, protocol::json::map_error(positions_ack.ret_code), positions_ack.ret_msg);
       }
     };
     process_response(event, handle_error, handle_success);
-    auto response = Response{
+    auto response_2 = Response{
         .account = account_.name,
         .topic = "position"sv,
         .symbol = symbol,
     };
-    create_trace_and_dispatch(handler_, event, response);
+    create_trace_and_dispatch(handler_, event, response_2);
   });
 }
 
@@ -589,25 +576,25 @@ void OrderEntryREST::get_orders(std::string_view const &symbol) {
 
 void OrderEntryREST::get_orders_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.open_orders_ack([&]() {
+    auto &[trace_info, response] = event;
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
     };
     auto handle_success = [&](auto &body) {
       protocol::json::OrdersAck orders_ack{body, decode_buffer_};
       if (orders_ack.ret_code == 0) {
-        Trace event_2{event, orders_ack};
-        (*this)(event_2);
+        create_trace_and_dispatch_2(trace_info, orders_ack);
       } else {
         handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, protocol::json::map_error(orders_ack.ret_code), orders_ack.ret_msg);
       }
     };
     process_response(event, handle_error, handle_success);
-    auto response = Response{
+    auto response_2 = Response{
         .account = account_.name,
         .topic = "order"sv,
         .symbol = symbol,
     };
-    create_trace_and_dispatch(handler_, event, response);
+    create_trace_and_dispatch(handler_, event, response_2);
   });
 }
 
@@ -715,26 +702,26 @@ void OrderEntryREST::get_executions(std::string_view const &symbol) {
 
 void OrderEntryREST::get_executions_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
   profile_.execution_ack([&]() {
+    auto &[trace_info, response] = event;
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
     };
     auto handle_success = [&](auto &body) {
       protocol::json::ExecutionsAck executions_ack{body, decode_buffer_};
       if (executions_ack.ret_code == 0) {
-        Trace event_2{event, executions_ack};
-        (*this)(event_2);
+        create_trace_and_dispatch_2(trace_info, executions_ack);
       } else {
         handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, protocol::json::map_error(executions_ack.ret_code), executions_ack.ret_msg);
       }
       download_trades_is_first_ = false;
     };
     process_response(event, handle_error, handle_success);
-    auto response = Response{
+    auto response_2 = Response{
         .account = account_.name,
         .topic = "execution"sv,
         .symbol = symbol,
     };
-    create_trace_and_dispatch(handler_, event, response);
+    create_trace_and_dispatch(handler_, event, response_2);
   });
 }
 
@@ -864,8 +851,7 @@ void OrderEntryREST::place_order_ack(Trace<web::rest::Response> const &event, ui
     auto handle_success = [&](auto &body) {
       protocol::json::PlaceOrderAck place_order_ack{body, decode_buffer_};
       // note! ret_code checked below
-      Trace event_2{event, place_order_ack};
-      (*this)(event_2, user_id, order_id, version);
+      create_trace_and_dispatch_2(trace_info, place_order_ack, user_id, order_id, version);
     };
     process_response(event, handle_error, handle_success);
   });
@@ -996,8 +982,7 @@ void OrderEntryREST::amend_order_ack(Trace<web::rest::Response> const &event, ui
     auto handle_success = [&](auto &body) {
       protocol::json::AmendOrderAck amend_order_ack{body, decode_buffer_};
       // note! ret_code checked below
-      Trace event_2{event, amend_order_ack};
-      (*this)(event_2, user_id, order_id, version);
+      create_trace_and_dispatch_2(trace_info, amend_order_ack, user_id, order_id, version);
     };
     process_response(event, handle_error, handle_success);
   });
@@ -1124,8 +1109,7 @@ void OrderEntryREST::cancel_order_ack(Trace<web::rest::Response> const &event, u
     auto handle_success = [&](auto &body) {
       protocol::json::CancelOrderAck cancel_order_ack{body, decode_buffer_};
       // note! ret_code checked below
-      Trace event_2{event, cancel_order_ack};
-      (*this)(event_2, user_id, order_id, version);
+      create_trace_and_dispatch_2(trace_info, cancel_order_ack, user_id, order_id, version);
     };
     process_response(event, handle_error, handle_success);
   });
@@ -1302,6 +1286,24 @@ void OrderEntryREST::operator()(Trace<protocol::json::CancelAllOrdersAck> const 
 }
 
 // helpers
+
+void OrderEntryREST::check_request_queue(std::chrono::nanoseconds now) {
+  auto request = [&](auto &message) {
+    auto &[topic, symbol] = message;
+    if (topic == "wallet"sv) {
+      get_wallet_balance();
+    } else if (topic == "position"sv) {
+      get_positions(symbol);
+    } else if (topic == "order"sv) {
+      get_orders(symbol);
+    } else if (topic == "execution"sv) {
+      get_executions(symbol);
+    }
+  };
+  if (account_.request_queue.dispatch(now, request)) {
+    log::debug("HERE size={}"sv, std::size(account_.request_queue));
+  }
+}
 
 void OrderEntryREST::process_response(Trace<web::rest::Response> const &event, auto error_handler, auto success_handler) {
   auto &[trace_info, response] = event;
