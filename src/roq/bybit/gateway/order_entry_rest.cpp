@@ -302,12 +302,8 @@ void OrderEntryREST::get_account_info() {
         .body = {},
         .quality_of_service = {},
     };
-    auto callback = [this, sequence = download_.sequence()]([[maybe_unused]] auto &request_id, auto &response) {
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
-      get_account_info_ack(event, sequence);
-    };
-    (*connection_)("account"sv, request, callback);
+    auto callback = [this, sequence = download_.sequence()](auto &event, [[maybe_unused]] auto &request_id) { get_account_info_ack(event, sequence); };
+    (*connection_)(request, callback, "account"sv);
   });
 }
 
@@ -373,12 +369,8 @@ void OrderEntryREST::get_wallet_balance() {
         .body = {},
         .quality_of_service = {},
     };
-    auto callback = [this]([[maybe_unused]] auto &request_id, auto &response) {
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
-      get_wallet_balance_ack(event);
-    };
-    (*connection_)("wallet"sv, request, callback);
+    auto callback = [this](auto &event, [[maybe_unused]] auto &request_id) { get_wallet_balance_ack(event); };
+    (*connection_)(request, callback, "wallet"sv);
   });
 }
 
@@ -469,12 +461,8 @@ void OrderEntryREST::get_positions(std::string_view const &symbol) {
         .body = {},
         .quality_of_service = {},
     };
-    auto callback = [this, symbol = std::string{symbol}]([[maybe_unused]] auto &request_id, auto &response) {
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
-      get_positions_ack(event, symbol);
-    };
-    (*connection_)("position"sv, request, callback);
+    auto callback = [this, symbol = std::string{symbol}](auto &event, [[maybe_unused]] auto &request_id) { get_positions_ack(event, symbol); };
+    (*connection_)(request, callback, "position"sv);
   });
 }
 
@@ -565,12 +553,8 @@ void OrderEntryREST::get_orders(std::string_view const &symbol) {
         .body = {},
         .quality_of_service = {},
     };
-    auto callback = [this, symbol = std::string{symbol}]([[maybe_unused]] auto &request_id, auto &response) {
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
-      get_orders_ack(event, symbol);
-    };
-    (*connection_)("orders"sv, request, callback);
+    auto callback = [this, symbol = std::string{symbol}](auto &event, [[maybe_unused]] auto &request_id) { get_orders_ack(event, symbol); };
+    (*connection_)(request, callback, "orders"sv);
   });
 }
 
@@ -691,12 +675,8 @@ void OrderEntryREST::get_executions(std::string_view const &symbol) {
         .body = {},
         .quality_of_service = {},
     };
-    auto callback = [this, symbol = std::string{symbol}]([[maybe_unused]] auto &request_id, auto &response) {
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
-      get_executions_ack(event, symbol);
-    };
-    (*connection_)("execution"sv, request, callback);
+    auto callback = [this, symbol = std::string{symbol}](auto &event, [[maybe_unused]] auto &request_id) { get_executions_ack(event, symbol); };
+    (*connection_)(request, callback, "execution"sv);
   });
 }
 
@@ -818,13 +798,11 @@ void OrderEntryREST::place_order(
         .body = body,
         .quality_of_service = {},
     };
-    auto callback = [this, user_id = message_info.source, order_id = create_order.order_id]([[maybe_unused]] auto &request_id, auto &response) {
+    auto callback = [this, user_id = message_info.source, order_id = create_order.order_id](auto &event, [[maybe_unused]] auto &request_id) {
       auto version = 1;
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
       place_order_ack(event, user_id, order_id, version);
     };
-    (*connection_)(request_id, request, callback);
+    (*connection_)(request, callback, request_id);
   });
 }
 
@@ -950,12 +928,8 @@ void OrderEntryREST::amend_order(
         .quality_of_service = {},
     };
     auto callback = [this, user_id = message_info.source, order_id = modify_order.order_id, version = modify_order.version](
-                        [[maybe_unused]] auto &request_id, auto &response) {
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
-      amend_order_ack(event, user_id, order_id, version);
-    };
-    (*connection_)(request_id, request, callback);
+                        auto &event, [[maybe_unused]] auto &request_id) { amend_order_ack(event, user_id, order_id, version); };
+    (*connection_)(request, callback, request_id);
   });
 }
 
@@ -1077,12 +1051,8 @@ void OrderEntryREST::cancel_order(
         .quality_of_service = {},
     };
     auto callback = [this, user_id = message_info.source, order_id = cancel_order.order_id, version = cancel_order.version](
-                        [[maybe_unused]] auto &request_id, auto &response) {
-      TraceInfo trace_info;
-      Trace event{trace_info, response};
-      cancel_order_ack(event, user_id, order_id, version);
-    };
-    (*connection_)(request_id, request, callback);
+                        auto &event, [[maybe_unused]] auto &request_id) { cancel_order_ack(event, user_id, order_id, version); };
+    (*connection_)(request, callback, request_id);
   });
 }
 
@@ -1226,12 +1196,8 @@ void OrderEntryREST::cancel_all_orders(Event<CancelAllOrders> const &event, std:
                   .body = body,
                   .quality_of_service = {},
               };
-              auto callback = [this](auto &request_id, auto &response) {
-                TraceInfo trace_info;
-                Trace event{trace_info, response};
-                cancel_all_orders_ack(event, request_id);
-              };
-              (*connection_)(request_id, request, callback);  // XXX FIXME TODO potentially many requests with same request_id
+              auto callback = [this](auto &event, auto &request_id) { cancel_all_orders_ack(event, request_id); };
+              (*connection_)(request, callback, request_id);
               send_ack(symbol);
             },
             account_.name)) {
