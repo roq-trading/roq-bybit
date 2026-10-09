@@ -55,7 +55,7 @@ struct MarketData final : public Base<MarketData>,
 
   // server::MarketDataStream
 
-  void subscribe(size_t start_from = 0);
+  void subscribe(size_t start_from = 0) override;
 
  protected:
   // web::socket::Client::Handler
