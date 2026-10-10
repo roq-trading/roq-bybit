@@ -213,8 +213,7 @@ void DropCopy::operator()(Trace<ConnectionStatus> const &event, std::string_view
 void DropCopy::operator()(Trace<web::socket::Connected> const &event) {
   auto &[trace_info, connected] = event;
   assert(logon_timeout_.count() == 0);
-  auto now = clock::get_system();
-  logon_timeout_ = now + shared_.settings.ws.request_timeout;
+  logon_timeout_ = trace_info.origin_create_time + shared_.settings.ws.request_timeout;
 }
 
 void DropCopy::operator()(Trace<web::socket::Disconnected> const &event) {
