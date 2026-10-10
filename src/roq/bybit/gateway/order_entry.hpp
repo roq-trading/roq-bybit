@@ -27,9 +27,9 @@ struct OrderEntry {
 
   virtual ~OrderEntry() = default;
 
-  virtual void operator()(Event<Start> const &) = 0;
-  virtual void operator()(Event<Stop> const &) = 0;
-  virtual void operator()(Event<Timer> const &) = 0;
+  virtual void operator()(Trace<Start> const &) = 0;
+  virtual void operator()(Trace<Stop> const &) = 0;
+  virtual void operator()(Trace<Timer> const &) = 0;
 
   virtual void operator()(metrics::Writer &) const = 0;
 

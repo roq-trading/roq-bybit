@@ -108,16 +108,16 @@ bool OrderEntryWS::ready() const {
   return (*connection_).ready();
 }
 
-void OrderEntryWS::operator()(Event<Start> const &) {
+void OrderEntryWS::operator()(Trace<Start> const &) {
   (*connection_).start();
 }
 
-void OrderEntryWS::operator()(Event<Stop> const &) {
+void OrderEntryWS::operator()(Trace<Stop> const &) {
   (*connection_).stop();
 }
 
-void OrderEntryWS::operator()(Event<Timer> const &event) {
-  auto &[message_info, timer] = event;
+void OrderEntryWS::operator()(Trace<Timer> const &event) {
+  auto &[trace_info, timer] = event;
   (*connection_).refresh(timer.now);
 }
 

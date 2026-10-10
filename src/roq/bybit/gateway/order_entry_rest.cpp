@@ -135,16 +135,16 @@ OrderEntryREST::OrderEntryREST(Handler &handler, io::Context &context, uint16_t 
 
 // server::Stream
 
-void OrderEntryREST::operator()(Event<Start> const &) {
+void OrderEntryREST::operator()(Trace<Start> const &) {
   (*connection_).start();
 }
 
-void OrderEntryREST::operator()(Event<Stop> const &) {
+void OrderEntryREST::operator()(Trace<Stop> const &) {
   (*connection_).stop();
 }
 
-void OrderEntryREST::operator()(Event<Timer> const &event) {
-  auto &[message_info, timer] = event;
+void OrderEntryREST::operator()(Trace<Timer> const &event) {
+  auto &[trace_info, timer] = event;
   if ((*connection_).refresh(timer.now)) {
     if (ready()) {
       check_request_queue(timer.now);
