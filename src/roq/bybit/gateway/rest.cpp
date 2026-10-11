@@ -330,7 +330,7 @@ void Rest::operator()(Trace<protocol::json::InstrumentsInfoAck> const &event) {
     auto symbols_update = SymbolsUpdate{
         .symbols = symbols,
     };
-    handler_(symbols_update);
+    create_trace_and_dispatch(handler_, trace_info, symbols_update);
   }
   if (counter > 0) {
     log::info("Symbols {} / {}"sv, counter, std::size(instruments_info_ack.result.list));

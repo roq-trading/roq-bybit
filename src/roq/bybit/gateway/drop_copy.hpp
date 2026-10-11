@@ -23,9 +23,8 @@
 #include "roq/bybit/gateway/account.hpp"
 #include "roq/bybit/gateway/shared.hpp"
 
-#include "roq/bybit/gateway/order_entry_rest.hpp"  // response
-#include "roq/bybit/gateway/order_entry_ws.hpp"    // response
-#include "roq/bybit/gateway/rest.hpp"              // symbols
+#include "roq/bybit/gateway/response.hpp"
+#include "roq/bybit/gateway/symbols_update.hpp"
 
 #include "roq/bybit/protocol/json/parser.hpp"
 
@@ -38,10 +37,8 @@ struct DropCopy final : public Base<DropCopy>, public server::Stream, public web
 
   DropCopy(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
 
-  void operator()(Rest::SymbolsUpdate &);
-
-  void operator()(Trace<OrderEntryREST::Response> const &);
-  void operator()(Trace<OrderEntryWS::Response> const &);
+  void operator()(Trace<SymbolsUpdate> const &);
+  void operator()(Trace<Response> const &);
 
   // protected:
   friend base_type;
@@ -97,7 +94,7 @@ struct DropCopy final : public Base<DropCopy>, public server::Stream, public web
 
   void subscribe(std::string_view const &topic);
 
-  void parse(std::string_view const &message);
+  void parse(TraceInfo const &, std::string_view const &message);
 
  private:
   [[maybe_unused]] Handler &handler_;

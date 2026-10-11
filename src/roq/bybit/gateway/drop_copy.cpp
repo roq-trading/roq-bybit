@@ -102,7 +102,8 @@ DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, A
       account_{account}, shared_{shared} {
 }
 
-void DropCopy::operator()(Rest::SymbolsUpdate &symbols_update) {
+void DropCopy::operator()(Trace<SymbolsUpdate> const &event) {
+  auto &[trace_info, symbols_update] = event;
   for (auto &symbol : symbols_update.symbols) {
     if (!shared_.dispatcher.can_account_trade_symbol(account_.name, shared_.settings.exchange, symbol)) {
       continue;
@@ -119,23 +120,7 @@ void DropCopy::operator()(Rest::SymbolsUpdate &symbols_update) {
   }
 }
 
-void DropCopy::operator()(Trace<OrderEntryREST::Response> const &event) {
-  auto &[trace_info, response] = event;
-  if (response.topic == "wallet"sv) {
-    log::debug("WALLET"sv);
-  } else if (response.topic == "position"sv) {
-    log::debug("POSITION"sv);
-  } else if (response.topic == "order"sv) {
-    log::debug("ORDER"sv);
-  } else if (response.topic == "execution"sv) {
-    log::debug("EXECUTION"sv);
-  } else {
-    log::fatal("Unexpected"sv);
-    // log::fatal("Unexpected: response={}"sv, response);
-  }
-}
-
-void DropCopy::operator()(Trace<OrderEntryWS::Response> const &event) {
+void DropCopy::operator()(Trace<Response> const &event) {
   auto &[trace_info, response] = event;
   if (response.topic == "wallet"sv) {
     log::debug("WALLET"sv);
@@ -249,7 +234,7 @@ void DropCopy::operator()(Trace<web::socket::Close> const &event) {
 
 void DropCopy::operator()(Trace<web::socket::Text> const &event) {
   auto &[trace_info, text] = event;
-  parse(text.payload);
+  parse(trace_info, text.payload);
 }
 
 void DropCopy::operator()(Trace<web::socket::Binary> const &) {
@@ -540,11 +525,10 @@ void DropCopy::subscribe(std::string_view const &topic) {
   (*connection_).send_text(message);
 }
 
-void DropCopy::parse(std::string_view const &message) {
+void DropCopy::parse(TraceInfo const &trace_info, std::string_view const &message) {
   profile_.parse([&]() {
     auto log_message = [&]() { log::warn(R"(*** PLEASE REPORT *** message="{}")"sv, message); };
     try {
-      TraceInfo trace_info;
       if (!protocol::json::Parser::dispatch(*this, message, decode_buffer_, trace_info, shared_.settings.experimental.allow_unknown_event_types)) {
         log_message();
       }

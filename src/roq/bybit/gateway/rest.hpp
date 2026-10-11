@@ -23,6 +23,7 @@
 #include "roq/server/stream.hpp"
 
 #include "roq/bybit/gateway/shared.hpp"
+#include "roq/bybit/gateway/symbols_update.hpp"
 
 #include "roq/bybit/protocol/json/instruments_info_ack.hpp"
 #include "roq/bybit/protocol/json/kline_ack.hpp"
@@ -32,12 +33,8 @@ namespace bybit {
 namespace gateway {
 
 struct Rest final : public Base<Rest>, public server::Stream, public web::rest::Client::Handler {
-  struct SymbolsUpdate final {
-    std::span<Symbol const> symbols;
-  };
-
   struct Handler {
-    virtual void operator()(SymbolsUpdate &) = 0;
+    virtual void operator()(Trace<SymbolsUpdate> const &) = 0;
   };
 
   Rest(Handler &, io::Context &context, uint16_t stream_id, Shared &);

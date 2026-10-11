@@ -21,6 +21,7 @@
 #include "roq/server/stream.hpp"
 
 #include "roq/bybit/gateway/account.hpp"
+#include "roq/bybit/gateway/response.hpp"
 #include "roq/bybit/gateway/shared.hpp"
 
 #include "roq/bybit/protocol/json/account_info_ack.hpp"
@@ -39,12 +40,6 @@ namespace bybit {
 namespace gateway {
 
 struct OrderEntryREST final : public Base<OrderEntryREST>, public server::OrderActionStream, public web::rest::Client::Handler {
-  struct Response final {
-    std::string_view account;
-    std::string_view topic;
-    std::string_view symbol;
-  };
-
   struct Handler {
     virtual void operator()(Trace<Response> const &) = 0;
   };

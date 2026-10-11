@@ -377,7 +377,7 @@ void OrderEntryREST::get_wallet_balance() {
 void OrderEntryREST::get_wallet_balance_ack(Trace<web::rest::Response> const &event) {
   profile_.wallet_balance_ack([&]() {
     auto &[trace_info, response] = event;
-    if (event.value.status() == web::http::Status::NOT_FOUND) {
+    if (response.status() == web::http::Status::NOT_FOUND) {
       return;
     }
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
@@ -397,7 +397,7 @@ void OrderEntryREST::get_wallet_balance_ack(Trace<web::rest::Response> const &ev
         .topic = "wallet"sv,
         .symbol = {},
     };
-    create_trace_and_dispatch(handler_, event, response_2);
+    create_trace_and_dispatch(handler_, trace_info, response_2);
   });
 }
 
@@ -486,7 +486,7 @@ void OrderEntryREST::get_positions_ack(Trace<web::rest::Response> const &event, 
         .topic = "position"sv,
         .symbol = symbol,
     };
-    create_trace_and_dispatch(handler_, event, response_2);
+    create_trace_and_dispatch(handler_, trace_info, response_2);
   });
 }
 
@@ -578,7 +578,7 @@ void OrderEntryREST::get_orders_ack(Trace<web::rest::Response> const &event, std
         .topic = "order"sv,
         .symbol = symbol,
     };
-    create_trace_and_dispatch(handler_, event, response_2);
+    create_trace_and_dispatch(handler_, trace_info, response_2);
   });
 }
 
@@ -701,7 +701,7 @@ void OrderEntryREST::get_executions_ack(Trace<web::rest::Response> const &event,
         .topic = "execution"sv,
         .symbol = symbol,
     };
-    create_trace_and_dispatch(handler_, event, response_2);
+    create_trace_and_dispatch(handler_, trace_info, response_2);
   });
 }
 

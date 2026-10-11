@@ -19,6 +19,7 @@
 #include "roq/server/stream.hpp"
 
 #include "roq/bybit/gateway/account.hpp"
+#include "roq/bybit/gateway/response.hpp"
 #include "roq/bybit/gateway/shared.hpp"
 
 #include "roq/bybit/protocol/json/parser_2.hpp"
@@ -28,12 +29,6 @@ namespace bybit {
 namespace gateway {
 
 struct OrderEntryWS final : public Base<OrderEntryWS>, public server::OrderActionStream, public web::socket::Client::Handler, protocol::json::Parser2::Handler {
-  struct Response final {
-    std::string_view account;
-    std::string_view topic;
-    std::string_view symbol;
-  };
-
   struct Handler {
     virtual void operator()(Trace<Response> const &) = 0;
   };
@@ -98,7 +93,7 @@ struct OrderEntryWS final : public Base<OrderEntryWS>, public server::OrderActio
 
   void send_login();
 
-  void parse(std::string_view const &message);
+  void parse(TraceInfo const &, std::string_view const &message);
 
  private:
   [[maybe_unused]] Handler &handler_;
