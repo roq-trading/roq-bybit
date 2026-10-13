@@ -115,7 +115,7 @@ void Rest::operator()(Trace<Timer> const &event) {
   auto &[trace_info, timer] = event;
   if ((*connection_).refresh(timer.now)) {
     if (ready()) {
-      check_request_queue(timer.now);
+      check_request_queue(trace_info);
     }
   }
 }
@@ -340,10 +340,9 @@ void Rest::operator()(Trace<protocol::json::InstrumentsInfoAck> const &event) {
 // kline
 
 // TODO paginate by splitting begin/end by interval and limit
-void Rest::get_kline(std::string_view const &symbol) {
+void Rest::get_kline(TraceInfo const &trace_info, std::string_view const &symbol) {
   profile_.kline([&]() {
-    auto now = clock::get_realtime<std::chrono::milliseconds>();
-    auto start = now - shared_.settings.time_series.lookback;
+    auto start = trace_info.origin_create_time_utc - shared_.settings.time_series.lookback;
     auto query = fmt::format(
         "?category={}"
         "&symbol={}"
@@ -425,10 +424,9 @@ void Rest::operator()(Trace<protocol::json::KlineAck> const &event) {
 
 // helpers
 
-void Rest::check_request_queue(std::chrono::nanoseconds now) {
-  auto can_request = [&](auto now) { return shared_.rate_limiter.can_request(now); };
-  auto request = [&](auto &symbol) { get_kline(symbol); };
-  shared_.time_series_request_queue.dispatch(can_request, request, now);
+void Rest::check_request_queue(TraceInfo const &trace_info) {
+  auto callback = [&](auto &trace_info, auto &symbol) { get_kline(trace_info, symbol); };
+  shared_.time_series_request_queue.dispatch(trace_info, callback);
 }
 
 void Rest::process_response(Trace<web::rest::Response> const &event, auto error_handler, auto success_handler) {

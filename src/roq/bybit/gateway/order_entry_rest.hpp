@@ -99,31 +99,31 @@ struct OrderEntryREST final : public Base<OrderEntryREST>, public server::OrderA
 
   // account-info
 
-  void get_account_info();
+  void get_account_info(TraceInfo const &);
   void get_account_info_ack(Trace<web::rest::Response> const &, uint32_t sequence);
   void operator()(Trace<protocol::json::AccountInfoAck> const &);
 
   // wallet-balance
 
-  void get_wallet_balance();
+  void get_wallet_balance(TraceInfo const &);
   void get_wallet_balance_ack(Trace<web::rest::Response> const &);
   void operator()(Trace<protocol::json::WalletBalanceAck> const &);
 
   // positions
 
-  void get_positions(std::string_view const &symbol);
+  void get_positions(TraceInfo const &, std::string_view const &symbol);
   void get_positions_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
   void operator()(Trace<protocol::json::PositionsAck> const &);
 
   // orders
 
-  void get_orders(std::string_view const &symbol);
+  void get_orders(TraceInfo const &, std::string_view const &symbol);
   void get_orders_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
   void operator()(Trace<protocol::json::OrdersAck> const &);
 
   // executions
 
-  void get_executions(std::string_view const &symbol);
+  void get_executions(TraceInfo const &, std::string_view const &symbol);
   void get_executions_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
   void operator()(Trace<protocol::json::ExecutionsAck> const &);
 
@@ -163,7 +163,7 @@ struct OrderEntryREST final : public Base<OrderEntryREST>, public server::OrderA
 
   // helpers
 
-  void check_request_queue(std::chrono::nanoseconds now);
+  void check_request_queue(TraceInfo const &);
 
   void process_response(Trace<web::rest::Response> const &, auto error_handler, auto success_handler);
 

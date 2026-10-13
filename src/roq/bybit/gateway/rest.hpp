@@ -81,13 +81,13 @@ struct Rest final : public Base<Rest>, public server::Stream, public web::rest::
 
   // kline
 
-  void get_kline(std::string_view const &symbol);
+  void get_kline(TraceInfo const &, std::string_view const &symbol);
   void get_kline_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
   void operator()(Trace<protocol::json::KlineAck> const &);
 
   // helpers
 
-  void check_request_queue(std::chrono::nanoseconds now);
+  void check_request_queue(TraceInfo const &);
 
   void process_response(Trace<web::rest::Response> const &, auto error_handler, auto success_handler);
 
