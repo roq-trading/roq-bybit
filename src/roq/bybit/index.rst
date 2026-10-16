@@ -169,10 +169,6 @@ Flags
 
    .. include:: flags/ws.rstinc
 
-.. tab:: Download
-
-   .. include:: flags/download.rstinc
-
 .. tab:: MBP
 
    .. include:: flags/mbp.rstinc
