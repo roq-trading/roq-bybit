@@ -22,6 +22,10 @@ namespace json {
 
 struct Encoder final {
   // REST
+  static std::string_view get_wallet_balance(std::string &buffer);
+
+  static std::string_view get_positions(std::string &buffer, Category, std::string_view settle_coin);
+  static std::string_view get_orders(std::string &buffer, Category, std::string_view settle_coin);
 
   static std::string_view place_order(
       std::string &buffer, roq::CreateOrder const &, server::oms::Order const &, server::oms::RefData const &, std::string_view const &request_id, Category);
@@ -48,6 +52,8 @@ struct Encoder final {
       std::string &buffer, roq::CancelAllOrders const &, std::string_view const &request_id, std::string_view const &symbol, Category);
 
   // WS
+
+  static std::string_view login_ws(std::string &buffer, std::string_view const &key, std::chrono::milliseconds expires_utc, std::string_view const &signature);
 
   static std::string_view place_order_ws(
       std::string &buffer,

@@ -5,7 +5,6 @@
 #include <string>
 #include <string_view>
 
-#include "roq/core/limit/queue.hpp"
 #include "roq/core/limit/rate_limiter.hpp"
 
 #include "roq/bybit/gateway/config.hpp"
@@ -35,7 +34,6 @@ struct Account final {
 
  public:
   core::limit::RateLimiter rate_limiter;
-  core::limit::Queue<std::pair<std::string, std::string>> request_queue;
 };
 
 }  // namespace gateway

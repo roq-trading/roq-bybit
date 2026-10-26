@@ -11,6 +11,7 @@
 
 #include "roq/utils/metrics/factory.hpp"
 
+#include "roq/bybit/protocol/json/encoder.hpp"
 #include "roq/bybit/protocol/json/map.hpp"
 
 using namespace std::literals;
@@ -81,7 +82,7 @@ struct create_metrics final : public utils::metrics::Factory {
 
 // === IMPLEMENTATION ===
 
-DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
+DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared, Request &request)
     : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, connection_{create_connection(*this, shared.settings, context, shared)},
       decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH},
       counter_{
@@ -99,41 +100,7 @@ DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, A
           .ping = create_metrics(shared.settings, name_, "ping"sv),
           .heartbeat = create_metrics(shared.settings, name_, "heartbeat"sv),
       },
-      account_{account}, shared_{shared} {
-}
-
-void DropCopy::operator()(Trace<SymbolsUpdate> const &event) {
-  auto &[trace_info, symbols_update] = event;
-  for (auto &symbol : symbols_update.symbols) {
-    if (!shared_.dispatcher.can_account_trade_symbol(account_.name, shared_.settings.exchange, symbol)) {
-      continue;
-    }
-    [[maybe_unused]] auto res = symbols_.emplace(static_cast<std::string_view>(symbol));
-    assert(res.second);
-    if ((*connection_).ready()) {
-      if (shared_.api.api != tools::API::SPOT) {
-        account_.request_queue.emplace_back("position"sv, symbol);
-      }
-      account_.request_queue.emplace_back("order"sv, symbol);
-      account_.request_queue.emplace_back("execution"sv, symbol);
-    }
-  }
-}
-
-void DropCopy::operator()(Trace<Response> const &event) {
-  auto &[trace_info, response] = event;
-  if (response.topic == "wallet"sv) {
-    log::debug("WALLET"sv);
-  } else if (response.topic == "position"sv) {
-    log::debug("POSITION"sv);
-  } else if (response.topic == "order"sv) {
-    log::debug("ORDER"sv);
-  } else if (response.topic == "execution"sv) {
-    log::debug("EXECUTION"sv);
-  } else {
-    log::fatal("Unexpected"sv);
-    // log::fatal("Unexpected: response={}"sv, response);
-  }
+      account_{account}, shared_{shared}, request_{request}, download_{shared.settings.rest.request_timeout, [this](auto &event) { return download(event); }} {
 }
 
 // server::Stream
@@ -152,7 +119,9 @@ void DropCopy::operator()(Trace<Stop> const &) {
 
 void DropCopy::operator()(Trace<Timer> const &event) {
   auto &[trace_info, timer] = event;
-  (*connection_).refresh(timer.now);
+  if ((*connection_).refresh(timer.now)) {
+    check_request_queue(trace_info);
+  }
 }
 
 void DropCopy::operator()(metrics::Writer &writer) const {
@@ -207,7 +176,7 @@ void DropCopy::operator()(Trace<web::socket::Disconnected> const &event) {
   create_trace_and_dispatch_2(trace_info, ConnectionStatus::DISCONNECTED);
   logon_timeout_ = {};
   next_ping_ = {};
-  account_.request_queue.clear();
+  download_.reset();
 }
 
 void DropCopy::operator()(Trace<web::socket::Latency> const &event) {
@@ -223,7 +192,7 @@ void DropCopy::operator()(Trace<web::socket::Latency> const &event) {
 
 void DropCopy::operator()(Trace<web::socket::Ready> const &event) {
   auto &[trace_info, ready] = event;
-  send_login();
+  send_login(trace_info);
   create_trace_and_dispatch_2(trace_info, ConnectionStatus::LOGIN_SENT);
 }
 
@@ -241,6 +210,71 @@ void DropCopy::operator()(Trace<web::socket::Binary> const &) {
   log::fatal("Unexpected"sv);
 }
 
+// core::Download
+
+int32_t DropCopy::download(Trace<State> const &event) {
+  auto &[trace_info, state] = event;
+  switch (state) {
+    using enum State;
+    case UNDEFINED:
+      assert(false);
+      break;
+    case GET_ACCOUNT_INFO:
+      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "get-account-info"sv);
+      request_.account.request(trace_info);
+      return 1;
+    case SUBSCRIBE_WALLET:
+      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "wallet-balance-subscribe"sv);
+      subscribe(state);
+      return 1;
+    case GET_WALLET:
+      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "wallet-balance-get"sv);
+      request_.wallet.request(trace_info);
+      return 1;
+    case SUBSCRIBE_POSITIONS:
+      if (shared_.api.api == tools::API::SPOT) {
+        return 0;
+      } else {
+        create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "position-list-subscribe"sv);
+        subscribe(state);
+        return 1;
+      }
+    case GET_POSITIONS:
+      if (shared_.api.api == tools::API::SPOT) {
+        return 0;
+      } else {
+        create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "position-list-get"sv);
+        request_.positions.request(trace_info);
+        return 1;
+      }
+    case SUBSCRIBE_ORDERS:
+      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "order-realtime-subscribe"sv);
+      subscribe(state);
+      return 1;
+    case GET_ORDERS:
+      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "order-realtime-get"sv);
+      request_.orders.request(trace_info);
+      return 1;
+    case SUBSCRIBE_EXECUTIONS:
+      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "execution-list-subscribe"sv);
+      subscribe(state);
+      return 1;
+    case GET_EXECUTIONS:
+      if (shared_.settings.download.trades_lookback_on_restart.count()) {
+        create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "execution-list-get"sv);
+        request_.executions.request(trace_info);
+        return 1;
+      } else {
+        return 0;
+      }
+    case DONE:
+      create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
+      return 0;
+  }
+  assert(false);
+  return 0;
+}
+
 // protocol::json::Parser::Handler
 
 void DropCopy::operator()(Trace<protocol::json::Ping> const &event) {
@@ -253,8 +287,7 @@ void DropCopy::operator()(Trace<protocol::json::Auth> const &event) {
     auto &[trace_info, auth] = event;
     log::info<4>("auth={}"sv, auth);
     if (auth.success) {
-      create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
-      subscribe();
+      download_.begin(trace_info);
     } else {
       if (shared_.settings.experimental.retry_logon) {
         log::error("[{}] auth={}"sv, account_.name, auth);
@@ -270,15 +303,12 @@ void DropCopy::operator()(Trace<protocol::json::Auth> const &event) {
 void DropCopy::operator()(Trace<protocol::json::Subscribe> const &event) {
   auto &[trace_info, subscribe] = event;
   log::info<4>("subscribe={}"sv, subscribe);
-  auto &req_id = subscribe.req_id;
-  if (req_id == "wallet"sv) {
-    account_.request_queue.emplace_back(req_id, std::string{});
-  } else if (req_id == "position"sv || req_id == "order"sv || req_id == "execution"sv) {
-    for (auto &symbol : symbols_) {
-      account_.request_queue.emplace_back(req_id, symbol);
-    }
+  auto req_id = magic_enum::enum_cast<State>(subscribe.req_id);
+  if (req_id.has_value()) {
+    auto state = req_id.value();
+    download_.check(trace_info, state);
   } else {
-    log::warn(R"(Unexpected: req_id="{}")"sv, req_id);
+    log::warn(R"(Unexpected: req_id="{}")"sv, subscribe.req_id);
   }
 }
 
@@ -488,41 +518,99 @@ void DropCopy::operator()(Trace<protocol::json::Execution> const &event) {
 
 // helpers
 
-void DropCopy::send_login() {
-  auto now_utc = clock::get_realtime<std::chrono::milliseconds>();
-  auto expires_utc = now_utc + AUTH_EXPIRES;
+void DropCopy::send_login(TraceInfo const &trace_info) {
+  auto expires_utc = std::chrono::duration_cast<std::chrono::milliseconds>(trace_info.origin_create_time_utc + AUTH_EXPIRES);
   auto signature = account_.create_signature(expires_utc);
-  auto message = fmt::format(
-      R"({{)"
-      R"("req_id":"auth",)"
-      R"("op": "auth",)"
-      R"("args":["{}",{},"{}"])"
-      R"(}})"sv,
-      account_.get_key(),
-      expires_utc.count(),
-      signature);
+  auto message = protocol::json::Encoder::login_ws(encode_buffer_, account_.get_key(), expires_utc, signature);
   (*connection_).send_text(message);
 }
 
-void DropCopy::subscribe() {
-  subscribe("wallet"sv);
-  if (shared_.api.api != tools::API::SPOT) {
-    subscribe("position"sv);
+void DropCopy::subscribe(State state) {
+  auto helper = [&](auto const &topic) {
+    auto message = fmt::format(
+        R"({{)"
+        R"("req_id":"{}",)"
+        R"("op":"subscribe",)"
+        R"("args":["{}"])"
+        R"(}})"sv,
+        state,
+        topic);
+    (*connection_).send_text(message);
+  };
+  switch (state) {
+    using enum State;
+    case UNDEFINED:
+      break;
+    case GET_ACCOUNT_INFO:
+      break;
+    case SUBSCRIBE_WALLET:
+      helper("wallet"sv);
+      return;
+    case GET_WALLET:
+      break;
+    case SUBSCRIBE_POSITIONS:
+      helper("position"sv);
+      return;
+    case GET_POSITIONS:
+      break;
+    case SUBSCRIBE_ORDERS:
+      helper("order"sv);
+      return;
+    case GET_ORDERS:
+      break;
+    case SUBSCRIBE_EXECUTIONS:
+      helper("execution"sv);
+      return;
+    case GET_EXECUTIONS:
+      break;
+    case DONE:
+      break;
   }
-  subscribe("order"sv);
-  subscribe("execution"sv);
+  log::fatal("Unexpected: state={}"sv, state);
 }
 
-void DropCopy::subscribe(std::string_view const &topic) {
-  auto message = fmt::format(
-      R"({{)"
-      R"("req_id":"{}",)"
-      R"("op":"subscribe",)"
-      R"("args":["{}"])"
-      R"(}})"sv,
-      topic,
-      topic);
-  (*connection_).send_text(message);
+void DropCopy::check_request_queue(TraceInfo const &trace_info) {
+  auto state = download_.state();
+  switch (state) {
+    using enum State;
+    case UNDEFINED:
+      break;
+    case GET_ACCOUNT_INFO:
+      if (request_.account.has_response()) {
+        download_.check(trace_info, state);
+      }
+      break;
+    case SUBSCRIBE_WALLET:
+      break;
+    case GET_WALLET:
+      if (request_.wallet.has_response()) {
+        download_.check(trace_info, state);
+      }
+      break;
+    case SUBSCRIBE_POSITIONS:
+      break;
+    case GET_POSITIONS:
+      if (request_.positions.has_response()) {
+        download_.check(trace_info, state);
+      }
+      break;
+    case SUBSCRIBE_ORDERS:
+      break;
+    case GET_ORDERS:
+      if (request_.orders.has_response()) {
+        download_.check(trace_info, state);
+      }
+      break;
+    case SUBSCRIBE_EXECUTIONS:
+      break;
+    case GET_EXECUTIONS:
+      if (request_.executions.has_response()) {
+        download_.check(trace_info, state);
+      }
+      break;
+    case DONE:
+      break;
+  }
 }
 
 void DropCopy::parse(TraceInfo const &trace_info, std::string_view const &message) {

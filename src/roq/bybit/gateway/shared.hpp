@@ -40,6 +40,8 @@ struct Shared final {
 
   core::limit::Queue<std::string> time_series_request_queue;
 
+  utils::unordered_set<std::string> settle_coins;
+
   core::Symbols symbols;
   utils::unordered_set<std::string> all_symbols;
 

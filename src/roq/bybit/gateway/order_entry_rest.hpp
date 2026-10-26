@@ -4,8 +4,6 @@
 
 #include <string>
 
-#include "roq/core/download_2.hpp"
-
 #include "roq/utils/metrics/counter.hpp"
 #include "roq/utils/metrics/latency.hpp"
 #include "roq/utils/metrics/profile.hpp"
@@ -21,7 +19,7 @@
 #include "roq/server/stream.hpp"
 
 #include "roq/bybit/gateway/account.hpp"
-#include "roq/bybit/gateway/response.hpp"
+#include "roq/bybit/gateway/request.hpp"
 #include "roq/bybit/gateway/shared.hpp"
 
 #include "roq/bybit/protocol/json/account_info_ack.hpp"
@@ -40,11 +38,9 @@ namespace bybit {
 namespace gateway {
 
 struct OrderEntryREST final : public Base<OrderEntryREST>, public server::OrderActionStream, public web::rest::Client::Handler {
-  struct Handler {
-    virtual void operator()(Trace<Response> const &) = 0;
-  };
+  struct Handler {};
 
-  OrderEntryREST(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
+  OrderEntryREST(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &, Request &, bool master);
 
   // protected:
   friend base_type;
@@ -87,20 +83,10 @@ struct OrderEntryREST final : public Base<OrderEntryREST>, public server::OrderA
   void operator()(Trace<web::rest::Disconnected> const &) override;
   void operator()(Trace<web::rest::Latency> const &) override;
 
-  // core::Download
-
-  enum class State {
-    UNDEFINED = 0,
-    ACCOUNT_INFO,
-    DONE,
-  };
-
-  int32_t download(Trace<State> const &);
-
   // account-info
 
   void get_account_info(TraceInfo const &);
-  void get_account_info_ack(Trace<web::rest::Response> const &, uint32_t sequence);
+  void get_account_info_ack(Trace<web::rest::Response> const &);
   void operator()(Trace<protocol::json::AccountInfoAck> const &);
 
   // wallet-balance
@@ -111,20 +97,20 @@ struct OrderEntryREST final : public Base<OrderEntryREST>, public server::OrderA
 
   // positions
 
-  void get_positions(TraceInfo const &, std::string_view const &symbol);
-  void get_positions_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
+  void get_positions(TraceInfo const &);
+  void get_positions_ack(Trace<web::rest::Response> const &);
   void operator()(Trace<protocol::json::PositionsAck> const &);
 
   // orders
 
-  void get_orders(TraceInfo const &, std::string_view const &symbol);
-  void get_orders_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
+  void get_orders(TraceInfo const &);
+  void get_orders_ack(Trace<web::rest::Response> const &);
   void operator()(Trace<protocol::json::OrdersAck> const &);
 
   // executions
 
-  void get_executions(TraceInfo const &, std::string_view const &symbol);
-  void get_executions_ack(Trace<web::rest::Response> const &, std::string_view const &symbol);
+  void get_executions(TraceInfo const &);
+  void get_executions_ack(Trace<web::rest::Response> const &);
   void operator()(Trace<protocol::json::ExecutionsAck> const &);
 
   // place-order
@@ -174,6 +160,7 @@ struct OrderEntryREST final : public Base<OrderEntryREST>, public server::OrderA
   // config
   uint16_t const stream_id_;
   std::string const name_;
+  bool const master_;
   // connection
   std::unique_ptr<web::rest::Client> const connection_;
   // buffers
@@ -202,9 +189,9 @@ struct OrderEntryREST final : public Base<OrderEntryREST>, public server::OrderA
   Account &account_;
   // cache
   Shared &shared_;
+  Request &request_;
   // state
   ConnectionStatus connection_status_ = {};
-  core::Download2<State> download_;
   bool download_trades_is_first_ = true;
   //
   std::string encode_buffer_;

@@ -101,8 +101,8 @@ auto get_download_trades_lookback(auto &settings, auto download_trades_is_first)
 
 // === IMPLEMENTATION ===
 
-OrderEntryREST::OrderEntryREST(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.name)},
+OrderEntryREST::OrderEntryREST(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared, Request &request, bool master)
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_, account.name)}, master_{master},
       connection_{create_connection(*this, shared.settings, context, shared)}, decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
@@ -130,7 +130,7 @@ OrderEntryREST::OrderEntryREST(Handler &handler, io::Context &context, uint16_t 
       latency_{
           .ping = create_metrics(shared.settings, name_, "ping"sv),
       },
-      account_{account}, shared_{shared}, download_{shared.settings.rest.request_timeout, [this](auto &event) { return download(event); }} {
+      account_{account}, shared_{shared}, request_{request} {
 }
 
 // server::Stream
@@ -147,7 +147,13 @@ void OrderEntryREST::operator()(Trace<Timer> const &event) {
   auto &[trace_info, timer] = event;
   if ((*connection_).refresh(timer.now)) {
     if (ready()) {
-      check_request_queue(trace_info);
+      try {
+        if (master_) {
+          check_request_queue(trace_info);
+        }
+      } catch (NotConnected &) {
+        // note! ok
+      }
     }
   }
 }
@@ -238,20 +244,13 @@ uint16_t OrderEntryREST::operator()(Event<CancelAllOrders> const &event, std::st
 
 void OrderEntryREST::operator()(Trace<web::rest::Connected> const &event) {
   auto &[trace_info, connected] = event;
-  if (download_.downloading()) {
-    download_.bump(trace_info);
-  } else {
-    download_.begin(trace_info);
-  }
+  create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
 }
 
 void OrderEntryREST::operator()(Trace<web::rest::Disconnected> const &event) {
   auto &[trace_info, disconnected] = event;
   ++counter_.disconnect;
   create_trace_and_dispatch_2(trace_info, ConnectionStatus::DISCONNECTED);
-  if (!download_.downloading()) {
-    download_.reset();
-  }
 }
 
 void OrderEntryREST::operator()(Trace<web::rest::Latency> const &event) {
@@ -263,27 +262,6 @@ void OrderEntryREST::operator()(Trace<web::rest::Latency> const &event) {
   };
   create_trace_and_dispatch(shared_.dispatcher, trace_info, external_latency);
   latency_.ping.update(latency.sample);
-}
-
-// core::Download
-
-int32_t OrderEntryREST::download(Trace<State> const &event) {
-  auto &[trace_info, state] = event;
-  switch (state) {
-    using enum State;
-    case UNDEFINED:
-      assert(false);
-      break;
-    case ACCOUNT_INFO:
-      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "account-info"sv);
-      get_account_info(trace_info);
-      return 1;
-    case DONE:
-      create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
-      return 0;
-  }
-  assert(false);
-  return 0;
 }
 
 // account-info
@@ -302,31 +280,27 @@ void OrderEntryREST::get_account_info(TraceInfo const &trace_info) {
         .body = {},
         .quality_of_service = {},
     };
-    auto callback = [this, sequence = download_.sequence()](auto &event, [[maybe_unused]] auto &request_id) { get_account_info_ack(event, sequence); };
-    (*connection_)(request, callback, "account"sv);
+    auto callback = [this](auto &event, [[maybe_unused]] auto &request_id) { get_account_info_ack(event); };
+    (*connection_)(request, callback, "account_info"sv);
   });
 }
 
-void OrderEntryREST::get_account_info_ack(Trace<web::rest::Response> const &event, [[maybe_unused]] uint32_t sequence) {
-  auto const STATE = State::ACCOUNT_INFO;
+void OrderEntryREST::get_account_info_ack(Trace<web::rest::Response> const &event) {
   profile_.account_info_ack([&]() {
     auto &[trace_info, response] = event;
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
       log::warn(R"(origin={}, error={}, status={}, text="{}")"sv, origin, error, status, text);
-      if (download_.downloading()) {
-        download_.retry(STATE);
-      }
     };
     auto handle_success = [&](auto &body) {
       protocol::json::AccountInfoAck account_info_ack{body, decode_buffer_};
       if (account_info_ack.ret_code == 0) {
         create_trace_and_dispatch_2(trace_info, account_info_ack);
-        download_.check_relaxed(trace_info, STATE);
       } else {
         handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, protocol::json::map_error(account_info_ack.ret_code), account_info_ack.ret_msg);
       }
     };
     process_response(event, handle_error, handle_success);
+    request_.account.commit(trace_info);
   });
 }
 
@@ -341,23 +315,7 @@ void OrderEntryREST::operator()(Trace<protocol::json::AccountInfoAck> const &eve
 void OrderEntryREST::get_wallet_balance(TraceInfo const &trace_info) {
   profile_.wallet_balance([&]() {
     auto path = shared_.api.simple.account_wallet_balance;
-    auto account_type = [&]() -> std::string_view {
-      switch (shared_.api.api) {
-        using enum tools::API;
-        case UNDEFINED:
-          break;
-        case SPOT:
-          return "UNIFIED"sv;
-        case LINEAR:
-          return "UNIFIED"sv;
-        case INVERSE:
-          return "UNIFIED"sv;
-        case OPTION:
-          return "UNIFIED"sv;
-      }
-      log::fatal("Unexpected"sv);
-    }();
-    auto query = fmt::format("?accountType={}"sv, account_type);
+    auto query = protocol::json::Encoder::get_wallet_balance(encode_buffer_);
     auto headers = account_.create_headers(trace_info, path, query, {});
     auto request = web::rest::Request{
         .method = web::http::Method::GET,
@@ -392,12 +350,7 @@ void OrderEntryREST::get_wallet_balance_ack(Trace<web::rest::Response> const &ev
       }
     };
     process_response(event, handle_error, handle_success);
-    auto response_2 = Response{
-        .account = account_.name,
-        .topic = "wallet"sv,
-        .symbol = {},
-    };
-    create_trace_and_dispatch(handler_, trace_info, response_2);
+    request_.wallet.commit(trace_info);
   });
 }
 
@@ -429,44 +382,44 @@ void OrderEntryREST::operator()(Trace<protocol::json::WalletBalanceAck> const &e
 
 // positions
 
-void OrderEntryREST::get_positions(TraceInfo const &trace_info, std::string_view const &symbol) {
+void OrderEntryREST::get_positions(TraceInfo const &trace_info) {
   profile_.position_info([&]() {
-    assert(shared_.api.api != tools::API::SPOT);
-    auto path = shared_.api.simple.position_list;
-    auto category = [&]() -> std::string_view {
-      switch (shared_.api.api) {
-        using enum tools::API;
-        case UNDEFINED:
-          break;
-        case SPOT:
-          break;
-        case LINEAR:
-          return "linear"sv;
-        case INVERSE:
-          return "inverse"sv;
-        case OPTION:
-          return "option"sv;
-      }
-      log::fatal("Unexpected"sv);
-    }();
-    auto query = fmt::format("?category={}&symbol={}&limit=200"sv, category, symbol);
-    auto headers = account_.create_headers(trace_info, path, query, {});
-    auto request = web::rest::Request{
-        .method = web::http::Method::GET,
-        .path = path,
-        .query = query,
-        .accept = web::http::Accept::APPLICATION_JSON,
-        .content_type = {},
-        .headers = headers,
-        .body = {},
-        .quality_of_service = {},
+    auto helper = [&](std::string_view const &settle_coin) {
+      auto path = shared_.api.simple.position_list;
+      auto query = protocol::json::Encoder::get_positions(encode_buffer_, shared_.api.category, settle_coin);
+      auto headers = account_.create_headers(trace_info, path, query, {});
+      auto request = web::rest::Request{
+          .method = web::http::Method::GET,
+          .path = path,
+          .query = query,
+          .accept = web::http::Accept::APPLICATION_JSON,
+          .content_type = {},
+          .headers = headers,
+          .body = {},
+          .quality_of_service = {},
+      };
+      auto callback = [this](auto &event, [[maybe_unused]] auto &request_id) { get_positions_ack(event); };
+      (*connection_)(request, callback, "positions"sv);
     };
-    auto callback = [this, symbol = std::string{symbol}](auto &event, [[maybe_unused]] auto &request_id) { get_positions_ack(event, symbol); };
-    (*connection_)(request, callback, "position"sv);
+    switch (shared_.api.api) {
+      using enum tools::API;
+      case UNDEFINED:
+      case SPOT:
+        log::fatal("Unexpected"sv);
+      case LINEAR:
+        for (auto &item : shared_.settle_coins) {
+          helper(item);
+        }
+        break;
+      case INVERSE:
+      case OPTION:
+        helper({});
+        break;
+    }
   });
 }
 
-void OrderEntryREST::get_positions_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
+void OrderEntryREST::get_positions_ack(Trace<web::rest::Response> const &event) {
   profile_.position_info_ack([&]() {
     auto &[trace_info, response] = event;
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
@@ -481,12 +434,7 @@ void OrderEntryREST::get_positions_ack(Trace<web::rest::Response> const &event, 
       }
     };
     process_response(event, handle_error, handle_success);
-    auto response_2 = Response{
-        .account = account_.name,
-        .topic = "position"sv,
-        .symbol = symbol,
-    };
-    create_trace_and_dispatch(handler_, trace_info, response_2);
+    request_.positions.commit(trace_info);
   });
 }
 
@@ -522,43 +470,46 @@ void OrderEntryREST::operator()(Trace<protocol::json::PositionsAck> const &event
 
 // open-orders
 
-void OrderEntryREST::get_orders(TraceInfo const &trace_info, std::string_view const &symbol) {
+void OrderEntryREST::get_orders(TraceInfo const &trace_info) {
   profile_.open_orders([&]() {
-    auto path = shared_.api.simple.order_realtime;
-    auto category = [&]() -> std::string_view {
-      switch (shared_.api.api) {
-        using enum tools::API;
-        case UNDEFINED:
-          break;
-        case SPOT:
-          return "spot"sv;
-        case LINEAR:
-          return "linear"sv;
-        case INVERSE:
-          return "inverse"sv;
-        case OPTION:
-          return "option"sv;
-      }
-      log::fatal("Unexpected"sv);
-    }();
-    auto query = fmt::format("?category={}&symbol={}&openOnly=0&limit=50"sv, category, symbol);
-    auto headers = account_.create_headers(trace_info, path, query, {});
-    auto request = web::rest::Request{
-        .method = web::http::Method::GET,
-        .path = path,
-        .query = query,
-        .accept = web::http::Accept::APPLICATION_JSON,
-        .content_type = {},
-        .headers = headers,
-        .body = {},
-        .quality_of_service = {},
+    auto helper = [&](std::string_view const &settle_coin) {
+      auto path = shared_.api.simple.order_realtime;
+      auto query = protocol::json::Encoder::get_orders(encode_buffer_, shared_.api.category, settle_coin);
+      auto headers = account_.create_headers(trace_info, path, query, {});
+      auto request = web::rest::Request{
+          .method = web::http::Method::GET,
+          .path = path,
+          .query = query,
+          .accept = web::http::Accept::APPLICATION_JSON,
+          .content_type = {},
+          .headers = headers,
+          .body = {},
+          .quality_of_service = {},
+      };
+      auto callback = [this](auto &event, [[maybe_unused]] auto &request_id) { get_orders_ack(event); };
+      (*connection_)(request, callback, "orders"sv);
     };
-    auto callback = [this, symbol = std::string{symbol}](auto &event, [[maybe_unused]] auto &request_id) { get_orders_ack(event, symbol); };
-    (*connection_)(request, callback, "orders"sv);
+    switch (shared_.api.api) {
+      using enum tools::API;
+      case UNDEFINED:
+        log::fatal("Unexpected"sv);
+      case SPOT:
+        helper({});
+        break;
+      case LINEAR:
+        for (auto &item : shared_.settle_coins) {
+          helper(item);
+        }
+        break;
+      case INVERSE:
+      case OPTION:
+        helper({});
+        break;
+    }
   });
 }
 
-void OrderEntryREST::get_orders_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
+void OrderEntryREST::get_orders_ack(Trace<web::rest::Response> const &event) {
   profile_.open_orders_ack([&]() {
     auto &[trace_info, response] = event;
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
@@ -573,12 +524,7 @@ void OrderEntryREST::get_orders_ack(Trace<web::rest::Response> const &event, std
       }
     };
     process_response(event, handle_error, handle_success);
-    auto response_2 = Response{
-        .account = account_.name,
-        .topic = "order"sv,
-        .symbol = symbol,
-    };
-    create_trace_and_dispatch(handler_, trace_info, response_2);
+    request_.orders.commit(trace_info);
   });
 }
 
@@ -630,7 +576,7 @@ void OrderEntryREST::operator()(Trace<protocol::json::OrdersAck> const &event) {
 
 // execution
 
-void OrderEntryREST::get_executions(TraceInfo const &trace_info, std::string_view const &symbol) {
+void OrderEntryREST::get_executions(TraceInfo const &trace_info) {
   profile_.execution([&]() {
     auto path = shared_.api.simple.execution_list;
     auto category = [&]() -> std::string_view {
@@ -656,12 +602,10 @@ void OrderEntryREST::get_executions(TraceInfo const &trace_info, std::string_vie
     auto limit = shared_.settings.download.trades_limit ? shared_.settings.download.trades_limit : DOWNLOAD_TRADES_LIMIT;
     auto query = fmt::format(
         "?category={}"
-        "&symbol={}"
         "&startTime={}"
         "&execType=Trade"
         "&limit={}"sv,
         category,
-        symbol,
         start_time.count(),
         limit);
     auto headers = account_.create_headers(trace_info, path, query, {});
@@ -675,12 +619,12 @@ void OrderEntryREST::get_executions(TraceInfo const &trace_info, std::string_vie
         .body = {},
         .quality_of_service = {},
     };
-    auto callback = [this, symbol = std::string{symbol}](auto &event, [[maybe_unused]] auto &request_id) { get_executions_ack(event, symbol); };
+    auto callback = [this](auto &event, [[maybe_unused]] auto &request_id) { get_executions_ack(event); };
     (*connection_)(request, callback, "execution"sv);
   });
 }
 
-void OrderEntryREST::get_executions_ack(Trace<web::rest::Response> const &event, std::string_view const &symbol) {
+void OrderEntryREST::get_executions_ack(Trace<web::rest::Response> const &event) {
   profile_.execution_ack([&]() {
     auto &[trace_info, response] = event;
     auto handle_error = [&](auto origin, auto status, auto error, auto const &text) {
@@ -696,12 +640,7 @@ void OrderEntryREST::get_executions_ack(Trace<web::rest::Response> const &event,
       download_trades_is_first_ = false;
     };
     process_response(event, handle_error, handle_success);
-    auto response_2 = Response{
-        .account = account_.name,
-        .topic = "execution"sv,
-        .symbol = symbol,
-    };
-    create_trace_and_dispatch(handler_, trace_info, response_2);
+    request_.executions.commit(trace_info);
   });
 }
 
@@ -1178,29 +1117,28 @@ void OrderEntryREST::cancel_all_orders(Event<CancelAllOrders> const &event, std:
       Trace event_2{trace_info, cancel_all_orders_ack};
       shared_.dispatcher(event_2);
     };
-    auto path = shared_.api.simple.order_cancel_all;
-    if (shared_.dispatcher.get_all_order_symbols(
-            [&](auto &symbol) {
-              if (!std::empty(cancel_all_orders.symbol) && symbol != cancel_all_orders.symbol) {
-                return;
-              }
-              auto body = protocol::json::Encoder::cancel_all_orders(encode_buffer_, cancel_all_orders, request_id, symbol, shared_.api.category);
-              auto headers = account_.create_headers(message_info, path, {}, body);
-              auto request = web::rest::Request{
-                  .method = web::http::Method::POST,
-                  .path = path,
-                  .query = {},
-                  .accept = web::http::Accept::APPLICATION_JSON,
-                  .content_type = web::http::ContentType::APPLICATION_JSON,
-                  .headers = headers,
-                  .body = body,
-                  .quality_of_service = {},
-              };
-              auto callback = [this](auto &event, auto &request_id) { cancel_all_orders_ack(event, request_id); };
-              (*connection_)(request, callback, request_id);
-              send_ack(symbol);
-            },
-            account_.name)) {
+    auto helper = [&](auto &symbol) {
+      if (!std::empty(cancel_all_orders.symbol) && symbol != cancel_all_orders.symbol) {
+        return;
+      }
+      auto body = protocol::json::Encoder::cancel_all_orders(encode_buffer_, cancel_all_orders, request_id, symbol, shared_.api.category);
+      auto path = shared_.api.simple.order_cancel_all;
+      auto headers = account_.create_headers(message_info, path, {}, body);
+      auto request = web::rest::Request{
+          .method = web::http::Method::POST,
+          .path = path,
+          .query = {},
+          .accept = web::http::Accept::APPLICATION_JSON,
+          .content_type = web::http::ContentType::APPLICATION_JSON,
+          .headers = headers,
+          .body = body,
+          .quality_of_service = {},
+      };
+      auto callback = [this](auto &event, auto &request_id) { cancel_all_orders_ack(event, request_id); };
+      (*connection_)(request, callback, request_id);
+      send_ack(symbol);
+    };
+    if (shared_.dispatcher.get_all_order_symbols(helper, account_.name)) {
     } else {
       log::warn("*** NOT POSSIBLE TO CANCEL ALL OPEN ORDERS (NO SYMBOLS) ***"sv);
     }
@@ -1254,21 +1192,11 @@ void OrderEntryREST::operator()(Trace<protocol::json::CancelAllOrdersAck> const 
 // helpers
 
 void OrderEntryREST::check_request_queue(TraceInfo const &trace_info) {
-  auto callback = [&](auto &trace_info, auto &message) {
-    auto &[topic, symbol] = message;
-    if (topic == "wallet"sv) {
-      get_wallet_balance(trace_info);
-    } else if (topic == "position"sv) {
-      get_positions(trace_info, symbol);
-    } else if (topic == "order"sv) {
-      get_orders(trace_info, symbol);
-    } else if (topic == "execution"sv) {
-      get_executions(trace_info, symbol);
-    }
-  };
-  if (account_.request_queue.dispatch(trace_info, callback)) {
-    log::debug("HERE size={}"sv, std::size(account_.request_queue));
-  }
+  request_.account.check_pending(trace_info, [this](auto &trace_info) { get_account_info(trace_info); });
+  request_.wallet.check_pending(trace_info, [this](auto &trace_info) { get_wallet_balance(trace_info); });
+  request_.positions.check_pending(trace_info, [this](auto &trace_info) { get_positions(trace_info); });
+  request_.orders.check_pending(trace_info, [this](auto &trace_info) { get_orders(trace_info); });
+  request_.executions.check_pending(trace_info, [this](auto &trace_info) { get_executions(trace_info); });
 }
 
 void OrderEntryREST::process_response(Trace<web::rest::Response> const &event, auto error_handler, auto success_handler) {

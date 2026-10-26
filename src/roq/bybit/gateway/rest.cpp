@@ -259,11 +259,15 @@ void Rest::get_instruments_info_ack(Trace<web::rest::Response> const &event, uin
 void Rest::operator()(Trace<protocol::json::InstrumentsInfoAck> const &event) {
   auto &[trace_info, instruments_info_ack] = event;
   log::info<4>("instruments_info_ack={}"sv, instruments_info_ack);
+  std::vector<Currency> coins;
   std::vector<Symbol> symbols;
   symbols.reserve(std::size(instruments_info_ack.result.list));  // alloc
   size_t counter = 0;
   for (auto &item : instruments_info_ack.result.list) {
     log::info<2>("item={}"sv, item);
+    if (!std::empty(item.settle_coin)) {
+      shared_.settle_coins.emplace(item.settle_coin);
+    }
     auto discard = shared_.dispatcher.discard_symbol(item.symbol);
     auto trade_vol_step_size = [&]() {
       if (shared_.api.category == protocol::json::Category::type_t::SPOT) {
@@ -335,6 +339,8 @@ void Rest::operator()(Trace<protocol::json::InstrumentsInfoAck> const &event) {
   if (counter > 0) {
     log::info("Symbols {} / {}"sv, counter, std::size(instruments_info_ack.result.list));
   }
+  MarketDataUpdated market_data_updated;
+  create_trace_and_dispatch(handler_, trace_info, market_data_updated);
 }
 
 // kline

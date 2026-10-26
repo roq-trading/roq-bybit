@@ -4,6 +4,8 @@
 
 #include <fmt/format.h>
 
+#include "roq/logging.hpp"
+
 #include "roq/decimal.hpp"
 
 #include "roq/bybit/protocol/json/map.hpp"
@@ -16,6 +18,30 @@ namespace protocol {
 namespace json {
 
 // REST
+
+std::string_view Encoder::get_wallet_balance(std::string &buffer) {
+  buffer.clear();
+  fmt::format_to(std::back_inserter(buffer), "?accountType=UNIFIED"sv);
+  return buffer;
+}
+
+std::string_view Encoder::get_positions(std::string &buffer, Category category, std::string_view settle_coin) {
+  buffer.clear();
+  fmt::format_to(std::back_inserter(buffer), "?category={}&limit=200"sv, category.as_raw_text());
+  if (!std::empty(settle_coin)) {
+    fmt::format_to(std::back_inserter(buffer), "&settleCoin={}"sv, settle_coin);
+  }
+  return buffer;
+}
+
+std::string_view Encoder::get_orders(std::string &buffer, Category category, std::string_view settle_coin) {
+  buffer.clear();
+  fmt::format_to(std::back_inserter(buffer), "?category={}&openOnly=0&limit=50"sv, category.as_raw_text());
+  if (!std::empty(settle_coin)) {
+    fmt::format_to(std::back_inserter(buffer), "&settleCoin={}"sv, settle_coin);
+  }
+  return buffer;
+}
 
 std::string_view Encoder::place_order(
     std::string &buffer,
@@ -142,6 +168,21 @@ std::string_view Encoder::cancel_all_orders(
 }
 
 // WS
+
+std::string_view Encoder::login_ws(std::string &buffer, std::string_view const &key, std::chrono::milliseconds expires_utc, std::string_view const &signature) {
+  buffer.clear();
+  fmt::format_to(
+      std::back_inserter(buffer),
+      R"({{)"
+      R"("req_id":"auth",)"
+      R"("op": "auth",)"
+      R"("args":["{}",{},"{}"])"
+      R"(}})"sv,
+      key,
+      expires_utc.count(),
+      signature);
+  return buffer;
+}
 
 std::string_view Encoder::place_order_ws(
     std::string &buffer,

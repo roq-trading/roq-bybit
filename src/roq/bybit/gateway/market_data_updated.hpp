@@ -2,17 +2,11 @@
 
 #pragma once
 
-#include <string_view>
-
 namespace roq {
 namespace bybit {
 namespace gateway {
 
-struct Response final {
-  std::string_view account;
-  std::string_view topic;
-  std::string_view symbol;
-};
+struct MarketDataUpdated final {};
 
 }  // namespace gateway
 }  // namespace bybit

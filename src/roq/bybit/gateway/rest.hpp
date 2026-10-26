@@ -22,6 +22,7 @@
 
 #include "roq/server/stream.hpp"
 
+#include "roq/bybit/gateway/market_data_updated.hpp"
 #include "roq/bybit/gateway/shared.hpp"
 #include "roq/bybit/gateway/symbols_update.hpp"
 
@@ -35,6 +36,7 @@ namespace gateway {
 struct Rest final : public Base<Rest>, public server::Stream, public web::rest::Client::Handler {
   struct Handler {
     virtual void operator()(Trace<SymbolsUpdate> const &) = 0;
+    virtual void operator()(Trace<MarketDataUpdated> const &) = 0;
   };
 
   Rest(Handler &, io::Context &context, uint16_t stream_id, Shared &);

@@ -41,12 +41,33 @@ R create_accounts(auto &settings, auto &config) {
 }
 
 template <typename R>
-R create_order_entry_rest(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
+R create_requests(auto &config, auto &shared) {
+  using result_type = std::remove_cvref_t<R>;
+  result_type result;
+  for (auto &[_, account] : config.accounts) {
+    auto request = std::make_unique<Request>(shared);
+    result.try_emplace(static_cast<std::string_view>(account.name), std::move(request));
+  }
+  return result;
+}
+
+Request &get_request(auto &requests, auto &account) {
+  auto iter = requests.find(account);
+  if (iter == std::end(requests)) {
+    log::fatal("Unexpected"sv);
+  }
+  return *(*iter).second;
+}
+
+template <typename R>
+R create_order_entry_rest(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared, auto &requests) {
   using result_type = std::remove_cvref_t<R>;
   result_type result;
   for (auto &[_, item] : accounts) {
     auto &account = *item;
-    auto obj = std::make_unique<OrderEntryREST>(gateway, context, ++stream_id, account, shared);
+    auto &request = get_request(requests, account.name);
+    auto master = true;
+    auto obj = std::make_unique<OrderEntryREST>(gateway, context, ++stream_id, account, shared, request, master);
     result.try_emplace(static_cast<std::string_view>(account.name), std::move(obj));
   }
   return result;
@@ -67,13 +88,11 @@ R create_order_entry_ws(auto &gateway, auto &settings, auto &context, auto &stre
 }
 
 template <typename R>
-R create_drop_copy(auto &gateway, auto &context, auto &stream_id, auto &accounts, auto &shared) {
+R create_drop_copy(auto &accounts) {
   using result_type = std::remove_cvref_t<R>;
   result_type result;
-  for (auto &[_, item] : accounts) {
-    auto &account = *item;
-    auto obj = std::make_unique<DropCopy>(gateway, context, ++stream_id, account, shared);
-    result.try_emplace(static_cast<std::string_view>(account.name), std::move(obj));
+  for (auto &[name, _] : accounts) {
+    result.try_emplace(static_cast<std::string_view>(name), nullptr);
   }
   return result;
 }
@@ -105,10 +124,10 @@ uint8_t Controller::parse_api(Settings const &settings) {
 
 Controller::Controller(server::Dispatcher &dispatcher, Settings const &settings, Config const &config, io::Context &context)
     : dispatcher_{dispatcher}, accounts_{create_accounts<decltype(accounts_)>(settings, config)}, context_{context}, shared_{dispatcher, settings},
-      rest_{*this, context_, ++stream_id_, shared_},
-      order_entry_rest_{create_order_entry_rest<decltype(order_entry_rest_)>(*this, context_, stream_id_, accounts_, shared_)},
+      requests_{create_requests<decltype(requests_)>(config, shared_)}, rest_{*this, context_, ++stream_id_, shared_},
+      order_entry_rest_{create_order_entry_rest<decltype(order_entry_rest_)>(*this, context_, stream_id_, accounts_, shared_, requests_)},
       order_entry_ws_{create_order_entry_ws<decltype(order_entry_ws_)>(*this, settings, context_, stream_id_, accounts_, shared_)},
-      drop_copy_{create_drop_copy<decltype(drop_copy_)>(*this, context_, stream_id_, accounts_, shared_)} {
+      drop_copy_{create_drop_copy<decltype(drop_copy_)>(accounts_)} {
   auto lookback = std::chrono::duration_cast<std::chrono::minutes>(settings.time_series.lookback);
   if (lookback.count() > static_cast<int64_t>(settings.download.time_series_limit)) {
     log::fatal("NOT IMPLEMENTED: lookback period too large ({} > {})"sv, lookback, settings.download.time_series_limit);
@@ -228,21 +247,29 @@ void Controller::operator()(Trace<SymbolsUpdate> const &event) {
   for (auto &item : market_data_) {
     (*item).subscribe(start_from);
   }
-  for (auto &item : drop_copy_) {
-    (*item.second)(event);
-  }
 }
 
-void Controller::operator()(Trace<Response> const &event) {
-  auto &[trace_info, response] = event;
-  get_drop_copy(response.account)(event);
+void Controller::operator()(Trace<MarketDataUpdated> const &event) {
+  log::warn("DEBUG HERE"sv);
+  auto &[trace_info, market_data_updated] = event;
+  for (auto &[name, item] : drop_copy_) {
+    if (!static_cast<bool>(item)) {
+      log::info(R"(Creating drop-copy (account="{}")...)"sv, name);
+      auto &account = get_account(name);
+      auto &request = get_request(requests_, name);
+      auto obj = std::make_unique<DropCopy>(*this, context_, ++stream_id_, account, shared_, request);
+      Start start;
+      create_trace_and_dispatch(*obj, trace_info, start);
+      item = std::move(obj);
+    }
+  }
 }
 
 // utilities
 
 void Controller::ensure_symbol_slices(TraceInfo const &trace_info, size_t size) {
   while (std::size(market_data_) < size) {
-    log::info("Create market-data (user-stream)"sv);
+    log::info("Creating market-data..."sv);
     auto market_data = std::make_unique<MarketData>(*this, context_, ++stream_id_, shared_, std::size(market_data_));
     Start start;
     create_trace_and_dispatch(*market_data, trace_info, start);
@@ -266,11 +293,21 @@ void Controller::dispatch_helper(auto &self, Args &&...args) {
     helper(*item);
   }
   for (auto &[_, item] : self.drop_copy_) {
-    helper(*item);
+    if (static_cast<bool>(item)) {
+      helper(*item);
+    }
   }
   for (auto &item : self.market_data_) {
     helper(*item);
   }
+}
+
+Account &Controller::get_account(std::string_view const &account) {
+  auto iter = accounts_.find(account);
+  if (iter != std::end(accounts_)) {
+    return *(*iter).second;
+  }
+  log::fatal(R"(Unknown account="{}")"sv, account);
 }
 
 DropCopy &Controller::get_drop_copy(std::string_view const &account) {

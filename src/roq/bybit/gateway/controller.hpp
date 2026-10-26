@@ -16,6 +16,7 @@
 
 #include "roq/bybit/gateway/account.hpp"
 #include "roq/bybit/gateway/config.hpp"
+#include "roq/bybit/gateway/request.hpp"
 #include "roq/bybit/gateway/settings.hpp"
 #include "roq/bybit/gateway/shared.hpp"
 
@@ -84,10 +85,7 @@ struct Controller final : public Base<Controller>,
   // Rest::Handler
 
   void operator()(Trace<SymbolsUpdate> const &) override;
-
-  // OrderEntryREST::Handler + OrderEntryWS::Handler
-
-  void operator()(Trace<Response> const &) override;
+  void operator()(Trace<MarketDataUpdated> const &) override;
 
   // helpers
 
@@ -98,6 +96,8 @@ struct Controller final : public Base<Controller>,
 
   template <typename... Args>
   static void dispatch_helper(auto &self, Args &&...);
+
+  Account &get_account(std::string_view const &account);
 
   DropCopy &get_drop_copy(std::string_view const &account);
 
@@ -113,6 +113,7 @@ struct Controller final : public Base<Controller>,
   io::Context &context_;
   // shared
   Shared shared_;
+  utils::unordered_map<std::string, std::unique_ptr<Request>> const requests_;
   // seed
   uint16_t stream_id_ = {};
   // streams

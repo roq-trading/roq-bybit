@@ -14,6 +14,8 @@
 
 #include "roq/web/socket/client.hpp"
 
+#include "roq/core/download_2.hpp"
+
 #include "roq/core/json/buffer_stack.hpp"
 
 #include "roq/server.hpp"
@@ -21,9 +23,9 @@
 #include "roq/server/stream.hpp"
 
 #include "roq/bybit/gateway/account.hpp"
+#include "roq/bybit/gateway/request.hpp"
 #include "roq/bybit/gateway/shared.hpp"
 
-#include "roq/bybit/gateway/response.hpp"
 #include "roq/bybit/gateway/symbols_update.hpp"
 
 #include "roq/bybit/protocol/json/parser.hpp"
@@ -35,10 +37,7 @@ namespace gateway {
 struct DropCopy final : public Base<DropCopy>, public server::Stream, public web::socket::Client::Handler, protocol::json::Parser::Handler {
   struct Handler {};
 
-  DropCopy(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &);
-
-  void operator()(Trace<SymbolsUpdate> const &);
-  void operator()(Trace<Response> const &);
+  DropCopy(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &, Request &);
 
   // protected:
   friend base_type;
@@ -68,6 +67,24 @@ struct DropCopy final : public Base<DropCopy>, public server::Stream, public web
   void operator()(Trace<web::socket::Text> const &) override;
   void operator()(Trace<web::socket::Binary> const &) override;
 
+  // core::Download
+
+  enum class State {
+    UNDEFINED = 0,
+    GET_ACCOUNT_INFO,
+    SUBSCRIBE_WALLET,
+    GET_WALLET,
+    SUBSCRIBE_POSITIONS,
+    GET_POSITIONS,
+    SUBSCRIBE_ORDERS,
+    GET_ORDERS,
+    SUBSCRIBE_EXECUTIONS,
+    GET_EXECUTIONS,
+    DONE,
+  };
+
+  int32_t download(Trace<State> const &);
+
   // protocol::json::Parser::Handler
 
   void operator()(Trace<protocol::json::Ping> const &) override;
@@ -88,11 +105,11 @@ struct DropCopy final : public Base<DropCopy>, public server::Stream, public web
 
   // helpers
 
-  void send_login();
+  void send_login(TraceInfo const &);
 
-  void subscribe();
+  void subscribe(State);
 
-  void subscribe(std::string_view const &topic);
+  void check_request_queue(TraceInfo const &);
 
   void parse(TraceInfo const &, std::string_view const &message);
 
@@ -119,12 +136,16 @@ struct DropCopy final : public Base<DropCopy>, public server::Stream, public web
   Account &account_;
   // cache
   Shared &shared_;
+  Request &request_;
   // state
   ConnectionStatus connection_status_ = {};
+  core::Download2<State> download_;
   std::chrono::nanoseconds logon_timeout_ = {};
   std::chrono::nanoseconds next_ping_ = {};
   // ...
   utils::unordered_set<std::string> symbols_;
+  // ...
+  std::string encode_buffer_;
 };
 
 }  // namespace gateway

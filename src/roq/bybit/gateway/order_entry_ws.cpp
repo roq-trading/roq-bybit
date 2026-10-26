@@ -5,6 +5,7 @@
 #include "roq/mask.hpp"
 
 #include "roq/utils/common.hpp"
+#include "roq/utils/safe_cast.hpp"
 
 #include "roq/utils/exceptions/unhandled.hpp"
 
@@ -166,9 +167,15 @@ uint16_t OrderEntryWS::operator()(
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[message_info, create_order] = event;
-    auto now_utc = clock::get_realtime<std::chrono::milliseconds>();
     auto message = protocol::json::Encoder::place_order_ws(
-        encode_buffer_, create_order, order, ref_data, request_id, shared_.api.category, now_utc, shared_.settings.rest.recv_window);
+        encode_buffer_,
+        create_order,
+        order,
+        ref_data,
+        request_id,
+        shared_.api.category,
+        utils::safe_cast(message_info.origin_create_time_utc),
+        shared_.settings.rest.recv_window);
     log::debug("{}"sv, message);
     (*connection_).send_text(message);
   });
@@ -186,9 +193,16 @@ uint16_t OrderEntryWS::operator()(
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[message_info, modify_order] = event;
-    auto now_utc = clock::get_realtime<std::chrono::milliseconds>();
     auto message = protocol::json::Encoder::amend_order_ws(
-        encode_buffer_, modify_order, order, ref_data, request_id, previous_request_id, shared_.api.category, now_utc, shared_.settings.rest.recv_window);
+        encode_buffer_,
+        modify_order,
+        order,
+        ref_data,
+        request_id,
+        previous_request_id,
+        shared_.api.category,
+        utils::safe_cast(message_info.origin_create_time_utc),
+        shared_.settings.rest.recv_window);
     log::debug("{}"sv, message);
     (*connection_).send_text(message);
   });
@@ -206,9 +220,16 @@ uint16_t OrderEntryWS::operator()(
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[message_info, cancel_order] = event;
-    auto now_utc = clock::get_realtime<std::chrono::milliseconds>();
     auto message = protocol::json::Encoder::cancel_order_ws(
-        encode_buffer_, cancel_order, order, ref_data, request_id, previous_request_id, shared_.api.category, now_utc, shared_.settings.rest.recv_window);
+        encode_buffer_,
+        cancel_order,
+        order,
+        ref_data,
+        request_id,
+        previous_request_id,
+        shared_.api.category,
+        utils::safe_cast(message_info.origin_create_time_utc),
+        shared_.settings.rest.recv_window);
     log::debug("{}"sv, message);
     (*connection_).send_text(message);
   });
@@ -232,7 +253,6 @@ void OrderEntryWS::operator()(Trace<web::socket::Disconnected> const &event) {
   ++counter_.disconnect;
   create_trace_and_dispatch_2(trace_info, ConnectionStatus::DISCONNECTED);
   logon_timeout_ = {};
-  account_.request_queue.clear();
 }
 
 void OrderEntryWS::operator()(Trace<web::socket::Latency> const &event) {
@@ -248,7 +268,7 @@ void OrderEntryWS::operator()(Trace<web::socket::Latency> const &event) {
 
 void OrderEntryWS::operator()(Trace<web::socket::Ready> const &event) {
   auto &[trace_info, ready] = event;
-  send_login();
+  send_login(trace_info);
   create_trace_and_dispatch_2(trace_info, ConnectionStatus::LOGIN_SENT);
 }
 
@@ -270,13 +290,13 @@ void OrderEntryWS::operator()(Trace<web::socket::Binary> const &) {
 
 void OrderEntryWS::operator()(Trace<protocol::json::Ping> const &event) {
   auto &[trace_info, ping] = event;
-  log::info<4>("event={{ping={}, trace_info={}}}"sv, ping, trace_info);
+  log::info<4>("ping={}"sv, ping);
 }
 
 void OrderEntryWS::operator()(Trace<protocol::json::Auth2> const &event) {
   profile_.auth([&]() {
     auto &[trace_info, auth] = event;
-    log::info<4>("event={{auth={}, trace_info={}}}"sv, auth, trace_info);
+    log::info<4>("auth={}"sv, auth);
     if (auth.ret_code == 0) {
       create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
     } else {
@@ -287,7 +307,6 @@ void OrderEntryWS::operator()(Trace<protocol::json::Auth2> const &event) {
 
 void OrderEntryWS::operator()(Trace<protocol::json::Error> const &event) {
   auto &[trace_info, error] = event;
-  log::info<4>("event={{error={}, trace_info={}}}"sv, error, trace_info);
   log::fatal("error={}"sv, error);
 }
 
@@ -356,19 +375,10 @@ void OrderEntryWS::operator()(Trace<protocol::json::CancelOrder2> const &event) 
 
 // helpers
 
-void OrderEntryWS::send_login() {
-  auto now_utc = clock::get_realtime<std::chrono::milliseconds>();
-  auto expires_utc = now_utc + AUTH_EXPIRES;
+void OrderEntryWS::send_login(TraceInfo const &trace_info) {
+  auto expires_utc = std::chrono::duration_cast<std::chrono::milliseconds>(trace_info.origin_create_time_utc + AUTH_EXPIRES);
   auto signature = account_.create_signature(expires_utc);
-  auto message = fmt::format(
-      R"({{)"
-      R"("req_id":"auth",)"
-      R"("op": "auth",)"
-      R"("args":["{}",{},"{}"])"
-      R"(}})"sv,
-      account_.get_key(),
-      expires_utc.count(),
-      signature);
+  auto message = protocol::json::Encoder::login_ws(encode_buffer_, account_.get_key(), expires_utc, signature);
   log::debug("{}"sv, message);
   (*connection_).send_text(message);
 }
