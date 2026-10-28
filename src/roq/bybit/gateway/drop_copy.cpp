@@ -303,12 +303,12 @@ void DropCopy::operator()(Trace<protocol::json::Auth> const &event) {
 void DropCopy::operator()(Trace<protocol::json::Subscribe> const &event) {
   auto &[trace_info, subscribe] = event;
   log::info<4>("subscribe={}"sv, subscribe);
-  auto req_id = magic_enum::enum_cast<State>(subscribe.req_id);
-  if (req_id.has_value()) {
-    auto state = req_id.value();
+  auto request_id = magic_enum::enum_cast<State>(subscribe.req_id);
+  if (request_id.has_value()) {
+    auto state = request_id.value();
     download_.check(trace_info, state);
   } else {
-    log::warn(R"(Unexpected: req_id="{}")"sv, subscribe.req_id);
+    log::warn(R"(Unexpected: request_id="{}")"sv, subscribe.req_id);
   }
 }
 
