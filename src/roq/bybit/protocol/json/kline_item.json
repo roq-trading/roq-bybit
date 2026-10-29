@@ -4,11 +4,11 @@
   "values": [
     {
       "name": "start",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     },
     {
       "name": "end",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     },
     {
       "name": "interval",
@@ -44,7 +44,7 @@
     },
     {
       "name": "timestamp",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     }
   ]
 }

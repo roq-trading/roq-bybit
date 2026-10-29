@@ -13,7 +13,7 @@
     {
       "raw": "ts",
       "name": "timestamp",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     },
     {
       "name": "data",

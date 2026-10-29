@@ -152,11 +152,11 @@
     },
     {
       "name": "createdTime",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     },
     {
       "name": "updatedTime",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     },
     {
       "name": "tpSlMode",

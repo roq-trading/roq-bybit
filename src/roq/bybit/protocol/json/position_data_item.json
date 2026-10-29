@@ -108,11 +108,11 @@
     },
     {
       "name": "createdTime",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     },
     {
       "name": "updatedTime",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     },
     {
       "name": "sessionAvgPrice",
@@ -128,11 +128,11 @@
     },
     {
       "name": "leverageSysUpdatedTime",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     },
     {
       "name": "mmrSysUpdatedTime",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     },
     {
       "name": "seq",
@@ -158,7 +158,7 @@
     },
     {
       "name": "openTime",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     },
     {
       "name": "netDeltaRatio",

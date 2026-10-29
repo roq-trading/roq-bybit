@@ -72,7 +72,7 @@
     },
     {
       "name": "execTime",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     },
     {
       "name": "isMaker",

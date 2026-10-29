@@ -4,7 +4,7 @@
   "values": [
     {
       "name": "start_time",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     },
     {
       "name": "open_price",

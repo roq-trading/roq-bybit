@@ -12,7 +12,7 @@
     },
     {
       "name": "creationTime",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     },
     {
       "name": "data",

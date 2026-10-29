@@ -19,7 +19,7 @@
     },
     {
       "name": "time",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     }
   ]
 }

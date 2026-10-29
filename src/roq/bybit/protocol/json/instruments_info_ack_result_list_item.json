@@ -29,12 +29,12 @@
     },
     {
       "name": "launchTime",
-      "type": "std/milliseconds",
+      "type": "std/microseconds",
       "comment": ".LIO"
     },
     {
       "name": "deliveryTime",
-      "type": "std/milliseconds",
+      "type": "std/microseconds",
       "comment": ".LIO"
     },
     {

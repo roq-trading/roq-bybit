@@ -89,7 +89,7 @@
     },
     {
       "name": "nextFundingTime",
-      "type": "std/milliseconds",
+      "type": "std/microseconds",
       "comment": ".LI."
     },
     {

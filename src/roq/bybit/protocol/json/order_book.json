@@ -18,7 +18,7 @@
     {
       "raw": "ts",
       "name": "timestamp",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     },
     {
       "name": "data",
@@ -27,7 +27,7 @@
     {
       "raw": "cts",
       "name": "cts",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     }
   ]
 }

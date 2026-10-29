@@ -16,7 +16,7 @@
     },
     {
       "name": "createTime",
-      "type": "std/milliseconds"
+      "type": "std/microseconds"
     },
     {
       "name": "orderPrice",

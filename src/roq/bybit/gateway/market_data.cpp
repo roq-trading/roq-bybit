@@ -362,7 +362,7 @@ void MarketData::operator()(Trace<protocol::json::PublicTrade> const &event) {
     (*connection_).touch(trace_info.source_receive_time);
     auto &trades = shared_.trades;
     trades.clear();
-    std::chrono::milliseconds timestamp = {};
+    std::chrono::microseconds timestamp = {};
     auto dispatch = [&](auto &symbol) {
       if (std::empty(symbol)) {
         assert(std::empty(trades));

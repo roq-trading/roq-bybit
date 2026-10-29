@@ -14,12 +14,12 @@
     },
     {
       "name": "creationTime",
-      "type": "std/milliseconds",
+      "type": "std/microseconds",
       "comment": ""
     },
     {
       "name": "ts",
-      "type": "std/milliseconds",
+      "type": "std/microseconds",
       "comment": "orderbook.1"
     },
     {
@@ -63,7 +63,7 @@
     },
     {
       "name": "cts",
-      "type": "std/milliseconds",
+      "type": "std/microseconds",
       "comment": "orderbook.1"
     },
     {
