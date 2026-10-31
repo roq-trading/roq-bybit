@@ -29,7 +29,7 @@ CONFIG_FILE="$ROQ_CONFIG_PATH/roq-bybit/$CONFIG.toml"
 
 FLAGFILE="../../../share/flags/test/flags.cfg"
 
-WSAPI=true
+WS_API=false
 
 $PREFIX ./roq-bybit \
   --name "$NAME" \

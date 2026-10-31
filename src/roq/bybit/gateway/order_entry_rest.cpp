@@ -541,6 +541,13 @@ void OrderEntryREST::operator()(Trace<protocol::json::OrdersAck> const &event) {
   log::info<2>("orders_ack={}"sv, orders_ack);
   for (auto &item : orders_ack.result.list) {
     log::info<2>("item={}"sv, item);
+    auto order_status = map(item.order_status).template get<OrderStatus>();
+    auto remaining_quantity = [&]() {
+      if (order_status != OrderStatus::CANCELED) {
+        return item.leaves_qty;
+      }
+      return 0.0;
+    }();
     auto order_update = server::oms::OrderUpdate{
         .account = account_.name,
         .exchange = shared_.settings.exchange,
@@ -558,14 +565,14 @@ void OrderEntryREST::operator()(Trace<protocol::json::OrdersAck> const &event) {
         .external_account = {},
         .external_order_id = item.order_id,
         .client_order_id = item.order_link_id,
-        .order_status = map(item.order_status),
+        .order_status = order_status,
         .error = {},
         .text = {},
         .quantity = item.qty,
         .price = item.price,
         .stop_price = NaN,  // XXX item.trigger_price ???
         .leverage = NaN,
-        .remaining_quantity = item.leaves_qty,
+        .remaining_quantity = remaining_quantity,
         .traded_quantity = item.cum_exec_qty,
         .average_traded_price = item.avg_price,
         .last_traded_quantity = NaN,
@@ -617,6 +624,7 @@ void OrderEntryREST::get_order_ack(Trace<web::rest::Response> const &event, std:
     auto handle_success = [&](auto &body) {
       protocol::json::OrdersAck orders_ack{body, decode_buffer_};
       if (orders_ack.ret_code == 0) {
+        log::warn("DEBUG len(orders)={}"sv, std::size(orders_ack.result.list));
         // note! documentation mentions rejected orders, but we don't seem to get any
         if (std::empty(orders_ack.result.list)) {
           auto order_update = server::oms::OrderUpdate{
