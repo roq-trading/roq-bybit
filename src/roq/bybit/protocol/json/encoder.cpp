@@ -25,7 +25,7 @@ std::string_view Encoder::get_wallet_balance(std::string &buffer) {
   return buffer;
 }
 
-std::string_view Encoder::get_positions(std::string &buffer, Category category, std::string_view settle_coin) {
+std::string_view Encoder::get_positions(std::string &buffer, Category category, std::string_view const &settle_coin) {
   buffer.clear();
   fmt::format_to(std::back_inserter(buffer), "?category={}&limit=200"sv, category.as_raw_text());
   if (!std::empty(settle_coin)) {
@@ -34,11 +34,27 @@ std::string_view Encoder::get_positions(std::string &buffer, Category category, 
   return buffer;
 }
 
-std::string_view Encoder::get_orders(std::string &buffer, Category category, std::string_view settle_coin) {
+std::string_view Encoder::get_orders(std::string &buffer, Category category, std::string_view const &settle_coin) {
   buffer.clear();
   fmt::format_to(std::back_inserter(buffer), "?category={}&openOnly=0&limit=50"sv, category.as_raw_text());
   if (!std::empty(settle_coin)) {
     fmt::format_to(std::back_inserter(buffer), "&settleCoin={}"sv, settle_coin);
+  }
+  return buffer;
+}
+
+std::string_view Encoder::get_order(
+    std::string &buffer,
+    Category category,
+    std::string_view const &symbol,
+    std::string_view const &client_order_id,
+    std::string_view const &external_order_id) {
+  buffer.clear();
+  fmt::format_to(std::back_inserter(buffer), "?category={}&openOnly=1&symbol={}"sv, category.as_raw_text(), symbol);
+  if (std::empty(external_order_id)) {
+    fmt::format_to(std::back_inserter(buffer), "&orderLinkId={}"sv, client_order_id);
+  } else {
+    fmt::format_to(std::back_inserter(buffer), "&orderId={}"sv, external_order_id);
   }
   return buffer;
 }

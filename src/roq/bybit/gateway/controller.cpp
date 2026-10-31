@@ -35,7 +35,7 @@ R create_accounts(auto &settings, auto &config) {
   result_type result;
   for (auto &[_, account] : config.accounts) {
     auto obj = std::make_unique<Account>(settings, config, account.name);
-    result.try_emplace(static_cast<std::string_view>(account.name), std::move(obj));
+    result.try_emplace(account.name, std::move(obj));
   }
   return result;
 }
@@ -45,8 +45,8 @@ R create_requests(auto &config, auto &shared) {
   using result_type = std::remove_cvref_t<R>;
   result_type result;
   for (auto &[_, account] : config.accounts) {
-    auto request = std::make_unique<Request>(shared);
-    result.try_emplace(static_cast<std::string_view>(account.name), std::move(request));
+    auto obj = std::make_unique<Request>(shared);
+    result.try_emplace(account.name, std::move(obj));
   }
   return result;
 }
@@ -66,9 +66,8 @@ R create_order_entry_rest(auto &gateway, auto &context, auto &stream_id, auto &a
   for (auto &[_, item] : accounts) {
     auto &account = *item;
     auto &request = get_request(requests, account.name);
-    auto master = true;
-    auto obj = std::make_unique<OrderEntryREST>(gateway, context, ++stream_id, account, shared, request, master);
-    result.try_emplace(static_cast<std::string_view>(account.name), std::move(obj));
+    auto obj = std::make_unique<OrderEntryREST>(gateway, context, ++stream_id, account, shared, request);
+    result.try_emplace(account.name, std::move(obj));
   }
   return result;
 }
@@ -81,7 +80,7 @@ R create_order_entry_ws(auto &gateway, auto &settings, auto &context, auto &stre
     for (auto &[_, item] : accounts) {
       auto &account = *item;
       auto obj = std::make_unique<OrderEntryWS>(gateway, context, ++stream_id, account, shared);
-      result.try_emplace(static_cast<std::string_view>(account.name), std::move(obj));
+      result.try_emplace(account.name, std::move(obj));
     }
   }
   return result;
@@ -91,8 +90,9 @@ template <typename R>
 R create_drop_copy(auto &accounts) {
   using result_type = std::remove_cvref_t<R>;
   result_type result;
-  for (auto &[name, _] : accounts) {
-    result.try_emplace(static_cast<std::string_view>(name), nullptr);
+  for (auto &[_, item] : accounts) {
+    auto &account = *item;
+    result.try_emplace(account.name, nullptr);  // note! delayed creation because we need list of settle-coins
   }
   return result;
 }
@@ -249,8 +249,8 @@ void Controller::operator()(Trace<SymbolsUpdate> const &event) {
   }
 }
 
+// note! delayed creation because we need list of settle-coins
 void Controller::operator()(Trace<MarketDataUpdated> const &event) {
-  log::warn("DEBUG HERE"sv);
   auto &[trace_info, market_data_updated] = event;
   for (auto &[name, item] : drop_copy_) {
     if (!static_cast<bool>(item)) {
@@ -265,15 +265,15 @@ void Controller::operator()(Trace<MarketDataUpdated> const &event) {
   }
 }
 
-// utilities
+// helpers
 
 void Controller::ensure_symbol_slices(TraceInfo const &trace_info, size_t size) {
   while (std::size(market_data_) < size) {
     log::info("Creating market-data..."sv);
-    auto market_data = std::make_unique<MarketData>(*this, context_, ++stream_id_, shared_, std::size(market_data_));
+    auto obj = std::make_unique<MarketData>(*this, context_, ++stream_id_, shared_, std::size(market_data_));
     Start start;
-    create_trace_and_dispatch(*market_data, trace_info, start);
-    market_data_.emplace_back(std::move(market_data));
+    create_trace_and_dispatch(*obj, trace_info, start);
+    market_data_.emplace_back(std::move(obj));
   }
 }
 

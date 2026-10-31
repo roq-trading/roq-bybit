@@ -24,8 +24,12 @@ struct Encoder final {
   // REST
   static std::string_view get_wallet_balance(std::string &buffer);
 
-  static std::string_view get_positions(std::string &buffer, Category, std::string_view settle_coin);
-  static std::string_view get_orders(std::string &buffer, Category, std::string_view settle_coin);
+  static std::string_view get_positions(std::string &buffer, Category, std::string_view const &settle_coin);
+
+  static std::string_view get_orders(std::string &buffer, Category, std::string_view const &settle_coin);
+
+  static std::string_view get_order(
+      std::string &buffer, Category, std::string_view const &symbol, std::string_view const &client_order_id, std::string_view const &external_order_id);
 
   static std::string_view place_order(
       std::string &buffer, roq::CreateOrder const &, server::oms::Order const &, server::oms::RefData const &, std::string_view const &request_id, Category);

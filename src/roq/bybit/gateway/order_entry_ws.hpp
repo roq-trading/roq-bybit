@@ -39,7 +39,7 @@ struct OrderEntryWS final : public Base<OrderEntryWS>, public server::OrderActio
 
   uint16_t stream_id() const override { return stream_id_; }
 
-  bool ready() const override;
+  bool ready() const override { return connection_status_ == ConnectionStatus::READY; }
 
   void operator()(Trace<Start> const &) override;
   void operator()(Trace<Stop> const &) override;

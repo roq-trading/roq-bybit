@@ -46,7 +46,7 @@ struct DropCopy final : public Base<DropCopy>, public server::Stream, public web
 
   uint16_t stream_id() const override { return stream_id_; }
 
-  bool ready() const override;
+  bool ready() const override { return connection_status_ == ConnectionStatus::READY; }
 
   void operator()(Trace<Start> const &) override;
   void operator()(Trace<Stop> const &) override;
@@ -71,15 +71,16 @@ struct DropCopy final : public Base<DropCopy>, public server::Stream, public web
 
   enum class State {
     UNDEFINED = 0,
-    GET_ACCOUNT_INFO,
-    SUBSCRIBE_WALLET,
-    GET_WALLET,
+    GET_ACCOUNT,
+    SUBSCRIBE_BALANCES,
+    GET_BALANCES,
     SUBSCRIBE_POSITIONS,
     GET_POSITIONS,
     SUBSCRIBE_ORDERS,
-    GET_ORDERS,
-    SUBSCRIBE_EXECUTIONS,
-    GET_EXECUTIONS,
+    GET_OPEN_ORDERS,
+    GET_LOST_ORDERS,
+    SUBSCRIBE_TRADES,
+    GET_TRADES,
     DONE,
   };
 
@@ -107,9 +108,12 @@ struct DropCopy final : public Base<DropCopy>, public server::Stream, public web
 
   void send_login(TraceInfo const &);
 
-  void subscribe(State);
+  void subscribe(State, std::string_view const &topic);
 
   void check_request_queue(TraceInfo const &);
+
+  bool check_stale_orders();
+  void check_stale_orders(TraceInfo const &);
 
   void parse(TraceInfo const &, std::string_view const &message);
 
@@ -146,6 +150,8 @@ struct DropCopy final : public Base<DropCopy>, public server::Stream, public web
   utils::unordered_set<std::string> symbols_;
   // ...
   std::string encode_buffer_;
+  //
+  std::chrono::nanoseconds next_check_stale_orders_ = {};
 };
 
 }  // namespace gateway

@@ -29,6 +29,8 @@ CONFIG_FILE="$ROQ_CONFIG_PATH/roq-bybit/$CONFIG.toml"
 
 FLAGFILE="../../../share/flags/test/flags.cfg"
 
+WSAPI=true
+
 $PREFIX ./roq-bybit \
   --name "$NAME" \
   --config_file "$CONFIG_FILE" \
@@ -38,4 +40,5 @@ $PREFIX ./roq-bybit \
   --client_listen_address "$HOME/run/$NAME.sock" \
   --service_listen_address "$HOME/run/metrics/${NAME}.sock" \
   --api "linear" \
+  --ws_api $WS_API \
   $@
