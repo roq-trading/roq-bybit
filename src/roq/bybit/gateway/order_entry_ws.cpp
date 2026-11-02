@@ -36,16 +36,20 @@ size_t const MAX_DECODE_BUFFER_DEPTH = 1;
 // === HELPERS ===
 
 namespace {
-auto get_supports(auto api) {
-  auto result = Mask{
-      SupportType::CREATE_ORDER,
-      SupportType::CANCEL_ORDER,
-      SupportType::ORDER_ACK,
-  };
-  if (api != tools::API::SPOT) {
-    result |= SupportType::MODIFY_ORDER;
+auto get_supports(auto api, auto ws_api) {
+  if (ws_api) {
+    auto result = Mask{
+        SupportType::CREATE_ORDER,
+        SupportType::CANCEL_ORDER,
+        SupportType::ORDER_ACK,
+    };
+    if (api != tools::API::SPOT) {
+      result |= SupportType::MODIFY_ORDER;
+    }
+    return result;
+  } else {
+    return Mask<SupportType>{};
   }
-  return result;
 }
 
 auto create_name(auto stream_id) {
@@ -139,7 +143,7 @@ void OrderEntryWS::operator()(Trace<ConnectionStatus> const &event, std::string_
   auto stream_status = StreamStatus{
       .stream_id = stream_id_,
       .account = account_.name,
-      .supports = get_supports(shared_.api.api),
+      .supports = get_supports(shared_.api.api, shared_.settings.ws_api),
       .transport = Transport::TCP,
       .protocol = Protocol::WS,
       .encoding = {Encoding::JSON},
