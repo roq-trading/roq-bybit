@@ -160,9 +160,13 @@ void MarketData::operator()(Trace<Stop> const &) {
 
 void MarketData::operator()(Trace<Timer> const &event) {
   auto &[trace_info, timer] = event;
-  if ((*connection_).refresh(timer.now)) {
-    if (ready() && next_ping_ < timer.now) {
-      send_ping(timer.now);
+  if ((*connection_).refresh(trace_info)) {
+    if (ready()) {
+      if (next_ping_ < trace_info.origin_create_time) {
+        assert(ping_frequency_.count() > 0);
+        next_ping_ = trace_info.origin_create_time + ping_frequency_ / 2;
+        send_ping(trace_info);
+      }
     }
   }
 }
@@ -610,15 +614,13 @@ void MarketData::subscribe(std::string_view const &topic, std::span<Symbol const
   }
 }
 
-void MarketData::send_ping(std::chrono::nanoseconds now) {
-  assert(ping_frequency_.count() > 0);
-  next_ping_ = now + ping_frequency_ / 2;
+void MarketData::send_ping(TraceInfo const &trace_info) {
   auto message = fmt::format(
       R"({{)"
       R"("req_id":"{}",)"
       R"("op":"ping")"
       R"(}})"sv,
-      now.count());
+      trace_info.origin_create_time.count());
   (*connection_).send_text(message);
 }
 

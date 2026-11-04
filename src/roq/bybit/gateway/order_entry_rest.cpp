@@ -155,13 +155,9 @@ void OrderEntryREST::operator()(Trace<Stop> const &) {
 
 void OrderEntryREST::operator()(Trace<Timer> const &event) {
   auto &[trace_info, timer] = event;
-  if ((*connection_).refresh(timer.now)) {
+  if ((*connection_).refresh(trace_info)) {
     if (ready()) {
-      try {
-        check_request_queue(trace_info);
-      } catch (NotConnected &) {
-        // note! ok
-      }
+      check_request_queue(trace_info);
     }
   }
 }
