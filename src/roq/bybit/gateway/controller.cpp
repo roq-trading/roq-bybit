@@ -76,7 +76,8 @@ template <typename R>
 R create_order_entry_ws(auto &gateway, auto &settings, auto &context, auto &stream_id, auto &accounts, auto &shared) {
   using result_type = std::remove_cvref_t<R>;
   result_type result;
-  if (settings.ws_api) {
+  if (settings.misc.disable_ws_api) {
+  } else {
     for (auto &[_, item] : accounts) {
       auto &account = *item;
       auto obj = std::make_unique<OrderEntryWS>(gateway, context, ++stream_id, account, shared);
@@ -335,10 +336,10 @@ server::OrderActionStream &Controller::get_order_entry_ws(std::string_view const
 }
 
 server::OrderActionStream &Controller::get_order_entry(std::string_view const &account) {
-  if (shared_.settings.ws_api) {
-    return get_order_entry_ws(account);
-  } else {
+  if (shared_.settings.misc.disable_ws_api) {
     return get_order_entry_rest(account);
+  } else {
+    return get_order_entry_ws(account);
   }
 }
 

@@ -35,14 +35,14 @@ auto const NAME = "om"sv;
 // === HELPERS ===
 
 namespace {
-auto get_supports(auto api, auto ws_api) {
+auto get_supports(auto api, auto disable_ws_api) {
   auto result = Mask{
       SupportType::FUNDS,
   };
   if (api != tools::API::SPOT) {
     result |= SupportType::POSITION;
   };
-  if (!ws_api) {
+  if (disable_ws_api) {
     result |= SupportType::CREATE_ORDER;
     result |= SupportType::CANCEL_ORDER;
     result |= SupportType::ORDER_ACK;
@@ -195,7 +195,7 @@ void OrderEntryREST::operator()(Trace<ConnectionStatus> const &event, std::strin
   auto stream_status = StreamStatus{
       .stream_id = stream_id_,
       .account = account_.name,
-      .supports = get_supports(shared_.api.api, shared_.settings.ws_api),
+      .supports = get_supports(shared_.api.api, shared_.settings.misc.disable_ws_api),
       .transport = Transport::TCP,
       .protocol = Protocol::HTTP,
       .encoding = {Encoding::JSON},
