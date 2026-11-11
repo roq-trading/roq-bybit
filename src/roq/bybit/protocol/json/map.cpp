@@ -2,12 +2,15 @@
 
 #include "roq/bybit/protocol/json/map.hpp"
 
-#include "roq/logging.hpp"
+#include "roq/server/tools/log_once.hpp"
 
 using namespace std::literals;
 
 namespace roq {
 
+namespace {
+server::tools::LogOnce LOG_ONCE{"Map"sv};
+}
 namespace {
 template <typename... Args>
 using Helper = detail::MapHelper<Args...>;
@@ -374,7 +377,7 @@ constexpr Helper<int32_t>::operator std::optional<roq::Error>() const {
     case 12632:  // Decimal of decimals has exceeded the maximum precision
       break;
   }
-  log::warn("DEBUG unable to map error_code={}"sv, value);
+  LOG_ONCE("error_code"sv, value);
   return Error::UNKNOWN;
 }
 
