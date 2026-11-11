@@ -26,6 +26,10 @@ namespace roq {
 
 template <>
 template <>
+std::optional<Error> Map<int32_t>::helper() const;
+
+template <>
+template <>
 std::optional<UpdateType> Map<bybit::protocol::json::EventType>::helper() const;
 
 template <>

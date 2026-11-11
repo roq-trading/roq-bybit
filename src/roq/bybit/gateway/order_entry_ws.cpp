@@ -14,7 +14,7 @@
 #include "roq/server/oms/exceptions.hpp"
 
 #include "roq/bybit/protocol/json/encoder.hpp"
-#include "roq/bybit/protocol/json/utils.hpp"
+#include "roq/bybit/protocol/json/map.hpp"
 
 using namespace std::literals;
 using namespace std::chrono_literals;
@@ -316,12 +316,11 @@ void OrderEntryWS::operator()(Trace<protocol::json::Error> const &event) {
 void OrderEntryWS::operator()(Trace<protocol::json::PlaceOrder2> const &event) {
   auto &[trace_info, place_order] = event;
   if (place_order.ret_code != 0) {
-    auto error = protocol::json::map_error(place_order.ret_code);
     auto response = server::oms::Response{
         .request_type = RequestType::CREATE_ORDER,
         .origin = Origin::EXCHANGE,
         .request_status = RequestStatus::REJECTED,
-        .error = error,
+        .error = map(place_order.ret_code),
         .text = place_order.ret_msg,
         .version = {},
         .request_id = place_order.req_id,
@@ -337,12 +336,11 @@ void OrderEntryWS::operator()(Trace<protocol::json::PlaceOrder2> const &event) {
 void OrderEntryWS::operator()(Trace<protocol::json::AmendOrder2> const &event) {
   auto &[trace_info, amend_order] = event;
   if (amend_order.ret_code != 0) {
-    auto error = protocol::json::map_error(amend_order.ret_code);
     auto response = server::oms::Response{
         .request_type = RequestType::MODIFY_ORDER,
         .origin = Origin::EXCHANGE,
         .request_status = RequestStatus::REJECTED,
-        .error = error,
+        .error = map(amend_order.ret_code),
         .text = amend_order.ret_msg,
         .version = {},
         .request_id = amend_order.req_id,
@@ -358,12 +356,11 @@ void OrderEntryWS::operator()(Trace<protocol::json::AmendOrder2> const &event) {
 void OrderEntryWS::operator()(Trace<protocol::json::CancelOrder2> const &event) {
   auto &[trace_info, cancel_order] = event;
   if (cancel_order.ret_code != 0) {
-    auto error = protocol::json::map_error(cancel_order.ret_code);
     auto response = server::oms::Response{
         .request_type = RequestType::CANCEL_ORDER,
         .origin = Origin::EXCHANGE,
         .request_status = RequestStatus::REJECTED,
-        .error = error,
+        .error = map(cancel_order.ret_code),
         .text = cancel_order.ret_msg,
         .version = {},
         .request_id = cancel_order.req_id,

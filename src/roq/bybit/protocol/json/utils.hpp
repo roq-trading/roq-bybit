@@ -46,8 +46,6 @@ inline void update(std::chrono::microseconds &result, core::json::Value const &v
       value);
 }
 
-extern roq::Error map_error(int32_t ret_code);
-
 }  // namespace json
 }  // namespace protocol
 }  // namespace bybit

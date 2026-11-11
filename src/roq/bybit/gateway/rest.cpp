@@ -248,7 +248,8 @@ void Rest::get_instruments_info_ack(Trace<web::rest::Response> const &event, uin
           create_trace_and_dispatch_2(trace_info, instruments_info_ack);
           download_.check(trace_info, STATE);
         } else {
-          handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, protocol::json::map_error(instruments_info_ack.ret_code), instruments_info_ack.ret_msg);
+          auto error = map(instruments_info_ack.ret_code).template get<Error>();
+          handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, error, instruments_info_ack.ret_msg);
         }
       }
     };
@@ -387,7 +388,8 @@ void Rest::get_kline_ack(Trace<web::rest::Response> const &event, [[maybe_unused
         assert(kline_ack.result.symbol == symbol);
         create_trace_and_dispatch_2(trace_info, kline_ack);
       } else {
-        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, protocol::json::map_error(kline_ack.ret_code), kline_ack.ret_msg);
+        auto error = map(kline_ack.ret_code).template get<Error>();
+        handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, error, kline_ack.ret_msg);
       }
     };
     process_response(event, handle_error, handle_success);
