@@ -886,7 +886,7 @@ void OrderEntryREST::place_order_ack(Trace<web::rest::Response> const &event, ui
       if (place_order_ack.ret_code != 0) {
         auto error = map(place_order_ack.ret_code).template get<Error>();
         handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, error, place_order_ack.ret_msg);
-      } else if (shared_.settings.oms.unsafe_order_ack) {
+      } else if (shared_.settings.oms.allow_unsafe_order_ack) {
         create_trace_and_dispatch_2(trace_info, place_order_ack, user_id, order_id, version);
       }
     };
@@ -1014,7 +1014,7 @@ void OrderEntryREST::amend_order_ack(Trace<web::rest::Response> const &event, ui
       if (amend_order_ack.ret_code != 0) {
         auto error = map(amend_order_ack.ret_code).template get<Error>();
         handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, error, amend_order_ack.ret_msg);
-      } else if (shared_.settings.oms.unsafe_order_ack) {
+      } else if (shared_.settings.oms.allow_unsafe_order_ack) {
         create_trace_and_dispatch_2(trace_info, amend_order_ack, user_id, order_id, version);
       }
     };
@@ -1138,7 +1138,7 @@ void OrderEntryREST::cancel_order_ack(Trace<web::rest::Response> const &event, u
       if (cancel_order_ack.ret_code != 0) {
         auto error = map(cancel_order_ack.ret_code).template get<Error>();
         handle_error(Origin::EXCHANGE, RequestStatus::REJECTED, error, cancel_order_ack.ret_msg);
-      } else if (shared_.settings.oms.unsafe_order_ack) {
+      } else if (shared_.settings.oms.allow_unsafe_order_ack) {
         create_trace_and_dispatch_2(trace_info, cancel_order_ack, user_id, order_id, version);
       }
     };
