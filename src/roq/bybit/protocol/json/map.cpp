@@ -27,355 +27,359 @@ constexpr Helper<int32_t>::operator std::optional<roq::Error>() const {
   switch (value) {
     case 0:
       return Error::UNDEFINED;
-    case 5019:  // User-service error
+    case 5'019:  // User-service error
       break;
-    case 5004:  // Upstream server timeout
+    case 5'004:  // Upstream server timeout
       break;
-    case 7001:  // Grpc request filed type error
+    case 7'001:  // Grpc request filed type error
       break;
-    case 10003:  // Invalid api_key
+    case 10'003:  // Invalid api_key
       break;
-    case 10006:  // Too many visits
+    case 10'006:  // Too many visits
       break;
-    case 10001:  // Params error
+    case 10'001:  // Params error
       return Error::INVALID_REQUEST_ARGS;
-    case 10002:  // Invalid request, please check your timestamp and recv_window param
+    case 10'002:  // Invalid request, please check your timestamp and recv_window param
       break;
-    case 10004:  // Error sign
+    case 10'004:  // Error sign
       break;
-    case 10005:  // Permission denied
+    case 10'005:  // Permission denied
       break;
-    case 110001:  //  Order does not exist
-      return Error::TOO_LATE_TO_MODIFY_OR_CANCEL;
-    case 33004:  // api_key expire
+    case 12'940:  // Connection reset
       break;
-    case 12940:  // Connection reset
+    case 12'999:  // Server Error
       break;
-    case 12999:  // Server Error
-      break;
-    case 12800:  // Invalid request
+    case 12'800:  // Invalid request
       return Error::INVALID_REQUEST_ARGS;
-    case 12801:  // Invalid JSON
+    case 12'801:  // Invalid JSON
       return Error::INVALID_REQUEST_ARGS;
-    case 12802:  // Invalid event
+    case 12'802:  // Invalid event
       break;
-    case 12803:  // Event required
+    case 12'803:  // Event required
       break;
-    case 12804:  // Invalid topic
+    case 12'804:  // Invalid topic
       break;
-    case 12805:  // Topic required
+    case 12'805:  // Topic required
       break;
-    case 12806:  // Params required
+    case 12'806:  // Params required
       return Error::INVALID_REQUEST_ARGS;
-    case 12807:  // Period required
+    case 12'807:  // Period required
       break;
-    case 12808:  // Invalid period
+    case 12'808:  // Invalid period
       break;
-    case 12809:  // Invalid Symbols
+    case 12'809:  // Invalid Symbols
       return Error::INVALID_SYMBOL;
-    case 12810:  // Not supported symbols
+    case 12'810:  // Not supported symbols
       return Error::INVALID_SYMBOL;
-    case 12811:  // There is no such broker.
+    case 12'811:  // There is no such broker.
       break;
-    case 12812:  // DumpScale required
+    case 12'812:  // DumpScale required
       break;
-    case 12813:  // Invalid exchangeId
+    case 12'813:  // Invalid exchangeId
       return Error::INVALID_EXCHANGE;
-    case 12814:  // Param %s should be %s.
+    case 12'814:  // Param %s should be %s.
       return Error::INVALID_REQUEST_ARGS;
-    case 12815:  // Symbol required
+    case 12'815:  // Symbol required
       return Error::INVALID_SYMBOL;
-    case 12816:  // Timeout. Retry later.
+    case 12'816:  // Timeout. Retry later.
       return Error::TIMEOUT;
-    case 12817:  // No business with any exchange.
+    case 12'817:  // No business with any exchange.
       break;
-    case 12818:  // Client disconnected.
+    case 12'818:  // Client disconnected.
       break;
-    case 12819:  // OrgId required.
+    case 12'819:  // OrgId required.
       return Error::INVALID_REQUEST_ID;
-    case 12820:  // OrgId must be a number.
+    case 12'820:  // OrgId must be a number.
       return Error::INVALID_REQUEST_ID;
-    case 12821:  // DumpScale error.
+    case 12'821:  // DumpScale error.
       break;
-    case 12822:  // Index name error.
+    case 12'822:  // Index name error.
       break;
-    case 12823:  // Parameter error
+    case 12'823:  // Parameter error
       return Error::INVALID_REQUEST_ARGS;
-    case 12824:  // Parameter %s [%s]
+    case 12'824:  // Parameter %s [%s]
       return Error::INVALID_REQUEST_ARGS;
-    case 12825:  // The number of each symbol request cannot exceed 300
+    case 12'825:  // The number of each symbol request cannot exceed 300
       break;
-    case 12001:  // Request failed to be processed. Please try again.
+    case 12'001:  // Request failed to be processed. Please try again.
       break;
-    case 12007:  // Response timeout from backend server. Delivery and request status unknown.
+    case 12'007:  // Response timeout from backend server. Delivery and request status unknown.
       break;
-    case 12014:  // Trading pairs not supported.
+    case 12'014:  // Trading pairs not supported.
       return Error::INVALID_SYMBOL;
-    case 12005:  // Too many new orders. Please lower request frequency.
+    case 12'005:  // Too many new orders. Please lower request frequency.
       break;
-    case 12016:  // Service not available.
+    case 12'016:  // Service not available.
       break;
-    case 12032:  // Fusing error
+    case 12'032:  // Fusing error
       break;
-    case 12114:  // NETWORK_BUSY
+    case 12'114:  // NETWORK_BUSY
       break;
-    case 12015:  // UID_NOT_EXIST
+    case 12'015:  // UID_NOT_EXIST
       break;
-    case 12011:  // INNOVATION_BUY_FAILED_BY_QUOTA
+    case 12'011:  // INNOVATION_BUY_FAILED_BY_QUOTA
       break;
-    case 12010:  // ETP_BUY_FAILED_BY_QUOTA
+    case 12'010:  // ETP_BUY_FAILED_BY_QUOTA
       break;
-    case 12012:  // ETP_NAV_IS_ABNORMAL
+    case 12'012:  // ETP_NAV_IS_ABNORMAL
       break;
-    case 12017:  // CROSS_MARGIN_PRE_BUY_QUOTA_FAILED
+    case 12'017:  // CROSS_MARGIN_PRE_BUY_QUOTA_FAILED
       break;
-    case 10020:  // CROSS_MARGIN_PRE_SELL_QUOTA_FAILED
+    case 10'020:  // CROSS_MARGIN_PRE_SELL_QUOTA_FAILED
       break;
-    case 12019:  // Your account has been restricted for trades. If you have any questions, please email us at
-                 // support@bybit.com
+    case 12'019:  // Your account has been restricted for trades. If you have any questions, please email us at
+                  // support@bybit.com
       break;
-    case 12124:  // Order amount is too big
+    case 12'124:  // Order amount is too big
       return Error::INSUFFICIENT_FUNDS;
-    case 12031:  // The feature has been suspended
+    case 12'031:  // The feature has been suspended
       break;
-    case 12105:  // Empty parameter.
+    case 12'105:  // Empty parameter.
       break;
-    case 12115:  // Invalid timeInForce.
+    case 12'115:  // Invalid timeInForce.
       return Error::INVALID_TIME_IN_FORCE;
-    case 12116:  // Invalid orderType.
+    case 12'116:  // Invalid orderType.
       return Error::INVALID_ORDER_TYPE;
-    case 12117:  // Invalid direction.
+    case 12'117:  // Invalid direction.
       return Error::INVALID_SIDE;
-    case 12121:  // Invalid symbol.
+    case 12'121:  // Invalid symbol.
       return Error::INVALID_SYMBOL;
-    case 12130:  // Invalid parameter sent.
+    case 12'130:  // Invalid parameter sent.
       return Error::INVALID_REQUEST_ARGS;
-    case 12131:  // Insufficient balance
+    case 12'131:  // Insufficient balance
       return Error::INSUFFICIENT_FUNDS;
-    case 12132:  // Order price exceeded upper limit.
+    case 12'132:  // Order price exceeded upper limit.
       return Error::INVALID_PRICE;
-    case 12133:  // Order price exceeded lower limit.
+    case 12'133:  // Order price exceeded lower limit.
       return Error::INVALID_PRICE;
-    case 12134:  // Order price has too many decimals.
+    case 12'134:  // Order price has too many decimals.
       return Error::INVALID_PRICE;
-    case 12135:  // Order quantity exceeded upper limit.
+    case 12'135:  // Order quantity exceeded upper limit.
       return Error::INVALID_QUANTITY;
-    case 12136:  // Order quantity exceeded lower limit.
+    case 12'136:  // Order quantity exceeded lower limit.
       return Error::INVALID_QUANTITY;
-    case 12137:  // Order quantity has too many decimals.
+    case 12'137:  // Order quantity has too many decimals.
       return Error::INVALID_QUANTITY;
-    case 12138:  // Order price exceeded limits.
+    case 12'138:  // Order price exceeded limits.
       return Error::INVALID_PRICE;
-    case 12139:  // Order has been filled.
+    case 12'139:  // Order has been filled.
       return Error::TOO_LATE_TO_MODIFY_OR_CANCEL;
-    case 12140:  // Order value exceeded lower limit.
+    case 12'140:  // Order value exceeded lower limit.
       break;
-    case 12141:  // Duplicate clientOrderId.
+    case 12'141:  // Duplicate clientOrderId.
       return Error::INVALID_REQUEST_ID;
-    case 12142:  // Order has been canceled.
+    case 12'142:  // Order has been canceled.
       return Error::TOO_LATE_TO_MODIFY_OR_CANCEL;
-    case 12143:  // Order not found.
+    case 12'143:  // Order not found.
       return Error::UNKNOWN_ORDER_ID;
-    case 12144:  // Order being cancelled. Operation not supported.
+    case 12'144:  // Order being cancelled. Operation not supported.
       return Error::TOO_LATE_TO_MODIFY_OR_CANCEL;
-    case 12145:  // Order cannot be canceled.
+    case 12'145:  // Order cannot be canceled.
       return Error::TOO_LATE_TO_MODIFY_OR_CANCEL;
-    case 12146:  // Order creation timeout.
+    case 12'146:  // Order creation timeout.
       break;
-    case 12147:  // Order cancellation timeout.
+    case 12'147:  // Order cancellation timeout.
       break;
-    case 12148:  // Market order amount decimal too long
+    case 12'148:  // Market order amount decimal too long
       return Error::INVALID_QUANTITY;
-    case 12149:  // Create order failed
+    case 12'149:  // Create order failed
       break;
-    case 12150:  // Cancel order failed
+    case 12'150:  // Cancel order failed
       break;
-    case 12151:  // The trading pair is not open yet
+    case 12'151:  // The trading pair is not open yet
       break;
-    case 12156:  // Order quantity invalid
+    case 12'156:  // Order quantity invalid
       return Error::INVALID_QUANTITY;
-    case 12157:  // The trading pair is not available for api trading
+    case 12'157:  // The trading pair is not available for api trading
       break;
-    case 12158:  // create limit maker order failed
+    case 12'158:  // create limit maker order failed
       break;
-    case 12159:  // Market Order is not supported within the first %s minutes of newly launched pairs due to risk
-                 // control.
+    case 12'159:  // Market Order is not supported within the first %s minutes of newly launched pairs due to risk
+                  // control.
       break;
-    case 12190:  // Cancel order has been finished.
+    case 12'190:  // Cancel order has been finished.
       break;
-    case 12191:  // Can not cancel order, please try again later.
+    case 12'191:  // Can not cancel order, please try again later.
       break;
-    case 12192:  // Order price cannot be higher than %s .
+    case 12'192:  // Order price cannot be higher than %s .
       return Error::INVALID_PRICE;
-    case 12193:  // Buy order price cannot be higher than %s.
+    case 12'193:  // Buy order price cannot be higher than %s.
       return Error::INVALID_PRICE;
-    case 12194:  // Sell order price cannot be lower than %s.
+    case 12'194:  // Sell order price cannot be lower than %s.
       return Error::INVALID_PRICE;
-    case 12195:  // Please note that your order may not be filled
+    case 12'195:  // Please note that your order may not be filled
       break;
-    case 12196:  // Please note that your order may not be filled
+    case 12'196:  // Please note that your order may not be filled
       break;
-    case 12197:  // Your order quantity to buy is too large. The filled price may deviate significantly from the market
-                 // price. Please try again
+    case 12'197:  // Your order quantity to buy is too large. The filled price may deviate significantly from the market
+                  // price. Please try again
       return Error::INVALID_QUANTITY;
       break;
-    case 12198:  // Your order quantity to sell is too large. The filled price may deviate significantly from the market
-                 // price. Please try again
+    case 12'198:  // Your order quantity to sell is too large. The filled price may deviate significantly from the market
+                  // price. Please try again
       return Error::INVALID_QUANTITY;
-    case 12199:  // Your order quantity to buy is too large. The filled price may deviate significantly from the nav.
-                 // Please try again.
+    case 12'199:  // Your order quantity to buy is too large. The filled price may deviate significantly from the nav.
+                  // Please try again.
       return Error::INVALID_QUANTITY;
-    case 12200:  // Your order quantity to sell is too large. The filled price may deviate significantly from the nav.
-                 // Please try again.
+    case 12'200:  // Your order quantity to sell is too large. The filled price may deviate significantly from the nav.
+                  // Please try again.
       return Error::INVALID_QUANTITY;
-    case 12201:  // Invalid orderCategory parameter
+    case 12'201:  // Invalid orderCategory parameter
       break;
-    case 12202:  // Please enter the TP/SL price
+    case 12'202:  // Please enter the TP/SL price
       break;
-    case 12203:  // trigger price cannot be higher than 110% price
+    case 12'203:  // trigger price cannot be higher than 110% price
       return Error::INVALID_PRICE;
-    case 12204:  // trigger price cannot be lower than 90% of qty
+    case 12'204:  // trigger price cannot be lower than 90% of qty
       return Error::INVALID_PRICE;
-    case 12205:  // CROSS_MARGIN_USER_NOT_ALLOW
+    case 12'205:  // CROSS_MARGIN_USER_NOT_ALLOW
       break;
-    case 12206:  // Stop_limit Order is not supported within the first 5 minutes of newly launched pairs
+    case 12'206:  // Stop_limit Order is not supported within the first 5 minutes of newly launched pairs
       break;
-    case 12210:  // New order rejected.
+    case 12'210:  // New order rejected.
       break;
-    case 12211:  // Cancelation rejected.
+    case 12'211:  // Cancelation rejected.
       break;
-    case 12213:  // Order does not exist.
+    case 12'213:  // Order does not exist.
       break;
-    case 12217:  // Only LIMIT-MAKER order is supported for the current pair.
+    case 12'217:  // Only LIMIT-MAKER order is supported for the current pair.
       break;
-    case 12218:  // The LIMIT-MAKER order is rejected due to invalid price.
+    case 12'218:  // The LIMIT-MAKER order is rejected due to invalid price.
       break;
-    case 12221:  // This coin does not exist
+    case 12'221:  // This coin does not exist
       return Error::INVALID_SYMBOL;
-    case 12222:  // Too many requests in this time frame
+    case 12'222:  // Too many requests in this time frame
       break;
-    case 12223:  // Your Spot Account with Institutional Lending triggers an alert or liquidation
+    case 12'223:  // Your Spot Account with Institutional Lending triggers an alert or liquidation
       break;
-    case 12224:  // You're not a user of the Innovation Zone
+    case 12'224:  // You're not a user of the Innovation Zone
       break;
-    case 12225:  // You've failed to check the Risk Alert for Leveraged Tokens
+    case 12'225:  // You've failed to check the Risk Alert for Leveraged Tokens
       break;
-    case 12226:  // Your Spot Account for Margin Trading is being liquidated
+    case 12'226:  // Your Spot Account for Margin Trading is being liquidated
       break;
-    case 12227:  // This feature is not supported
+    case 12'227:  // This feature is not supported
       break;
-    case 12228:  // The purchase amount of each order exceeds the estimated maximum purchase amount
+    case 12'228:  // The purchase amount of each order exceeds the estimated maximum purchase amount
       return Error::INVALID_QUANTITY;
-    case 12229:  // The sell quantity per order exceeds the estimated maximum sell quantity
+    case 12'229:  // The sell quantity per order exceeds the estimated maximum sell quantity
       return Error::INVALID_QUANTITY;
-    case 12230:  // The reserved quota for Spot Margin Trading does not meet the LTV ratio requirement
+    case 12'230:  // The reserved quota for Spot Margin Trading does not meet the LTV ratio requirement
       break;
-    case 12231:  // Users with Spot Margin Trading are not allowed to perform Block Trades
+    case 12'231:  // Users with Spot Margin Trading are not allowed to perform Block Trades
       break;
-    case 12232:  // Users with Institutional Lending are not allowed to perform Block Trades
+    case 12'232:  // Users with Institutional Lending are not allowed to perform Block Trades
       break;
-    case 12233:  // Users with Leverage Tokens are not allowed to perform Block Trades
+    case 12'233:  // Users with Leverage Tokens are not allowed to perform Block Trades
       break;
-    case 12234:  // System Error
+    case 12'234:  // System Error
       break;
-    case 12400:  // The serialNum is already in use.
+    case 12'400:  // The serialNum is already in use.
       break;
-    case 12401:  // Daily purchase limit has been exceeded. Please try again later.
+    case 12'401:  // Daily purchase limit has been exceeded. Please try again later.
       break;
-    case 12402:  // There's a large number of purchase orders. Please try again later.
+    case 12'402:  // There's a large number of purchase orders. Please try again later.
       break;
-    case 12403:  // Insufficient available balance. Please make a deposit and try again.
+    case 12'403:  // Insufficient available balance. Please make a deposit and try again.
       return Error::INSUFFICIENT_FUNDS;
-    case 12404:  // Daily redemption limit has been exceeded. Please try again later.
+    case 12'404:  // Daily redemption limit has been exceeded. Please try again later.
       break;
-    case 12405:  // There's a large number of redemption orders. Please try again later.
+    case 12'405:  // There's a large number of redemption orders. Please try again later.
       break;
-    case 12406:  // Insufficient available balance. Please make a deposit and try again.
+    case 12'406:  // Insufficient available balance. Please make a deposit and try again.
       return Error::INSUFFICIENT_FUNDS;
-    case 12407:  // Order not found.
+    case 12'407:  // Order not found.
       return Error::UNKNOWN_ORDER_ID;
-    case 12408:  // Purchase period hasn't started yet.
+    case 12'408:  // Purchase period hasn't started yet.
       break;
-    case 12409:  // Purchase amount has exceeded the upper limit.
+    case 12'409:  // Purchase amount has exceeded the upper limit.
       break;
-    case 12410:  // You haven't passed the quiz yet! To purchase and/or redeem an LT, please complete the quiz first.
+    case 12'410:  // You haven't passed the quiz yet! To purchase and/or redeem an LT, please complete the quiz first.
       break;
-    case 12412:  // Redemption period hasn't started yet.
+    case 12'412:  // Redemption period hasn't started yet.
       break;
-    case 12413:  // Redemption amount has exceeded the upper limit.
+    case 12'413:  // Redemption amount has exceeded the upper limit.
       break;
-    case 12414:  // Purchase of the LT has been temporarily suspended.
+    case 12'414:  // Purchase of the LT has been temporarily suspended.
       break;
-    case 12415:  // Redemption of the LT has been temporarily suspended.
+    case 12'415:  // Redemption of the LT has been temporarily suspended.
       break;
-    case 12416:  // Invalid format. Please check the length and numeric precision.
+    case 12'416:  // Invalid format. Please check the length and numeric precision.
       return Error::INVALID_REQUEST_ARGS;
-    case 12417:  // Failed to place order：Exceed the maximum position limit of leveraged tokens
+    case 12'417:  // Failed to place order：Exceed the maximum position limit of leveraged tokens
       break;
-    case 12601:  // Query user repay history error
+    case 12'601:  // Query user repay history error
       break;
-    case 12602:  // Query user account info error
+    case 12'602:  // Query user account info error
       break;
-    case 12603:  // Query user loan history error
+    case 12'603:  // Query user loan history error
       break;
-    case 12604:  // Query order history start time exceeds end time
+    case 12'604:  // Query order history start time exceeds end time
       break;
-    case 12605:  // Failed to borrow
+    case 12'605:  // Failed to borrow
       break;
-    case 12606:  // Repayment Failed
+    case 12'606:  // Repayment Failed
       break;
-    case 12607:  // User not found
+    case 12'607:  // User not found
       break;
-    case 12608:  // You haven't enabled Cross Margin Trading yet. To do so
+    case 12'608:  // You haven't enabled Cross Margin Trading yet. To do so
       break;
-    case 12609:  // You haven't enabled Cross Margin Trading yet. To do so
+    case 12'609:  // You haven't enabled Cross Margin Trading yet. To do so
       break;
-    case 12610:  // Failed to locate the coins to borrow
+    case 12'610:  // Failed to locate the coins to borrow
       break;
-    case 12611:  // Cross Margin Trading not yet supported by the selected coin
+    case 12'611:  // Cross Margin Trading not yet supported by the selected coin
       break;
-    case 12612:  // Pair not available
+    case 12'612:  // Pair not available
       break;
-    case 12613:  // Cross Margin Trading not yet supported by the selected pair
+    case 12'613:  // Cross Margin Trading not yet supported by the selected pair
       break;
-    case 12614:  // Repeated repayment requests
+    case 12'614:  // Repeated repayment requests
       break;
-    case 12615:  // Insufficient available balance
+    case 12'615:  // Insufficient available balance
       break;
-    case 12616:  // No repayment required
+    case 12'616:  // No repayment required
       break;
-    case 12617:  // Repayment amount has exceeded the total liability
+    case 12'617:  // Repayment amount has exceeded the total liability
       break;
-    case 12618:  // Settlement in progress
+    case 12'618:  // Settlement in progress
       break;
-    case 12619:  // Liquidation in progress
+    case 12'619:  // Liquidation in progress
       break;
-    case 12620:  // Failed to locate repayment history
+    case 12'620:  // Failed to locate repayment history
       break;
-    case 12621:  // Repeated borrowing requests
+    case 12'621:  // Repeated borrowing requests
       break;
-    case 12622:  // Coins to borrow not generally available yet
+    case 12'622:  // Coins to borrow not generally available yet
       break;
-    case 12623:  // Pair to borrow not generally available yet
+    case 12'623:  // Pair to borrow not generally available yet
       break;
-    case 12624:  // Invalid user status
+    case 12'624:  // Invalid user status
       break;
-    case 12625:  // Amount to borrow cannot be lower than the min. amount to borrow (per transaction)
+    case 12'625:  // Amount to borrow cannot be lower than the min. amount to borrow (per transaction)
       break;
-    case 12626:  // Amount to borrow cannot be larger than the max. amount to borrow (per transaction)
+    case 12'626:  // Amount to borrow cannot be larger than the max. amount to borrow (per transaction)
       break;
-    case 12627:  // Amount to borrow cannot be higher than the max. amount to borrow per user
+    case 12'627:  // Amount to borrow cannot be higher than the max. amount to borrow per user
       break;
-    case 12628:  // Amount to borrow has exceeded Bybit's max. amount to borrow
+    case 12'628:  // Amount to borrow has exceeded Bybit's max. amount to borrow
       break;
-    case 12629:  // Amount to borrow has exceeded the user's estimated max. amount to borrow
+    case 12'629:  // Amount to borrow has exceeded the user's estimated max. amount to borrow
       break;
-    case 12630:  // Query user loan info error
+    case 12'630:  // Query user loan info error
       break;
-    case 12631:  // Decimal of decimals has exceeded the maximum precision
+    case 12'631:  // Decimal of decimals has exceeded the maximum precision
       break;
-    case 12632:  // Decimal of decimals has exceeded the maximum precision
+    case 12'632:  // Decimal of decimals has exceeded the maximum precision
       break;
+    case 33'004:  // api_key expire
+      break;
+    case 110'001:  // Order does not exist
+      return Error::TOO_LATE_TO_MODIFY_OR_CANCEL;
+    case 110'007:  // Available balance is insufficient
+      return Error::INSUFFICIENT_FUNDS;
+    case 110'123:  // You must agree to the Trading Terms
+      return Error::UNKNOWN;
   }
   LOG_ONCE("error_code"sv, value);
   return Error::UNKNOWN;
