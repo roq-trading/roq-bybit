@@ -191,13 +191,14 @@ void Rest::operator()(Trace<web::rest::Latency> const &event) {
 
 int32_t Rest::download(Trace<State> const &event) {
   auto &[trace_info, state] = event;
+  auto publish_downloading = [&]() { create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, magic_enum::enum_name(state)); };
   switch (state) {
     using enum State;
     case UNDEFINED:
       assert(false);
       break;
     case GET_INSTRUMENTS_INFO:
-      create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, "get-instruments-info"sv);
+      publish_downloading();
       get_instruments_info();
       return 1;
     case DONE:
