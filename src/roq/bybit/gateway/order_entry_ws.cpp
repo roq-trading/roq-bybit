@@ -164,13 +164,25 @@ void OrderEntryWS::operator()(Trace<ConnectionStatus> const &event, std::string_
 
 // server::OrderActionStream
 
+void OrderEntryWS::operator()(Trace<server::oms::OrderActionBatchBegin> const &) {
+  throw server::oms::NotSupported{"not supported"sv};
+}
+
+void OrderEntryWS::operator()(Trace<server::oms::OrderActionBatchCommit> const &) {
+  throw server::oms::NotSupported{"not supported"sv};
+}
+
+void OrderEntryWS::operator()(Trace<server::oms::OrderActionBatchRollback> const &) {
+  throw server::oms::NotSupported{"not supported"sv};
+}
+
 uint16_t OrderEntryWS::operator()(
-    Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
+    Trace<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
   profile_.create_order([&]() {
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
     }
-    auto &[message_info, create_order] = event;
+    auto &[trace_info, create_order] = event;
     auto message = protocol::json::Encoder::place_order_ws(
         encode_buffer_,
         create_order,
@@ -178,7 +190,7 @@ uint16_t OrderEntryWS::operator()(
         ref_data,
         request_id,
         shared_.api.category,
-        utils::safe_cast(message_info.origin_create_time_utc),
+        utils::safe_cast(trace_info.origin_create_time_utc),
         shared_.settings.rest.recv_window);
     log::debug("{}"sv, message);
     (*connection_).send_text(message);
@@ -187,7 +199,7 @@ uint16_t OrderEntryWS::operator()(
 }
 
 uint16_t OrderEntryWS::operator()(
-    Event<ModifyOrder> const &event,
+    Trace<ModifyOrder> const &event,
     server::oms::Order const &order,
     server::oms::RefData const &ref_data,
     std::string_view const &request_id,
@@ -214,7 +226,7 @@ uint16_t OrderEntryWS::operator()(
 }
 
 uint16_t OrderEntryWS::operator()(
-    Event<CancelOrder> const &event,
+    Trace<CancelOrder> const &event,
     server::oms::Order const &order,
     server::oms::RefData const &ref_data,
     std::string_view const &request_id,
@@ -240,7 +252,7 @@ uint16_t OrderEntryWS::operator()(
   return stream_id_;
 }
 
-uint16_t OrderEntryWS::operator()(Event<CancelAllOrders> const &, [[maybe_unused]] std::string_view const &request_id) {
+uint16_t OrderEntryWS::operator()(Trace<CancelAllOrders> const &, [[maybe_unused]] std::string_view const &request_id) {
   log::fatal("Unexpected"sv);
 }
 

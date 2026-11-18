@@ -158,8 +158,8 @@ void Controller::operator()(Event<Connected> const &) {
 void Controller::operator()(Event<Disconnected> const &) {
 }
 
-void Controller::operator()(Event<Subscribe> const &event) {
-  auto &[message_info, subscribe] = event;
+void Controller::operator()(Trace<Subscribe> const &event) {
+  auto &[trace_info, subscribe] = event;
   std::vector<Symbol> symbols;
   for (auto &item : subscribe.symbols) {
     if (shared_.all_symbols.emplace(item).second) {
@@ -171,11 +171,11 @@ void Controller::operator()(Event<Subscribe> const &event) {
   auto symbols_update = SymbolsUpdate{
       .symbols = symbols,
   };
-  create_trace_and_dispatch_2(message_info, symbols_update);
+  create_trace_and_dispatch_2(trace_info, symbols_update);
 }
 
-void Controller::operator()(Event<Control> const &event) {
-  auto &[message_info, control] = event;
+void Controller::operator()(Trace<Control> const &event) {
+  auto &[trace_info, control] = event;
   switch (control.action) {
     using enum Action;
     case UNDEFINED:
@@ -190,48 +190,50 @@ void Controller::operator()(Event<Control> const &event) {
   }
 }
 
-uint16_t Controller::operator()(
-    Event<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
-  auto &[message_info, create_order] = event;
-  assert(!std::empty(create_order.account));
-  return get_order_entry(create_order.account)(event, order, ref_data, request_id);
+void Controller::operator()(Trace<server::oms::OrderActionBatchBegin> const &event) {
+  dispatch_order_action<void>(event);
+}
+
+void Controller::operator()(Trace<server::oms::OrderActionBatchCommit> const &event) {
+  dispatch_order_action<void>(event);
+}
+
+void Controller::operator()(Trace<server::oms::OrderActionBatchRollback> const &event) {
+  dispatch_order_action<void>(event);
 }
 
 uint16_t Controller::operator()(
-    Event<ModifyOrder> const &event,
+    Trace<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
+  return dispatch_order_action<uint16_t>(event, order, ref_data, request_id);
+}
+
+uint16_t Controller::operator()(
+    Trace<ModifyOrder> const &event,
     server::oms::Order const &order,
     server::oms::RefData const &ref_data,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
-  auto &[message_info, modify_order] = event;
-  assert(!std::empty(modify_order.account));
-  assert(modify_order.account == order.account);
-  return get_order_entry(modify_order.account)(event, order, ref_data, request_id, previous_request_id);
+  return dispatch_order_action<uint16_t>(event, order, ref_data, request_id, previous_request_id);
 }
 
 uint16_t Controller::operator()(
-    Event<CancelOrder> const &event,
+    Trace<CancelOrder> const &event,
     server::oms::Order const &order,
     server::oms::RefData const &ref_data,
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
-  auto &[message_info, cancel_order] = event;
-  assert(!std::empty(cancel_order.account));
-  assert(cancel_order.account == order.account);
-  return get_order_entry(cancel_order.account)(event, order, ref_data, request_id, previous_request_id);
+  return dispatch_order_action<uint16_t>(event, order, ref_data, request_id, previous_request_id);
 }
 
-uint16_t Controller::operator()(Event<CancelAllOrders> const &event, std::string_view const &request_id) {
-  auto &[message_info, cancel_all_orders] = event;
-  assert(!std::empty(cancel_all_orders.account));
-  return get_order_entry_rest(cancel_all_orders.account)(event, request_id);  // note! only available from REST
+uint16_t Controller::operator()(Trace<CancelAllOrders> const &event, std::string_view const &request_id) {
+  return dispatch_order_action<uint16_t>(event, request_id);
 }
 
-uint16_t Controller::operator()(Event<MassQuote> const &) {
+uint16_t Controller::operator()(Trace<MassQuote> const &) {
   throw server::oms::NotSupported{"not supported"sv};
 }
 
-uint16_t Controller::operator()(Event<CancelQuotes> const &) {
+uint16_t Controller::operator()(Trace<CancelQuotes> const &) {
   throw server::oms::NotSupported{"not supported"sv};
 }
 
@@ -311,35 +313,21 @@ Account &Controller::get_account(std::string_view const &account) {
   log::fatal(R"(Unknown account="{}")"sv, account);
 }
 
-DropCopy &Controller::get_drop_copy(std::string_view const &account) {
-  auto iter = drop_copy_.find(account);
-  if (iter != std::end(drop_copy_)) {
-    return *(*iter).second;
-  }
-  log::fatal(R"(Unknown account="{}")"sv, account);
-}
-
-server::OrderActionStream &Controller::get_order_entry_rest(std::string_view const &account) {
-  auto iter = order_entry_rest_.find(account);
-  if (iter != std::end(order_entry_rest_)) {
-    return *(*iter).second;
-  }
-  throw RuntimeError{R"(Unknown account="{}")"sv, account};
-}
-
-server::OrderActionStream &Controller::get_order_entry_ws(std::string_view const &account) {
-  auto iter = order_entry_ws_.find(account);
-  if (iter != std::end(order_entry_ws_)) {
-    return *(*iter).second;
-  }
-  throw RuntimeError{R"(Unknown account="{}")"sv, account};
-}
-
-server::OrderActionStream &Controller::get_order_entry(std::string_view const &account) {
+template <typename Res, typename T, typename... Args>
+Res Controller::dispatch_order_action(Trace<T> const &event, Args &&...args) {
+  auto &[trace_info, value] = event;
   if (shared_.settings.misc.disable_ws_api) {
-    return get_order_entry_rest(account);
+    auto iter = order_entry_rest_.find(value.account);
+    if (iter == std::end(order_entry_rest_)) [[unlikely]] {
+      throw RuntimeError{R"(Unknown account="{}")"sv, value.account};
+    }
+    return (*(*iter).second)(event, args...);
   } else {
-    return get_order_entry_ws(account);
+    auto iter = order_entry_ws_.find(value.account);
+    if (iter == std::end(order_entry_ws_)) [[unlikely]] {
+      throw RuntimeError{R"(Unknown account="{}")"sv, value.account};
+    }
+    return (*(*iter).second)(event, args...);
   }
 }
 
