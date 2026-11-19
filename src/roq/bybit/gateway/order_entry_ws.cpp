@@ -121,6 +121,10 @@ void OrderEntryWS::operator()(Trace<Timer> const &event) {
   auto &[trace_info, timer] = event;
   if ((*connection_).refresh(trace_info)) {
     if (ready()) {
+      if (next_ping_ < trace_info.origin_create_time) {
+        next_ping_ = trace_info.origin_create_time + shared_.settings.ws.ping_freq;
+        send_ping(trace_info);
+      }
     }
   }
 }
@@ -269,6 +273,7 @@ void OrderEntryWS::operator()(Trace<web::socket::Disconnected> const &event) {
   ++counter_.disconnect;
   create_trace_and_dispatch_2(trace_info, ConnectionStatus::DISCONNECTED);
   logon_timeout_ = {};
+  next_ping_ = {};
 }
 
 void OrderEntryWS::operator()(Trace<web::socket::Latency> const &event) {
@@ -307,6 +312,11 @@ void OrderEntryWS::operator()(Trace<web::socket::Binary> const &) {
 void OrderEntryWS::operator()(Trace<protocol::json::Ping> const &event) {
   auto &[trace_info, ping] = event;
   log::info<4>("ping={}"sv, ping);
+}
+
+void OrderEntryWS::operator()(Trace<protocol::json::Pong> const &event) {
+  auto &[trace_info, pong] = event;
+  log::info<4>("pong={}"sv, pong);
 }
 
 void OrderEntryWS::operator()(Trace<protocol::json::Auth2> const &event) {
@@ -396,6 +406,16 @@ void OrderEntryWS::send_login(TraceInfo const &trace_info) {
   auto signature = account_.create_signature(expires_utc);
   auto message = protocol::json::Encoder::login_ws(encode_buffer_, account_.get_key(), expires_utc, signature);
   log::debug("{}"sv, message);
+  (*connection_).send_text(message);
+}
+
+void OrderEntryWS::send_ping(TraceInfo const &trace_info) {
+  auto message = fmt::format(
+      R"({{)"
+      R"("req_id":"{}",)"
+      R"("op":"ping")"
+      R"(}})"sv,
+      trace_info.origin_create_time.count());
   (*connection_).send_text(message);
 }
 

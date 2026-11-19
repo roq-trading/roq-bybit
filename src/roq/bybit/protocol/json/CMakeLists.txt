@@ -46,30 +46,31 @@ set(AUTOGEN_SCHEMAS
     message.json
     operation.json
     options_type.json
-    order_book_data.json
+    order.json
     order_book.json
+    order_book_data.json
     order_book_level.json
     order_data_item.json
-    order.json
+    order_status.json
+    order_type.json
     orders_ack.json
     orders_ack_result.json
     orders_ack_result_list_item.json
-    order_status.json
-    order_type.json
     ping.json
-    place_order2_data.json
     place_order2.json
+    place_order2_data.json
     place_order_ack.json
     place_order_ack_result.json
-    position_data_item.json
+    pong.json
     position.json
+    position_data_item.json
+    position_status.json
     positions_ack.json
     positions_ack_result.json
     positions_ack_result_list_item.json
-    position_status.json
     price_filter.json
-    public_trade_data.json
     public_trade.json
+    public_trade_data.json
     reject_reason.json
     side.json
     status.json

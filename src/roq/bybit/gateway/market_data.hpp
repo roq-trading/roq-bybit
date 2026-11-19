@@ -102,7 +102,6 @@ struct MarketData final : public Base<MarketData>,
   uint16_t const stream_id_;
   std::string const name_;
   size_t const index_;
-  std::chrono::nanoseconds const ping_frequency_;
   bool const spot_;
   size_t const mbp_depth_;
   std::string const mbp_topic_;

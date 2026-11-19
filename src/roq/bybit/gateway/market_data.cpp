@@ -127,8 +127,8 @@ struct create_metrics final : public utils::metrics::Factory {
 // === IMPLEMENTATION ===
 
 MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared, size_t index)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, index_{index}, ping_frequency_{shared.settings.ws.ping_freq},
-      spot_{is_spot(shared.api.api)}, mbp_depth_{get_mbp_depth(shared.settings, shared.api.api)}, mbp_topic_{create_mbp_topic(mbp_depth_)},
+    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, index_{index}, spot_{is_spot(shared.api.api)},
+      mbp_depth_{get_mbp_depth(shared.settings, shared.api.api)}, mbp_topic_{create_mbp_topic(mbp_depth_)},
       connection_{create_connection(*this, shared.settings, context, shared, shared.api.api)},
       decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH}, request_id_{stream_id_ * REQUEST_ID},
       counter_{
@@ -163,8 +163,7 @@ void MarketData::operator()(Trace<Timer> const &event) {
   if ((*connection_).refresh(trace_info)) {
     if (ready()) {
       if (next_ping_ < trace_info.origin_create_time) {
-        assert(ping_frequency_.count() > 0);
-        next_ping_ = trace_info.origin_create_time + ping_frequency_ / 2;
+        next_ping_ = trace_info.origin_create_time + shared_.settings.ws.ping_freq;
         send_ping(trace_info);
       }
     }

@@ -22,13 +22,14 @@ set(SOURCES
     json_ping.cpp
     json_place_order_2.cpp
     json_place_order_ack.cpp
+    json_pong.cpp
     json_position.cpp
     json_positions_ack.cpp
     json_public_trade.cpp
     json_subscribe.cpp
     json_tickers.cpp
-    json_wallet_balance_ack.cpp
     json_wallet.cpp
+    json_wallet_balance_ack.cpp
     main.cpp)
 
 roq_gitignore(OUTPUT .gitignore SOURCES ${TARGET_NAME})

@@ -4,6 +4,10 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Fixed
+
+* Mising protocol ping for execution WS (#666)
+
 ## 1.2.0 &ndash; 2026-11-14
 
 ### Changed

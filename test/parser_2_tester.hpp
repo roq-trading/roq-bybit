@@ -30,6 +30,7 @@ struct Parser2Tester final : public protocol::json::Parser2::Handler {
   explicit Parser2Tester(callback_type const &callback) : callback_{callback} {}
 
   void operator()(Trace<protocol::json::Ping> const &event) override { dispatch_helper(event); }
+  void operator()(Trace<protocol::json::Pong> const &event) override { dispatch_helper(event); }
   void operator()(Trace<protocol::json::Auth2> const &event) override { dispatch_helper(event); }
   void operator()(Trace<protocol::json::Error> const &event) override { dispatch_helper(event); }
   void operator()(Trace<protocol::json::PlaceOrder2> const &event) override { dispatch_helper(event); }

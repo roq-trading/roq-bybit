@@ -84,6 +84,7 @@ struct OrderEntryWS final : public Base<OrderEntryWS>, public server::OrderActio
   // protocol::json::Parser2::Handler
 
   void operator()(Trace<protocol::json::Ping> const &) override;
+  void operator()(Trace<protocol::json::Pong> const &) override;
   void operator()(Trace<protocol::json::Auth2> const &) override;
   void operator()(Trace<protocol::json::Error> const &) override;
   void operator()(Trace<protocol::json::PlaceOrder2> const &) override;
@@ -93,6 +94,8 @@ struct OrderEntryWS final : public Base<OrderEntryWS>, public server::OrderActio
   // helpers
 
   void send_login(TraceInfo const &);
+
+  void send_ping(TraceInfo const &);
 
   void parse(TraceInfo const &, std::string_view const &message);
 
@@ -126,6 +129,8 @@ struct OrderEntryWS final : public Base<OrderEntryWS>, public server::OrderActio
   std::chrono::nanoseconds logon_timeout_ = {};
   // ...
   std::string encode_buffer_;
+  //
+  std::chrono::nanoseconds next_ping_ = {};
 };
 
 }  // namespace gateway

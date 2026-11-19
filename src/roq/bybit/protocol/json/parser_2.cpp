@@ -52,6 +52,7 @@ bool Parser2::dispatch(
           case PING:
             break;
           case PONG:
+            result = dispatch_helper<Pong>(handler, message, buffer_stack, trace_info);
             break;
           case SUBSCRIBE:
             break;
