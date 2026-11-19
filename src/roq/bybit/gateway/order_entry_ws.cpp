@@ -212,7 +212,7 @@ uint16_t OrderEntryWS::operator()(
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
     }
-    auto &[message_info, modify_order] = event;
+    auto &[trace_info, modify_order] = event;
     auto message = protocol::json::Encoder::amend_order_ws(
         encode_buffer_,
         modify_order,
@@ -221,7 +221,7 @@ uint16_t OrderEntryWS::operator()(
         request_id,
         previous_request_id,
         shared_.api.category,
-        utils::safe_cast(message_info.origin_create_time_utc),
+        utils::safe_cast(trace_info.origin_create_time_utc),
         shared_.settings.rest.recv_window);
     log::debug("{}"sv, message);
     (*connection_).send_text(message);
@@ -239,7 +239,7 @@ uint16_t OrderEntryWS::operator()(
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
     }
-    auto &[message_info, cancel_order] = event;
+    auto &[trace_info, cancel_order] = event;
     auto message = protocol::json::Encoder::cancel_order_ws(
         encode_buffer_,
         cancel_order,
@@ -248,7 +248,7 @@ uint16_t OrderEntryWS::operator()(
         request_id,
         previous_request_id,
         shared_.api.category,
-        utils::safe_cast(message_info.origin_create_time_utc),
+        utils::safe_cast(trace_info.origin_create_time_utc),
         shared_.settings.rest.recv_window);
     log::debug("{}"sv, message);
     (*connection_).send_text(message);

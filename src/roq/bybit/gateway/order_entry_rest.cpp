@@ -853,10 +853,10 @@ void OrderEntryREST::place_order(
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
     }
-    auto &[message_info, create_order] = event;
+    auto &[trace_info, create_order] = event;
     auto path = shared_.api.simple.order_create;
     auto body = protocol::json::Encoder::place_order(encode_buffer_, create_order, order, ref_data, request_id, shared_.api.category);
-    auto headers = account_.create_headers(message_info, path, {}, body);
+    auto headers = account_.create_headers(trace_info, path, {}, body);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
         .path = path,
@@ -986,10 +986,10 @@ void OrderEntryREST::amend_order(
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
     }
-    auto &[message_info, modify_order] = event;
+    auto &[trace_info, modify_order] = event;
     auto path = shared_.api.simple.order_amend;
     auto body = protocol::json::Encoder::amend_order(encode_buffer_, modify_order, order, ref_data, request_id, previous_request_id, shared_.api.category);
-    auto headers = account_.create_headers(message_info, path, {}, body);
+    auto headers = account_.create_headers(trace_info, path, {}, body);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
         .path = path,
@@ -1114,10 +1114,10 @@ void OrderEntryREST::cancel_order(
     if (!ready()) {
       throw server::oms::NotReady{"not ready"sv};
     }
-    auto &[message_info, cancel_order] = event;
+    auto &[trace_info, cancel_order] = event;
     auto path = shared_.api.simple.order_cancel;
     auto body = protocol::json::Encoder::cancel_order(encode_buffer_, cancel_order, order, ref_data, request_id, previous_request_id, shared_.api.category);
-    auto headers = account_.create_headers(message_info, path, {}, body);
+    auto headers = account_.create_headers(trace_info, path, {}, body);
     auto request = web::rest::Request{
         .method = web::http::Method::POST,
         .path = path,
