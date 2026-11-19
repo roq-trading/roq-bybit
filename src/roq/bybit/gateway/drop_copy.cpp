@@ -118,6 +118,10 @@ void DropCopy::operator()(Trace<Timer> const &event) {
   if ((*connection_).refresh(trace_info)) {
     check_request_queue(trace_info);
     if (ready()) {
+      if (next_ping_ < trace_info.origin_create_time) {
+        next_ping_ = trace_info.origin_create_time + shared_.settings.ws.ping_freq;
+        send_ping(trace_info);
+      }
       check_stale_orders(trace_info);
     }
   }
@@ -535,18 +539,6 @@ void DropCopy::send_login(TraceInfo const &trace_info) {
   (*connection_).send_text(message);
 }
 
-void DropCopy::subscribe(State state, std::string_view const &topic) {
-  auto message = fmt::format(
-      R"({{)"
-      R"("req_id":"{}",)"
-      R"("op":"subscribe",)"
-      R"("args":["{}"])"
-      R"(}})"sv,
-      state,
-      topic);
-  (*connection_).send_text(message);
-}
-
 void DropCopy::check_request_queue(TraceInfo const &trace_info) {
   auto state = download_.state();
   switch (state) {
@@ -598,6 +590,28 @@ void DropCopy::check_request_queue(TraceInfo const &trace_info) {
     case DONE:
       break;
   }
+}
+
+void DropCopy::subscribe(State state, std::string_view const &topic) {
+  auto message = fmt::format(
+      R"({{)"
+      R"("req_id":"{}",)"
+      R"("op":"subscribe",)"
+      R"("args":["{}"])"
+      R"(}})"sv,
+      state,
+      topic);
+  (*connection_).send_text(message);
+}
+
+void DropCopy::send_ping(TraceInfo const &trace_info) {
+  auto message = fmt::format(
+      R"({{)"
+      R"("req_id":"{}",)"
+      R"("op":"ping")"
+      R"(}})"sv,
+      trace_info.origin_create_time.count());
+  (*connection_).send_text(message);
 }
 
 bool DropCopy::check_stale_orders() {

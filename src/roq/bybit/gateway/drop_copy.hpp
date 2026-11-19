@@ -108,9 +108,11 @@ struct DropCopy final : public Base<DropCopy>, public server::Stream, public web
 
   void send_login(TraceInfo const &);
 
+  void check_request_queue(TraceInfo const &);
+
   void subscribe(State, std::string_view const &topic);
 
-  void check_request_queue(TraceInfo const &);
+  void send_ping(TraceInfo const &);
 
   bool check_stale_orders();
   void check_stale_orders(TraceInfo const &);
