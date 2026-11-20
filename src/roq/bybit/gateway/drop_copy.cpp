@@ -197,7 +197,7 @@ void DropCopy::operator()(Trace<web::socket::Latency> const &event) {
 void DropCopy::operator()(Trace<web::socket::Ready> const &event) {
   auto &[trace_info, ready] = event;
   send_login(trace_info);
-  create_trace_and_dispatch_2(trace_info, ConnectionStatus::LOGIN_SENT);
+  create_trace_and_dispatch_2(trace_info, ConnectionStatus::AUTHENTICATING);
 }
 
 void DropCopy::operator()(Trace<web::socket::Close> const &event) {
