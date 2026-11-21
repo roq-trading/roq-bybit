@@ -39,7 +39,7 @@ struct DropCopy final : public Base<DropCopy>, public server::Stream, public web
 
   DropCopy(Handler &, io::Context &, uint16_t stream_id, Account &, Shared &, Request &);
 
-  // protected:
+ protected:
   friend base_type;
 
   // server::Stream
@@ -56,7 +56,6 @@ struct DropCopy final : public Base<DropCopy>, public server::Stream, public web
 
   void operator()(Trace<ConnectionStatus> const &, std::string_view const &reason = {}) override;
 
- protected:
   // web::socket::Client::Handler
 
   void operator()(Trace<web::socket::Connected> const &) override;
@@ -89,16 +88,16 @@ struct DropCopy final : public Base<DropCopy>, public server::Stream, public web
   // protocol::json::Parser::Handler
 
   void operator()(Trace<protocol::json::Ping> const &) override;
-  // response
+  // - response
   void operator()(Trace<protocol::json::Auth> const &) override;
   void operator()(Trace<protocol::json::Subscribe> const &) override;
   void operator()(Trace<protocol::json::Error> const &) override;
-  // public stream
+  // - public stream
   void operator()(Trace<protocol::json::OrderBook> const &, size_t depth) override;
   void operator()(Trace<protocol::json::PublicTrade> const &) override;
   void operator()(Trace<protocol::json::Tickers> const &) override;
   void operator()(Trace<protocol::json::Kline> const &) override;
-  // private stream
+  // - private stream
   void operator()(Trace<protocol::json::Wallet> const &) override;
   void operator()(Trace<protocol::json::Position> const &) override;
   void operator()(Trace<protocol::json::Order> const &) override;

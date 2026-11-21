@@ -36,7 +36,7 @@ struct MarketData final : public Base<MarketData>,
 
   MarketData(Handler &, io::Context &, uint16_t stream_id, Shared &, size_t index);
 
-  // protected:
+ protected:
   friend base_type;
 
   // server::Stream
@@ -57,7 +57,6 @@ struct MarketData final : public Base<MarketData>,
 
   void subscribe(size_t start_from = 0) override;
 
- protected:
   // web::socket::Client::Handler
 
   void operator()(Trace<web::socket::Connected> const &) override;
@@ -68,6 +67,24 @@ struct MarketData final : public Base<MarketData>,
   void operator()(Trace<web::socket::Text> const &) override;
   void operator()(Trace<web::socket::Binary> const &) override;
 
+  // protocol::json::Parser::Handler
+
+  void operator()(Trace<protocol::json::Ping> const &) override;
+  // - response
+  void operator()(Trace<protocol::json::Auth> const &) override;
+  void operator()(Trace<protocol::json::Subscribe> const &) override;
+  void operator()(Trace<protocol::json::Error> const &) override;
+  // - public stream
+  void operator()(Trace<protocol::json::OrderBook> const &, size_t depth) override;
+  void operator()(Trace<protocol::json::PublicTrade> const &) override;
+  void operator()(Trace<protocol::json::Tickers> const &) override;
+  void operator()(Trace<protocol::json::Kline> const &) override;
+  // - private stream
+  void operator()(Trace<protocol::json::Wallet> const &) override;
+  void operator()(Trace<protocol::json::Position> const &) override;
+  void operator()(Trace<protocol::json::Order> const &) override;
+  void operator()(Trace<protocol::json::Execution> const &) override;
+
   // helpers
 
   void subscribe(std::span<Symbol const> const &symbols);
@@ -77,24 +94,6 @@ struct MarketData final : public Base<MarketData>,
   void send_ping(TraceInfo const &);
 
   void parse(TraceInfo const &, std::string_view const &message);
-
-  // protocol::json::Parser::Handler
-
-  void operator()(Trace<protocol::json::Ping> const &) override;
-  // response
-  void operator()(Trace<protocol::json::Auth> const &) override;
-  void operator()(Trace<protocol::json::Subscribe> const &) override;
-  void operator()(Trace<protocol::json::Error> const &) override;
-  // public stream
-  void operator()(Trace<protocol::json::OrderBook> const &, size_t depth) override;
-  void operator()(Trace<protocol::json::PublicTrade> const &) override;
-  void operator()(Trace<protocol::json::Tickers> const &) override;
-  void operator()(Trace<protocol::json::Kline> const &) override;
-  // private stream
-  void operator()(Trace<protocol::json::Wallet> const &) override;
-  void operator()(Trace<protocol::json::Position> const &) override;
-  void operator()(Trace<protocol::json::Order> const &) override;
-  void operator()(Trace<protocol::json::Execution> const &) override;
 
  private:
   [[maybe_unused]] Handler &handler_;

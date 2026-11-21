@@ -108,21 +108,19 @@ struct Controller final : public Base<Controller>,
 
  private:
   server::Dispatcher &dispatcher_;
-  // accounts
-  utils::unordered_map<std::string, std::unique_ptr<Account>> const accounts_;
-  // io
+  //
   io::Context &context_;
-  // shared
   Shared shared_;
-  utils::unordered_map<std::string, std::unique_ptr<Request>> const requests_;
-  // seed
   uint16_t stream_id_ = {};
-  // streams
-  Rest rest_;
+  //
+  utils::unordered_map<std::string, std::unique_ptr<Account>> const accounts_;
+  utils::unordered_map<std::string, std::unique_ptr<Request>> const requests_;
+  //
+  std::unique_ptr<Rest> const rest_;
   utils::unordered_map<std::string, std::unique_ptr<server::OrderActionStream>> order_entry_rest_;
   utils::unordered_map<std::string, std::unique_ptr<server::OrderActionStream>> order_entry_ws_;
   utils::unordered_map<std::string, std::unique_ptr<DropCopy>> drop_copy_;
-  std::vector<std::unique_ptr<MarketData>> market_data_;
+  std::vector<std::unique_ptr<server::MarketDataStream>> market_data_;
 };
 
 }  // namespace gateway
