@@ -16,8 +16,6 @@
 
 #include "roq/core/json/buffer_stack.hpp"
 
-#include "roq/core/limit/rate_limiter.hpp"
-
 #include "roq/server.hpp"
 
 #include "roq/server/stream.hpp"
@@ -95,14 +93,12 @@ struct Rest final : public Base<Rest>, public server::Stream, public web::rest::
 
  private:
   Handler &handler_;
-  // config
+  //
   uint16_t const stream_id_;
   std::string const name_;
-  // connection
   std::unique_ptr<web::rest::Client> const connection_;
-  // buffers
+  //
   core::json::BufferStack decode_buffer_;
-  // metrics
   struct {
     utils::metrics::Counter disconnect;
   } counter_;
@@ -112,13 +108,9 @@ struct Rest final : public Base<Rest>, public server::Stream, public web::rest::
   struct {
     utils::metrics::Latency ping;
   } latency_;
-  // cache
   Shared &shared_;
-  // state
   ConnectionStatus connection_status_ = {};
   core::Download2<State> download_;
-  // ...
-  core::limit::RateLimiter rate_limiter;
 };
 
 }  // namespace gateway

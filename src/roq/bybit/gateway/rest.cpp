@@ -97,8 +97,7 @@ Rest::Rest(Handler &handler, io::Context &context, uint16_t stream_id, Shared &s
       latency_{
           .ping = create_metrics(shared.settings, name_, "ping"sv),
       },
-      shared_{shared}, download_{shared.settings.rest.request_timeout, [this](auto &event) { return download(event); }},
-      rate_limiter{create_rate_limiter(shared.settings)} {
+      shared_{shared}, download_{shared.settings.rest.request_timeout, [this](auto &event) { return download(event); }} {
 }
 
 // server::Stream
