@@ -378,6 +378,8 @@ constexpr Helper<int32_t>::operator std::optional<roq::Error>() const {
       return Error::TOO_LATE_TO_MODIFY_OR_CANCEL;
     case 110'007:  // Available balance is insufficient
       return Error::INSUFFICIENT_FUNDS;
+    case 110'101:  // Trading inverse contracts under Cross and Portfolio modes requires enabling the settlement asset as collateral.
+      return Error::UNKNOWN;
     case 110'123:  // You must agree to the Trading Terms
       return Error::UNKNOWN;
   }
