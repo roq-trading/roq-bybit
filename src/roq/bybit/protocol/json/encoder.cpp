@@ -59,6 +59,33 @@ std::string_view Encoder::get_order(
   return buffer;
 }
 
+std::string_view Encoder::test_order(
+    std::string &buffer,
+    std::string_view const &symbol,
+    std::string_view const &quantity,
+    std::string_view const &price,
+    [[maybe_unused]] std::string_view const &request_id,
+    Category category) {
+  buffer.clear();
+  fmt::format_to(
+      std::back_inserter(buffer),
+      R"({{)"
+      R"("category":"{}",)"
+      R"("symbol":"{}",)"
+      R"("side":"Buy",)"
+      R"("orderType":"Limit",)"
+      R"("qty":"{}",)"
+      R"("timeInForce":"IOC",)"
+      R"("reduceOnly":true,)"
+      R"("price":"{}")"
+      R"(}})"sv,
+      category.as_raw_text(),
+      symbol,
+      quantity,
+      price);
+  return buffer;
+}
+
 std::string_view Encoder::place_order(
     std::string &buffer,
     roq::CreateOrder const &create_order,
@@ -197,6 +224,47 @@ std::string_view Encoder::login_ws(std::string &buffer, std::string_view const &
       key,
       expires_utc.count(),
       signature);
+  return buffer;
+}
+
+std::string_view Encoder::test_order_ws(
+    std::string &buffer,
+    std::string_view const &symbol,
+    std::string_view const &quantity,
+    std::string_view const &price,
+    std::string_view const &request_id,
+    Category category,
+    std::chrono::milliseconds now_utc,
+    std::chrono::milliseconds recv_window) {
+  buffer.clear();
+  fmt::format_to(
+      std::back_inserter(buffer),
+      R"({{)"
+      R"("op":"order.create",)"
+      R"("header":{{)"
+      R"("X-BAPI-TIMESTAMP":"{}",)"
+      R"("X-BAPI-RECV-WINDOW":"{}")"
+      R"(}},)"
+      R"("args":[{{)"
+      R"("category":"{}",)"
+      R"("symbol":"{}",)"
+      R"("side":"Buy",)"
+      R"("orderType":"Limit",)"
+      R"("qty":"{}",)"
+      R"("timeInForce":"IOC",)"
+      R"("reduceOnly":true,)"
+      R"("price":"{}")"
+      R"(}})"
+      R"(],)"
+      R"("reqId":"{}")"
+      R"(}})"sv,
+      now_utc.count(),
+      recv_window.count(),
+      category.as_raw_text(),
+      symbol,
+      quantity,
+      price,
+      request_id);
   return buffer;
 }
 

@@ -31,6 +31,14 @@ struct Encoder final {
   static std::string_view get_order(
       std::string &buffer, Category, std::string_view const &symbol, std::string_view const &client_order_id, std::string_view const &external_order_id);
 
+  static std::string_view test_order(
+      std::string &buffer,
+      std::string_view const &symbol,
+      std::string_view const &quantity,
+      std::string_view const &price,
+      std::string_view const &request_id,
+      Category);
+
   static std::string_view place_order(
       std::string &buffer, roq::CreateOrder const &, server::oms::Order const &, server::oms::RefData const &, std::string_view const &request_id, Category);
 
@@ -58,6 +66,16 @@ struct Encoder final {
   // WS
 
   static std::string_view login_ws(std::string &buffer, std::string_view const &key, std::chrono::milliseconds expires_utc, std::string_view const &signature);
+
+  static std::string_view test_order_ws(
+      std::string &buffer,
+      std::string_view const &symbol,
+      std::string_view const &quantity,
+      std::string_view const &price,
+      std::string_view const &request_id,
+      Category,
+      std::chrono::milliseconds now_utc,
+      std::chrono::milliseconds recv_window);
 
   static std::string_view place_order_ws(
       std::string &buffer,

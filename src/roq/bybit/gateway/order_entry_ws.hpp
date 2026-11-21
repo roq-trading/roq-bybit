@@ -12,6 +12,8 @@
 
 #include "roq/web/socket/client.hpp"
 
+#include "roq/core/download_2.hpp"
+
 #include "roq/core/json/buffer_stack.hpp"
 
 #include "roq/server.hpp"
@@ -81,6 +83,16 @@ struct OrderEntryWS final : public Base<OrderEntryWS>, public server::OrderActio
   void operator()(Trace<web::socket::Text> const &) override;
   void operator()(Trace<web::socket::Binary> const &) override;
 
+  // core::Download
+
+  enum class State {
+    UNDEFINED = 0,
+    TEST_ORDER,
+    DONE,
+  };
+
+  int32_t download(Trace<State> const &);
+
   // protocol::json::Parser2::Handler
 
   void operator()(Trace<protocol::json::Ping> const &) override;
@@ -94,6 +106,8 @@ struct OrderEntryWS final : public Base<OrderEntryWS>, public server::OrderActio
   // helpers
 
   void send_login(TraceInfo const &);
+
+  void send_test_order(TraceInfo const &);
 
   void send_ping(TraceInfo const &);
 
@@ -126,6 +140,7 @@ struct OrderEntryWS final : public Base<OrderEntryWS>, public server::OrderActio
   Shared &shared_;
   // state
   ConnectionStatus connection_status_ = {};
+  core::Download2<State> download_;
   std::chrono::nanoseconds logon_timeout_ = {};
   // ...
   std::string encode_buffer_;

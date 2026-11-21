@@ -12,6 +12,8 @@
 
 #include "roq/web/rest/client.hpp"
 
+#include "roq/core/download_2.hpp"
+
 #include "roq/core/json/buffer_stack.hpp"
 
 #include "roq/server.hpp"
@@ -87,6 +89,16 @@ struct OrderEntryREST final : public Base<OrderEntryREST>, public server::OrderA
   void operator()(Trace<web::rest::Disconnected> const &) override;
   void operator()(Trace<web::rest::Latency> const &) override;
 
+  // core::Download
+
+  enum class State {
+    UNDEFINED = 0,
+    TEST_ORDER,
+    DONE,
+  };
+
+  int32_t download(Trace<State> const &);
+
   // account-info
 
   void get_account_info(TraceInfo const &);
@@ -158,6 +170,8 @@ struct OrderEntryREST final : public Base<OrderEntryREST>, public server::OrderA
 
   // helpers
 
+  void send_test_order(TraceInfo const &);
+
   void check_request_queue(TraceInfo const &);
 
   void process_response(Trace<web::rest::Response> const &, auto error_handler, auto success_handler);
@@ -200,6 +214,7 @@ struct OrderEntryREST final : public Base<OrderEntryREST>, public server::OrderA
   Request &request_;
   // state
   ConnectionStatus connection_status_ = {};
+  core::Download2<State> download_;
   bool download_trades_is_first_ = true;
   //
   std::string encode_buffer_;

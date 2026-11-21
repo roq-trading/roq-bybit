@@ -4,6 +4,10 @@ All notable changes will be documented in this file.
 
 ## Head
 
+### Added
+
+* Send test order when execution stream connects (#667)
+
 ### Fixed
 
 * Mising protocol ping for execution WS (#666)

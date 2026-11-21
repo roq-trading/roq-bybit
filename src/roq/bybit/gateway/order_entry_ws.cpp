@@ -31,6 +31,8 @@ auto const NAME = "ex"sv;
 auto const AUTH_EXPIRES = 1s;
 
 size_t const MAX_DECODE_BUFFER_DEPTH = 1;
+
+auto const TEST_REQUEST_ID = "ROQ-TEST"sv;
 }  // namespace
 
 // === HELPERS ===
@@ -104,7 +106,7 @@ OrderEntryWS::OrderEntryWS(Handler &handler, io::Context &context, uint16_t stre
       latency_{
           .ping = create_metrics(shared.settings, name_, "ping"sv),
       },
-      account_{account}, shared_{shared} {
+      account_{account}, shared_{shared}, download_{shared.settings.rest.request_timeout, [this](auto &event) { return download(event); }} {
 }
 
 // server::Stream
@@ -274,6 +276,7 @@ void OrderEntryWS::operator()(Trace<web::socket::Disconnected> const &event) {
   create_trace_and_dispatch_2(trace_info, ConnectionStatus::DISCONNECTED);
   logon_timeout_ = {};
   next_ping_ = {};
+  download_.reset();
 }
 
 void OrderEntryWS::operator()(Trace<web::socket::Latency> const &event) {
@@ -307,6 +310,33 @@ void OrderEntryWS::operator()(Trace<web::socket::Binary> const &) {
   log::fatal("Unexpected"sv);
 }
 
+// core::Download
+
+int32_t OrderEntryWS::download(Trace<State> const &event) {
+  auto &[trace_info, state] = event;
+  auto publish_downloading = [&]() { create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, magic_enum::enum_name(state)); };
+  switch (state) {
+    using enum State;
+    case UNDEFINED:
+      assert(false);
+      break;
+    case TEST_ORDER:
+      if (!shared_.settings.misc.disable_ws_api && !std::empty(shared_.settings.misc.test_order_symbol) &&
+          !std::empty(shared_.settings.misc.test_order_quantity) && !std::empty(shared_.settings.misc.test_order_price)) {
+        publish_downloading();
+        send_test_order(trace_info);
+        return 1;
+      } else {
+        return 0;
+      }
+    case DONE:
+      create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
+      return 0;
+  }
+  assert(false);
+  return 0;
+}
+
 // protocol::json::Parser2::Handler
 
 void OrderEntryWS::operator()(Trace<protocol::json::Ping> const &event) {
@@ -324,7 +354,7 @@ void OrderEntryWS::operator()(Trace<protocol::json::Auth2> const &event) {
     auto &[trace_info, auth] = event;
     log::info<4>("auth={}"sv, auth);
     if (auth.ret_code == 0) {
-      create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
+      download_.begin(trace_info);
     } else {
       log::fatal("Unexpected: auth={}"sv, auth);
     }
@@ -338,22 +368,29 @@ void OrderEntryWS::operator()(Trace<protocol::json::Error> const &event) {
 
 void OrderEntryWS::operator()(Trace<protocol::json::PlaceOrder2> const &event) {
   auto &[trace_info, place_order] = event;
-  if (place_order.ret_code != 0) {
-    auto response = server::oms::Response{
-        .request_type = RequestType::CREATE_ORDER,
-        .origin = Origin::EXCHANGE,
-        .request_status = RequestStatus::REJECTED,
-        .error = map(place_order.ret_code),
-        .text = place_order.ret_msg,
-        .version = {},
-        .request_id = place_order.req_id,
-        .external_trace_id = place_order.header.traceid,
-        .external_order_id = {},
-        .client_order_id = place_order.req_id,
-        .quantity = NaN,
-        .price = NaN,
-    };
-    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id_);
+  if (download_.state() == State::TEST_ORDER) [[unlikely]] {
+    if (place_order.req_id == TEST_REQUEST_ID) {
+      log::warn("DEBUG place_order={}"sv, place_order);
+      download_.check_relaxed(trace_info, State::TEST_ORDER);
+    }
+  } else {
+    if (place_order.ret_code != 0) {
+      auto response = server::oms::Response{
+          .request_type = RequestType::CREATE_ORDER,
+          .origin = Origin::EXCHANGE,
+          .request_status = RequestStatus::REJECTED,
+          .error = map(place_order.ret_code),
+          .text = place_order.ret_msg,
+          .version = {},
+          .request_id = place_order.req_id,
+          .external_trace_id = place_order.header.traceid,
+          .external_order_id = {},
+          .client_order_id = place_order.req_id,
+          .quantity = NaN,
+          .price = NaN,
+      };
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id_);
+    }
   }
 }
 
@@ -406,6 +443,20 @@ void OrderEntryWS::send_login(TraceInfo const &trace_info) {
   auto signature = account_.create_signature(expires_utc);
   auto message = protocol::json::Encoder::login_ws(encode_buffer_, account_.get_key(), expires_utc, signature);
   log::debug("{}"sv, message);
+  (*connection_).send_text(message);
+}
+
+void OrderEntryWS::send_test_order(TraceInfo const &trace_info) {
+  auto message = protocol::json::Encoder::test_order_ws(
+      encode_buffer_,
+      shared_.settings.misc.test_order_symbol,
+      shared_.settings.misc.test_order_quantity,
+      shared_.settings.misc.test_order_price,
+      TEST_REQUEST_ID,
+      shared_.api.category,
+      utils::safe_cast(trace_info.origin_create_time_utc),
+      shared_.settings.rest.recv_window);
+  log::warn("DEBUG {}"sv, message);
   (*connection_).send_text(message);
 }
 

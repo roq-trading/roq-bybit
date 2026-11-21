@@ -21,6 +21,21 @@
       "type": "std/bool",
       "default": false,
       "description": "Disable WebSocket API?"
+    },
+    {
+      "name": "test_order_symbol",
+      "type": "std/string",
+      "description": "Symbol for test-order"
+    },
+    {
+      "name": "test_order_quantity",
+      "type": "std/string",
+      "description": "Quantity for test-order"
+    },
+    {
+      "name": "test_order_price",
+      "type": "std/string",
+      "description": "Price for test-order"
     }
   ]
 }

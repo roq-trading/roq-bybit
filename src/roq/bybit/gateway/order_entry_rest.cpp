@@ -30,6 +30,8 @@ auto const NAME = "om"sv;
       SupportType::FUNDS,
   };
 */
+
+auto const TEST_REQUEST_ID = "ROQ-TEST"sv;
 }  // namespace
 
 // === HELPERS ===
@@ -140,7 +142,7 @@ OrderEntryREST::OrderEntryREST(Handler &handler, io::Context &context, uint16_t 
       latency_{
           .ping = create_metrics(shared.settings, name_, "ping"sv),
       },
-      account_{account}, shared_{shared}, request_{request} {
+      account_{account}, shared_{shared}, request_{request}, download_{shared.settings.rest.request_timeout, [this](auto &event) { return download(event); }} {
 }
 
 // server::Stream
@@ -261,13 +263,14 @@ uint16_t OrderEntryREST::operator()(Trace<CancelAllOrders> const &event, std::st
 
 void OrderEntryREST::operator()(Trace<web::rest::Connected> const &event) {
   auto &[trace_info, connected] = event;
-  create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
+  download_.begin(trace_info);
 }
 
 void OrderEntryREST::operator()(Trace<web::rest::Disconnected> const &event) {
   auto &[trace_info, disconnected] = event;
   ++counter_.disconnect;
   create_trace_and_dispatch_2(trace_info, ConnectionStatus::DISCONNECTED);
+  download_.reset();
 }
 
 void OrderEntryREST::operator()(Trace<web::rest::Latency> const &event) {
@@ -279,6 +282,33 @@ void OrderEntryREST::operator()(Trace<web::rest::Latency> const &event) {
   };
   create_trace_and_dispatch(shared_.dispatcher, trace_info, external_latency);
   latency_.ping.update(latency.sample);
+}
+
+// core::Download
+
+int32_t OrderEntryREST::download(Trace<State> const &event) {
+  auto &[trace_info, state] = event;
+  auto publish_downloading = [&]() { create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, magic_enum::enum_name(state)); };
+  switch (state) {
+    using enum State;
+    case UNDEFINED:
+      assert(false);
+      break;
+    case TEST_ORDER:
+      if (shared_.settings.misc.disable_ws_api && !std::empty(shared_.settings.misc.test_order_symbol) &&
+          !std::empty(shared_.settings.misc.test_order_quantity) && !std::empty(shared_.settings.misc.test_order_price)) {
+        publish_downloading();
+        send_test_order(trace_info);
+        return 1;
+      } else {
+        return 0;
+      }
+    case DONE:
+      create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
+      return 0;
+  }
+  assert(false);
+  return 0;
 }
 
 // account-info
@@ -1333,6 +1363,35 @@ void OrderEntryREST::operator()(Trace<protocol::json::CancelAllOrdersAck> const 
 }
 
 // helpers
+
+void OrderEntryREST::send_test_order(TraceInfo const &trace_info) {
+  auto path = shared_.api.simple.order_create;
+  auto body = protocol::json::Encoder::test_order(
+      encode_buffer_,
+      shared_.settings.misc.test_order_symbol,
+      shared_.settings.misc.test_order_quantity,
+      shared_.settings.misc.test_order_price,
+      TEST_REQUEST_ID,
+      shared_.api.category);
+  auto headers = account_.create_headers(trace_info, path, {}, body);
+  auto request = web::rest::Request{
+      .method = web::http::Method::POST,
+      .path = path,
+      .query = {},
+      .accept = web::http::Accept::APPLICATION_JSON,
+      .content_type = web::http::ContentType::APPLICATION_JSON,
+      .headers = headers,
+      .body = body,
+      .quality_of_service = {},
+  };
+  log::warn("DEBUG request={}"sv, request);
+  auto callback = [this](auto &event, [[maybe_unused]] auto &request_id) {
+    auto &[trace_info, response] = event;
+    log::warn("DEBUG response={}"sv, response);
+    download_.check_relaxed(trace_info, State::TEST_ORDER);
+  };
+  (*connection_)(request, callback, TEST_REQUEST_ID);
+}
 
 void OrderEntryREST::check_request_queue(TraceInfo const &trace_info) {
   request_.account.check_pending(trace_info, [this](auto &trace_info) { get_account_info(trace_info); });
