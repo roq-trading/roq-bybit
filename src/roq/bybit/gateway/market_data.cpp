@@ -127,10 +127,10 @@ struct create_metrics final : public utils::metrics::Factory {
 // === IMPLEMENTATION ===
 
 MarketData::MarketData(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared, size_t index)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, index_{index}, spot_{is_spot(shared.api.api)},
+    : server::MarketDataStream{stream_id}, handler_{handler}, name_{create_name(stream_id)}, index_{index}, spot_{is_spot(shared.api.api)},
       mbp_depth_{get_mbp_depth(shared.settings, shared.api.api)}, mbp_topic_{create_mbp_topic(mbp_depth_)},
       connection_{create_connection(*this, shared.settings, context, shared, shared.api.api)},
-      decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH}, request_id_{stream_id_ * REQUEST_ID},
+      decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH}, request_id_{stream_id * REQUEST_ID},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -187,25 +187,26 @@ void MarketData::operator()(metrics::Writer &writer) const {
 
 void MarketData::operator()(Trace<ConnectionStatus> const &event, std::string_view const &reason) {
   auto &[trace_info, connection_status] = event;
-  connection_status_ = connection_status;
-  auto stream_status = StreamStatus{
-      .stream_id = stream_id_,
-      .account = {},
-      .supports = SUPPORTS,
-      .transport = Transport::TCP,
-      .protocol = Protocol::WS,
-      .encoding = {Encoding::JSON},
-      .priority = Priority::PRIMARY,
-      .connection_status = connection_status_,
-      .reason = reason,
-      .interface = (*connection_).get_interface(),
-      .proxy = (*connection_).get_proxy(),
-      .peer = (*connection_).get_current_peer(),
-      .authority = (*connection_).get_current_authority(),
-      .path = (*connection_).get_current_path(),
-  };
-  log::info("stream_status={}"sv, stream_status);
-  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
+  if (update(connection_status, reason)) {
+    auto stream_status = StreamStatus{
+        .stream_id = stream_id(),
+        .account = {},
+        .supports = SUPPORTS,
+        .transport = Transport::TCP,
+        .protocol = Protocol::WS,
+        .encoding = {Encoding::JSON},
+        .priority = Priority::PRIMARY,
+        .connection_status = connection_status,
+        .reason = reason,
+        .interface = (*connection_).get_interface(),
+        .proxy = (*connection_).get_proxy(),
+        .peer = (*connection_).get_current_peer(),
+        .authority = (*connection_).get_current_authority(),
+        .path = (*connection_).get_current_path(),
+    };
+    log::info("stream_status={}"sv, stream_status);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
+  }
 }
 
 // server::MarketDataStream
@@ -224,13 +225,13 @@ void MarketData::operator()(Trace<web::socket::Connected> const &) {
 void MarketData::operator()(Trace<web::socket::Disconnected> const &event) {
   auto &[trace_info, disconnected] = event;
   ++counter_.disconnect;
-  create_trace_and_dispatch_2(trace_info, ConnectionStatus::DISCONNECTED);
+  publish(trace_info, ConnectionStatus::DISCONNECTED);
 }
 
 void MarketData::operator()(Trace<web::socket::Latency> const &event) {
   auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
-      .stream_id = stream_id_,
+      .stream_id = stream_id(),
       .account = {},
       .latency = latency.sample,
   };
@@ -301,7 +302,7 @@ void MarketData::operator()(Trace<protocol::json::OrderBook> const &event, size_
       auto [bid_price, bid_quantity] = helper(data.bids);
       auto [ask_price, ask_quantity] = helper(data.asks);
       auto top_of_book = TopOfBook{
-          .stream_id = stream_id_,
+          .stream_id = stream_id(),
           .exchange = shared_.settings.exchange,
           .symbol = data.symbol,
           .layer{
@@ -337,7 +338,7 @@ void MarketData::operator()(Trace<protocol::json::OrderBook> const &event, size_
         emplace_back(shared_.asks, item);
       }
       auto market_by_price_update = MarketByPriceUpdate{
-          .stream_id = stream_id_,
+          .stream_id = stream_id(),
           .exchange = shared_.settings.exchange,
           .symbol = data.symbol,
           .bids = shared_.bids,
@@ -375,7 +376,7 @@ void MarketData::operator()(Trace<protocol::json::PublicTrade> const &event) {
         return;
       }
       auto trade_summary = TradeSummary{
-          .stream_id = stream_id_,
+          .stream_id = stream_id(),
           .exchange = shared_.settings.exchange,
           .symbol = symbol,
           .trades = trades,
@@ -426,7 +427,7 @@ void MarketData::operator()(Trace<protocol::json::Tickers> const &event) {
       case LINEAR:
       case INVERSE: {
         auto top_of_book = TopOfBook{
-            .stream_id = stream_id_,
+            .stream_id = stream_id(),
             .exchange = shared_.settings.exchange,
             .symbol = data.symbol,
             .layer{
@@ -445,7 +446,7 @@ void MarketData::operator()(Trace<protocol::json::Tickers> const &event) {
       }
       case OPTION: {
         auto top_of_book = TopOfBook{
-            .stream_id = stream_id_,
+            .stream_id = stream_id(),
             .exchange = shared_.settings.exchange,
             .symbol = data.symbol,
             .layer{
@@ -490,7 +491,7 @@ void MarketData::operator()(Trace<protocol::json::Tickers> const &event) {
         },
     }};
     auto statistics_update = StatisticsUpdate{
-        .stream_id = stream_id_,
+        .stream_id = stream_id(),
         .exchange = shared_.settings.exchange,
         .symbol = data.symbol,
         .statistics = statistics,
@@ -531,7 +532,7 @@ void MarketData::operator()(Trace<protocol::json::Kline> const &event) {
     }
     if (!std::empty(bars)) {
       auto time_series_update = TimeSeriesUpdate{
-          .stream_id = stream_id_,
+          .stream_id = stream_id(),
           .exchange = shared_.settings.exchange,
           .symbol = kline.symbol,
           .data_source = DataSource::TRADE_SUMMARY,

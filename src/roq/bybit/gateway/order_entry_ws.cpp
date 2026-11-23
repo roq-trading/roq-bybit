@@ -91,8 +91,8 @@ struct create_metrics final : public utils::metrics::Factory {
 // === IMPLEMENTATION ===
 
 OrderEntryWS::OrderEntryWS(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
-    : handler_{handler}, stream_id_{stream_id}, name_{create_name(stream_id_)}, connection_{create_connection(*this, shared.settings, context, shared)},
-      decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH},
+    : server::OrderActionStream{stream_id}, handler_{handler}, name_{create_name(stream_id)},
+      connection_{create_connection(*this, shared.settings, context, shared)}, decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -147,25 +147,26 @@ void OrderEntryWS::operator()(metrics::Writer &writer) const {
 
 void OrderEntryWS::operator()(Trace<ConnectionStatus> const &event, std::string_view const &reason) {
   auto &[trace_info, connection_status] = event;
-  connection_status_ = connection_status;
-  auto stream_status = StreamStatus{
-      .stream_id = stream_id_,
-      .account = account_.name,
-      .supports = get_supports(shared_.api.api, shared_.settings.misc.disable_ws_api),
-      .transport = Transport::TCP,
-      .protocol = Protocol::WS,
-      .encoding = {Encoding::JSON},
-      .priority = Priority::PRIMARY,
-      .connection_status = connection_status_,
-      .reason = reason,
-      .interface = (*connection_).get_interface(),
-      .proxy = (*connection_).get_proxy(),
-      .peer = (*connection_).get_current_peer(),
-      .authority = (*connection_).get_current_authority(),
-      .path = (*connection_).get_current_path(),
-  };
-  log::info("stream_status={}"sv, stream_status);
-  create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
+  if (update(connection_status, reason)) {
+    auto stream_status = StreamStatus{
+        .stream_id = stream_id(),
+        .account = account_.name,
+        .supports = get_supports(shared_.api.api, shared_.settings.misc.disable_ws_api),
+        .transport = Transport::TCP,
+        .protocol = Protocol::WS,
+        .encoding = {Encoding::JSON},
+        .priority = Priority::PRIMARY,
+        .connection_status = connection_status,
+        .reason = reason,
+        .interface = (*connection_).get_interface(),
+        .proxy = (*connection_).get_proxy(),
+        .peer = (*connection_).get_current_peer(),
+        .authority = (*connection_).get_current_authority(),
+        .path = (*connection_).get_current_path(),
+    };
+    log::info("stream_status={}"sv, stream_status);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, stream_status);
+  }
 }
 
 // server::OrderActionStream
@@ -201,7 +202,7 @@ uint16_t OrderEntryWS::operator()(
     log::debug("{}"sv, message);
     (*connection_).send_text(message);
   });
-  return stream_id_;
+  return stream_id();
 }
 
 uint16_t OrderEntryWS::operator()(
@@ -228,7 +229,7 @@ uint16_t OrderEntryWS::operator()(
     log::debug("{}"sv, message);
     (*connection_).send_text(message);
   });
-  return stream_id_;
+  return stream_id();
 }
 
 uint16_t OrderEntryWS::operator()(
@@ -255,7 +256,7 @@ uint16_t OrderEntryWS::operator()(
     log::debug("{}"sv, message);
     (*connection_).send_text(message);
   });
-  return stream_id_;
+  return stream_id();
 }
 
 uint16_t OrderEntryWS::operator()(Trace<CancelAllOrders> const &, [[maybe_unused]] std::string_view const &request_id) {
@@ -273,7 +274,7 @@ void OrderEntryWS::operator()(Trace<web::socket::Connected> const &event) {
 void OrderEntryWS::operator()(Trace<web::socket::Disconnected> const &event) {
   auto &[trace_info, disconnected] = event;
   ++counter_.disconnect;
-  create_trace_and_dispatch_2(trace_info, ConnectionStatus::DISCONNECTED);
+  publish(trace_info, ConnectionStatus::DISCONNECTED);
   logon_timeout_ = {};
   next_ping_ = {};
   download_.reset();
@@ -282,7 +283,7 @@ void OrderEntryWS::operator()(Trace<web::socket::Disconnected> const &event) {
 void OrderEntryWS::operator()(Trace<web::socket::Latency> const &event) {
   auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
-      .stream_id = stream_id_,
+      .stream_id = stream_id(),
       .account = account_.name,
       .latency = latency.sample,
   };
@@ -293,7 +294,7 @@ void OrderEntryWS::operator()(Trace<web::socket::Latency> const &event) {
 void OrderEntryWS::operator()(Trace<web::socket::Ready> const &event) {
   auto &[trace_info, ready] = event;
   send_login(trace_info);
-  create_trace_and_dispatch_2(trace_info, ConnectionStatus::AUTHENTICATING);
+  publish(trace_info, ConnectionStatus::AUTHENTICATING);
 }
 
 void OrderEntryWS::operator()(Trace<web::socket::Close> const &event) {
@@ -314,7 +315,6 @@ void OrderEntryWS::operator()(Trace<web::socket::Binary> const &) {
 
 int32_t OrderEntryWS::download(Trace<State> const &event) {
   auto &[trace_info, state] = event;
-  auto publish_downloading = [&]() { create_trace_and_dispatch_2(trace_info, ConnectionStatus::DOWNLOADING, magic_enum::enum_name(state)); };
   switch (state) {
     using enum State;
     case UNDEFINED:
@@ -323,14 +323,14 @@ int32_t OrderEntryWS::download(Trace<State> const &event) {
     case TEST_ORDER:
       if (!shared_.settings.misc.disable_ws_api && !std::empty(shared_.settings.misc.test_order_symbol) &&
           !std::empty(shared_.settings.misc.test_order_quantity) && !std::empty(shared_.settings.misc.test_order_price)) {
-        publish_downloading();
+        publish(trace_info, ConnectionStatus::DOWNLOADING, state);
         send_test_order(trace_info);
         return 1;
       } else {
         return 0;
       }
     case DONE:
-      create_trace_and_dispatch_2(trace_info, ConnectionStatus::READY);
+      publish(trace_info, ConnectionStatus::READY);
       return 0;
   }
   assert(false);
@@ -389,7 +389,7 @@ void OrderEntryWS::operator()(Trace<protocol::json::PlaceOrder2> const &event) {
           .quantity = NaN,
           .price = NaN,
       };
-      create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id_);
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id());
     }
   }
 }
@@ -411,7 +411,7 @@ void OrderEntryWS::operator()(Trace<protocol::json::AmendOrder2> const &event) {
         .quantity = NaN,
         .price = NaN,
     };
-    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id_);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id());
   }
 }
 
@@ -432,7 +432,7 @@ void OrderEntryWS::operator()(Trace<protocol::json::CancelOrder2> const &event) 
         .quantity = NaN,
         .price = NaN,
     };
-    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id_);
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id());
   }
 }
 
