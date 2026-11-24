@@ -103,6 +103,8 @@ struct OrderEntryWS final : public Base<OrderEntryWS>, public server::OrderActio
 
   void send_login(TraceInfo const &);
 
+  void check_timeout(TraceInfo const &);
+
   void send_test_order(TraceInfo const &);
 
   void send_ping(TraceInfo const &);

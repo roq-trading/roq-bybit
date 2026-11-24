@@ -83,8 +83,8 @@ auto create_rate_limiter(auto &settings) {
 // === IMPLEMENTATION ===
 
 Rest::Rest(Handler &handler, io::Context &context, uint16_t stream_id, Shared &shared)
-    : server::Stream{stream_id}, handler_{handler}, name_{create_name(stream_id)}, connection_{create_connection(*this, shared.settings, context, shared)},
-      decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH},
+    : server::Stream{stream_id, {}, SUPPORTS}, handler_{handler}, name_{create_name(stream_id)},
+      connection_{create_connection(*this, shared.settings, context, shared)}, decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -136,9 +136,9 @@ void Rest::operator()(Trace<ConnectionStatus> const &event, std::string_view con
   auto &[trace_info, connection_status] = event;
   if (update(connection_status, reason)) {
     auto stream_status = StreamStatus{
-        .stream_id = stream_id(),
-        .account = {},
-        .supports = SUPPORTS,
+        .stream_id = stream_id,
+        .account = account,
+        .supports = supports,
         .transport = Transport::TCP,
         .protocol = Protocol::HTTP,
         .encoding = {Encoding::JSON},
@@ -179,7 +179,7 @@ void Rest::operator()(Trace<web::rest::Disconnected> const &event) {
 void Rest::operator()(Trace<web::rest::Latency> const &event) {
   auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
-      .stream_id = stream_id(),
+      .stream_id = stream_id,
       .account = {},
       .latency = latency.sample,
   };
@@ -278,7 +278,7 @@ void Rest::operator()(Trace<protocol::json::InstrumentsInfoAck> const &event) {
       return item.lot_size_filter.qty_step;
     }();
     auto reference_data = ReferenceData{
-        .stream_id = stream_id(),
+        .stream_id = stream_id,
         .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
         .description = item.display_name,
@@ -322,7 +322,7 @@ void Rest::operator()(Trace<protocol::json::InstrumentsInfoAck> const &event) {
     }
     ++counter;
     auto market_status = MarketStatus{
-        .stream_id = stream_id(),
+        .stream_id = stream_id,
         .exchange = shared_.settings.exchange,
         .symbol = item.symbol,
         .trading_status = map(item.status),
@@ -418,7 +418,7 @@ void Rest::operator()(Trace<protocol::json::KlineAck> const &event) {
     bars.emplace_back(std::move(bar));
   }
   auto time_series_update = TimeSeriesUpdate{
-      .stream_id = stream_id(),
+      .stream_id = stream_id,
       .exchange = shared_.settings.exchange,
       .symbol = kline_response.result.symbol,
       .data_source = DataSource::TRADE_SUMMARY,

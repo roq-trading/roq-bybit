@@ -91,8 +91,9 @@ struct create_metrics final : public utils::metrics::Factory {
 // === IMPLEMENTATION ===
 
 OrderEntryWS::OrderEntryWS(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared)
-    : server::OrderActionStream{stream_id}, handler_{handler}, name_{create_name(stream_id)},
-      connection_{create_connection(*this, shared.settings, context, shared)}, decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH},
+    : server::OrderActionStream{stream_id, account.name, get_supports(shared.api.api, shared.settings.misc.disable_ws_api)}, handler_{handler},
+      name_{create_name(stream_id)}, connection_{create_connection(*this, shared.settings, context, shared)},
+      decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -123,10 +124,9 @@ void OrderEntryWS::operator()(Trace<Timer> const &event) {
   auto &[trace_info, timer] = event;
   if ((*connection_)(event)) {
     if (ready()) {
-      if (next_ping_ < trace_info.origin_create_time) {
-        next_ping_ = trace_info.origin_create_time + shared_.settings.ws.ping_freq;
-        send_ping(trace_info);
-      }
+      send_ping(trace_info);
+    } else {
+      check_timeout(trace_info);
     }
   }
 }
@@ -149,9 +149,9 @@ void OrderEntryWS::operator()(Trace<ConnectionStatus> const &event, std::string_
   auto &[trace_info, connection_status] = event;
   if (update(connection_status, reason)) {
     auto stream_status = StreamStatus{
-        .stream_id = stream_id(),
-        .account = account_.name,
-        .supports = get_supports(shared_.api.api, shared_.settings.misc.disable_ws_api),
+        .stream_id = stream_id,
+        .account = account,
+        .supports = supports,
         .transport = Transport::TCP,
         .protocol = Protocol::WS,
         .encoding = {Encoding::JSON},
@@ -186,7 +186,7 @@ void OrderEntryWS::operator()(Trace<server::oms::OrderActionBatchRollback> const
 void OrderEntryWS::operator()(
     Trace<CreateOrder> const &event, server::oms::Order const &order, server::oms::RefData const &ref_data, std::string_view const &request_id) {
   profile_.create_order([&]() {
-    if (!ready()) {
+    if (!ready()) [[unlikely]] {
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[trace_info, create_order] = event;
@@ -211,7 +211,7 @@ void OrderEntryWS::operator()(
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
   profile_.modify_order([&]() {
-    if (!ready()) {
+    if (!ready()) [[unlikely]] {
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[trace_info, modify_order] = event;
@@ -237,7 +237,7 @@ void OrderEntryWS::operator()(
     std::string_view const &request_id,
     std::string_view const &previous_request_id) {
   profile_.cancel_order([&]() {
-    if (!ready()) {
+    if (!ready()) [[unlikely]] {
       throw server::oms::NotReady{"not ready"sv};
     }
     auto &[trace_info, cancel_order] = event;
@@ -262,10 +262,7 @@ void OrderEntryWS::operator()(Trace<CancelAllOrders> const &, [[maybe_unused]] s
 
 // web::socket::Client::Handler
 
-void OrderEntryWS::operator()(Trace<web::socket::Connected> const &event) {
-  auto &[trace_info, connected] = event;
-  assert(logon_timeout_.count() == 0);
-  logon_timeout_ = trace_info.origin_create_time + shared_.settings.ws.request_timeout;
+void OrderEntryWS::operator()(Trace<web::socket::Connected> const &) {
 }
 
 void OrderEntryWS::operator()(Trace<web::socket::Disconnected> const &event) {
@@ -280,7 +277,7 @@ void OrderEntryWS::operator()(Trace<web::socket::Disconnected> const &event) {
 void OrderEntryWS::operator()(Trace<web::socket::Latency> const &event) {
   auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
-      .stream_id = stream_id(),
+      .stream_id = stream_id,
       .account = account_.name,
       .latency = latency.sample,
   };
@@ -350,6 +347,7 @@ void OrderEntryWS::operator()(Trace<protocol::json::Auth2> const &event) {
   profile_.auth([&]() {
     auto &[trace_info, auth] = event;
     log::info<4>("auth={}"sv, auth);
+    logon_timeout_ = {};
     if (auth.ret_code == 0) {
       download_.begin(trace_info);
     } else {
@@ -386,7 +384,7 @@ void OrderEntryWS::operator()(Trace<protocol::json::PlaceOrder2> const &event) {
           .quantity = NaN,
           .price = NaN,
       };
-      create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id());
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id);
     }
   }
 }
@@ -408,7 +406,7 @@ void OrderEntryWS::operator()(Trace<protocol::json::AmendOrder2> const &event) {
         .quantity = NaN,
         .price = NaN,
     };
-    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id());
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id);
   }
 }
 
@@ -429,7 +427,7 @@ void OrderEntryWS::operator()(Trace<protocol::json::CancelOrder2> const &event) 
         .quantity = NaN,
         .price = NaN,
     };
-    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id());
+    create_trace_and_dispatch(shared_.dispatcher, trace_info, response, stream_id);
   }
 }
 
@@ -441,6 +439,16 @@ void OrderEntryWS::send_login(TraceInfo const &trace_info) {
   auto message = protocol::json::Encoder::login_ws(encode_buffer_, account_.get_key(), expires_utc, signature);
   log::debug("{}"sv, message);
   (*connection_).send_text(message);
+  assert(logon_timeout_.count() == 0);
+  logon_timeout_ = trace_info.origin_create_time + shared_.settings.ws.request_timeout;
+}
+
+void OrderEntryWS::check_timeout(TraceInfo const &trace_info) {
+  if (logon_timeout_.count() == 0 || trace_info.origin_create_time < logon_timeout_) {
+    return;
+  }
+  log::warn("Logon request has timed out. Disconnecting now..."sv);
+  (*connection_).close();
 }
 
 void OrderEntryWS::send_test_order(TraceInfo const &trace_info) {
@@ -458,6 +466,10 @@ void OrderEntryWS::send_test_order(TraceInfo const &trace_info) {
 }
 
 void OrderEntryWS::send_ping(TraceInfo const &trace_info) {
+  if (trace_info.origin_create_time < next_ping_) [[likely]] {
+    return;
+  }
+  next_ping_ = trace_info.origin_create_time + shared_.settings.ws.ping_freq;
   auto message = fmt::format(
       R"({{)"
       R"("req_id":"{}",)"

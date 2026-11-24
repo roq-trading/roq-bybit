@@ -83,8 +83,8 @@ struct create_metrics final : public utils::metrics::Factory {
 // === IMPLEMENTATION ===
 
 DropCopy::DropCopy(Handler &handler, io::Context &context, uint16_t stream_id, Account &account, Shared &shared, Request &request)
-    : server::Stream{stream_id}, handler_{handler}, name_{create_name(stream_id)}, connection_{create_connection(*this, shared.settings, context, shared)},
-      decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH},
+    : server::Stream{stream_id, account.name, get_supports(shared.api.api)}, handler_{handler}, name_{create_name(stream_id)},
+      connection_{create_connection(*this, shared.settings, context, shared)}, decode_buffer_{shared.settings.misc.decode_buffer_size, MAX_DECODE_BUFFER_DEPTH},
       counter_{
           .disconnect = create_metrics(shared.settings, name_, "disconnect"sv),
       },
@@ -116,13 +116,12 @@ void DropCopy::operator()(Trace<Stop> const &event) {
 void DropCopy::operator()(Trace<Timer> const &event) {
   auto &[trace_info, timer] = event;
   if ((*connection_)(event)) {
-    check_request_queue(trace_info);
     if (ready()) {
-      if (next_ping_ < trace_info.origin_create_time) {
-        next_ping_ = trace_info.origin_create_time + shared_.settings.ws.ping_freq;
-        send_ping(trace_info);
-      }
+      send_ping(trace_info);
       check_stale_orders(trace_info);
+    } else {
+      check_timeout(trace_info);
+      check_request_queue(trace_info);
     }
   }
 }
@@ -147,9 +146,9 @@ void DropCopy::operator()(Trace<ConnectionStatus> const &event, std::string_view
   auto &[trace_info, connection_status] = event;
   if (update(connection_status, reason)) {
     auto stream_status = StreamStatus{
-        .stream_id = stream_id(),
-        .account = account_.name,
-        .supports = get_supports(shared_.api.api),
+        .stream_id = stream_id,
+        .account = account,
+        .supports = supports,
         .transport = Transport::TCP,
         .protocol = Protocol::WS,
         .encoding = {Encoding::JSON},
@@ -169,10 +168,7 @@ void DropCopy::operator()(Trace<ConnectionStatus> const &event, std::string_view
 
 // web::socket::Client::Handler
 
-void DropCopy::operator()(Trace<web::socket::Connected> const &event) {
-  auto &[trace_info, connected] = event;
-  assert(logon_timeout_.count() == 0);
-  logon_timeout_ = trace_info.origin_create_time + shared_.settings.ws.request_timeout;
+void DropCopy::operator()(Trace<web::socket::Connected> const &) {
 }
 
 void DropCopy::operator()(Trace<web::socket::Disconnected> const &event) {
@@ -187,7 +183,7 @@ void DropCopy::operator()(Trace<web::socket::Disconnected> const &event) {
 void DropCopy::operator()(Trace<web::socket::Latency> const &event) {
   auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
-      .stream_id = stream_id(),
+      .stream_id = stream_id,
       .account = account_.name,
       .latency = latency.sample,
   };
@@ -299,6 +295,7 @@ void DropCopy::operator()(Trace<protocol::json::Auth> const &event) {
   profile_.auth([&]() {
     auto &[trace_info, auth] = event;
     log::info<4>("auth={}"sv, auth);
+    logon_timeout_ = {};
     if (auth.success) {
       download_.begin(trace_info);
     } else {
@@ -356,7 +353,7 @@ void DropCopy::operator()(Trace<protocol::json::Wallet> const &event) {
       for (auto &item_2 : item.coin) {
         // XXX maybe margin mode is from account_type?
         auto funds_update = FundsUpdate{
-            .stream_id = stream_id(),
+            .stream_id = stream_id,
             .account = account_.name,
             .currency = item_2.coin,
             .margin_mode = {},
@@ -390,7 +387,7 @@ void DropCopy::operator()(Trace<protocol::json::Position> const &event) {
       auto long_quantity = std::max(0.0, quantity);
       auto short_quantity = std::max(0.0, -quantity);
       auto position_update = PositionUpdate{
-          .stream_id = stream_id(),
+          .stream_id = stream_id,
           .account = account_.name,
           .exchange = shared_.settings.exchange,
           .symbol = item.symbol,
@@ -451,7 +448,7 @@ void DropCopy::operator()(Trace<protocol::json::Order> const &event) {
           .update_type = UpdateType::INCREMENTAL,
           .sending_time_utc = order.creation_time,
       };
-      create_trace_and_dispatch(shared_.dispatcher, trace_info, order_update, stream_id());
+      create_trace_and_dispatch(shared_.dispatcher, trace_info, order_update, stream_id);
     }
   });
 }
@@ -471,7 +468,7 @@ void DropCopy::operator()(Trace<protocol::json::Execution> const &event) {
         return;
       }
       auto trade_update = TradeUpdate{
-          .stream_id = stream_id(),
+          .stream_id = stream_id,
           .account = account_.name,
           .order_id = {},
           .exchange = shared_.settings.exchange,
@@ -537,6 +534,17 @@ void DropCopy::send_login(TraceInfo const &trace_info) {
   auto signature = account_.create_signature(expires_utc);
   auto message = protocol::json::Encoder::login_ws(encode_buffer_, account_.get_key(), expires_utc, signature);
   (*connection_).send_text(message);
+  assert(logon_timeout_.count() == 0);
+  logon_timeout_ = trace_info.origin_create_time + shared_.settings.ws.request_timeout;
+}
+
+void DropCopy::check_timeout(TraceInfo const &trace_info) {
+  if (logon_timeout_.count() == 0 || trace_info.origin_create_time < logon_timeout_) {
+    return;
+  }
+  log::warn("DEBUG {} {}"sv, trace_info.origin_create_time, logon_timeout_);
+  log::warn("Logon request has timed out. Disconnecting now..."sv);
+  (*connection_).close();
 }
 
 void DropCopy::check_request_queue(TraceInfo const &trace_info) {
@@ -605,6 +613,10 @@ void DropCopy::subscribe(State state, std::string_view const &topic) {
 }
 
 void DropCopy::send_ping(TraceInfo const &trace_info) {
+  if (trace_info.origin_create_time < next_ping_) [[likely]] {
+    return;
+  }
+  next_ping_ = trace_info.origin_create_time + shared_.settings.ws.ping_freq;
   auto message = fmt::format(
       R"({{)"
       R"("req_id":"{}",)"
