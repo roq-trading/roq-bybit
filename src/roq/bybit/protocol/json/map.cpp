@@ -372,10 +372,14 @@ constexpr Helper<int32_t>::operator std::optional<roq::Error>() const {
       break;
     case 12'632:  // Decimal of decimals has exceeded the maximum precision
       break;
+    case 20'006:  // reqId is duplicated
+      return Error::UNKNOWN;
     case 33'004:  // api_key expire
       break;
     case 110'001:  // Order does not exist
       return Error::TOO_LATE_TO_MODIFY_OR_CANCEL;
+    case 110'003:  // Order price exceeds the allowable range.
+      return Error::UNKNOWN;
     case 110'007:  // Available balance is insufficient
       return Error::INSUFFICIENT_FUNDS;
     case 110'101:  // Trading inverse contracts under Cross and Portfolio modes requires enabling the settlement asset as collateral.

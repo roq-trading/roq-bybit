@@ -36,6 +36,12 @@
       "name": "test_order_price",
       "type": "std/string",
       "description": "Price for test-order"
+    },
+    {
+      "name": "test_order_freq",
+      "type": "std/nanoseconds",
+      "validator": "roq/flags/validators/TimePeriod",
+      "description": "Test order frequency"
     }
   ]
 }

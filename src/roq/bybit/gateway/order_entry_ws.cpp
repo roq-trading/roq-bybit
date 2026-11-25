@@ -139,6 +139,7 @@ void OrderEntryWS::operator()(Trace<Timer> const &event) {
   if ((*connection_)(event)) {
     if (ready()) {
       send_ping(trace_info);
+      check_test_order(trace_info);
     } else {
       check_timeout(trace_info);
     }
@@ -272,6 +273,7 @@ void OrderEntryWS::operator()(Trace<web::socket::Disconnected> const &event) {
   logon_timeout_ = {};
   next_ping_ = {};
   download_.reset();
+  next_test_order_ = {};
 }
 
 void OrderEntryWS::operator()(Trace<web::socket::Latency> const &event) {
@@ -363,11 +365,9 @@ void OrderEntryWS::operator()(Trace<protocol::json::Error> const &event) {
 
 void OrderEntryWS::operator()(Trace<protocol::json::PlaceOrder2> const &event) {
   auto &[trace_info, place_order] = event;
-  if (download_.state() == State::TEST_ORDER) [[unlikely]] {
-    if (place_order.req_id == TEST_REQUEST_ID) {
-      log::warn("DEBUG place_order={}"sv, place_order);
-      download_.check_relaxed(trace_info, State::TEST_ORDER);
-    }
+  if (place_order.req_id.starts_with(TEST_REQUEST_ID)) [[unlikely]] {
+    log::warn("DEBUG place_order={}"sv, place_order);
+    download_.check_relaxed(trace_info, State::TEST_ORDER);
   } else {
     if (place_order.ret_code != 0) {
       auto response = server::oms::Response{
@@ -451,13 +451,27 @@ void OrderEntryWS::check_timeout(TraceInfo const &trace_info) {
   (*connection_).close();
 }
 
+void OrderEntryWS::check_test_order(TraceInfo const &trace_info) {
+  if (shared_.settings.misc.test_order_freq.count() == 0) {
+    return;
+  }
+  if (trace_info.origin_create_time < next_test_order_) {
+    return;
+  }
+  if (next_test_order_.count()) {
+    send_test_order(trace_info);
+  }
+  next_test_order_ = trace_info.origin_create_time + shared_.settings.misc.test_order_freq;
+}
+
 void OrderEntryWS::send_test_order(TraceInfo const &trace_info) {
+  auto request_id = fmt::format("{}-{}"sv, TEST_REQUEST_ID, trace_info.origin_create_time_utc.count());
   auto message = protocol::json::Encoder::test_order_ws(
       encode_buffer_,
       shared_.settings.misc.test_order_symbol,
       shared_.settings.misc.test_order_quantity,
       shared_.settings.misc.test_order_price,
-      TEST_REQUEST_ID,
+      request_id,
       shared_.api.category,
       utils::safe_cast(trace_info.origin_create_time_utc),
       shared_.settings.rest.recv_window);

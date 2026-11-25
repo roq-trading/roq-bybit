@@ -105,6 +105,8 @@ struct OrderEntryWS final : public Base<OrderEntryWS>, public server::OrderActio
 
   void check_timeout(TraceInfo const &);
 
+  void check_test_order(TraceInfo const &);
+
   void send_test_order(TraceInfo const &);
 
   void send_ping(TraceInfo const &);
@@ -135,6 +137,9 @@ struct OrderEntryWS final : public Base<OrderEntryWS>, public server::OrderActio
   std::string encode_buffer_;
   std::chrono::nanoseconds logon_timeout_ = {};
   std::chrono::nanoseconds next_ping_ = {};
+  // TEST
+  uint32_t request_id = {};
+  std::chrono::nanoseconds next_test_order_ = {};
 };
 
 }  // namespace gateway
