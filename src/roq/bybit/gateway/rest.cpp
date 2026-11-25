@@ -102,6 +102,19 @@ Rest::Rest(Handler &handler, io::Context &context, uint16_t stream_id, Shared &s
 
 // server::Stream
 
+void Rest::operator()(metrics::Writer &writer) const {
+  writer
+      // counter
+      .write(counter_.disconnect, metrics::Type::COUNTER)
+      // profile
+      .write(profile_.instruments_info, metrics::Type::PROFILE)
+      .write(profile_.instruments_info_ack, metrics::Type::PROFILE)
+      .write(profile_.kline, metrics::Type::PROFILE)
+      .write(profile_.kline_ack, metrics::Type::PROFILE)
+      // latency
+      .write(latency_.ping, metrics::Type::LATENCY);
+}
+
 void Rest::operator()(Trace<Start> const &event) {
   (*connection_)(event);
 }
@@ -117,19 +130,6 @@ void Rest::operator()(Trace<Timer> const &event) {
       check_request_queue(trace_info);
     }
   }
-}
-
-void Rest::operator()(metrics::Writer &writer) const {
-  writer
-      // counter
-      .write(counter_.disconnect, metrics::Type::COUNTER)
-      // profile
-      .write(profile_.instruments_info, metrics::Type::PROFILE)
-      .write(profile_.instruments_info_ack, metrics::Type::PROFILE)
-      .write(profile_.kline, metrics::Type::PROFILE)
-      .write(profile_.kline_ack, metrics::Type::PROFILE)
-      // latency
-      .write(latency_.ping, metrics::Type::LATENCY);
 }
 
 void Rest::operator()(Trace<ConnectionStatus> const &event, std::string_view const &reason) {
