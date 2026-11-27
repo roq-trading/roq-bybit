@@ -317,31 +317,28 @@ void Controller::dispatch_helper(auto &self, Args &&...args) {
 
 Account &Controller::get_account(std::string_view const &account) {
   auto iter = accounts_.find(account);
-  if (iter != std::end(accounts_)) {
-    return *(*iter).second;
+  if (iter == std::end(accounts_)) [[unlikely]] {
+    log::fatal(R"(Unknown account="{}")"sv, account);
   }
-  log::fatal(R"(Unknown account="{}")"sv, account);
+  return *(*iter).second;
 }
 
 template <typename T, typename... Args>
 uint16_t Controller::dispatch_order_action(Trace<T> const &event, Args &&...args) {
   auto &[trace_info, value] = event;
-  if (shared_.settings.misc.disable_ws_api) {
-    auto iter = order_entry_rest_.find(value.account);
-    if (iter == std::end(order_entry_rest_)) [[unlikely]] {
+  auto helper = [&](auto &container) {
+    auto iter = container.find(value.account);
+    if (iter == std::end(container)) [[unlikely]] {
       throw RuntimeError{R"(Unknown account="{}")"sv, value.account};
     }
     auto &stream = *(*iter).second;
     stream(event, args...);
     return stream.stream_id;
+  };
+  if (std::is_same_v<T, CancelAllOrders> || shared_.settings.misc.disable_ws_api) {
+    return helper(order_entry_rest_);
   } else {
-    auto iter = order_entry_ws_.find(value.account);
-    if (iter == std::end(order_entry_ws_)) [[unlikely]] {
-      throw RuntimeError{R"(Unknown account="{}")"sv, value.account};
-    }
-    auto &stream = *(*iter).second;
-    stream(event, args...);
-    return stream.stream_id;
+    return helper(order_entry_ws_);
   }
 }
 

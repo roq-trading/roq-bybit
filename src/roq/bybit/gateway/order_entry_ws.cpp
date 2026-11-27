@@ -258,7 +258,7 @@ void OrderEntryWS::operator()(
 }
 
 void OrderEntryWS::operator()(Trace<CancelAllOrders> const &, [[maybe_unused]] std::string_view const &request_id) {
-  log::fatal("Unexpected"sv);
+  throw server::oms::NotSupported{"not supported"sv};
 }
 
 // web::socket::Client::Handler
@@ -280,7 +280,7 @@ void OrderEntryWS::operator()(Trace<web::socket::Latency> const &event) {
   auto &[trace_info, latency] = event;
   auto external_latency = ExternalLatency{
       .stream_id = stream_id,
-      .account = account_.name,
+      .account = account,
       .latency = latency.sample,
   };
   create_trace_and_dispatch(shared_.dispatcher, trace_info, external_latency);
